@@ -2,7 +2,11 @@
 declare type GMConstructorPreferencesData = {
     defaultRuntimeVersion?: string;
     runtimesPath?: string;
-    runtimes: string[]
+    runtimes: string[];
+}
+
+declare type GMConstructorCompileSettings = {
+    launch: boolean;
 }
 
 declare type GMPlugin = {
@@ -78,6 +82,7 @@ declare interface GMEditUIMainMenu {
 declare type GMLProject = {
     name: string;
     displayName: string;
+    config: string;
     dir: string;
     path: string;
     isGMS23: boolean;

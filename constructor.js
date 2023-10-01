@@ -12,7 +12,12 @@ function GMConstructor() {
 
     this.preferences = new GMConstructorPreferences(this.plugin_name, this.version, this.showError);
     this.compile = new GMConstructorCompile(this.showError);
-    this.menu = new GMConstructorMenu(this.showError);
+    this.menu = new GMConstructorMenu(
+        this.showError,
+        this.compile.compileCurrentProject,
+        this.preferences.getCurrentRuntime,
+        this.preferences.getRuntimesPath
+    );
 
     this.onProjectOpen = () => {
         this.menu.setEnableMenuItems(true);

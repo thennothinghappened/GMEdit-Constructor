@@ -14,6 +14,14 @@ function GMConstructorPreferences(plugin_name, version, showError) {
 
     const prefs_el_query = `.plugin-settings[for="${plugin_name}"]`;
 
+    this.getCurrentRuntime = () => {
+        return this.preferences.defaultRuntimeVersion ?? this.preferences.runtimes[0];
+    }
+
+    this.getRuntimesPath = () => {
+        return this.preferences.runtimesPath;
+    }
+
     const loadPreferences = () => {
         if (!Electron_FS.existsSync(preferences_path)) {
             return savePreferences();
@@ -74,7 +82,7 @@ function GMConstructorPreferences(plugin_name, version, showError) {
         uiPreferences.addDropdown(
             runtime_group,
             'Runtime Version',
-            this.preferences.runtimes[0],
+            this.getCurrentRuntime(),
             this.preferences.runtimes,
             setPreference((val, prefs) => {
                 prefs.defaultRuntimeVersion = val;

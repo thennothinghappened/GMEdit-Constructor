@@ -1,7 +1,10 @@
 /**
  * @param {(error: string) => void} showError
- */
-function GMConstructorMenu(showError) {
+ * @param {(runtime: string, launch: boolean) => Promise<void>} compile 
+ * @param {() => string} getCurrentRuntime
+ * @param {() => string} getRuntimesPath
+ **/
+function GMConstructorMenu(showError, compile, getCurrentRuntime, getRuntimesPath) {
 
     const menu_items = {
         separator: new Electron_MenuItem({
@@ -12,11 +15,17 @@ function GMConstructorMenu(showError) {
         compile: new Electron_MenuItem({
             id: 'constructor-compile',
             label: 'Compile',
+            click: async () => {
+                await compile(getRuntimesPath() + '/' + getCurrentRuntime(), false);
+            },
             enabled: false
         }),
         run: new Electron_MenuItem({
             id: 'constructor-run',
             label: 'Run',
+            click: async () => {
+                await compile(getRuntimesPath() + '/' + getCurrentRuntime(), true);
+            },
             enabled: false
         })
     };
