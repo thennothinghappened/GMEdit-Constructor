@@ -4,6 +4,7 @@
     "scripts": [
         "preferences.js",
         "menu.js",
+        "compile.js",
         "constructor.js"
     ]
 }

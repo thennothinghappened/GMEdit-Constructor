@@ -11,6 +11,7 @@ function GMConstructor() {
     }
 
     this.preferences = new GMConstructorPreferences(this.plugin_name, this.version, this.showError);
+    this.compile = new GMConstructorCompile(this.showError);
     this.menu = new GMConstructorMenu(this.showError);
 
     this.onProjectOpen = () => {
@@ -22,7 +23,7 @@ function GMConstructor() {
     }
 
     this.init = () => {
-        this.preferences.init();
+        this.preferences.init(this.compile.getAllRuntimes, this.compile.getDefaultRuntimesPath);
         this.menu.init();
 
         GMEdit.on('projectOpen', this.onProjectOpen);

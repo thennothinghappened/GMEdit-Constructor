@@ -8,8 +8,8 @@ function GMConstructorPreferences(plugin_name, version, showError) {
     const preferences_path = `${Electron_App.getPath('userData')}/GMEdit/config/constructor-preferences.json`;
 
     /** @type {GMConstructorPreferencesData} */
-    const preferences = {
-
+    this.preferences = {
+        runtimes: []
     };
 
     const prefs_el_query = `.plugin-settings[for="${plugin_name}"]`;
@@ -21,7 +21,7 @@ function GMConstructorPreferences(plugin_name, version, showError) {
 
         try {
             const prefs_str = Electron_FS.readFileSync(preferences_path);
-            Object.assign(preferences, JSON.parse(prefs_str));
+            Object.assign(this.preferences, JSON.parse(prefs_str));
         } catch (err) {
             showError(`Failed to load preferences:\n${err}\n\nUsing defaults.`);
         }
@@ -29,18 +29,20 @@ function GMConstructorPreferences(plugin_name, version, showError) {
 
     const savePreferences = () => {
         try {
-            Electron_FS.writeFileSync(preferences_path, JSON.stringify(preferences));
+            Electron_FS.writeFileSync(preferences_path, JSON.stringify(this.preferences));
         } catch (err) {
             showError(`Failed to write preferences:\n${err}`);
         }
     }
 
     /**
-     * @param {(prefs: GMConstructorPreferencesData) => void} setter
+     * @template T
+     * @param {(value: T, prefs: GMConstructorPreferencesData) => void} setter
      */
     const setPreference = (setter) => {
-        return () => {
-            setter(preferences);
+        /** @param {T} value */
+        return (value) => {
+            setter(value, this.preferences);
             savePreferences();
         }
     }
@@ -60,6 +62,25 @@ function GMConstructorPreferences(plugin_name, version, showError) {
 
         const uiPreferences = $gmedit['ui.Preferences'];
 
+        const runtime_group = uiPreferences.addGroup(our_prefs_el, 'Runtime');
+
+        uiPreferences.addInput(
+            runtime_group,
+            'Runtimes Path',
+            this.preferences.runtimesPath ?? '',
+            setPreference((val, prefs) => { prefs.runtimesPath = (val === '') ? undefined : val; })
+        );
+
+        uiPreferences.addDropdown(
+            runtime_group,
+            'Runtime Version',
+            this.preferences.runtimes[0],
+            this.preferences.runtimes,
+            setPreference((val, prefs) => {
+                prefs.defaultRuntimeVersion = val;
+            })
+        );
+
         uiPreferences.addText(our_prefs_el, `Version: ${version}`);
 
         return true;
@@ -73,8 +94,18 @@ function GMConstructorPreferences(plugin_name, version, showError) {
         drawPreferences(ev.target);
     }
 
-    this.init = () => {
+    /**
+     * @param {(path?: string) => string[]} getAllRuntimes 
+     * @param {() => string} getDefaultRuntimesPath 
+     */
+    this.init = (getAllRuntimes, getDefaultRuntimesPath) => {
         loadPreferences();
+
+        if (this.preferences.runtimesPath === undefined) {
+            this.preferences.runtimesPath = getDefaultRuntimesPath();
+        }
+
+        this.preferences.runtimes = getAllRuntimes(this.preferences.runtimesPath);
 
         if (!drawPreferences(document.body)) {
             GMEdit.on('preferencesBuilt', onPreferencesBuilt);
