@@ -1,6 +1,6 @@
 {
     "name": "GMEdit-Constructor",
-    "description": "Compile projects from GMEdit",
+    "description": "Compile projects from GMEdit!",
     "scripts": [
         "constructor.js"
     ]

@@ -1,4 +1,5 @@
-class GMConstructor {
+// @ts-ignore
+GMConstructor = class {
 
     static plugin_name = 'GMEdit-Constructor';
     static version = '0.1.0';
@@ -7,6 +8,8 @@ class GMConstructor {
     static preferences = {
         
     };
+
+    static prefs_el_query = `.plugin-settings[for="${this.plugin_name}"]`;
 
     static loadPreferences = () => {
         if (!Electron_FS.existsSync(this.preferences_path)) {
@@ -30,6 +33,36 @@ class GMConstructor {
     }
 
     /**
+     * @param {(prefs: GMConstructor.preferences) => void} setter
+     */
+    static setPreference = (setter) => {
+        return () => {
+            setter(this.preferences);
+            this.savePreferences();
+        }
+    }
+
+    /**
+     * @param {HTMLElement} prefs_el
+     * @returns {boolean} success
+     */
+    static drawPreferences = (prefs_el) => {
+        /** @type {HTMLElement} */
+        // @ts-ignore
+        const our_prefs_el = prefs_el.querySelector(this.prefs_el_query);
+        
+        if (our_prefs_el === null) {
+            return false;
+        }
+
+        const uiPreferences = $gmedit['ui.Preferences'];
+
+        uiPreferences.addText(our_prefs_el, `Version: ${this.version}`);
+
+        return true;
+    }
+
+    /**
      * @param {string|Error} error
      */
     static showError = (error) => {
@@ -38,10 +71,18 @@ class GMConstructor {
     
     static init = () => {
         this.loadPreferences();
+
+        if (!this.drawPreferences(document.body)) {
+            GMEdit.on('preferencesBuilt', (ev) => {
+                // @ts-ignore
+                this.drawPreferences(ev.target);
+            });
+        }
+
     }
 
     static cleanup = () => {
-
+        
     }
 }
 
