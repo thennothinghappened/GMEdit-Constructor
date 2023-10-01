@@ -1,0 +1,7 @@
+{
+    "name": "constructor",
+    "description": "Compile projects from GMEdit",
+    "scripts": [
+        "constructor.js"
+    ]
+}
