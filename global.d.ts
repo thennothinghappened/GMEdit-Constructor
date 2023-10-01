@@ -1,8 +1,14 @@
 
+declare type GMConstructorPreferencesData = {
+    
+}
+
 declare type GMPlugin = {
     init: () => void,
     cleanup: () => void
 }
+
+declare let gmConstructor: GMConstructor;
 
 declare type GMEdit_Event =
     'preferencesBuilt' |
