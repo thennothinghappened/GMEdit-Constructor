@@ -1,4 +1,3 @@
-
 declare type GMConstructorPreferencesData = {
     defaultRuntimeVersion?: string;
     runtimesPath?: string;
@@ -6,6 +5,14 @@ declare type GMConstructorPreferencesData = {
 }
 
 declare type GMConstructorCompileSettings = {
+}
+
+declare type GMConstructorCompilerJob = {
+    command: GMConstructorCompilerCommand;
+    process: ChildProcess;
+    project: GMLProject;
+    stdout: string;
+    stderr: string;
 }
 
 declare type GMConstructorCompilerCommand = 

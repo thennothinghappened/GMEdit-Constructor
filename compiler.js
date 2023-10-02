@@ -38,16 +38,22 @@ export class GMConstructorCompiler {
 
     #process;
     #child_process;
+    #path;
+
+    /** @type {GMConstructorCompilerJob[]} */
+    #jobs = [];
 
     /**
      * @param {(error: string) => void} showError
      * @param {import('node:process')} process 
      * @param {import('node:child_process')} child_process
+     * @param {import('node:path')} path
      */
-    constructor(showError, process, child_process) {
+    constructor(showError, process, child_process, path) {
 
         this.#process = process;
         this.#child_process = child_process;
+        this.#path = path;
 
     }
 
@@ -56,25 +62,66 @@ export class GMConstructorCompiler {
      * @param {GMConstructorCompileSettings} settings
      * @param {GMConstructorCompilerCommand} cmd
      */
-    runTaskOnCurrentProject = async (runtime_path, settings, cmd) => {
+    runJobOnCurrentProject = (runtime_path, settings, cmd) => {
         const proj = getCurrentProject();
 
         if (proj === undefined) {
             throw 'Tried to run tasks on non-existent project!';
         }
 
-        await this.#runTask(proj, runtime_path, settings, cmd);
+        return this.#runJob(proj, runtime_path, settings, cmd);
     }
+
+    /**
+     * @param {...string} path
+     */
+    #joinNormPath = (...path) =>
+        this.#path.normalize(this.#path.join(...path));
 
     /**
      * @param {string} runtime_path
      */
     #getIgorPath = (runtime_path) => {
         switch (process.platform) {
-            case 'win32': return `${runtime_path}\\bin\\igor\\windows\\x86\\Igor.exe`;
-            case 'darwin': return `${runtime_path}/bin/igor/osx/${process.arch === 'x64' ? 'x86' : 'arm64' }/Igor`;
+            case 'win32': return this.#path.join(runtime_path, 'bin', 'igor', 'windows', 'x86', 'Igor.exe');
+            case 'darwin': return this.#path.join(runtime_path, 'bin', 'igor', 'osx', process.arch === 'x64' ? 'x86' : 'arm64', 'Igor');
             default: throw 'Platform unsupported, sorry!'; // TODO: allow user to specify totally custom location.
         }
+    }
+
+    /**
+     * @param {GMLProject} project
+     * @param {string} runtime_path
+     * @param {GMConstructorCompilerCommand} cmd
+     * @returns {string[]}
+     */
+    #getFlagsForJob = (project, runtime_path, cmd) => {
+        const flags = [
+            `/project=${project.path}`,
+            `/config=${project.config}`,
+            `/rp=${runtime_path}`
+        ];
+
+        switch (cmd) {
+            case 'Run':
+            case 'Package':
+                flags.push(`/of=${ this.#joinNormPath(project.dir, 'output') }`);
+                flags.push(`/cache=${ this.#joinNormPath(project.dir, 'cache') }`);
+                break;
+
+            case 'Clean':
+                // TODO: get a proper place for this!
+                flags.push(`/of=${this.#joinNormPath(project.dir, '..', 'output', project.name)}`);
+                flags.push(`/cache=${this.#joinNormPath(project.dir, '..', 'cache', project.name)}`);
+                break;
+
+            default:
+                throw `Unhandled command case for flags: ${cmd}`;
+        }
+
+        flags.push(platformMappings[process.platform], cmd);
+
+        return flags;
     }
    
     /**
@@ -82,43 +129,53 @@ export class GMConstructorCompiler {
      * @param {string} runtime_path
      * @param {GMConstructorCompileSettings} settings
      * @param {GMConstructorCompilerCommand} cmd
+     * @returns {GMConstructorCompilerJob}
      */
-    #runTask = async (project, runtime_path, settings, cmd) => {
+    #runJob = (project, runtime_path, settings, cmd) => {
         const igor_path = this.#getIgorPath(runtime_path);
 
         if (!Electron_FS.existsSync(igor_path)) {
             throw `Failed to find Igor at ${igor_path}`;
         }
 
-        let log = '';
+        const proc = this.#child_process.spawn(
+            igor_path,
+            this.#getFlagsForJob(project, runtime_path, cmd),
+            { cwd: project.dir }
+        );
 
-        const proc = this.#child_process.spawn(igor_path, [
-            `/project=${project.path}`,
-            `/config=${project.config}`,
-            `/rp=${runtime_path}`,
-            `/cache=${project.dir}/cache`,
-            `/of=${project.dir}/output`,
-            platformMappings[process.platform], cmd
-        ]);
+        /** @type {GMConstructorCompilerJob} */
+        const job = {
+            command: cmd,
+            process: proc,
+            project: project,
+            stdout: '',
+            stderr: ''
+        };
 
-        // TODO: log properly
         proc.stdout.on('data', (data) => {
-            log += data.toString();
-            console.log(data.toString());
+            job.stdout += data.toString();
         });
 
         proc.stderr.on('data', (data) => {
-            log += data.toString();
-            console.log(data.toString());
+            job.stderr += data.toString();
         });
 
-        await new Promise((res) => {
-            proc.on('exit', () => {
-                res(null);
-            })
+        proc.on('exit', (exit_code) => {
+            console.log('Job finished:', job);
+            this.#removeJob(job);
         });
+
+        this.#jobs.push(job);
+
+        return job;
 
     }
 
-
+    /**
+     * @param {GMConstructorCompilerJob} job
+     */
+    #removeJob = (job) => {
+        this.#jobs.splice(this.#jobs.indexOf(job), 1);
+    }
 }

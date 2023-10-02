@@ -41,19 +41,19 @@ export class GMConstructorPreferences {
 
     }
 
-    getCurrentRuntime = () => {
+    #getCurrentRuntime = () => {
         return this.#preferences.defaultRuntimeVersion ?? this.#preferences.runtimes[0];
     }
 
-    getRuntimesPath = () => {
+    #getRuntimesPath = () => {
         return this.#preferences.runtimesPath;
     }
 
     /**
-     * @param {string} runtime
+     * @param {string} [runtime]
      */
-    getRuntimePath = (runtime) =>
-       `${this.getRuntimesPath()}/${runtime}`
+    getRuntimePath = (runtime = this.#getCurrentRuntime()) =>
+       `${this.#getRuntimesPath()}/${runtime}`
 
     #loadPreferences = () => {
         if (!Electron_FS.existsSync(this.#preferences_path)) {
@@ -115,7 +115,7 @@ export class GMConstructorPreferences {
         uiPreferences.addDropdown(
             runtime_group,
             'Runtime Version',
-            this.getCurrentRuntime(),
+            this.#getCurrentRuntime(),
             this.#preferences.runtimes,
             this.#setPreference((val, prefs) => {
                 prefs.defaultRuntimeVersion = val;

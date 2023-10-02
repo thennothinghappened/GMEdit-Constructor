@@ -6,6 +6,7 @@
     const version = '0.2.0';
 
     const child_process = require('node:child_process');
+    const path = require('node:path');
 
     /** @type {import('./constructor.js').GMConstructor} */
     let gmConstructor;
@@ -13,7 +14,7 @@
     const load = (async () => {
         const { GMConstructor } = await import('./constructor.js');
 
-        gmConstructor = new GMConstructor(plugin_name, version, process, child_process);
+        gmConstructor = new GMConstructor(plugin_name, version, process, child_process, path);
 
         // workaround at the moment since reloading doesn't call init again:
         // https://github.com/YellowAfterlife/GMEdit/issues/201
