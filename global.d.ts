@@ -6,7 +6,6 @@ declare type GMConstructorPreferencesData = {
 }
 
 declare type GMConstructorCompileSettings = {
-    launch: boolean;
 }
 
 declare type GMConstructorCompilerCommand = 

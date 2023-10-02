@@ -38,16 +38,23 @@ export class GMConstructor {
         console.log(`${this.plugin_name}: ${error}`);
     }
 
-    #onCompile = () => {
+    /**
+    * @param {GMConstructorCompilerCommand} cmd
+    */
+    #runTaskOnCurrentProject = (cmd) => {
+        this.#compiler.runTaskOnCurrentProject(this.#preferences.getRuntimePath(this.#preferences.getCurrentRuntime()), {}, cmd);
+    }
 
+    #onCompile = () => {
+        this.#runTaskOnCurrentProject('Package');
     }
 
     #onClean = () => {
-
+        this.#runTaskOnCurrentProject('Clean');
     }
 
     #onRun = () => {
-
+        this.#runTaskOnCurrentProject('Run');
     }
 
     init = () => {

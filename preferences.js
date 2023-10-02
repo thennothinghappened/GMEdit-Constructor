@@ -49,6 +49,12 @@ export class GMConstructorPreferences {
         return this.#preferences.runtimesPath;
     }
 
+    /**
+     * @param {string} runtime
+     */
+    getRuntimePath = (runtime) =>
+       `${this.getRuntimesPath()}/${runtime}`
+
     #loadPreferences = () => {
         if (!Electron_FS.existsSync(this.#preferences_path)) {
             return this.#savePreferences();
