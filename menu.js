@@ -1,3 +1,5 @@
+import { isProjectOpen } from './utils.js';
+
 export class GMConstructorMenu {
 
     #showError;
@@ -51,6 +53,7 @@ export class GMConstructorMenu {
         });
 
         this.#addMenuItems();
+        this.#setEnableMenuItems(isProjectOpen());
 
         GMEdit.on('projectOpen', this.#onProjectOpen);
         GMEdit.on('projectClose', this.#onProjectClose);
@@ -120,11 +123,11 @@ export class GMConstructorMenu {
     }
 
     #onProjectOpen = () => {
-        this.#setEnableMenuItems(true);
+        this.#setEnableMenuItems(isProjectOpen());
     }
 
     #onProjectClose = () => {
-        this.#setEnableMenuItems(false);
+        this.#setEnableMenuItems(isProjectOpen());
     }
 
 

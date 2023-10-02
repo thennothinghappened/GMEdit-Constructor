@@ -34,18 +34,42 @@ export function getAllRuntimes(path) {
     return Electron_FS.readdirSync(runtimes_path);
 }
 
-/**
- * @class
- * @param {(error: string) => void} showError
- * @param {import('node:process')} process 
- * @param {import('node:child_process')} child_process
- */
-export function GMConstructorCompiler(showError, process, child_process) {
+export class GMConstructorCompiler {
+
+    #process;
+    #child_process;
+
+    /**
+     * @param {(error: string) => void} showError
+     * @param {import('node:process')} process 
+     * @param {import('node:child_process')} child_process
+     */
+    constructor(showError, process, child_process) {
+
+        this.#process = process;
+        this.#child_process = child_process;
+
+    }
+
+    /**
+     * @param {string} runtime_path
+     * @param {GMConstructorCompileSettings} settings
+     * @param {GMConstructorCompilerCommand} cmd
+     */
+    runTaskOnCurrentProject = async (runtime_path, settings, cmd) => {
+        const proj = getCurrentProject();
+
+        if (proj === undefined) {
+            throw 'Tried to run tasks on non-existent project!';
+        }
+
+        await this.#runTask(proj, runtime_path, settings, cmd);
+    }
 
     /**
      * @param {string} runtime_path
      */
-    const getIgorPath = (runtime_path) => {
+    #getIgorPath = (runtime_path) => {
         switch (process.platform) {
             case 'win32': return `${runtime_path}\\bin\\igor\\windows\\x86\\Igor.exe`;
             case 'darwin': return `${runtime_path}/bin/igor/osx/${process.arch === 'x64' ? 'x86' : 'arm64' }/Igor`;
@@ -59,8 +83,8 @@ export function GMConstructorCompiler(showError, process, child_process) {
      * @param {GMConstructorCompileSettings} settings
      * @param {GMConstructorCompilerCommand} cmd
      */
-    const runTask = async (project, runtime_path, settings, cmd) => {
-        const igor_path = getIgorPath(runtime_path);
+    #runTask = async (project, runtime_path, settings, cmd) => {
+        const igor_path = this.#getIgorPath(runtime_path);
 
         if (!Electron_FS.existsSync(igor_path)) {
             throw `Failed to find Igor at ${igor_path}`;
@@ -68,7 +92,7 @@ export function GMConstructorCompiler(showError, process, child_process) {
 
         let log = '';
 
-        const proc = child_process.spawn(igor_path, [
+        const proc = this.#child_process.spawn(igor_path, [
             `/project=${project.path}`,
             `/config=${project.config}`,
             `/rp=${runtime_path}`,
@@ -96,19 +120,5 @@ export function GMConstructorCompiler(showError, process, child_process) {
 
     }
 
-    /**
-     * @param {string} runtime_path
-     * @param {GMConstructorCompileSettings} settings
-     * @param {GMConstructorCompilerCommand} cmd
-     */
-    this.compileCurrentProject = async (runtime_path, settings, cmd) => {
-        const proj = getCurrentProject();
-
-        if (proj === undefined) {
-            throw 'Tried to run tasks on non-existent project!';
-        }
-
-        await runTask(proj, runtime_path, settings, cmd);
-    }
 
 }
