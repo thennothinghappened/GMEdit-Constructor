@@ -1,46 +1,72 @@
-/**
- * @class
- * @param {string} plugin_name 
- * @param {string} version 
- * @param {(error: string) => void} showError
- */
-export function GMConstructorPreferences(plugin_name, version, showError) {
+import { getAllRuntimes, getDefaultRuntimesPath } from './compiler.js';
 
-    const preferences_path = `${Electron_App.getPath('userData')}/GMEdit/config/constructor-preferences.json`;
+export class GMConstructorPreferences {
 
+    /** @type {string} */
+    #preferences_path;
+    /** @type {string} */
+    #prefs_el_query;
     /** @type {GMConstructorPreferencesData} */
-    this.preferences = {
+    #preferences = {
         runtimes: []
-    };
-
-    const prefs_el_query = `.plugin-settings[for="${plugin_name}"]`;
-
-    this.getCurrentRuntime = () => {
-        return this.preferences.defaultRuntimeVersion ?? this.preferences.runtimes[0];
     }
 
-    this.getRuntimesPath = () => {
-        return this.preferences.runtimesPath;
+    #showError;
+    #version;
+
+    /**
+     * @param {string} plugin_name 
+     * @param {string} version 
+     * @param {(error: string) => void} showError
+     */
+    constructor(plugin_name, version, showError) {
+
+        this.#showError = showError;
+        this.#version = version;
+
+        this.#preferences_path = `${Electron_App.getPath('userData')}/GMEdit/config/constructor-preferences.json`;
+        this.#prefs_el_query = `.plugin-settings[for="${plugin_name}"]`;
+
+        this.#loadPreferences();
+
+        if (this.#preferences.runtimesPath === undefined) {
+            this.#preferences.runtimesPath = getDefaultRuntimesPath();
+        }
+
+        this.#preferences.runtimes = getAllRuntimes(this.#preferences.runtimesPath);
+
+        if (!this.#drawPreferences(document.body)) {
+            GMEdit.on('preferencesBuilt', this.#onPreferencesBuilt);
+        }
+
     }
 
-    const loadPreferences = () => {
-        if (!Electron_FS.existsSync(preferences_path)) {
-            return savePreferences();
+    getCurrentRuntime = () => {
+        return this.#preferences.defaultRuntimeVersion ?? this.#preferences.runtimes[0];
+    }
+
+    getRuntimesPath = () => {
+        return this.#preferences.runtimesPath;
+    }
+
+    #loadPreferences = () => {
+        if (!Electron_FS.existsSync(this.#preferences_path)) {
+            return this.#savePreferences();
         }
 
         try {
-            const prefs_str = Electron_FS.readFileSync(preferences_path);
-            Object.assign(this.preferences, JSON.parse(prefs_str));
+            const prefs_str = Electron_FS.readFileSync(this.#preferences_path);
+            Object.assign(this.#preferences, JSON.parse(prefs_str));
         } catch (err) {
-            showError(`Failed to load preferences:\n${err}\n\nUsing defaults.`);
+            this.#showError(`Failed to load preferences:\n${err}\n\nUsing defaults.`);
         }
     }
 
-    const savePreferences = () => {
+    #savePreferences = () => {
         try {
-            Electron_FS.writeFileSync(preferences_path, JSON.stringify(this.preferences));
+            Electron_FS.writeFileSync(this.#preferences_path, JSON.stringify(this.#preferences));
         } catch (err) {
-            showError(`Failed to write preferences:\n${err}`);
+            this.#showError(`Failed to write preferences:\n${err}`);
         }
     }
 
@@ -48,11 +74,11 @@ export function GMConstructorPreferences(plugin_name, version, showError) {
      * @template T
      * @param {(value: T, prefs: GMConstructorPreferencesData) => void} setter
      */
-    const setPreference = (setter) => {
+    #setPreference = (setter) => {
         /** @param {T} value */
         return (value) => {
-            setter(value, this.preferences);
-            savePreferences();
+            setter(value, this.#preferences);
+            this.#savePreferences();
         }
     }
 
@@ -60,10 +86,10 @@ export function GMConstructorPreferences(plugin_name, version, showError) {
      * @param {HTMLElement} prefs_el
      * @returns {boolean} success
      */
-    const drawPreferences = (prefs_el) => {
+    #drawPreferences = (prefs_el) => {
         /** @type {HTMLElement} */
         // @ts-ignore
-        const our_prefs_el = prefs_el.querySelector(prefs_el_query);
+        const our_prefs_el = prefs_el.querySelector(this.#prefs_el_query);
 
         if (our_prefs_el === null) {
             return false;
@@ -76,21 +102,21 @@ export function GMConstructorPreferences(plugin_name, version, showError) {
         uiPreferences.addInput(
             runtime_group,
             'Runtimes Path',
-            this.preferences.runtimesPath ?? '',
-            setPreference((val, prefs) => { prefs.runtimesPath = (val === '') ? undefined : val; })
+            this.#preferences.runtimesPath ?? '',
+            this.#setPreference((val, prefs) => { prefs.runtimesPath = (val === '') ? undefined : val; })
         );
 
         uiPreferences.addDropdown(
             runtime_group,
             'Runtime Version',
             this.getCurrentRuntime(),
-            this.preferences.runtimes,
-            setPreference((val, prefs) => {
+            this.#preferences.runtimes,
+            this.#setPreference((val, prefs) => {
                 prefs.defaultRuntimeVersion = val;
             })
         );
 
-        uiPreferences.addText(our_prefs_el, `Version: ${version}`);
+        uiPreferences.addText(our_prefs_el, `Version: ${this.#version}`);
 
         return true;
     }
@@ -98,31 +124,14 @@ export function GMConstructorPreferences(plugin_name, version, showError) {
     /**
      * @param {Event} ev
      */
-    const onPreferencesBuilt = (ev) => {
+    #onPreferencesBuilt = (ev) => {
         // @ts-ignore
-        drawPreferences(ev.target);
+        this.#drawPreferences(ev.target);
     }
 
-    /**
-     * @param {(path?: string) => string[]} getAllRuntimes 
-     * @param {() => string} getDefaultRuntimesPath 
-     */
-    this.init = (getAllRuntimes, getDefaultRuntimesPath) => {
-        loadPreferences();
-
-        if (this.preferences.runtimesPath === undefined) {
-            this.preferences.runtimesPath = getDefaultRuntimesPath();
-        }
-
-        this.preferences.runtimes = getAllRuntimes(this.preferences.runtimesPath);
-
-        if (!drawPreferences(document.body)) {
-            GMEdit.on('preferencesBuilt', onPreferencesBuilt);
-        }
+    cleanup = () => {
+        GMEdit.off('preferencesBuilt', this.#onPreferencesBuilt);
     }
 
-    this.cleanup = () => {
-        GMEdit.off('preferencesBuilt', onPreferencesBuilt);
-    }
 
 }

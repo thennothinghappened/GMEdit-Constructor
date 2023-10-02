@@ -1,3 +1,39 @@
+import { getCurrentProject } from './utils.js';
+
+/** @type {{[key in NodeJS.Platform]: string}} */
+const defaultRuntimePaths = {
+    'win32': 'C:\\ProgramData\\GameMakerStudio2\\Cache\\runtimes',
+    'darwin': '/Users/Shared/GameMakerStudio2/Cache/runtimes'
+};
+
+/** @type {{[key in NodeJS.Platform]: string}} */
+const platformMappings = {
+    'win32': 'Windows',
+    'darwin': 'Mac',
+    'linux': 'Linux'
+};
+
+export function getDefaultRuntimesPath() { 
+    return defaultRuntimePaths[process.platform];
+}
+
+/**
+ * @param {string} [path]
+ */
+export function getAllRuntimes(path) {
+    const runtimes_path = path ?? getDefaultRuntimesPath();
+
+    if (runtimes_path === undefined) {
+        throw 'Platform unsupported! Please provide the runtimes path manually';
+    }
+    
+    if (!Electron_FS.existsSync(runtimes_path)) {
+        throw `Runtimes path ${runtimes_path} doesn't exist`;
+    }
+
+    return Electron_FS.readdirSync(runtimes_path);
+}
+
 /**
  * @class
  * @param {(error: string) => void} showError
@@ -5,39 +41,6 @@
  * @param {import('node:child_process')} child_process
  */
 export function GMConstructorCompiler(showError, process, child_process) {
-
-    /** @type {{[key in NodeJS.Platform]: string}} */
-    const defaultRuntimePaths = {
-        'win32': 'C:\\ProgramData\\GameMakerStudio2\\Cache\\runtimes',
-        'darwin': '/Users/Shared/GameMakerStudio2/Cache/runtimes'
-    };
-
-    /** @type {{[key in NodeJS.Platform]: string}} */
-    const platformMappings = {
-        'win32': 'Windows',
-        'darwin': 'Mac',
-        'linux': 'Linux'
-    };
-
-    this.getDefaultRuntimesPath = () => 
-        defaultRuntimePaths[process.platform];
-
-    /**
-     * @param {string} [path]
-     */
-    this.getAllRuntimes = (path) => {
-        const runtimes_path = path ?? this.getDefaultRuntimesPath();
-
-        if (runtimes_path === undefined) {
-            throw 'Platform unsupported! Please provide the runtimes path manually';
-        }
-        
-        if (!Electron_FS.existsSync(runtimes_path)) {
-            throw `Runtimes path ${runtimes_path} doesn't exist`;
-        }
-
-        return Electron_FS.readdirSync(runtimes_path);
-    }
 
     /**
      * @param {string} runtime_path
@@ -94,25 +97,12 @@ export function GMConstructorCompiler(showError, process, child_process) {
     }
 
     /**
-     * @returns {GMLProject|undefined}
-     */
-    this.getCurrentProject = () => {
-        const proj = $gmedit['gml.Project'].current;
-        
-        if (proj.path === '') {
-            return;
-        }
-
-        return proj;
-    }
-
-    /**
      * @param {string} runtime_path
      * @param {GMConstructorCompileSettings} settings
      * @param {GMConstructorCompilerCommand} cmd
      */
     this.compileCurrentProject = async (runtime_path, settings, cmd) => {
-        const proj = this.getCurrentProject();
+        const proj = getCurrentProject();
 
         if (proj === undefined) {
             throw 'Tried to run tasks on non-existent project!';
