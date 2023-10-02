@@ -13,12 +13,7 @@
 
     const load = (async () => {
         const { GMConstructor } = await import('./constructor.js');
-
         gmConstructor = new GMConstructor(plugin_name, version, process, child_process, path);
-
-        // workaround at the moment since reloading doesn't call init again:
-        // https://github.com/YellowAfterlife/GMEdit/issues/201
-        gmConstructor.init();
     })();
 
     GMEdit.register(plugin_name, {

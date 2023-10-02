@@ -14,10 +14,6 @@ export class GMConstructor {
     /** @type {GMConstructorMenu} */
     #menu;
 
-    #process;
-    #child_process;
-    #path;
-
     /**
      * @param {string} plugin_name 
      * @param {string} version 
@@ -28,10 +24,10 @@ export class GMConstructor {
     constructor(plugin_name, version, process, child_process, path) {
         this.plugin_name = plugin_name;
         this.version = version;
-        
-        this.#process = process;
-        this.#child_process = child_process;
-        this.#path = path;
+
+        this.#preferences = new GMConstructorPreferences(this.plugin_name, this.version, this.#showError);
+        this.#compiler = new GMConstructorCompiler(this.#showError, process, child_process, path);
+        this.#menu = new GMConstructorMenu(this.#showError, this.#onCompile, this.#onClean, this.#onRun);
     }
 
     /**
@@ -58,12 +54,6 @@ export class GMConstructor {
 
     #onRun = () => {
         this.#runTaskOnCurrentProject('Run');
-    }
-
-    init = () => {
-        this.#preferences = new GMConstructorPreferences(this.plugin_name, this.version, this.#showError);
-        this.#compiler = new GMConstructorCompiler(this.#showError, this.#process, this.#child_process, this.#path);
-        this.#menu = new GMConstructorMenu(this.#showError, this.#onCompile, this.#onClean, this.#onRun);
     }
 
     cleanup = () => {
