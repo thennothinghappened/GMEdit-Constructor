@@ -1,31 +1,36 @@
 /**
+ * @class
  * @param {(error: string) => void} showError
- * @param {(runtime: string, launch: boolean) => Promise<void>} compile 
- * @param {() => string} getCurrentRuntime
- * @param {() => string} getRuntimesPath
  **/
-function GMConstructorMenu(showError, compile, getCurrentRuntime, getRuntimesPath) {
+export function GMConstructorMenu(showError) {
+
+    /** @type {() => void} */
+    let _onClickCompile;
+    /** @type {() => void} */
+    let _onClickClean;
+    /** @type {() => void} */
+    let _onClickRun;
 
     const menu_items = {
-        separator: new Electron_MenuItem({
-            id: 'constructor-separator',
-            type: 'separator',
-            enabled: false
-        }),
         compile: new Electron_MenuItem({
             id: 'constructor-compile',
             label: 'Compile',
-            click: async () => {
-                await compile(getRuntimesPath() + '/' + getCurrentRuntime(), false);
-            },
+            accelerator: 'Ctrl+F5', // TODO: correct keybind
+            click: () => _onClickCompile(),
+            enabled: false
+        }),
+        clean: new Electron_MenuItem({
+            id: 'constructor-clean',
+            label: 'Clean',
+            accelerator: 'Ctrl+F7',
+            click: () => _onClickClean(),
             enabled: false
         }),
         run: new Electron_MenuItem({
             id: 'constructor-run',
             label: 'Run',
-            click: async () => {
-                await compile(getRuntimesPath() + '/' + getCurrentRuntime(), true);
-            },
+            accelerator: 'F5',
+            click: () => _onClickRun(),
             enabled: false
         })
     };
@@ -34,19 +39,16 @@ function GMConstructorMenu(showError, compile, getCurrentRuntime, getRuntimesPat
         id: 'constructor-menu',
         label: 'Constructor',
         enabled: false,
-        // @ts-ignore
         submenu: [
-            menu_items.separator,
             menu_items.compile,
+            menu_items.clean,
             menu_items.run
         ]
     });
 
-    const findExistingMenu = () => {
-        const menu = $gmedit['ui.MainMenu'].menu;
-
-        return menu.items.find(item => item.id === menu_items_container.id);
-    }
+    const findExistingMenu = () =>
+        $gmedit['ui.MainMenu'].menu.items
+            .find(item => item.id === menu_items_container.id);
 
     const addMenuItems = () => {
 
@@ -61,9 +63,11 @@ function GMConstructorMenu(showError, compile, getCurrentRuntime, getRuntimesPat
         // Reusing the existing menu. This is a silly workaround
         // for https://github.com/electron/electron/issues/527
 
-        // @ts-ignore
+        if (menu_items_container.submenu === undefined || existing.submenu === undefined) {
+            return showError('Menu items submenu missing!');
+        }
+
         for (const item of menu_items_container.submenu.items) {
-            // @ts-ignore
             existing.submenu.append(item);
         }
 
@@ -79,15 +83,18 @@ function GMConstructorMenu(showError, compile, getCurrentRuntime, getRuntimesPat
             return;
         }
 
+        if (existing.submenu === undefined) {
+            return showError('Menu items submenu missing!');
+        }
+
         existing.visible = false;
-        // @ts-ignore
         existing.submenu.clear();
     }
 
     /**
      * @param {boolean} enabled
-     */
-    this.setEnableMenuItems = (enabled) => {
+     **/
+    const setEnableMenuItems = (enabled) => {
         menu_items_container.enabled = enabled;
         // @ts-ignore
         for (const item of menu_items_container.submenu.items) {
@@ -95,12 +102,32 @@ function GMConstructorMenu(showError, compile, getCurrentRuntime, getRuntimesPat
         }
     }
 
-    this.init = () => {
+    const onProjectOpen = () => {
+        setEnableMenuItems(true);
+    }
+
+    const onProjectClose = () => {
+        setEnableMenuItems(false);
+    }
+
+    /**
+     * @param {() => void} onClickCompile
+     * @param {() => void} onClickClean
+     * @param {() => void} onClickRun
+     */
+    this.init = (onClickCompile, onClickClean, onClickRun) => {
+        [ _onClickCompile, _onClickClean, _onClickRun ] = [ onClickCompile, onClickClean, onClickRun ];
         addMenuItems();
+
+        GMEdit.on('projectOpen', onProjectOpen);
+        GMEdit.on('projectClose', onProjectClose);
     }
 
     this.cleanup = () => {
         removeMenuItems();
+
+        GMEdit.off('projectOpen', onProjectOpen);
+        GMEdit.off('projectClose', onProjectClose);
     }
 
 }

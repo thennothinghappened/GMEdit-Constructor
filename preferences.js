@@ -1,9 +1,10 @@
 /**
+ * @class
  * @param {string} plugin_name 
  * @param {string} version 
  * @param {(error: string) => void} showError
  */
-function GMConstructorPreferences(plugin_name, version, showError) {
+export function GMConstructorPreferences(plugin_name, version, showError) {
 
     const preferences_path = `${Electron_App.getPath('userData')}/GMEdit/config/constructor-preferences.json`;
 

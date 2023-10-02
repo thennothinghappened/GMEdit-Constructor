@@ -2,9 +2,6 @@
     "name": "GMEdit-Constructor",
     "description": "Compile projects from GMEdit!",
     "scripts": [
-        "preferences.js",
-        "menu.js",
-        "compile.js",
-        "constructor.js"
+        "init.js"
     ]
 }

@@ -1,9 +1,10 @@
 /**
+ * @class
  * @param {(error: string) => void} showError
+ * @param {import('node:process')} process 
+ * @param {import('node:child_process')} child_process
  */
-function GMConstructorCompile(showError) {
-
-    const { spawn } = require('child_process');
+export function GMConstructorCompiler(showError, process, child_process) {
 
     /** @type {{[key in NodeJS.Platform]: string}} */
     const defaultRuntimePaths = {
@@ -53,8 +54,9 @@ function GMConstructorCompile(showError) {
      * @param {GMLProject} project
      * @param {string} runtime_path
      * @param {GMConstructorCompileSettings} settings
+     * @param {GMConstructorCompilerCommand} cmd
      */
-    const compile = async (project, runtime_path, settings) => {
+    const runTask = async (project, runtime_path, settings, cmd) => {
         const igor_path = getIgorPath(runtime_path);
 
         if (!Electron_FS.existsSync(igor_path)) {
@@ -63,13 +65,13 @@ function GMConstructorCompile(showError) {
 
         let log = '';
 
-        const proc = spawn(igor_path, [
+        const proc = child_process.spawn(igor_path, [
             `/project=${project.path}`,
             `/config=${project.config}`,
             `/rp=${runtime_path}`,
             `/cache=${project.dir}/cache`,
             `/of=${project.dir}/output`,
-            platformMappings[process.platform], settings.launch ? 'Run' : 'Package' // TODO: we'll split this stuff out so its cmd-independent
+            platformMappings[process.platform], cmd
         ]);
 
         // TODO: log properly
@@ -83,17 +85,40 @@ function GMConstructorCompile(showError) {
             console.log(data.toString());
         });
 
+        await new Promise((res) => {
+            proc.on('exit', () => {
+                res(null);
+            })
+        });
+
+    }
+
+    /**
+     * @returns {GMLProject|undefined}
+     */
+    this.getCurrentProject = () => {
+        const proj = $gmedit['gml.Project'].current;
+        
+        if (proj.path === '') {
+            return;
+        }
+
+        return proj;
     }
 
     /**
      * @param {string} runtime_path
-     * @param {boolean} launch
+     * @param {GMConstructorCompileSettings} settings
+     * @param {GMConstructorCompilerCommand} cmd
      */
-    this.compileCurrentProject = async (runtime_path, launch) => {
-        const proj = $gmedit['gml.Project'].current;
-        await compile(proj, runtime_path, {
-            launch
-        })
+    this.compileCurrentProject = async (runtime_path, settings, cmd) => {
+        const proj = this.getCurrentProject();
+
+        if (proj === undefined) {
+            throw 'Tried to run tasks on non-existent project!';
+        }
+
+        await runTask(proj, runtime_path, settings, cmd);
     }
 
 }

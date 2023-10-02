@@ -1,56 +1,48 @@
-function GMConstructor() {
+import { GMConstructorCompiler } from './compiler.js';
+import { GMConstructorPreferences } from './preferences.js';
+import { GMConstructorMenu } from './menu.js';
 
-    this.plugin_name = 'GMEdit-Constructor';
-    this.version = '0.1.0';
+/**
+ * @param {string} plugin_name 
+ * @param {string} version 
+ * @param {import('node:process')} process 
+ * @param {import('node:child_process')} child_process
+ */
+export function GMConstructor(plugin_name, version, process, child_process) {
+
+    this.plugin_name = plugin_name;
+    this.version = version;
 
     /**
      * @param {string|Error} error
      */
-    this.showError = (error) => {
+    const showError = (error) => {
         console.log(`${this.plugin_name}: ${error}`);
     }
 
-    this.preferences = new GMConstructorPreferences(this.plugin_name, this.version, this.showError);
-    this.compile = new GMConstructorCompile(this.showError);
-    this.menu = new GMConstructorMenu(
-        this.showError,
-        this.compile.compileCurrentProject,
-        this.preferences.getCurrentRuntime,
-        this.preferences.getRuntimesPath
-    );
+    const preferences = new GMConstructorPreferences(this.plugin_name, this.version, showError);
+    const compile = new GMConstructorCompiler(showError, process, child_process);
+    const menu = new GMConstructorMenu(showError);
 
-    this.onProjectOpen = () => {
-        this.menu.setEnableMenuItems(true);
+    const onCompile = () => {
+
     }
 
-    this.onProjectClose = () => {
-        this.menu.setEnableMenuItems(false);
+    const onClean = () => {
+
+    }
+
+    const onRun = () => {
+
     }
 
     this.init = () => {
-        this.preferences.init(this.compile.getAllRuntimes, this.compile.getDefaultRuntimesPath);
-        this.menu.init();
-
-        GMEdit.on('projectOpen', this.onProjectOpen);
-        GMEdit.on('projectClose', this.onProjectClose);
+        preferences.init(compile.getAllRuntimes, compile.getDefaultRuntimesPath);
+        menu.init(onCompile, onClean, onRun);
     }
 
     this.cleanup = () => {
-        this.preferences.cleanup();
-        this.menu.cleanup();
-
-        GMEdit.off('projectOpen', this.onProjectOpen);
-        GMEdit.off('projectClose', this.onProjectClose);
+        preferences.cleanup();
+        menu.cleanup();
     }
 }
-
-gmConstructor = new GMConstructor();
-
-GMEdit.register(gmConstructor.plugin_name, {
-    init: () => {},
-    cleanup: gmConstructor.cleanup
-});
-
-// workaround at the moment since reloading doesn't call init again:
-// https://github.com/YellowAfterlife/GMEdit/issues/201
-gmConstructor.init();

@@ -9,6 +9,11 @@ declare type GMConstructorCompileSettings = {
     launch: boolean;
 }
 
+declare type GMConstructorCompilerCommand = 
+    'Run'       |
+    'Package'   |
+    'Clean'     ;
+
 declare type GMPlugin = {
     init: () => void,
     cleanup: () => void
@@ -17,10 +22,10 @@ declare type GMPlugin = {
 declare let gmConstructor: GMConstructor;
 
 declare type GMEdit_Event =
-    'preferencesBuilt' |
-    'projectPropertiesBuilt' |
-    'projectOpen' |
-    'projectClose';
+    'preferencesBuilt'          |
+    'projectPropertiesBuilt'    |
+    'projectOpen'               |
+    'projectClose'              ;
 
 declare class GMEdit {
     static register = function(name: string, body: GMPlugin) {}
