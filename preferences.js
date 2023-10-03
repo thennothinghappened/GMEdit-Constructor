@@ -1,12 +1,12 @@
 import { getAllRuntimes, getDefaultRuntimesPath } from './compiler.js';
 
-export class GMConstructorPreferences {
+export class Preferences {
 
     /** @type {string} */
     #preferences_path;
     /** @type {string} */
     #prefs_el_query;
-    /** @type {GMConstructorPreferencesData} */
+    /** @type {PreferencesData} */
     #preferences = {
         runtimes: []
     }
@@ -78,7 +78,7 @@ export class GMConstructorPreferences {
 
     /**
      * @template T
-     * @param {(value: T, prefs: GMConstructorPreferencesData) => void} setter
+     * @param {(value: T, prefs: PreferencesData) => void} setter
      */
     #setPreference = (setter) => {
         /** @param {T} value */

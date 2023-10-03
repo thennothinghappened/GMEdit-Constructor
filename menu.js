@@ -1,6 +1,6 @@
 import { isProjectOpen } from './utils.js';
 
-export class GMConstructorMenu {
+export class Menu {
 
     #showError;
 

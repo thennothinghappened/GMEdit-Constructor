@@ -35,13 +35,13 @@ export function getAllRuntimes(path) {
     return Electron_FS.readdirSync(runtimes_path);
 }
 
-export class GMConstructorCompiler {
+export class Compiler {
 
     #process;
     #child_process;
     #path;
 
-    /** @type {GMConstructorCompilerJob[]} */
+    /** @type {CompilerJob[]} */
     #jobs = [];
 
     /**
@@ -61,8 +61,8 @@ export class GMConstructorCompiler {
     /**
      * Run a job on the currently open project.
      * @param {string} runtime_path
-     * @param {GMConstructorCompileSettings} settings
-     * @param {GMConstructorCompilerCommand} cmd
+     * @param {CompileSettings} settings
+     * @param {CompilerCommand} cmd
      */
     runJobOnCurrentProject = (runtime_path, settings, cmd) => {
         const proj = getCurrentProject();
@@ -96,7 +96,7 @@ export class GMConstructorCompiler {
      * Select the flags for Igor to run the job.
      * @param {GMLProject} project
      * @param {string} runtime_path
-     * @param {GMConstructorCompilerCommand} cmd
+     * @param {CompilerCommand} cmd
      * @returns {string[]}
      */
     #getFlagsForJob = (project, runtime_path, cmd) => {
@@ -132,9 +132,9 @@ export class GMConstructorCompiler {
      * Run a new job on a given project.
      * @param {GMLProject} project
      * @param {string} runtime_path
-     * @param {GMConstructorCompileSettings} settings
-     * @param {GMConstructorCompilerCommand} cmd
-     * @returns {GMConstructorCompilerJob}
+     * @param {CompileSettings} settings
+     * @param {CompilerCommand} cmd
+     * @returns {CompilerJob}
      */
     #runJob = (project, runtime_path, settings, cmd) => {
         const igor_path = this.#getIgorPath(runtime_path);
@@ -149,7 +149,7 @@ export class GMConstructorCompiler {
             { cwd: project.dir }
         );
 
-        const job = new GMConstructorCompilerJob(cmd, proc, project);
+        const job = new CompilerJob(cmd, proc, project);
         this.#jobs.push(job);
 
         job.on('stop', () => {
@@ -161,7 +161,7 @@ export class GMConstructorCompiler {
     }
 
     /**
-     * @param {GMConstructorCompilerJob} job
+     * @param {CompilerJob} job
      */
     #removeJob = (job) => {
         this.#jobs.splice(this.#jobs.indexOf(job), 1);
@@ -169,16 +169,16 @@ export class GMConstructorCompiler {
 
     /**
      * Create a new editor instance for a given job.
-     * @param {GMConstructorCompilerJob} job
+     * @param {CompilerJob} job
      */
     openEditorForJob = (job) => {
         CompileLogViewer.view(job);
     }
 }
 
-export class GMConstructorCompilerJob {
+export class CompilerJob {
 
-    /** @type {GMConstructorCompilerCommand} */
+    /** @type {CompilerCommand} */
     command;
     /** @type {import('node:child_process').ChildProcess} */
     process;
@@ -196,7 +196,7 @@ export class GMConstructorCompilerJob {
     #listeners_stop = new Set();
     
     /**
-     * @param {GMConstructorCompilerCommand} command
+     * @param {CompilerCommand} command
      * @param {import('node:child_process').ChildProcess} process
      * @param {GMLProject} project
      */
@@ -215,7 +215,7 @@ export class GMConstructorCompilerJob {
      */
     #onStdoutData = (chunk) => {
         this.stdout += chunk.toString();
-        GMConstructorCompilerJob.#notify(this.#listeners_stdout, this.stdout);
+        CompilerJob.#notify(this.#listeners_stdout, this.stdout);
     }
 
     /**
@@ -223,11 +223,11 @@ export class GMConstructorCompilerJob {
      */
     #onStderrData = (chunk) => {
         this.stderr += chunk.toString();
-        GMConstructorCompilerJob.#notify(this.#listeners_stderr, this.stderr);
+        CompilerJob.#notify(this.#listeners_stderr, this.stderr);
     }
 
     #onExit = () => {
-        GMConstructorCompilerJob.#notify(this.#listeners_stop);
+        CompilerJob.#notify(this.#listeners_stop);
         this.process.removeAllListeners();
     }
 
@@ -242,7 +242,7 @@ export class GMConstructorCompilerJob {
     }
 
     /**
-     * @template {GMConstructorCompilerJobEvent} T
+     * @template {CompilerJobEvent} T
      * @param {T} event
      * @param {(data?: any) => void} callback
      */

@@ -1,17 +1,17 @@
-import { GMConstructorCompiler } from './compiler.js';
-import { GMConstructorPreferences } from './preferences.js';
-import { GMConstructorMenu } from './menu.js';
+import { Compiler } from './compiler.js';
+import { Preferences } from './preferences.js';
+import { Menu } from './menu.js';
 
 export class GMConstructor {
 
     plugin_name;
     version;
 
-    /** @type {GMConstructorPreferences} */
+    /** @type {Preferences} */
     #preferences;
-    /** @type {GMConstructorCompiler} */
+    /** @type {Compiler} */
     #compiler;
-    /** @type {GMConstructorMenu} */
+    /** @type {Menu} */
     #menu;
 
     /**
@@ -25,9 +25,9 @@ export class GMConstructor {
         this.plugin_name = plugin_name;
         this.version = version;
 
-        this.#preferences = new GMConstructorPreferences(this.plugin_name, this.version, this.#showError);
-        this.#compiler = new GMConstructorCompiler(this.#showError, process, child_process, path);
-        this.#menu = new GMConstructorMenu(this.#showError, this.#onCompile, this.#onClean, this.#onRun);
+        this.#preferences = new Preferences(this.plugin_name, this.version, this.#showError);
+        this.#compiler = new Compiler(this.#showError, process, child_process, path);
+        this.#menu = new Menu(this.#showError, this.#onCompile, this.#onClean, this.#onRun);
     }
 
     /**
@@ -38,7 +38,7 @@ export class GMConstructor {
     }
 
     /**
-    * @param {GMConstructorCompilerCommand} cmd
+    * @param {CompilerCommand} cmd
     */
     #runTaskOnCurrentProject = (cmd) => {
         const job = this.#compiler.runJobOnCurrentProject(this.#preferences.getRuntimePath(), {}, cmd);

@@ -1,18 +1,18 @@
-declare type GMConstructorPreferencesData = {
+declare type PreferencesData = {
     defaultRuntimeVersion?: string;
     runtimesPath?: string;
     runtimes: string[];
 }
 
-declare type GMConstructorCompileSettings = {
+declare type CompileSettings = {
 }
 
-declare type GMConstructorCompilerCommand = 
+declare type CompilerCommand = 
     'Run'       |
     'Package'   |
     'Clean'     ;
 
-declare type GMConstructorCompilerJobEvent =
+declare type CompilerJobEvent =
     'stdout'    |
     'stderr'    |
     'stop'      ;
