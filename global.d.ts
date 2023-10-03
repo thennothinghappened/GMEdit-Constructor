@@ -149,13 +149,6 @@ class FileKind {
 		if (file.path != null) return file.path;
 		return file.name;
 	}
-
-    public static openTab = (file: GmlFile) => {
-		file.editor.stateLoad();
-		// addTab doesn't return the new tab so we bind it up in the "active tab change" event:
-		GmlFile.next = file;
-		ui.ChromeTabs.addTab(file.name);
-	}
 }
 
 /**
@@ -237,7 +230,7 @@ declare class GmlFile {
 		return codeEditor.session ?? null;
 	}
 
-    public open = (name: string, path: string, nav?: GmlFileNav): GmlFile? => {
+    public static open = (name: string, path: string, nav?: GmlFileNav): GmlFile? => {
 		path = Path.normalize(path);
 		// todo: perhaps completely eliminate "name" from here and rely on file data
 		// see if there's an existing tab for this:
@@ -284,7 +277,7 @@ declare class GmlFile {
 		this.editor.load(data);
 	}
 
-    public openTab = (file: GmlFile) => {
+    public static openTab = (file: GmlFile) => {
 		file.editor.stateLoad();
 		// addTab doesn't return the new tab so we bind it up in the "active tab change" event:
 		GmlFile.next = file;
