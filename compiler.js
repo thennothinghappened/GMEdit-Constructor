@@ -205,7 +205,7 @@ export class GMConstructorCompilerJob {
         this.process = process;
         this.project = project;
 
-        this.process.on('exit', this.#onExit);
+        this.process.once('exit', this.#onExit);
         this.process.stdout?.on('data', this.#onStdoutData);
         this.process.stderr?.on('data', this.#onStderrData);
     }
@@ -228,10 +228,7 @@ export class GMConstructorCompilerJob {
 
     #onExit = () => {
         GMConstructorCompilerJob.#notify(this.#listeners_stop);
-
-        this.process.off('exit', this.#onExit);
-        this.process.stdout?.off('data', this.#onStdoutData);
-        this.process.stderr?.off('data', this.#onStderrData);
+        this.process.removeAllListeners();
     }
 
     /**

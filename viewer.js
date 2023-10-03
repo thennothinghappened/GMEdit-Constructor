@@ -49,10 +49,17 @@ export class CompileLogViewer extends editor {
         super(file);
 
         this.job = job;
+
+        // temporary testing log output
         this.element = document.createElement('div');
 
+        const log = document.createElement('pre');
+        log.className = 'gm-constructor-log';
+
+        this.element.appendChild(log);
+
         this.job.on('stdout', (content) => {
-            this.element.textContent = content;
+            log.textContent = content;
         });
     }
 
