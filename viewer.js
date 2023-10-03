@@ -41,6 +41,9 @@ export class CompileLogViewer extends editor {
     /** @type {CompilerJob} */
     job;
 
+    #stop_btn;
+    #log;
+
     /**
      * @param {GmlFile} file
      * @param {CompilerJob} job
@@ -52,14 +55,29 @@ export class CompileLogViewer extends editor {
 
         // temporary testing log output
         this.element = document.createElement('div');
+        this.element.className = 'gm-constructor-viewer';
 
-        const log = document.createElement('pre');
-        log.className = 'gm-constructor-log';
+        const info = document.createElement('div');
 
-        this.element.appendChild(log);
+        this.#stop_btn = document.createElement('input');
+        this.#stop_btn.type = 'button';
+        this.#stop_btn.value = 'Stop';
+        this.#stop_btn.onclick = this.job.stop;
+
+        info.appendChild(this.#stop_btn);
+
+        this.#log = document.createElement('pre');
+        this.#log.className = 'gm-constructor-log';
+
+        this.element.appendChild(info);
+        this.element.appendChild(this.#log);
 
         this.job.on('stdout', (content) => {
-            log.textContent = content;
+            this.#log.textContent = content;
+        });
+
+        this.job.on('stop', () => {
+            this.#stop_btn.disabled = true;
         });
     }
 

@@ -15,6 +15,8 @@ declare type CompilerCommand =
 declare type CompilerJobEvent =
     'stdout'    |
     'stderr'    |
+    'output'    |
+    'error'     |
     'stop'      ;
 
 declare type GMPlugin = {

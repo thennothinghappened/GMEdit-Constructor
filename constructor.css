@@ -1,4 +1,12 @@
 
+.gm-constructor-viewer {
+    display: flex;
+    flex-direction: column;
+
+    padding: 8px;
+}
+
 .gm-constructor-log {
     overflow: scroll;
+    flex-grow: 1;
 }

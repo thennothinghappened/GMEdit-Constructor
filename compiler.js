@@ -188,12 +188,18 @@ export class CompilerJob {
     stdout = '';
     stderr = '';
 
-    /** @type {Set<(data: string) => void>} */
-    #listeners_stdout = new Set();
-    /** @type {Set<(data: string) => void>} */
-    #listeners_stderr = new Set();
-    /** @type {Set<() => void>} */
-    #listeners_stop = new Set();
+    log = '';
+    /** @type {string?} */
+    error = null;
+
+    /** @type {{[key in CompilerJobEvent]: Set<(data: any?) => void>}} */
+    #listeners = {
+        stdout: new Set(),
+        stderr: new Set(),
+        output: new Set(),
+        error: new Set(),
+        stop: new Set()
+    };
     
     /**
      * @param {CompilerCommand} command
@@ -208,6 +214,8 @@ export class CompilerJob {
         this.process.once('exit', this.#onExit);
         this.process.stdout?.on('data', this.#onStdoutData);
         this.process.stderr?.on('data', this.#onStderrData);
+
+        this.on('stdout', this.#notifyParsedOutput);
     }
 
     /**
@@ -215,7 +223,7 @@ export class CompilerJob {
      */
     #onStdoutData = (chunk) => {
         this.stdout += chunk.toString();
-        CompilerJob.#notify(this.#listeners_stdout, this.stdout);
+        CompilerJob.#notify(this.#listeners.stdout, this.stdout);
     }
 
     /**
@@ -223,12 +231,23 @@ export class CompilerJob {
      */
     #onStderrData = (chunk) => {
         this.stderr += chunk.toString();
-        CompilerJob.#notify(this.#listeners_stderr, this.stderr);
+        CompilerJob.#notify(this.#listeners.stderr, this.stderr);
     }
 
     #onExit = () => {
-        CompilerJob.#notify(this.#listeners_stop);
+        CompilerJob.#notify(this.#listeners.stop);
         this.process.removeAllListeners();
+    }
+    
+    /**
+     * Parse the stdout of the compiler to find errors so we can display them nicely!
+     */
+    #parseOutput = () => {
+        
+    }
+
+    #notifyParsedOutput = () => {
+        
     }
 
     /**
@@ -242,16 +261,11 @@ export class CompilerJob {
     }
 
     /**
-     * @template {CompilerJobEvent} T
-     * @param {T} event
+     * @param {CompilerJobEvent} event
      * @param {(data?: any) => void} callback
      */
     on = (event, callback) => {
-        switch (event) {
-            case 'stdout': return this.#listeners_stdout.add(callback);
-            case 'stderr': return this.#listeners_stderr.add(callback);
-            case 'stop': return this.#listeners_stop.add(callback);
-        }
+        this.#listeners[event].add(callback);
     }
 
     stop = () => {
