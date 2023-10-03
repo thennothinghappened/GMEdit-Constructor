@@ -188,7 +188,7 @@ class KCode extends FileKind {
 }
 
 /**
- * Represents a single "file", which will usually be tied to a tab and has an editor tied to it.
+ * Represents a single 'file', which will usually be tied to a tab and has an editor tied to it.
  * Some editor types (e.g. object editor for GMS2+) may associate multiple files on disk with one tab.
  * @author YellowAfterlife
  */
@@ -232,7 +232,7 @@ declare class GmlFile {
 
     public static open = (name: string, path: string, nav?: GmlFileNav): GmlFile? => {
 		path = Path.normalize(path);
-		// todo: perhaps completely eliminate "name" from here and rely on file data
+		// todo: perhaps completely eliminate 'name' from here and rely on file data
 		// see if there's an existing tab for this:
 		for (tabEl in ui.ChromeTabs.element.querySelectorEls('.chrome-tab')) {
 			const gmlFile: GmlFile = tabEl.gmlFile;
@@ -279,7 +279,7 @@ declare class GmlFile {
 
     public static openTab = (file: GmlFile) => {
 		file.editor.stateLoad();
-		// addTab doesn't return the new tab so we bind it up in the "active tab change" event:
+		// addTab doesn't return the new tab so we bind it up in the 'active tab change' event:
 		GmlFile.next = file;
 		ui.ChromeTabs.addTab(file.name);
 	}
@@ -363,6 +363,347 @@ class EditCode extends Editor {
 
 }
 
+/**
+ * ...
+ * @author YellowAfterlife
+ */
+class KCode extends FileKind {
+	
+	/** language mode path for Ace */
+	public modePath: string = 'ace/mode/text';
+	
+	/** whether to do a GmlSeeker pass after saving to update definitions */
+	public indexOnSave: boolean = false;
+	
+	/**
+	 * Whether to set GmlFile.changed when code gets changed
+	 * @see AceStatusBar.update
+	 */
+	public setChangedOnEdits: boolean = true;
+	
+	constructor() {
+		super();
+	}
+	
+	override public init = (file: GmlFile, data?: any): void => {
+		file.codeEditor = new EditCode(file, modePath);
+		file.editor = file.codeEditor;
+	}
+	
+	public loadCode = (editor: EditCode, data?: any): string => {
+		return data != null ? data : editor.file.readContent();
+	}
+	public saveCode = (editor: EditCode, code: string): boolean => {
+		if (editor.file.path == null) return false;
+		return editor.file.writeContent(code);
+	}
+	
+	/**
+	 * Executed after getting the code from loadCode for pre-processing
+	 * @return Modified code
+	 */
+	public preproc = (editor: EditCode, code: string): string => {
+		return code;
+	}
+	
+	/**
+	 * Executed before passing the code to saveCode for post-processing
+	 * Whatever returned from here is then passed to saveCode.
+	 * @return New code or null on error
+	 */
+	public postproc = (editor: EditCode, code: string): string => {
+		return code;
+	}
+	
+	public gatherGotoTargets = (editor: EditCode): AceAutoCompleteItems|null => {
+		return null;
+	}
+}
+
+/**
+ * ...
+ * @author YellowAfterlife
+ */
+class EditCode extends Editor {
+	
+	public static currentNew: EditCode? = null;
+	public static container: Element;
+	public session: AceSession;
+	public kind: KCode;
+	private modePath: string;
+	
+	public locals: Dictionary<GmlLocals> = GmlLocals.defaultMap;
+	public imports: Dictionary<GmlImports> = GmlImports.defaultMap;
+	
+	public lambdaList: Array<string> = [];
+	public lambdaMap: Dictionary<string> = new Dictionary();
+	public lambdas: Dictionary<GmlExtLambda> = new Dictionary();
+	
+	constructor(file: GmlFile, modePath: string) {
+		super(file);
+		this.kind = file.kind;
+		this.modePath = modePath;
+		this.element = container;
+	}
+	
+	override public ready = (): void => {
+		if (GmlAPI.version.config.indexingMode == Local) {
+			GmlSeeker.runSync(file.path, file.code, null, file.kind);
+		}
+
+		let _prev = currentNew;
+		currentNew = this;
+		// todo: this does not seem to cache per-version, but not a performance hit either?
+		
+		session = AceTools.createSession(file.code, { path: modePath, version: GmlAPI.version });
+		AceTools.bindSession(session, this);
+		
+		if (Project.current != null && Project.current.properties.indentWithTabs != null) {
+			session.setOption('useSoftTabs', !Project.current.properties.indentWithTabs);
+		} else if (Preferences.current.detectTab) {
+			if (Nativestring.contains(file.code, '\n\t')) {
+				session.setOption('useSoftTabs', false);
+			} else if (Nativestring.contains(file.code, '\n  ')) {
+				session.setOption('useSoftTabs', true);
+			} else {
+				session.setOption('useSoftTabs', Preferences.current.tabSpaces);
+			}
+		} else {
+			session.setOption('useSoftTabs', Preferences.current.tabSpaces);
+		}
+
+		if (Project.current != null && Project.current.properties.indentSize != null) {
+			session.setOption('tabSize', Std.int(Project.current.properties.indentSize));
+		}
+
+		Preferences.hookSetOption(session);
+
+		if (modePath === 'ace/mode/javascript') {
+			session.setOption('useWorker', false);
+		}
+		
+		currentNew = _prev;
+		
+		let data = file.path != null ? GmlSeekData.map[file.path] : null;
+		if (data != null) {
+			locals = data.locals;
+			if (data.imports != null) imports = data.imports;
+		}
+	}
+	
+	override public stateLoad = () => {
+		if (file.path != null) AceSessionData.restore(this);
+	}
+	override public stateSave = () => {
+		AceSessionData.store(this);
+	}
+	
+	override public focusGain = (prev:Editor): void => {
+		super.focusGain(prev);
+		Main.aceEditor.setSession(session);
+	}
+	
+	public setLoadError = (text: string) => {
+		file.code = text;
+		file.path = null;
+		file.kind = KExtern.inst;
+		return text;
+	}
+	override public load = (data: any): void => {
+		let src = kind.loadCode(this, data);
+		src = kind.preproc(this, src);
+		file.code = src;
+		file.syncTime();
+	}
+	
+	public postpImport = (val: string): { val: string, sessionChanged: boolean } => {
+		let val_preImport = val;
+		let path = file.path;
+
+		val = GmlExtImport.post(val, this);
+
+		if (val == null) {
+			Dialog.showError(GmlExtImport.errorText);
+			return null;
+		}
+
+		// if there are imports, check if we should be updating the code
+		let data = path !== null ? GmlSeekData.map[path] : null;
+		let sessionChanged = false;
+		let hadImports = data != null && data.imports !== null;
+
+		if (hadImports || GmlExtImport.post_numImports > 0) {
+			let next = GmlExtImport.pre(val, this);
+
+			if (data != null && data.imports != null) {
+				imports = data.imports;
+			} else imports = GmlImports.defaultMap;
+
+			if (next != val_preImport) {
+				const sd = AceSessionData.get(this);
+				const session = session;
+				session.doc.setValue(next);
+				AceSessionData.set(this, sd);
+				sessionChanged = true;
+
+				Main.window.setTimeout(() => {
+					const undoManager = session.getUndoManager();
+
+					if (!Preferences.current.allowImportUndo) {
+						session.setUndoManager(undoManager);
+						undoManager.reset();
+					}
+
+					undoManager.markClean();
+					file.changed = false;
+				});
+			} else if (!hadImports) {
+				// if we didn't have imports before, data.imports would
+				// be null and thus our imports were left untransformed.
+				// But now they are OK so we can do it again and right.
+				val = GmlExtImport.post(val_preImport, this);
+				if (val == null) {
+					Main.window.alert(GmlExtImport.errorText);
+					return null;
+				}
+			}
+		}
+
+		return { val: val, sessionChanged: sessionChanged };
+	}
+	
+	public setSaveError = (text:string): void => {
+		Dialog.showError(text);
+	}
+
+	override public save = (): boolean => {
+		let code = session.getValue();
+		GmlFileBackup.save(file, code);
+		
+		code = kind.postproc(this, code);
+		if (code == null) return false;
+		
+		let ok = kind.saveCode(this, code);
+		if (!ok) return false;
+		
+		file.savePost(code);
+		return true;
+	}
+
+	override public checkChanges = (): void => {
+		const act = Preferences.current.fileChangeAction;
+		if (act == null) return;
+
+		const status = kind.checkForChanges(this);
+
+		if (status < 0) {
+			switch (Dialog.showMessageBox({
+				title: 'File missing: ' + file.name,
+				message: 'The source file is no longer found on disk. '
+					+ 'What would you like to do?',
+				buttons: [
+					'Keep editing',
+					'Close the file'
+				], cancelId: 0,
+			})) {
+				case 1: {
+					file.path = null;
+					Main.window.setTimeout(function() {
+						file.tabEl.querySelector('.chrome-tab-close').click();
+					});
+                    return;
+				};
+				default: file.path = null;
+			}
+			return;
+		}
+
+		if (status > 0) try {
+			let prev = file.code;
+			file.load();
+			
+			const rxr = /\\r/g;
+			let check_0 = Nativestring.trimRight(prev);
+			check_0 = Nativestring.replaceExt(check_0, rxr, '');
+			let check_1 = Nativestring.trimRight(file.code);
+			check_1 = Nativestring.replaceExt(check_1, rxr, '');
+			
+			const finishChange = (): void => {
+				session.setValue(file.code);
+				plugins.PluginEvents.fileReload({file:file});
+				let path = file.path;
+
+				if (path != null) {
+					const data = GmlSeekData.map[path];
+					if (data != null) {
+						kind.index(path, file.readContent(), data.main, true);
+						if (GmlAPI.version.config.indexingMode == Local) file.liveApply();
+						session.gmlScopes.updateOnSave();
+						let next = GmlSeekData.map[path];
+						if (locals != locals) {
+							locals = locals;
+							if (GmlFile.current == file) session.bgTokenizer.start(0);
+						}
+					}
+				}
+				if (kind === KGml && kind.canSyntaxCheck) {
+					let check = parsers.linter.GmlLinter.getOption(q.q.onLoad);
+					if (check) parsers.linter.GmlLinter.runFor(this);
+				}
+			}
+
+			let dlg: number = 0;
+			if (check_0 == check_1) {
+				// OK!
+			} else if (!file.changed) {
+				if (act != Ask) {
+					finishChange();
+				} else dlg = 1;
+			} else dlg = 2;
+
+			if (dlg != 0) {
+				printSize = (b: number) => {
+					toFixed = (f: number):string => {
+						return f(2);
+					}
+					if (b < 10000) return b + 'B';
+					b /= 1024;
+					if (b < 10000) return toFixed(b) + 'KB';
+					b /= 1024;
+					if (b < 10000) return toFixed(b) + 'MB';
+					b /= 1024;
+					return toFixed(b) + 'GB';
+				}
+				let sz1 = printSize(file.code.length);
+				let sz2 = printSize(session.getValue().length);
+				let bt = Dialog.showMessageBox({
+					title: 'File conflict for ' + file.name,
+					message: 'Source file changed ($sz1) ' + (dlg == 2
+						? 'but you have unsaved changes ($sz2)'
+						: 'while the current version is $sz2'
+					) + '. What would you like to do?',
+					buttons: ['Reload file', 'Keep current', 'Open changes in a new tab'],
+					cancelId: 1,
+				});
+
+				switch (bt) {
+					case 0: {
+						finishChange();
+					};
+					case 1: { };
+					case 2: {
+						let name1 = file.name + ' <copy>';
+						GmlFile.next = new GmlFile(name1, null, file.kind, file.code);
+						ui.ChromeTabs.addTab(name1);
+					};
+				}
+			}
+		} catch (e: any) {
+			Main.console.error('Error applying changes: ', e);
+		}
+	}
+}
+
 declare type $GMEdit = {
     'ui.Preferences': GMEditUIPreferences;
     'ui.MainMenu': GMEditUIMainMenu;
@@ -370,6 +711,7 @@ declare type $GMEdit = {
     'editors.Editor': typeof Editor;
     'file.FileKind': typeof FileKind;
     'gml.file.GmlFile': typeof GmlFile;
+    'editors.EditCode': typeof EditCode;
 };
 
 declare const $gmedit: $GMEdit;
