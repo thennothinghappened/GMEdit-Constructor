@@ -1,4 +1,5 @@
 import { getCurrentProject } from './utils.js';
+import { CompileLogViewer } from './viewer.js';
 
 /** @type {{[key in NodeJS.Platform]: string}} */
 const defaultRuntimePaths = {
@@ -58,6 +59,7 @@ export class GMConstructorCompiler {
     }
 
     /**
+     * Run a job on the currently open project.
      * @param {string} runtime_path
      * @param {GMConstructorCompileSettings} settings
      * @param {GMConstructorCompilerCommand} cmd
@@ -79,6 +81,7 @@ export class GMConstructorCompiler {
         this.#path.normalize(this.#path.join(...path));
 
     /**
+     * Get the path to Igor's executable for the running platform, in the provided runtime's path.
      * @param {string} runtime_path
      */
     #getIgorPath = (runtime_path) => {
@@ -90,6 +93,7 @@ export class GMConstructorCompiler {
     }
 
     /**
+     * Select the flags for Igor to run the job.
      * @param {GMLProject} project
      * @param {string} runtime_path
      * @param {GMConstructorCompilerCommand} cmd
@@ -125,6 +129,7 @@ export class GMConstructorCompiler {
     }
    
     /**
+     * Run a new job on a given project.
      * @param {GMLProject} project
      * @param {string} runtime_path
      * @param {GMConstructorCompileSettings} settings
@@ -144,29 +149,12 @@ export class GMConstructorCompiler {
             { cwd: project.dir }
         );
 
-        /** @type {GMConstructorCompilerJob} */
-        const job = {
-            command: cmd,
-            process: proc,
-            project: project,
-            stdout: '',
-            stderr: ''
-        };
+        const job = new GMConstructorCompilerJob(cmd, proc, project);
+        this.#jobs.push(job);
 
-        proc.stdout.on('data', (data) => {
-            job.stdout += data.toString();
-        });
-
-        proc.stderr.on('data', (data) => {
-            job.stderr += data.toString();
-        });
-
-        proc.on('exit', (exit_code) => {
-            console.log('Job finished:', job);
+        job.on('stop', () => {
             this.#removeJob(job);
         });
-
-        this.#jobs.push(job);
 
         return job;
 
@@ -177,5 +165,99 @@ export class GMConstructorCompiler {
      */
     #removeJob = (job) => {
         this.#jobs.splice(this.#jobs.indexOf(job), 1);
+    }
+
+    /**
+     * Create a new editor instance for a given job.
+     * @param {GMConstructorCompilerJob} job
+     */
+    openEditorForJob = (job) => {
+        CompileLogViewer.view(job);
+    }
+}
+
+export class GMConstructorCompilerJob {
+
+    /** @type {GMConstructorCompilerCommand} */
+    command;
+    /** @type {import('node:child_process').ChildProcess} */
+    process;
+    /** @type {GMLProject} */
+    project;
+
+    stdout = '';
+    stderr = '';
+
+    /** @type {Set<(data: string) => void>} */
+    #listeners_stdout = new Set();
+    /** @type {Set<(data: string) => void>} */
+    #listeners_stderr = new Set();
+    /** @type {Set<() => void>} */
+    #listeners_stop = new Set();
+    
+    /**
+     * @param {GMConstructorCompilerCommand} command
+     * @param {import('node:child_process').ChildProcess} process
+     * @param {GMLProject} project
+     */
+    constructor(command, process, project) {
+        this.command = command;
+        this.process = process;
+        this.project = project;
+
+        this.process.on('exit', this.#onExit);
+        this.process.stdout?.on('data', this.#onStdoutData);
+        this.process.stderr?.on('data', this.#onStderrData);
+    }
+
+    /**
+     * @param {any?} chunk
+     */
+    #onStdoutData = (chunk) => {
+        this.stdout += chunk.toString();
+        GMConstructorCompilerJob.#notify(this.#listeners_stdout, this.stdout);
+    }
+
+    /**
+     * @param {any?} chunk
+     */
+    #onStderrData = (chunk) => {
+        this.stderr += chunk.toString();
+        GMConstructorCompilerJob.#notify(this.#listeners_stderr, this.stderr);
+    }
+
+    #onExit = () => {
+        GMConstructorCompilerJob.#notify(this.#listeners_stop);
+
+        this.process.off('exit', this.#onExit);
+        this.process.stdout?.off('data', this.#onStdoutData);
+        this.process.stderr?.off('data', this.#onStderrData);
+    }
+
+    /**
+     * @param {Set<(data?: any) => void>} listeners
+     * @param {any} [data]
+     */
+    static #notify = (listeners, data) => {
+        for (const cb of listeners) {
+            cb(data);
+        }
+    }
+
+    /**
+     * @template {GMConstructorCompilerJobEvent} T
+     * @param {T} event
+     * @param {(data?: any) => void} callback
+     */
+    on = (event, callback) => {
+        switch (event) {
+            case 'stdout': return this.#listeners_stdout.add(callback);
+            case 'stderr': return this.#listeners_stderr.add(callback);
+            case 'stop': return this.#listeners_stop.add(callback);
+        }
+    }
+
+    stop = () => {
+        this.process.kill();
     }
 }

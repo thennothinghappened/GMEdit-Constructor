@@ -7,18 +7,15 @@ declare type GMConstructorPreferencesData = {
 declare type GMConstructorCompileSettings = {
 }
 
-declare type GMConstructorCompilerJob = {
-    command: GMConstructorCompilerCommand;
-    process: ChildProcess;
-    project: GMLProject;
-    stdout: string;
-    stderr: string;
-}
-
 declare type GMConstructorCompilerCommand = 
     'Run'       |
     'Package'   |
     'Clean'     ;
+
+declare type GMConstructorCompilerJobEvent =
+    'stdout'    |
+    'stderr'    |
+    'stop'      ;
 
 declare type GMPlugin = {
     init: () => void,
@@ -137,7 +134,7 @@ class FileKind {
 	 * Should assign the file.editor by least.
 	 */
 	public init = (file: GmlFile, data: any): void => {
-		//
+		
 	}
 
     /** We're asked to bring `nav` into view */
@@ -212,22 +209,23 @@ declare class GmlFile {
 
     constructor(name: string, path: string?, kind: FileKind, data?: any) {
         this.name = name;
-		this.path = path;
-		this.kind = kind;
-		
-		context = kind.getTabContext(this, data);
-		kind.init(this, data);
-		load(data);
-		editor.ready();
+        this.path = path;
+        this.kind = kind;
+        this.context = kind.getTabContext(this, data);
+
+        kind.init(this, data);
+
+        this.load(data);
+        this.editor.ready();
     }
 
     public close = (): void => {
-		editor.stateSave();
-		editor.destroy();
+		this.editor.stateSave();
+		this.editor.destroy();
 	}
 
     public getAceSession = (): AceSession? => {
-		return codeEditor.session ?? null;
+		return this.codeEditor?.session ?? null;
 	}
 
     public static open = (name: string, path: string, nav?: GmlFileNav): GmlFile? => {

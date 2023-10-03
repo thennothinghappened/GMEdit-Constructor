@@ -41,7 +41,8 @@ export class GMConstructor {
     * @param {GMConstructorCompilerCommand} cmd
     */
     #runTaskOnCurrentProject = (cmd) => {
-        this.#compiler.runJobOnCurrentProject(this.#preferences.getRuntimePath(), {}, cmd);
+        const job = this.#compiler.runJobOnCurrentProject(this.#preferences.getRuntimePath(), {}, cmd);
+        this.#compiler.openEditorForJob(job);
     }
 
     #onCompile = () => {
