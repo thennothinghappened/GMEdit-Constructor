@@ -155,7 +155,11 @@ class FileKind {
  * @author YellowAfterlife
  */
 class KCode extends FileKind {
-	/// whether to do a GmlSeeker pass after saving to update definitions
+
+    /** language mode path for Ace */
+	public modePath: string = 'ace/mode/text';
+
+	/** whether to do a GmlSeeker pass after saving to update definitions */
 	public indexOnSave: boolean = false;
 	
 	/**
@@ -172,8 +176,6 @@ class KCode extends FileKind {
 		file.codeEditor = new EditCode(file, modePath);
 		file.editor = file.codeEditor;
 	}
-
-    
 
     public loadCode = (editor: EditCode, data: any): string => {
 		return data != null ? data : editor.file.readContent();
@@ -205,7 +207,7 @@ declare class GmlFile {
     /** The associated editor */
 	public editor: Editor;
     /** Shortcut if this is a code editor. Otherwise null */
-	public codeEditor:EditCode;
+	public codeEditor: EditCode;
 
     public static next: GmlFile?;
 
@@ -346,9 +348,8 @@ class EditCode extends Editor {
     constructor(file: GmlFile, modePath: string) {
 		super(file);
 
-		this.kind = cast(file.kind, KCode);
-		this.modePath = modePath;
-		element = container;
+		this.kind = file.kind;
+		this.element = EditCode.container;
 	}
 
     override public stateLoad = () => {
@@ -393,6 +394,7 @@ class KCode extends FileKind {
 	public loadCode = (editor: EditCode, data?: any): string => {
 		return data != null ? data : editor.file.readContent();
 	}
+
 	public saveCode = (editor: EditCode, code: string): boolean => {
 		if (editor.file.path == null) return false;
 		return editor.file.writeContent(code);
@@ -704,14 +706,25 @@ class EditCode extends Editor {
 	}
 }
 
+declare interface Ace {
+    
+    define: (
+        module: string,
+        deps: string[],
+        payload: (require: (string) => any, exports: any, module: void) => void
+    ) => void
+}
+
 declare type $GMEdit = {
     'ui.Preferences': GMEditUIPreferences;
     'ui.MainMenu': GMEditUIMainMenu;
     'gml.Project': GMEditGMLProject;
     'editors.Editor': typeof Editor;
     'file.FileKind': typeof FileKind;
+    'file.kind.KCode': typeof KCode;
     'gml.file.GmlFile': typeof GmlFile;
     'editors.EditCode': typeof EditCode;
 };
 
 declare const $gmedit: $GMEdit;
+declare const ace: Ace;
