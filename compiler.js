@@ -19,6 +19,8 @@ export function getDefaultRuntimesPath() {
 }
 
 /**
+ * Get the list of runtimes found in a path.
+ *
  * @param {string} [path]
  */
 export function getAllRuntimes(path) {
@@ -35,6 +37,10 @@ export function getAllRuntimes(path) {
     return Electron_FS.readdirSync(runtimes_path);
 }
 
+/**
+ * Container for controlling the list of compile jobs,
+ * and starting new ones on projects.
+ */
 export class Compiler {
 
     #process;
@@ -161,9 +167,11 @@ export class Compiler {
     }
 
     /**
+     *
      * @param {CompilerJob} job
      */
     #removeJob = (job) => {
+        
         this.#jobs.splice(this.#jobs.indexOf(job), 1);
     }
 
@@ -176,21 +184,22 @@ export class Compiler {
     }
 }
 
+/**
+ * Wrapper for an Igor compile job.
+ */
 export class CompilerJob {
 
     /** @type {CompilerCommand} */
-    command;
+    #command;
     /** @type {import('node:child_process').ChildProcess} */
-    process;
+    #process;
     /** @type {GMLProject} */
-    project;
+    #project;
 
-    stdout = '';
-    stderr = '';
+    #stdout = '';
+    #stderr = '';
 
-    log = '';
-    /** @type {string?} */
-    error = null;
+    #stopped = false;
 
     /** @type {{[key in CompilerJobEvent]: Set<(data: any?) => void>}} */
     #listeners = {
@@ -207,22 +216,20 @@ export class CompilerJob {
      * @param {GMLProject} project
      */
     constructor(command, process, project) {
-        this.command = command;
-        this.process = process;
-        this.project = project;
+        this.#command = command;
+        this.#process = process;
+        this.#project = project;
 
-        this.process.once('exit', this.#onExit);
-        this.process.stdout?.on('data', this.#onStdoutData);
-        this.process.stderr?.on('data', this.#onStderrData);
-
-        this.on('stdout', this.#notifyParsedOutput);
+        this.#process.once('exit', this.#onExit);
+        this.#process.stdout?.on('data', this.#onStdoutData);
+        this.#process.stderr?.on('data', this.#onStderrData);
     }
 
     /**
      * @param {any?} chunk
      */
     #onStdoutData = (chunk) => {
-        this.stdout += chunk.toString();
+        this.#stdout += chunk.toString();
         CompilerJob.#notify(this.#listeners.stdout, this.stdout);
     }
 
@@ -230,24 +237,13 @@ export class CompilerJob {
      * @param {any?} chunk
      */
     #onStderrData = (chunk) => {
-        this.stderr += chunk.toString();
+        this.#stderr += chunk.toString();
         CompilerJob.#notify(this.#listeners.stderr, this.stderr);
     }
 
     #onExit = () => {
         CompilerJob.#notify(this.#listeners.stop);
-        this.process.removeAllListeners();
-    }
-    
-    /**
-     * Parse the stdout of the compiler to find errors so we can display them nicely!
-     */
-    #parseOutput = () => {
-        
-    }
-
-    #notifyParsedOutput = () => {
-        
+        this.#process.removeAllListeners();
     }
 
     /**
@@ -261,6 +257,7 @@ export class CompilerJob {
     }
 
     /**
+     * Add an event listener for the given event.
      * @param {CompilerJobEvent} event
      * @param {(data?: any) => void} callback
      */
@@ -268,7 +265,31 @@ export class CompilerJob {
         this.#listeners[event].add(callback);
     }
 
+    /**
+     * Stop the job.
+     */
     stop = () => {
-        this.process.kill();
+        this.#process.kill();
+    }
+
+    /**
+     * The `stdout` output of the job's process.
+     */
+    get stdout() {
+        return this.#stdout;
+    }
+
+    /**
+     * The `stderr` output of the job's process.
+     */
+    get stderr() {
+        return this.#stderr;
+    }
+
+    /**
+     * Whether this job has stopped yet.
+     */
+    get stopped() {
+        return this.#stopped;
     }
 }
