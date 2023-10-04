@@ -87,60 +87,28 @@ export class Job {
         this.#process.kill();
     }
 
-    /**
-     * The `stdout` output of the job's process.
-     */
-    get stdout() {
-        return this.#stdout;
-    }
+    /** The `stdout` output of the job's process. */
+	get stdout() { return this.#stdout; }
 
-    /**
-     * The `stderr` output of the job's process.
-     */
-    get stderr() {
-        return this.#stderr;
-    }
+    /** The `stderr` output of the job's process. */
+	get stderr() { return this.#stderr; }
 
-    /**
-     * Whether this job has stopped yet.
-     */
-    get stopped() {
-        return this.#stopped;
-    }
+    /** Whether this job has stopped yet. */
+	get stopped() { return this.#stopped; }
 
-    /**
-     * The command this job is running.
-     */
-    get command() {
-        return this.#command;
-    }
+    /** The command this job is running. */
+	get command() { return this.#command; }
 
-    /**
-     * The name of the project this job is running for.
-     */
-    get projectName() {
-        return this.#project.name;
-    }
+    /** The name of the project this job is running for. */
+	get projectName() { return this.#project.name; }
 
-    /**
-     * The display name of the project this job is running for.
-     */
-    get projectDisplayName() {
-        return this.#project.displayName;
-    }
+    /** The display name of the project this job is running for. */
+	get projectDisplayName() { return this.#project.displayName; }
 
-    /**
-     * The directory of the project this job is running for.
-     */
-    get projectDir() {
-        return this.#project.dir;
-    }
+    /** The directory of the project this job is running for. */
+	get projectDir() { return this.#project.dir; }
 
-    /**
-     * The path to the `yyz` for the project this job is running for.
-     */
-    get projectPath() {
-        return this.#project.path;
-    }
+    /** The path to the `yyz` for the project this job is running for. */
+	get projectPath() { return this.#project.path; }
 
 }
