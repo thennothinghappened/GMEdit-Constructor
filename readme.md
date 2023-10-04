@@ -18,8 +18,9 @@ There isn't really much here, since this plugin doesn't do a whole lot, but rega
 
 ## Shortcuts
 
-| Compile | <kbd>Ctrl+F5</kbd> |
-|  Clean  | <kbd>Ctrl+F7</kbd> |
-|   Run   |      <kbd>F5</kbd> |
+| Shortcut |        Key         |
+| Compile  | <kbd>Ctrl+F5</kbd> |
+|  Clean   | <kbd>Ctrl+F7</kbd> |
+|   Run    |      <kbd>F5</kbd> |
 
 Maybe later these can be customisable :)
