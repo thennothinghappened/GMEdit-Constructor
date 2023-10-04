@@ -167,11 +167,10 @@ export class Compiler {
     }
 
     /**
-     *
+     * Remove a job from our tracked list.
      * @param {CompilerJob} job
      */
     #removeJob = (job) => {
-        
         this.#jobs.splice(this.#jobs.indexOf(job), 1);
     }
 
@@ -292,4 +291,40 @@ export class CompilerJob {
     get stopped() {
         return this.#stopped;
     }
+
+    /**
+     * The command this job is running.
+     */
+    get command() {
+        return this.#command;
+    }
+
+    /**
+     * The name of the project this job is running for.
+     */
+    get projectName() {
+        return this.#project.name;
+    }
+
+    /**
+     * The display name of the project this job is running for.
+     */
+    get projectDisplayName() {
+        return this.#project.displayName;
+    }
+
+    /**
+     * The directory of the project this job is running for.
+     */
+    get projectDir() {
+        return this.#project.dir;
+    }
+
+    /**
+     * The path to the `yyz` for the project this job is running for.
+     */
+    get projectPath() {
+        return this.#project.path;
+    }
+
 }
