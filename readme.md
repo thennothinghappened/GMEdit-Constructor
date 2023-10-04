@@ -16,3 +16,10 @@ There isn't really much here, since this plugin doesn't do a whole lot, but rega
  - [x] Basic viewing of compile log output
  - [ ] Error highlighting (using Ace)
 
+## Shortcuts
+
+| Compile | <kbd>Ctrl+F5</kbd> |
+|  Clean  | <kbd>Ctrl+F7</kbd> |
+|   Run   |      <kbd>F5</kbd> |
+
+Maybe later these can be customisable :)
