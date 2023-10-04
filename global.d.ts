@@ -7,12 +7,12 @@ declare type PreferencesData = {
 declare type CompileSettings = {
 }
 
-declare type CompilerCommand = 
+declare type JobCommand = 
     'Run'       |
     'Package'   |
     'Clean'     ;
 
-declare type CompilerJobEvent =
+declare type JobEvent =
     'stdout'    |
     'stderr'    |
     'output'    |

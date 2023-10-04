@@ -1,5 +1,6 @@
 import { getCurrentProject } from './utils.js';
 import { CompileLogViewer } from './viewer.js';
+import { Job } from './job.js';
 
 /** @type {{[key in NodeJS.Platform]: string}} */
 const defaultRuntimePaths = {
@@ -47,7 +48,7 @@ export class Compiler {
     #child_process;
     #path;
 
-    /** @type {CompilerJob[]} */
+    /** @type {Job[]} */
     #jobs = [];
 
     /**
@@ -68,7 +69,7 @@ export class Compiler {
      * Run a job on the currently open project.
      * @param {string} runtime_path
      * @param {CompileSettings} settings
-     * @param {CompilerCommand} cmd
+     * @param {JobCommand} cmd
      */
     runJobOnCurrentProject = (runtime_path, settings, cmd) => {
         const proj = getCurrentProject();
@@ -102,7 +103,7 @@ export class Compiler {
      * Select the flags for Igor to run the job.
      * @param {GMLProject} project
      * @param {string} runtime_path
-     * @param {CompilerCommand} cmd
+     * @param {JobCommand} cmd
      * @returns {string[]}
      */
     #getFlagsForJob = (project, runtime_path, cmd) => {
@@ -139,8 +140,8 @@ export class Compiler {
      * @param {GMLProject} project
      * @param {string} runtime_path
      * @param {CompileSettings} settings
-     * @param {CompilerCommand} cmd
-     * @returns {CompilerJob}
+     * @param {JobCommand} cmd
+     * @returns {Job}
      */
     #runJob = (project, runtime_path, settings, cmd) => {
         const igor_path = this.#getIgorPath(runtime_path);
@@ -155,7 +156,7 @@ export class Compiler {
             { cwd: project.dir }
         );
 
-        const job = new CompilerJob(cmd, proc, project);
+        const job = new Job(cmd, proc, project);
         this.#jobs.push(job);
 
         job.on('stop', () => {
@@ -168,7 +169,7 @@ export class Compiler {
 
     /**
      * Remove a job from our tracked list.
-     * @param {CompilerJob} job
+     * @param {Job} job
      */
     #removeJob = (job) => {
         this.#jobs.splice(this.#jobs.indexOf(job), 1);
@@ -176,155 +177,9 @@ export class Compiler {
 
     /**
      * Create a new editor instance for a given job.
-     * @param {CompilerJob} job
+     * @param {Job} job
      */
     openEditorForJob = (job) => {
         CompileLogViewer.view(job);
     }
-}
-
-/**
- * Wrapper for an Igor compile job.
- */
-export class CompilerJob {
-
-    /** @type {CompilerCommand} */
-    #command;
-    /** @type {import('node:child_process').ChildProcess} */
-    #process;
-    /** @type {GMLProject} */
-    #project;
-
-    #stdout = '';
-    #stderr = '';
-
-    #stopped = false;
-
-    /** @type {{[key in CompilerJobEvent]: Set<(data: any?) => void>}} */
-    #listeners = {
-        stdout: new Set(),
-        stderr: new Set(),
-        output: new Set(),
-        error: new Set(),
-        stop: new Set()
-    };
-    
-    /**
-     * @param {CompilerCommand} command
-     * @param {import('node:child_process').ChildProcess} process
-     * @param {GMLProject} project
-     */
-    constructor(command, process, project) {
-        this.#command = command;
-        this.#process = process;
-        this.#project = project;
-
-        this.#process.once('exit', this.#onExit);
-        this.#process.stdout?.on('data', this.#onStdoutData);
-        this.#process.stderr?.on('data', this.#onStderrData);
-    }
-
-    /**
-     * @param {any?} chunk
-     */
-    #onStdoutData = (chunk) => {
-        this.#stdout += chunk.toString();
-        CompilerJob.#notify(this.#listeners.stdout, this.stdout);
-    }
-
-    /**
-     * @param {any?} chunk
-     */
-    #onStderrData = (chunk) => {
-        this.#stderr += chunk.toString();
-        CompilerJob.#notify(this.#listeners.stderr, this.stderr);
-    }
-
-    #onExit = () => {
-        CompilerJob.#notify(this.#listeners.stop);
-        this.#process.removeAllListeners();
-    }
-
-    /**
-     * @param {Set<(data?: any) => void>} listeners
-     * @param {any} [data]
-     */
-    static #notify = (listeners, data) => {
-        for (const cb of listeners) {
-            cb(data);
-        }
-    }
-
-    /**
-     * Add an event listener for the given event.
-     * @param {CompilerJobEvent} event
-     * @param {(data?: any) => void} callback
-     */
-    on = (event, callback) => {
-        this.#listeners[event].add(callback);
-    }
-
-    /**
-     * Stop the job.
-     */
-    stop = () => {
-        this.#process.kill();
-    }
-
-    /**
-     * The `stdout` output of the job's process.
-     */
-    get stdout() {
-        return this.#stdout;
-    }
-
-    /**
-     * The `stderr` output of the job's process.
-     */
-    get stderr() {
-        return this.#stderr;
-    }
-
-    /**
-     * Whether this job has stopped yet.
-     */
-    get stopped() {
-        return this.#stopped;
-    }
-
-    /**
-     * The command this job is running.
-     */
-    get command() {
-        return this.#command;
-    }
-
-    /**
-     * The name of the project this job is running for.
-     */
-    get projectName() {
-        return this.#project.name;
-    }
-
-    /**
-     * The display name of the project this job is running for.
-     */
-    get projectDisplayName() {
-        return this.#project.displayName;
-    }
-
-    /**
-     * The directory of the project this job is running for.
-     */
-    get projectDir() {
-        return this.#project.dir;
-    }
-
-    /**
-     * The path to the `yyz` for the project this job is running for.
-     */
-    get projectPath() {
-        return this.#project.path;
-    }
-
 }

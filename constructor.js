@@ -38,7 +38,7 @@ export class GMConstructor {
     }
 
     /**
-    * @param {CompilerCommand} cmd
+    * @param {JobCommand} cmd
     */
     #runTaskOnCurrentProject = (cmd) => {
         const job = this.#compiler.runJobOnCurrentProject(this.#preferences.getRuntimePath(), {}, cmd);
