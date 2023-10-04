@@ -25,3 +25,9 @@ There isn't really much here, since this plugin doesn't do a whole lot, but rega
 |   Run    |      <kbd>F5</kbd> |
 
 Maybe later these can be customisable :)
+
+## Installation
+Installation is the same here as any other GMEdit plugin - clone it into your `plugins` folder.
+
+See [GMEdit#Installing plugins](https://github.com/YellowAfterlife/GMEdit/wiki/Using-plugins#installing-plugins)
+for more details!
