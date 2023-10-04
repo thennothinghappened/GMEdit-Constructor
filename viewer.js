@@ -1,4 +1,4 @@
-import { CompilerJob } from './compiler.js';
+import { Job } from './job.js';
 
 const editor = $gmedit['editors.Editor'];
 const fileKind = $gmedit['file.FileKind'];
@@ -16,17 +16,17 @@ class KConstructorOutput extends fileKind {
 
     /**
      * @param {GmlFile} file
-     * @param {CompilerJob} job
+     * @param {Job} job
      */
     init = (file, job) => {
         file.editor = new CompileLogViewer(file, job);
     }
 
     /**
-     * @param {CompilerJob} job
+     * @param {Job} job
      */
     static getJobName = (job) => {
-        return `${job.project.name} - ${job.command}`;
+        return `${job.projectDisplayName} - ${job.command}`;
     }
 
 }
@@ -38,7 +38,7 @@ export class CompileLogViewer extends editor {
 
     static #fileKind = new KConstructorOutput();
 
-    /** @type {CompilerJob} */
+    /** @type {Job} */
     job;
 
     #stop_btn;
@@ -46,7 +46,7 @@ export class CompileLogViewer extends editor {
 
     /**
      * @param {GmlFile} file
-     * @param {CompilerJob} job
+     * @param {Job} job
      */
     constructor(file, job) {
         super(file);
@@ -83,7 +83,7 @@ export class CompileLogViewer extends editor {
 
     /**
      * Set up an editor tab for a Job, and view it.
-     * @param {CompilerJob} job
+     * @param {Job} job
      */
     static view = (job) => {
         const file = new gmlFile(
