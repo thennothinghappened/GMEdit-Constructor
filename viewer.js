@@ -37,6 +37,7 @@ class KConstructorOutput extends fileKind {
 export class CompileLogViewer extends editor {
 
     static #fileKind = new KConstructorOutput();
+    static #scrollGrabMargin = 32;
 
     /** @type {Job} */
     job;
@@ -73,7 +74,14 @@ export class CompileLogViewer extends editor {
         this.element.appendChild(this.#log);
 
         this.job.on('stdout', (content) => {
+            const should_scroll =
+                (this.#log.scrollTop + this.#log.clientHeight) >= (this.#log.scrollHeight - CompileLogViewer.#scrollGrabMargin);
+
             this.#log.textContent = content;
+
+            if (should_scroll) {
+                this.#log.scrollTop = this.#log.scrollHeight;
+            }
         });
 
         this.job.on('stop', () => {
