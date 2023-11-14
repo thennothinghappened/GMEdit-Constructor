@@ -156,12 +156,7 @@ export class CompileController {
         switch (cmd) {
             case 'Run':
             case 'Package':
-                break;
-
             case 'Clean':
-                // TODO: get a proper place for this!
-                // flags.push(`/of=${this.#joinNormPath(project.dir, '..', 'output', project.name)}`);
-                // flags.push(`/cache=${this.#joinNormPath(project.dir, '..', 'cache', project.name)}`);
                 break;
 
             default:
