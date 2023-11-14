@@ -3,7 +3,7 @@
 (() => {
 
     const plugin_name = 'GMEdit-Constructor';
-    const version = '0.3.0';
+    const version = '0.4.0';
 
     const child_process = require('node:child_process');
     const path = require('node:path');

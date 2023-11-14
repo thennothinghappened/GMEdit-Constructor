@@ -2,47 +2,30 @@ import { getCurrentProject } from './utils.js';
 import { CompileLogViewer } from './viewer.js';
 import { Job } from './job.js';
 
-/** @type {{[key in NodeJS.Platform]: string}} */
-const defaultRuntimePaths = {
-    'win32': 'C:\\ProgramData\\GameMakerStudio2\\Cache\\runtimes',
-    'darwin': '/Users/Shared/GameMakerStudio2/Cache/runtimes'
-};
-
-/** @type {{[key in NodeJS.Platform]: string}} */
-const platformMappings = {
-    'win32': 'Windows',
-    'darwin': 'Mac',
-    'linux': 'Linux'
-};
-
-export function getDefaultRuntimesPath() { 
-    return defaultRuntimePaths[process.platform];
-}
-
-/**
- * Get the list of runtimes found in a path.
- *
- * @param {string} [path]
- */
-export function getAllRuntimes(path) {
-    const runtimes_path = path ?? getDefaultRuntimesPath();
-
-    if (runtimes_path === undefined) {
-        throw 'Platform unsupported! Please provide the runtimes path manually';
+/** @type {{[key in NodeJS.Platform]: {ext: string, path_name: string, cmd: string}}} */
+const igorPlatformMappings = {
+    'win32': {
+        ext: '.exe',
+        path_name: 'windows',
+        cmd: 'Windows'
+    },
+    'darwin': {
+        ext: '',
+        path_name: 'osx',
+        cmd: 'Mac'
+    },
+    'linux': {
+        ext: '',
+        path_name: 'ubuntu', // TODO: can't check this right now
+        cmd: 'Linux'
     }
-    
-    if (!Electron_FS.existsSync(runtimes_path)) {
-        throw `Runtimes path ${runtimes_path} doesn't exist`;
-    }
-
-    return Electron_FS.readdirSync(runtimes_path);
-}
+};
 
 /**
  * Container for controlling the list of compile jobs,
  * and starting new ones on projects.
  */
-export class Compiler {
+export class CompileController {
 
     #process;
     #child_process;
@@ -66,22 +49,6 @@ export class Compiler {
     }
 
     /**
-     * Run a job on the currently open project.
-     * @param {string} runtime_path
-     * @param {CompileSettings} settings
-     * @param {JobCommand} cmd
-     */
-    runJobOnCurrentProject = (runtime_path, settings, cmd) => {
-        const proj = getCurrentProject();
-
-        if (proj === undefined) {
-            throw 'Tried to run tasks on non-existent project!';
-        }
-
-        return this.#runJob(proj, runtime_path, settings, cmd);
-    }
-
-    /**
      * @param {...string} path
      */
     #joinNormPath = (...path) =>
@@ -90,12 +57,85 @@ export class Compiler {
     /**
      * Get the path to Igor's executable for the running platform, in the provided runtime's path.
      * @param {string} runtime_path
+     * @returns {Result<string, 'unsupported'>}
      */
     #getIgorPath = (runtime_path) => {
-        switch (process.platform) {
-            case 'win32': return this.#path.join(runtime_path, 'bin', 'igor', 'windows', process.arch, 'Igor.exe');
-            case 'darwin': return this.#path.join(runtime_path, 'bin', 'igor', 'osx', process.arch, 'Igor');
-            default: throw 'Platform unsupported, sorry!'; // TODO: allow user to specify totally custom location.
+        const platform = igorPlatformMappings[process.platform];
+
+        if (platform === undefined) {
+            return {
+                err: 'unsupported',
+                msg: `Platform ${process.platform} not in known Igor platforms:\n${Object.keys(igorPlatformMappings)}`
+            }
+        }
+
+        return {
+            data: this.#path.join(runtime_path, 'bin', 'igor', platform.path_name, process.arch, `Igor${platform.ext}`)
+        };
+    }
+
+    /**
+     * Get the list of runtimes in a given path.
+     * @param {string} path 
+     * @returns {Promise<Result<{ [key: string]: RuntimeInfo }, 'directory not found'|'directory read failed'>>}
+     */
+    getRuntimesInDir = async (path) => {
+        if (!Electron_FS.existsSync(path)) {
+            return {
+                err: 'directory not found',
+                msg: `Runtimes directory "${path}" not found!`
+            };
+        }
+
+        try {
+            /** @type {string[]} */
+            const list = await new Promise(
+                (res, rej) => Electron_FS.readdir(path, (err, data) => {
+                    if (err !== null) {
+                        rej(err);
+                    }
+
+                    // @ts-ignore
+                    res(data);
+                })
+            );
+
+            /** @type { { [key: string]: RuntimeInfo } } */
+            const runtimes = {};
+
+            for (const item of list) {
+                const igor_res = this.#getIgorPath(item);
+
+                if ('err' in igor_res) {
+                    continue;
+                }
+
+                const igor_path = this.#path.join(path, igor_res.data);
+
+                /** @type {boolean} */
+                const exists = await new Promise((res) =>
+                    Electron_FS.exists(igor_path, (exists) => res(exists))
+                );
+
+                if (!exists) {
+                    continue;
+                }
+
+                runtimes[item] = {
+                    path: this.#path.join(path, item),
+                    igor_path: igor_path
+                };
+            }
+
+            return {
+                data: runtimes
+            };
+
+        } catch (err) {
+            return {
+                err: 'directory read failed',
+                msg: err
+            };
         }
     }
 
@@ -116,21 +156,19 @@ export class Compiler {
         switch (cmd) {
             case 'Run':
             case 'Package':
-                flags.push(`/of=${ this.#joinNormPath(project.dir, 'output') }`);
-                flags.push(`/cache=${ this.#joinNormPath(project.dir, 'cache') }`);
                 break;
 
             case 'Clean':
                 // TODO: get a proper place for this!
-                flags.push(`/of=${this.#joinNormPath(project.dir, '..', 'output', project.name)}`);
-                flags.push(`/cache=${this.#joinNormPath(project.dir, '..', 'cache', project.name)}`);
+                // flags.push(`/of=${this.#joinNormPath(project.dir, '..', 'output', project.name)}`);
+                // flags.push(`/cache=${this.#joinNormPath(project.dir, '..', 'cache', project.name)}`);
                 break;
 
             default:
                 throw `Unhandled command case for flags: ${cmd}`;
         }
 
-        flags.push(platformMappings[process.platform], cmd);
+        flags.push(igorPlatformMappings[process.platform].cmd, cmd);
 
         return flags;
     }
@@ -138,21 +176,16 @@ export class Compiler {
     /**
      * Run a new job on a given project.
      * @param {GMLProject} project
-     * @param {string} runtime_path
+     * @param {RuntimeInfo} runtime
      * @param {CompileSettings} settings
      * @param {JobCommand} cmd
-     * @returns {Job}
+     * @returns {Result<Job, 'igor missing'>}
      */
-    #runJob = (project, runtime_path, settings, cmd) => {
-        const igor_path = this.#getIgorPath(runtime_path);
-
-        if (!Electron_FS.existsSync(igor_path)) {
-            throw `Failed to find Igor at ${igor_path}`;
-        }
+    runJob = (project, runtime, settings, cmd) => {
 
         const proc = this.#child_process.spawn(
-            igor_path,
-            this.#getFlagsForJob(project, runtime_path, cmd),
+            runtime.igor_path,
+            this.#getFlagsForJob(project, runtime.path, cmd),
             { cwd: project.dir }
         );
 
@@ -163,7 +196,9 @@ export class Compiler {
             this.#removeJob(job);
         });
 
-        return job;
+        return {
+            data: job
+        };
 
     }
 

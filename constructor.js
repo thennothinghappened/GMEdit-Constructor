@@ -1,6 +1,7 @@
-import { Compiler } from './compiler.js';
+import { CompileController } from './compiler.js';
 import { Preferences } from './preferences.js';
 import { Menu } from './menu.js';
+import { getCurrentProject } from './utils.js';
 
 export class GMConstructor {
 
@@ -9,7 +10,7 @@ export class GMConstructor {
 
     /** @type {Preferences} */
     #preferences;
-    /** @type {Compiler} */
+    /** @type {CompileController} */
     #compiler;
     /** @type {Menu} */
     #menu;
@@ -25,8 +26,8 @@ export class GMConstructor {
         this.plugin_name = plugin_name;
         this.version = version;
 
-        this.#preferences = new Preferences(this.plugin_name, this.version, this.#showError);
-        this.#compiler = new Compiler(this.#showError, process, child_process, path);
+        this.#compiler = new CompileController(this.#showError, process, child_process, path);
+        this.#preferences = new Preferences(this.plugin_name, this.version, this.#compiler.getRuntimesInDir, this.#showError);
         this.#menu = new Menu(this.#showError, this.#onCompile, this.#onClean, this.#onRun);
     }
 
@@ -34,15 +35,34 @@ export class GMConstructor {
      * @param {string|Error} error
      */
     #showError = (error) => {
-        console.log(`${this.plugin_name}: ${error}`);
+        console.error(`${this.plugin_name}: ${error}`);
     }
 
     /**
     * @param {JobCommand} cmd
     */
     #runTaskOnCurrentProject = (cmd) => {
-        const job = this.#compiler.runJobOnCurrentProject(this.#preferences.getRuntimePath(), {}, cmd);
-        this.#compiler.openEditorForJob(job);
+        const proj = getCurrentProject();
+
+        if (proj === undefined) {
+            return;
+        }
+
+        const runtime = this.#preferences.getProjectRuntime(proj);
+
+        if (runtime === undefined) {
+            this.#showError('Failed to find runtime for project!');
+            return;
+        }
+
+        const res = this.#compiler.runJob(proj, runtime, {}, cmd);
+
+        if ('err' in res) {
+            this.#showError(res.msg);
+            return;
+        }
+
+        this.#compiler.openEditorForJob(res.data);
     }
 
     #onCompile = () => {

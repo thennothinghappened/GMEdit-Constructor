@@ -1,8 +1,24 @@
 declare type PreferencesData = {
-    defaultRuntimeVersion?: string;
-    runtimesPath?: string;
-    runtimes: string[];
+	runtimeTypes: {
+		[key in RuntimeType]: RuntimePreference;
+	};
+
+	globalDefaultRuntimeType: RuntimeType;
 }
+
+declare type RuntimeType = 'stable'|'beta';
+
+declare type RuntimePreference = {
+	searchPath: string;
+	globalDefault?: string;
+};
+
+declare type RuntimeInfo = {
+	path: string;
+	igor_path: string;
+};
+
+declare type Result<T, E> = { data: T } | { err: E, msg: any };
 
 declare type CompileSettings = {
 }
@@ -45,8 +61,10 @@ declare class Electron_App {
 declare class Electron_FS {
     static readFileSync = function(path: string): string {}
     static readdirSync = function(path: string): string[] {}
+	static readdir = function(path: string, cb: (err?: Error, files?: string[]) => void) {}
     static writeFileSync = function(path: string, content: string) {}
     static existsSync = function(path: string): boolean {}
+	static exists = function(path: string, cb: (exists: boolean) => void) {}
 }
 
 declare type Electron_MenuItemProps = {
