@@ -93,8 +93,8 @@ export class Compiler {
      */
     #getIgorPath = (runtime_path) => {
         switch (process.platform) {
-            case 'win32': return this.#path.join(runtime_path, 'bin', 'igor', 'windows', 'x86', 'Igor.exe');
-            case 'darwin': return this.#path.join(runtime_path, 'bin', 'igor', 'osx', process.arch === 'x64' ? 'x86' : 'arm64', 'Igor');
+            case 'win32': return this.#path.join(runtime_path, 'bin', 'igor', 'windows', process.arch, 'Igor.exe');
+            case 'darwin': return this.#path.join(runtime_path, 'bin', 'igor', 'osx', process.arch, 'Igor');
             default: throw 'Platform unsupported, sorry!'; // TODO: allow user to specify totally custom location.
         }
     }
