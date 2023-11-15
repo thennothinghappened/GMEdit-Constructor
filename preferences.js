@@ -40,21 +40,18 @@ export class Preferences {
         beta: {}
     };
 
-    #showError;
-    #version;
+    #plugin_version;
 
     #getRuntimesInDir;
 
     /**
      * @param {string} plugin_name 
-     * @param {string} version 
-     * @param {(path: string) => Promise<Result<{ [key: string]: RuntimeInfo }, 'directory not found'|'directory read failed'>>} getRuntimesInDir 
-     * @param {(error: string) => void} showError
+     * @param {string} plugin_version 
+     * @param {(path: string) => Promise<Result<{ [key: string]: RuntimeInfo }, 'directory not found'|'directory read failed'>>} getRuntimesInDir
      */
-    constructor(plugin_name, version, getRuntimesInDir, showError) {
+    constructor(plugin_name, plugin_version, getRuntimesInDir) {
 
-        this.#showError = showError;
-        this.#version = version;
+        this.#plugin_version = plugin_version;
 
         this.#getRuntimesInDir = getRuntimesInDir;
 
@@ -82,7 +79,7 @@ export class Preferences {
             const prefs_str = Electron_FS.readFileSync(this.#preferences_path);
             Object.assign(this.#preferences, JSON.parse(prefs_str));
         } catch (err) {
-            this.#showError(`Failed to load preferences:\n${err}\n\nUsing defaults.`);
+            console.error(`Failed to load preferences:\n${err}\n\nUsing defaults.`);
         }
     }
 
@@ -90,7 +87,7 @@ export class Preferences {
         try {
             Electron_FS.writeFileSync(this.#preferences_path, JSON.stringify(this.#preferences));
         } catch (err) {
-            this.#showError(`Failed to write preferences:\n${err}`);
+            console.error(`Failed to write preferences:\n${err}`);
         }
     }
 
@@ -125,7 +122,7 @@ export class Preferences {
 
         if ('err' in res) {
             this.#runtimes[type] = {};
-            this.#showError(res.msg);
+            console.error(res.msg);
             return;
         }
 
@@ -217,7 +214,7 @@ export class Preferences {
 
         }
 
-        uiPreferences.addText(our_prefs_el, `Version: ${this.#version}`);
+        uiPreferences.addText(our_prefs_el, `Version: ${this.#plugin_version}`);
 
         return true;
     }

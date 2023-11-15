@@ -2,20 +2,16 @@ import { isProjectOpen } from './utils.js';
 
 export class Menu {
 
-    #showError;
-
     #menu_items;
 
     #menu_items_container;
 
     /**
-     * @param {(error: string) => void} showError
      * @param {() => void} onClickCompile 
      * @param {() => void} onClickClean 
      * @param {() => void} onClickRun 
      */
-    constructor(showError, onClickCompile, onClickClean, onClickRun) {
-        this.#showError = showError;
+    constructor(onClickCompile, onClickClean, onClickRun) {
 
         this.#menu_items = {
             compile: new Electron_MenuItem({
@@ -84,7 +80,7 @@ export class Menu {
         // for https://github.com/electron/electron/issues/527
 
         if (this.#menu_items_container.submenu === undefined || existing.submenu === undefined) {
-            return this.#showError('Menu items submenu missing!');
+            return console.error('Menu items submenu missing!');
         }
 
         for (const item of this.#menu_items_container.submenu.items) {
@@ -99,12 +95,12 @@ export class Menu {
         const existing = this.#findExistingMenu();
 
         if (existing === undefined) {
-            this.#showError('Failed to deinitialize popup menu, can\'t find existing instance');
+            console.error('Failed to deinitialize popup menu, can\'t find existing instance');
             return;
         }
 
         if (existing.submenu === undefined) {
-            return this.#showError('Menu items submenu missing!');
+            return console.error('Menu items submenu missing!');
         }
 
         existing.visible = false;

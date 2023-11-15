@@ -27,7 +27,6 @@ const igorPlatformMappings = {
  */
 export class CompileController {
 
-    #process;
     #child_process;
     #path;
 
@@ -35,14 +34,11 @@ export class CompileController {
     #jobs = [];
 
     /**
-     * @param {(error: string) => void} showError
-     * @param {import('node:process')} process 
      * @param {import('node:child_process')} child_process
      * @param {import('node:path')} path
      */
-    constructor(showError, process, child_process, path) {
+    constructor(child_process, path) {
 
-        this.#process = process;
         this.#child_process = child_process;
         this.#path = path;
 

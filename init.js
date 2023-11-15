@@ -13,7 +13,7 @@
 
     const load = (async () => {
         const { GMConstructor } = await import('./constructor.js');
-        gmConstructor = new GMConstructor(plugin_name, version, process, child_process, path);
+        gmConstructor = new GMConstructor(plugin_name, version, child_process, path);
     })();
 
     GMEdit.register(plugin_name, {
