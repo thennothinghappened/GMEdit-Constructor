@@ -55,18 +55,20 @@ export class Menu {
         GMEdit.on('projectClose', this.#onProjectClose);
     }
 
-    cleanup = () => {
-        this.#removeMenuItems();
-
-        GMEdit.off('projectOpen', this.#onProjectOpen);
-        GMEdit.off('projectClose', this.#onProjectClose);
+    /**
+     * Part of the workaround for reusing existing menu, since we can't
+     * delete its item properly.
+     */
+    #findExistingMenu() {
+        return $gmedit['ui.MainMenu'].menu.items
+            .find(item => item.id === this.#menu_items_container.id);
     }
 
-    #findExistingMenu = () =>
-        $gmedit['ui.MainMenu'].menu.items
-            .find(item => item.id === this.#menu_items_container.id);
-
-    #addMenuItems = () => {
+    /**
+     * Add our menu items to the tool list. If we already had a submenu,
+     * we reuse it due to a limitation with Electron (see below).
+     */
+    #addMenuItems() {
 
         const menu = $gmedit['ui.MainMenu'].menu;
         const existing = this.#findExistingMenu();
@@ -91,7 +93,10 @@ export class Menu {
         this.#menu_items_container.visible = true;
     }
 
-    #removeMenuItems = () => {
+    /**
+     * Remove our existing menu for cleanup.
+     */
+    #removeMenuItems() {
         const existing = this.#findExistingMenu();
 
         if (existing === undefined) {
@@ -100,7 +105,8 @@ export class Menu {
         }
 
         if (existing.submenu === undefined) {
-            return console.error('Menu items submenu missing!');
+            console.error('Menu items submenu missing!');
+            return;
         }
 
         existing.visible = false;
@@ -108,8 +114,9 @@ export class Menu {
     }
 
     /**
+     * Toggle whether menu items are enabled.
      * @param {boolean} enabled
-     **/
+     */
     #setEnableMenuItems = (enabled) => {
         this.#menu_items_container.enabled = enabled;
         // @ts-ignore
@@ -126,5 +133,20 @@ export class Menu {
         this.#setEnableMenuItems(isProjectOpen());
     }
 
+    /**
+     * Clean up our menu and remove event listeners.
+     * 
+     * Unfortunately we can't remove the top level menu,
+     * so we clear out the items and disable it. GMEdit
+     * does not provide a way (that I know of) to disable
+     * plugins, only reload them, so this is done with
+     * the intent to get it ready to re-use.
+     */
+    cleanup() {
+        this.#removeMenuItems();
+
+        GMEdit.off('projectOpen', this.#onProjectOpen);
+        GMEdit.off('projectClose', this.#onProjectClose);
+    }
 
 }

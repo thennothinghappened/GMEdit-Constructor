@@ -1,28 +1,30 @@
-// really bad workaround that should (hopefully) work to
-// allow using es modules, since they're way nicer to work with.
+/**
+ * Evil workaround to use ES modules in a project that wasn't designed
+ * for them, because I like using them too much :)
+ */
 (() => {
 
     const plugin_name = 'GMEdit-Constructor';
-    const version = '0.4.0';
+    const plugin_version = '0.5.0';
 
-    const child_process = require('node:child_process');
-    const path = require('node:path');
+    const node_child_process = require('node:child_process');
+    const node_path = require('node:path');
 
-    /** @type {import('./js/GMConstructor.js').GMConstructor} */
-    let gmConstructor;
+    /** @type {import('./js/GMConstructor.js').GMConstructor?} */
+    window.GMConstructor = null;
 
     const load = (async () => {
         const { GMConstructor } = await import('./js/GMConstructor.js');
-        gmConstructor = new GMConstructor(plugin_name, version, child_process, path);
-    })();
+        window.GMConstructor = await GMConstructor.create(plugin_name, plugin_version, node_path, node_child_process);
+    });
 
     GMEdit.register(plugin_name, {
         init: async () => {
-            await load;
+            await window.GMConstructor?.cleanup();
+            await load();
         },
         cleanup: async () => {
-            await load;
-            gmConstructor.cleanup();
+            await window.GMConstructor?.cleanup();
         }
     });
 

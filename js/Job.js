@@ -4,8 +4,8 @@
  */
 export class Job {
 
-    /** @type {JobCommand} */
-    #command;
+    /** @type {IgorSettings} */
+    #settings;
     /** @type {import('node:child_process').ChildProcess} */
     #process;
     /** @type {GMLProject} */
@@ -26,12 +26,12 @@ export class Job {
     };
     
     /**
-     * @param {JobCommand} command
+     * @param {IgorSettings} settings
      * @param {import('node:child_process').ChildProcess} process
      * @param {GMLProject} project
      */
-    constructor(command, process, project) {
-        this.#command = command;
+    constructor(settings, process, project) {
+        this.#settings = settings;
         this.#process = process;
         this.#project = project;
 
@@ -97,7 +97,7 @@ export class Job {
 	get stopped() { return this.#stopped; }
 
     /** The command this job is running. */
-	get command() { return this.#command; }
+	get command() { return this.#settings.verb; }
 
     /** The name of the project this job is running for. */
 	get projectName() { return this.#project.name; }

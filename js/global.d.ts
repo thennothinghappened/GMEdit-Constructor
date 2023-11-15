@@ -1,29 +1,42 @@
 declare type PreferencesData = {
-	runtimeTypes: {
-		[key in RuntimeType]: RuntimePreference;
-	};
 
-	globalDefaultRuntimeType: RuntimeType;
+	/** Globally selected runtime options that may be overriden by projects. */
+	runtime_opts: {
+		type: RuntimeType;
+
+		type_opts: {
+			stable: RuntimePreference;
+			beta: RuntimePreference;
+		};
+	};
 }
 
 declare type RuntimeType = 'stable'|'beta';
 
 declare type RuntimePreference = {
-	searchPath: string;
-	globalDefault?: string;
+	/** Where we should search for the list of runtimes. */
+	search_path: string;
+	/** Chosen runtime to use. */
+	choice: string?;
 };
 
+/**
+ * Information for a specific found runtime.
+ */
 declare type RuntimeInfo = {
+	version: string;
 	path: string;
 	igor_path: string;
 };
 
 declare type Result<T, E> = { data: T } | { err: E, msg: any };
 
-declare type CompileSettings = {
+declare type IgorSettings = {
+	verb: IgorVerb;
+	mode: 'VM'|'YYC';
 }
 
-declare type JobCommand = 
+declare type IgorVerb = 
     'Run'       |
     'Package'   |
     'Clean'     ;
@@ -59,10 +72,9 @@ declare class Electron_App {
 }
 
 declare class Electron_FS {
-    static readFileSync = function(path: string): string {}
-    static readdirSync = function(path: string): string[] {}
-	static readdir = function(path: string, cb: (err?: Error, files?: string[]) => void) {}
-    static writeFileSync = function(path: string, content: string) {}
+	static readFile = function(path: string, cb: (err: Error?, data: string?) => void) {}
+	static readdir = function(path: string, cb: (err: Error?, files: string[]?) => void) {}
+    static writeFile = function(path: string, content: string, cb: (err: Error?) => void) {}
     static existsSync = function(path: string): boolean {}
 	static exists = function(path: string, cb: (exists: boolean) => void) {}
 }
