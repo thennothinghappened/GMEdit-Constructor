@@ -6,7 +6,14 @@
     padding: 8px;
 }
 
+.gm-constructor-info {
+    display: flex;
+    flex-direction: row;
+    column-gap: 4px;
+}
+
 .gm-constructor-log {
     overflow: scroll;
     flex-grow: 1;
 }
+

@@ -1,13 +1,13 @@
 import { Job } from './Job.js';
 
-const editor = $gmedit['editors.Editor'];
-const fileKind = $gmedit['file.FileKind'];
-const gmlFile = $gmedit['gml.file.GmlFile'];
+const Editor = $gmedit['editors.Editor'];
+const FileKind = $gmedit['file.FileKind'];
+const GmlFile = $gmedit['gml.file.GmlFile'];
 
 /**
  * File type for a compile job.
  */
-class KConstructorOutput extends fileKind {
+class KConstructorOutput extends FileKind {
 
     constructor() {
         super();
@@ -26,7 +26,7 @@ class KConstructorOutput extends fileKind {
      * @param {Job} job
      */
     static getJobName = (job) => {
-        return `${job.projectDisplayName} - ${job.command}`;
+        return `${job.projectDisplayName} - ${job.command}${job.stopped ? ' - Finished' : ''}`;
     }
 
 }
@@ -34,7 +34,7 @@ class KConstructorOutput extends fileKind {
 /**
  * 'Editor' for viewing a compile log all fancy.
  */
-export class CompileLogViewer extends editor {
+export class CompileLogViewer extends Editor {
 
     static #fileKind = new KConstructorOutput();
     static #scrollGrabMargin = 32;
@@ -44,6 +44,7 @@ export class CompileLogViewer extends editor {
 
     #stop_btn;
     #log;
+    #cmd;
 
     /**
      * @param {GmlFile} file
@@ -59,16 +60,32 @@ export class CompileLogViewer extends editor {
         this.element.className = 'gm-constructor-viewer';
 
         const info = document.createElement('div');
+        info.className = 'gm-constructor-info';
 
-        this.#stop_btn = document.createElement('input');
-        this.#stop_btn.type = 'button';
-        this.#stop_btn.value = 'Stop';
-        this.#stop_btn.onclick = this.job.stop;
+        const stop_btn = document.createElement('input');
+        stop_btn.type = 'button';
+        stop_btn.value = 'Stop';
+        stop_btn.className = 'stop';
+        stop_btn.onclick = this.job.stop;
+
+        this.#stop_btn = stop_btn;
 
         info.appendChild(this.#stop_btn);
 
-        this.#log = document.createElement('pre');
-        this.#log.className = 'gm-constructor-log';
+        const cmd = document.createElement('input');
+        cmd.type = 'text';
+        cmd.readOnly = true;
+        cmd.style.flexGrow = '1';
+        cmd.value = job.command;
+
+        this.#cmd = cmd;
+
+        info.appendChild(cmd);
+
+        const log = document.createElement('pre');
+        log.className = 'gm-constructor-log';
+
+        this.#log = log;
 
         this.element.appendChild(info);
         this.element.appendChild(this.#log);
@@ -86,6 +103,8 @@ export class CompileLogViewer extends editor {
 
         this.job.on('stop', () => {
             this.#stop_btn.disabled = true;
+            this.#cmd.value += ' - Finished';
+            this.file.rename(KConstructorOutput.getJobName(this.job), '');
         });
     }
 
@@ -94,14 +113,14 @@ export class CompileLogViewer extends editor {
      * @param {Job} job
      */
     static view = (job) => {
-        const file = new gmlFile(
+        const file = new GmlFile(
             KConstructorOutput.getJobName(job),
             null,
             this.#fileKind,
             job
         );
         
-        gmlFile.openTab(file);
+        GmlFile.openTab(file);
     }
 
     /**

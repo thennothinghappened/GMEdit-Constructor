@@ -136,7 +136,7 @@ declare interface GMEditGMLProject {
  * ...
  * @author YellowAfterlife
  */
-private class FileKind {
+class FileKind {
 
     public checkSelfForChanges: boolean = true;
 
