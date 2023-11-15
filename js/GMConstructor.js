@@ -1,6 +1,6 @@
-import { CompileController } from './compiler.js';
-import { Preferences } from './preferences.js';
-import { Menu } from './menu.js';
+import { CompileController } from './CompileController.js';
+import { Preferences } from './Preferences.js';
+import { Menu } from './Menu.js';
 import { getCurrentProject } from './utils.js';
 
 export class GMConstructor {

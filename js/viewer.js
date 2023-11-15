@@ -1,4 +1,4 @@
-import { Job } from './job.js';
+import { Job } from './Job.js';
 
 const editor = $gmedit['editors.Editor'];
 const fileKind = $gmedit['file.FileKind'];

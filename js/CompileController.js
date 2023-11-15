@@ -1,6 +1,6 @@
 import { getCurrentProject } from './utils.js';
 import { CompileLogViewer } from './viewer.js';
-import { Job } from './job.js';
+import { Job } from './Job.js';
 
 /** @type {{[key in NodeJS.Platform]: {ext: string, path_name: string, cmd: string}}} */
 const igorPlatformMappings = {
