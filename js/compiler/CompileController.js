@@ -1,7 +1,7 @@
 import { getCurrentProject } from '../utils.js';
-import { CompileLogViewer } from '../viewer.js';
-import { Job } from '../Job.js';
-import { igor_platform_cmd_name } from '../igor.js';
+import { CompileLogViewer } from './CompileLogViewer.js';
+import { Job } from './Job.js';
+import { igor_platform_cmd_name } from './igor.js';
 
 /**
  * Container for controlling the list of compile jobs,
@@ -68,7 +68,7 @@ export class CompileController {
             { cwd: project.dir }
         );
 
-        const job = new Job(settings.verb, proc, project);
+        const job = new Job(settings, proc, project);
         this.#jobs.push(job);
 
         job.on('stop', () => {

@@ -1,4 +1,4 @@
-import { def_runtime_paths, igorPath } from '../igor.js';
+import { def_runtime_paths, igorPath } from '../compiler/igor.js';
 import { fileExists, readFile, readdir, writeFile } from '../utils.js';
 
 /**
