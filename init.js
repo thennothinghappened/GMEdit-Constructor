@@ -8,11 +8,11 @@
     const child_process = require('node:child_process');
     const path = require('node:path');
 
-    /** @type {import('./constructor.js').GMConstructor} */
+    /** @type {import('./js/constructor.js').GMConstructor} */
     let gmConstructor;
 
     const load = (async () => {
-        const { GMConstructor } = await import('./constructor.js');
+        const { GMConstructor } = await import('./js/constructor.js');
         gmConstructor = new GMConstructor(plugin_name, version, child_process, path);
     })();
 
