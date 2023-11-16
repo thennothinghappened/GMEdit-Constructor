@@ -9,6 +9,9 @@ declare type PreferencesData = {
             beta: RuntimePreference;
         };
     };
+
+    /** Whether to automatically save open files when a task runs. */
+    save_on_run_task: boolean;
 }
 
 declare type RuntimeType = 'stable'|'beta';
@@ -238,6 +241,8 @@ declare class GmlFile {
     public editor: Editor;
     /** Shortcut if this is a code editor. Otherwise null */
     public codeEditor: EditCode;
+    /** Whether the file has been modified. */
+    public __changed: boolean;
 
     public static next: GmlFile?;
 
@@ -321,6 +326,10 @@ declare class GmlFile {
         this.path = newPath;
 
         this.context = this.kind.getTabContext(this, {});
+    }
+
+    public save(): void {
+
     }
 }
 
@@ -745,15 +754,41 @@ declare interface Ace {
     ) => void
 }
 
+declare type AceCommand = {
+    name: string;
+    title?: string;
+    bindKey: { win: string, mac: string };
+    exec: () => void;
+};
+
+declare interface AceCommands {
+
+    add: (comamnd: AceCommand) => void;
+    addToPalette: (command: AceCommand) => void;
+
+    remove: (comamnd: AceCommand) => void;
+    removeFromPalette: (comamnd: AceCommand) => void;
+}
+
+declare interface ChromeTabs {
+    getTabs: () => NodeListOf<ChromeTab>;
+}
+
+declare interface ChromeTab extends HTMLDivElement {
+    gmlFile: GmlFile;
+}
+
 declare type $GMEdit = {
     'ui.Preferences': GMEditUIPreferences;
     'ui.MainMenu': GMEditUIMainMenu;
+    'ui.ChromeTabs': ChromeTabs;
     'gml.Project': GMEditGMLProject;
     'editors.Editor': typeof Editor;
     'file.FileKind': typeof FileKind;
     'file.kind.KCode': typeof KCode;
     'gml.file.GmlFile': typeof GmlFile;
     'editors.EditCode': typeof EditCode;
+    'ace.AceCommands': AceCommands;
 };
 
 declare const $gmedit: $GMEdit;

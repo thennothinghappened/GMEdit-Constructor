@@ -2,18 +2,25 @@
 .gm-constructor-viewer {
     display: flex;
     flex-direction: column;
-
-    padding: 8px;
 }
 
 .gm-constructor-info {
     display: flex;
     flex-direction: row;
     column-gap: 4px;
+
+    padding: 8px;
 }
 
 .gm-constructor-log {
     overflow: scroll;
     flex-grow: 1;
+
+    padding: 8px;
 }
 
+/** I know I shouldn't do this but it just looks nicer... */
+.plugin-settings[for='GMEdit-Constructor'] {
+    padding-top: 6px;
+    line-height: 20px;
+}

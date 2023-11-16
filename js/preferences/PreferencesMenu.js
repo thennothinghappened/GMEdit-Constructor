@@ -1,4 +1,4 @@
-import { UIDropdownMutate } from '../utils.js';
+import { UIDropdownMutate } from '../utils/ui.js';
 
 const UIPreferences = $gmedit['ui.Preferences'];
 
@@ -55,26 +55,46 @@ export class PreferencesMenu {
     #setRuntimeChoice;
 
     /**
+     * Function to get whether we should save upon running a task.
+     * @type {() => boolean}
+     */
+    #getSaveOnRunTask;
+
+    /**
+     * Function to set whether we should save upon running a task.
+     * @type {(save_on_run_task: boolean) => Promise<void>}
+     */
+    #setSaveOnRunTask;
+
+    /**
      * @param {string} plugin_name 
      * @param {string} plugin_version
-     * @param {() => string} getRuntimeType Function to get the chosen default runtime type.
-     * @param {(type: RuntimeType) => string[]} getRuntimeVersions Function to get a list of runtime version names for a given runtime type.
-     * @param {(type: RuntimeType) => string?} getRuntimeChoice Function to get the chosen runtime version for a given type.
-     * @param {(type: RuntimeType) => string} getRuntimeSearchPath Function to get the search path for a given type.
-     * @param {(type: RuntimeType, search_path: string) => Promise<void>} setRuntimeSearchPath Function to set the search path for a given runtime type.
-     * @param {(type: RuntimeType, choice: string) => Promise<void>} setRuntimeChoice Function to set the chosen runtime version for a given type.
-     * @param {(type: RuntimeType) => Promise<void>} setRuntimeType Function to set the chosen runtime type to use.
+     * 
+     * @param {() => string} getRuntimeType
+     * @param {(type: RuntimeType) => string[]} getRuntimeVersions
+     * @param {(type: RuntimeType) => string?} getRuntimeChoice
+     * @param {(type: RuntimeType) => string} getRuntimeSearchPath
+     * @param {(type: RuntimeType, search_path: string) => Promise<void>} setRuntimeSearchPath
+     * @param {(type: RuntimeType, choice: string) => Promise<void>} setRuntimeChoice
+     * @param {(type: RuntimeType) => Promise<void>} setRuntimeType
+     * 
+     * @param {() => boolean} getSaveOnRunTask 
+     * @param {(save_on_run_task: boolean) => Promise<void>} setSaveOnRunTask 
      */
     constructor(
         plugin_name,
         plugin_version,
+
         getRuntimeType,
         getRuntimeVersions,
         getRuntimeChoice,
         getRuntimeSearchPath,
         setRuntimeSearchPath,
         setRuntimeChoice,
-        setRuntimeType
+        setRuntimeType,
+
+        getSaveOnRunTask,
+        setSaveOnRunTask
     ) {
 
         this.#plugin_version = plugin_version;
@@ -87,6 +107,9 @@ export class PreferencesMenu {
         this.#setRuntimeSearchPath = setRuntimeSearchPath;
         this.#setRuntimeChoice = setRuntimeChoice;
         this.#setRuntimeType = setRuntimeType;
+
+        this.#getSaveOnRunTask = getSaveOnRunTask;
+        this.#setSaveOnRunTask = setSaveOnRunTask;
 
         if (!this.#createMenu(document.body)) {
             GMEdit.on('preferencesBuilt', this.#onPreferencesBuilt);
@@ -101,30 +124,35 @@ export class PreferencesMenu {
     #createMenu = (prefs_el) => {
         
         /** @type {HTMLElement?} */
-        const our_prefs_el = prefs_el.querySelector(this.#ele_css_query);
+        const prefs_group = prefs_el.querySelector(this.#ele_css_query);
 
-        if (our_prefs_el === null) {
+        if (prefs_group === null) {
             return false;
         }
+
+        UIPreferences.addCheckbox(
+            prefs_group,
+            'Save automatically when running a task',
+            this.#getSaveOnRunTask(),
+            this.#setSaveOnRunTask
+        );
 
         /** @type {RuntimeType[]} */
         const runtime_types = ['stable', 'beta'];
 
         /** @type {boolean} */
         UIPreferences.addDropdown(
-            our_prefs_el,
+            prefs_group,
             'Default Runtime type',
             this.#getRuntimeType(),
             runtime_types,
             // @ts-ignore
-            async (/** @type {RuntimeType} */ choice) => {
-                await this.#setRuntimeType(choice);
-            }
+           this.#setRuntimeType
         )
 
         for (const type of runtime_types) {
 
-            const group = UIPreferences.addGroup(our_prefs_el, type);
+            const group = UIPreferences.addGroup(prefs_group, type);
 
             /** @type {HTMLElement} */
             let version_dropdown;
@@ -151,7 +179,7 @@ export class PreferencesMenu {
 
         }
 
-        UIPreferences.addText(our_prefs_el, `Version: ${this.#plugin_version}`);
+        UIPreferences.addText(prefs_group, `Version: ${this.#plugin_version}`);
 
         return true;
     }

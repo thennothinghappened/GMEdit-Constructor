@@ -1,7 +1,7 @@
-import { getCurrentProject } from '../utils.js';
+import { getCurrentProject } from '../utils/editor.js';
 import { CompileLogViewer } from './CompileLogViewer.js';
 import { Job } from './Job.js';
-import { igor_platform_cmd_name } from './igor.js';
+import { igor_platform_cmd_name } from '../utils/igor.js';
 
 /**
  * Container for controlling the list of compile jobs,

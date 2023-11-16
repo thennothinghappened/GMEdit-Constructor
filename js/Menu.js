@@ -1,4 +1,6 @@
-import { isProjectOpen } from './utils.js';
+import { isProjectOpen } from './utils/editor.js';
+
+const AceCommands = $gmedit['ace.AceCommands'];
 
 export class Menu {
 
@@ -6,33 +8,39 @@ export class Menu {
 
     #menu_items_container;
 
+    /** @type {{ [key in 'compile'|'clean'|'run']: AceCommand }} */
+    #commands;
+
     /**
-     * @param {() => void} onClickCompile 
-     * @param {() => void} onClickClean 
-     * @param {() => void} onClickRun 
+     * @param {() => void} onCompile 
+     * @param {() => void} onClean 
+     * @param {() => void} onRun 
+     * @param {string} [compileKey] Shortcut to compile project
+     * @param {string} [cleanKey] Shortcut to clean project
+     * @param {string} [runKey] Shortcut to run project
      */
-    constructor(onClickCompile, onClickClean, onClickRun) {
+    constructor(onCompile, onClean, onRun, compileKey = 'Ctrl+F5', cleanKey = 'Ctrl+F7', runKey = 'F5') {
 
         this.#menu_items = {
             compile: new Electron_MenuItem({
                 id: 'constructor-compile',
                 label: 'Compile',
-                accelerator: 'Ctrl+F5', // TODO: correct keybind
-                click: () => onClickCompile(),
+                accelerator: compileKey,
+                click: onCompile,
                 enabled: false
             }),
             clean: new Electron_MenuItem({
                 id: 'constructor-clean',
                 label: 'Clean',
-                accelerator: 'Ctrl+F7',
-                click: () => onClickClean(),
+                accelerator: cleanKey,
+                click: onClean,
                 enabled: false
             }),
             run: new Electron_MenuItem({
                 id: 'constructor-run',
                 label: 'Run',
-                accelerator: 'F5',
-                click: () => onClickRun(),
+                accelerator: runKey,
+                click: onRun,
                 enabled: false
             })
         };
@@ -50,6 +58,29 @@ export class Menu {
 
         this.#addMenuItems();
         this.#setEnableMenuItems(isProjectOpen());
+
+        this.#commands = {
+            compile: {
+                name: 'compile',
+                title: 'Compile',
+                bindKey: { win: compileKey, mac: compileKey },
+                exec: onCompile
+            },
+            clean: {
+                name: 'clean',
+                title: 'Clean',
+                bindKey: { win: cleanKey, mac: cleanKey },
+                exec: onClean
+            },
+            run: {
+                name: 'run',
+                title: 'Run',
+                bindKey: { win: runKey, mac: runKey },
+                exec: onRun
+            }
+        };
+
+        this.#addCommands();
 
         GMEdit.on('projectOpen', this.#onProjectOpen);
         GMEdit.on('projectClose', this.#onProjectClose);
@@ -113,6 +144,18 @@ export class Menu {
         existing.submenu.clear();
     }
 
+    #addCommands() {
+        AceCommands.add(this.#commands.compile);
+        AceCommands.add(this.#commands.clean);
+        AceCommands.add(this.#commands.run);
+    }
+
+    #removeCommands() {
+        AceCommands.remove(this.#commands.compile);
+        AceCommands.remove(this.#commands.clean);
+        AceCommands.remove(this.#commands.run);
+    }
+
     /**
      * Toggle whether menu items are enabled.
      * @param {boolean} enabled
@@ -144,6 +187,7 @@ export class Menu {
      */
     cleanup() {
         this.#removeMenuItems();
+        this.#removeCommands();
 
         GMEdit.off('projectOpen', this.#onProjectOpen);
         GMEdit.off('projectClose', this.#onProjectClose);

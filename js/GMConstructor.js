@@ -1,7 +1,7 @@
 import { CompileController } from './compiler/CompileController.js';
 // import { PreferencesMenu } from './preferences/PreferencesMenu.js';
 import { Menu } from './Menu.js';
-import { getCurrentProject } from './utils.js';
+import { getCurrentProject, saveOpenFiles } from './utils/editor.js';
 import { Preferences } from './preferences/Preferences.js';
 import { PreferencesMenu } from './preferences/PreferencesMenu.js';
 
@@ -111,6 +111,13 @@ export class GMConstructor {
             async (type) => {
                 this.preferences.setGlobalRuntimeType(type);
                 await this.preferences.save();
+            },
+
+            () => this.preferences.saveOnRunTask,
+
+            async (save_on_run_task) => {
+                this.preferences.saveOnRunTask = save_on_run_task;
+                await this.preferences.save();
             }
         );
     }
@@ -131,6 +138,10 @@ export class GMConstructor {
         if ('err' in runtime_res) {
             console.error('Failed to find runtime for project:', runtime_res.err, runtime_res.msg);
             return;
+        }
+
+        if (this.preferences.saveOnRunTask) {
+            saveOpenFiles();
         }
 
         const res = this.compileController.runJob(project, runtime_res.data, {

@@ -1,5 +1,5 @@
-import { def_runtime_paths, igorPath } from '../compiler/igor.js';
-import { fileExists, readFile, readdir, writeFile } from '../utils.js';
+import { def_runtime_paths, igorPath } from '../utils/igor.js';
+import { fileExists, readFile, readdir, writeFile } from '../utils/file.js';
 
 /**
  * Handler for plugin preferences file, asnd
@@ -23,7 +23,9 @@ export class Preferences {
                     choice: null
                 }
             }
-        }
+        },
+
+        save_on_run_task: true
     };
 
     /**
@@ -52,6 +54,14 @@ export class Preferences {
         // We trust the user hasn't messed with the JSON file... or else!
         Object.assign(this.#prefs, loaded_prefs);
 
+    }
+
+    get saveOnRunTask() {
+        return this.#prefs.save_on_run_task;
+    }
+
+    set saveOnRunTask(save_on_run_task) {
+        this.#prefs.save_on_run_task = save_on_run_task;
     }
 
     /**
