@@ -5,22 +5,20 @@
 (() => {
 
     const plugin_name = 'GMEdit-Constructor';
-    const plugin_version = '0.6.0';
+    const plugin_version = '0.6.1';
 
     const node_child_process = require('node:child_process');
     const node_path = require('node:path');
 
-    /** @type {import('./js/GMConstructor.js').GMConstructor?} */
-    window.GMConstructor = null;
-
     const load = (async () => {
+        await window.GMConstructor?.cleanup();
+
         const { GMConstructor } = await import('./js/GMConstructor.js');
         window.GMConstructor = await GMConstructor.create(plugin_name, plugin_version, node_path, node_child_process);
     });
 
     GMEdit.register(plugin_name, {
         init: async () => {
-            await window.GMConstructor?.cleanup();
             await load();
         },
         cleanup: async () => {
