@@ -162,6 +162,11 @@ export class PreferencesMenu {
                 'Search Path',
                 this.#getRuntimeSearchPath(type),
                 async (path) => {
+                    // Workaround for being called twice for some reason?
+                    if (path === this.#getRuntimeSearchPath(type)) {
+                        return;
+                    }
+
                     await this.#setRuntimeSearchPath(type, path);
                     UIDropdownMutate(version_dropdown, this.#getRuntimeVersions(type), this.#getRuntimeChoice(type) ?? '');
                 }

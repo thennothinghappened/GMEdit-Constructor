@@ -101,6 +101,16 @@ export class GMConstructor {
                 }
 
                 this.runtimes[type] = res.data;
+
+                const choice = this.preferences.getGlobalRuntimeTypeOpts(type).choice;
+
+                if (
+                    choice !== undefined && 
+                    this.runtimes[type]?.find(runtimeInfo => runtimeInfo.version === choice) === undefined
+                ) {
+                    console.warn(`Runtime version "${choice}" not available in new search path "${search_path}".`);
+                    this.preferences.setGlobalRuntimeChoice(type, this.runtimes[type]?.at(0)?.version ?? null);
+                }
             },
 
             async (type, choice) => {
