@@ -34,14 +34,14 @@ const igor_platform_map = {
 // @ts-ignore
 const def_runtime_platform_paths = {
     'win32': {
-        stable: 'C:\\ProgramData\\GameMakerStudio2\\Cache\\runtimes',
-        beta: 'C:\\ProgramData\\GameMakerStudio2-Beta\\Cache\\runtimes',
-        lts: 'C:\\ProgramData\\GameMakerStudio2-LTS\\Cache\\runtimes'
+        Stable: 'C:\\ProgramData\\GameMakerStudio2\\Cache\\runtimes',
+        Beta: 'C:\\ProgramData\\GameMakerStudio2-Beta\\Cache\\runtimes',
+        LTS: 'C:\\ProgramData\\GameMakerStudio2-LTS\\Cache\\runtimes'
     },
     'darwin': {
-        stable: '/Users/Shared/GameMakerStudio2/Cache/runtimes',
-        beta: '/Users/Shared/GameMakerStudio2-Beta/Cache/runtimes',
-        lts: '/Users/Shared/GameMakerStudio2-LTS/Cache/runtimes'
+        Stable: '/Users/Shared/GameMakerStudio2/Cache/runtimes',
+        Beta: '/Users/Shared/GameMakerStudio2-Beta/Cache/runtimes',
+        LTS: '/Users/Shared/GameMakerStudio2-LTS/Cache/runtimes'
     }
 };
 

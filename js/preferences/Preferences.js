@@ -2,6 +2,9 @@ import { def_runtime_paths, igorPath } from '../utils/igor.js';
 import { fileExists, readFile, readdir, writeFile } from '../utils/file.js';
 import { Err } from '../utils/Err.js';
 
+/** @type {RuntimeType[]} */
+export const valid_runtime_types = ['Stable', 'Beta', 'LTS'];
+
 /**
  * Handler for plugin preferences file, asnd
  * project-specific preferences handling.
@@ -12,19 +15,19 @@ export class Preferences {
     #prefs = {
         runtime_opts: {
             // Default runtime to use is probably going to be stable.
-            type: 'stable',
+            type: 'Stable',
 
             type_opts: {
-                stable: {
-                    search_path: def_runtime_paths.stable,
+                Stable: {
+                    search_path: def_runtime_paths.Stable,
                     choice: null
                 },
-                beta: {
-                    search_path: def_runtime_paths.beta,
+                Beta: {
+                    search_path: def_runtime_paths.Beta,
                     choice: null
                 },
-                lts: {
-                    search_path: def_runtime_paths.lts,
+                LTS: {
+                    search_path: def_runtime_paths.LTS,
                     choice: null
                 }
             }
@@ -56,7 +59,30 @@ export class Preferences {
         this.#join_path = join_path;
         this.#save_path = save_path;
 
-        // We trust the user hasn't messed with the JSON file... or else!
+        if (loaded_prefs?.runtime_opts?.type !== undefined) {
+            if (!valid_runtime_types.includes(loaded_prefs.runtime_opts.type)) {
+
+                console.warn(`Found invalid preferred runtime type '${loaded_prefs.runtime_opts.type}', changed to ${this.#prefs.runtime_opts.type}`);
+                loaded_prefs.runtime_opts.type = this.#prefs.runtime_opts.type;
+
+            }
+        }
+
+        if (loaded_prefs?.runtime_opts?.type_opts !== undefined) {
+
+            const type_opts = loaded_prefs?.runtime_opts?.type_opts;
+
+            for (const type of valid_runtime_types) {
+                if (!(type in type_opts)) {
+
+                    console.warn(`Missing runtime type preference data for type '${type}', replacing with default.`);
+                    loaded_prefs.runtime_opts.type_opts[type] = this.#prefs.runtime_opts.type_opts[type];
+
+                }
+            }
+
+        }
+        
         Object.assign(this.#prefs, loaded_prefs);
 
     }
@@ -116,6 +142,7 @@ export class Preferences {
      * @returns {Promise<Result<RuntimeInfo[]>>}
      */
     async loadRuntimeList(type = this.globalRuntimeType) {
+        
         const opts = this.getGlobalRuntimeTypeOpts(type);
         const dir_res = await readdir(opts.search_path);
 
@@ -172,7 +199,7 @@ export class Preferences {
 
             const res = await readFile(save_path);
 
-            if ('data' in res) {
+            if (res.ok) {
                 try {
                     loaded_prefs = JSON.parse(res.data);
                 } catch (err) {

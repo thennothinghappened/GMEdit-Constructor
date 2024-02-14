@@ -226,9 +226,9 @@ export class GMConstructor {
         // Setting up preferences //
         const preferences = await Preferences.create(node_path.join, plugin_name);
 
-        const stable_req = preferences.loadRuntimeList('stable');
-        const beta_req = preferences.loadRuntimeList('beta');
-        const lts_req = preferences.loadRuntimeList('lts');
+        const stable_req = preferences.loadRuntimeList('Stable');
+        const beta_req = preferences.loadRuntimeList('Beta');
+        const lts_req = preferences.loadRuntimeList('LTS');
 
         const [stable_res, beta_res, lts_res] = await Promise.all([stable_req, beta_req, lts_req]);
 
@@ -236,9 +236,9 @@ export class GMConstructor {
          * @type { { [key in RuntimeType]: RuntimeInfo[]? } }
          */
         const runtimes = {
-            stable: null,
-            beta: null,
-            lts: null
+            Stable: null,
+            Beta: null,
+            LTS: null
         };
 
         // TODO: separate the loading from picking defaults!
@@ -246,29 +246,29 @@ export class GMConstructor {
         if (!stable_res.ok) {
             console.warn('Failed to load stable runtimes list:', stable_res.err);
 
-            if (preferences.globalRuntimeType === 'stable' && beta_res.ok) {
+            if (preferences.globalRuntimeType === 'Stable' && beta_res.ok) {
                 console.warn('Switched to Beta runtimes');
 
-                preferences.setGlobalRuntimeType('beta');
+                preferences.setGlobalRuntimeType('Beta');
                 await preferences.save();
             }
 
         } else {
-            runtimes.stable = stable_res.data;
+            runtimes.Stable = stable_res.data;
         }
 
         if (!beta_res.ok) {
             console.warn('Failed to load beta runtimes list:', beta_res.err);
 
-            if (preferences.globalRuntimeType === 'beta' && stable_res.ok) {
+            if (preferences.globalRuntimeType === 'Beta' && stable_res.ok) {
                 console.warn('Switched to Stable runtimes');
 
-                preferences.setGlobalRuntimeType('stable');
+                preferences.setGlobalRuntimeType('Stable');
                 await preferences.save();
             }
 
         } else {
-            runtimes.beta = beta_res.data;
+            runtimes.Beta = beta_res.data;
         }
 
         // Setting up compilation //

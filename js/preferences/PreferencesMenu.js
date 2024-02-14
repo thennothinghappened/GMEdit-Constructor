@@ -1,4 +1,5 @@
 import { UIDropdownMutate } from '../utils/ui.js';
+import { valid_runtime_types } from './Preferences.js';
 
 const UIPreferences = $gmedit['ui.Preferences'];
 
@@ -137,20 +138,17 @@ export class PreferencesMenu {
             this.#setSaveOnRunTask
         );
 
-        /** @type {RuntimeType[]} */
-        const runtime_types = ['stable', 'beta', 'lts'];
-
         /** @type {boolean} */
         UIPreferences.addDropdown(
             prefs_group,
             'Default Runtime type',
             this.#getRuntimeType(),
-            runtime_types,
+            valid_runtime_types,
             // @ts-ignore
            this.#setRuntimeType
         )
 
-        for (const type of runtime_types) {
+        for (const type of valid_runtime_types) {
 
             const group = UIPreferences.addGroup(prefs_group, type);
 

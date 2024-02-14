@@ -14,9 +14,9 @@ declare type PreferencesData = {
 }
 
 declare type RuntimeType = 
-    'stable'    |
-    'beta'      |
-    'lts'       ;
+    'Stable'    |
+    'Beta'      |
+    'LTS'       ;
 
 declare type RuntimePreference = {
     /** Where we should search for the list of runtimes. */
