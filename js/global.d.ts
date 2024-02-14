@@ -169,7 +169,7 @@ class FileKind {
     }
 
     /**
-     * Called by a GmlFile upon creation.
+     * Called by a GmlFile upon creation, initialising said file of this type.
      * Should assign the file.editor by least.
      */
     public init = (file: GmlFile, data: any): void => {

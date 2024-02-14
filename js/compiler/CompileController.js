@@ -1,5 +1,5 @@
 import { getCurrentProject } from '../utils/editor.js';
-import { CompileLogViewer } from './CompileLogViewer.js';
+import { CompileLogViewer } from '../editors/CompileLogViewer.js';
 import { Job } from './Job.js';
 import { igor_platform_cmd_name } from '../utils/igor.js';
 import { Err } from '../utils/Err.js';
