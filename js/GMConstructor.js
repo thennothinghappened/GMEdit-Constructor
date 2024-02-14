@@ -230,7 +230,7 @@ export class GMConstructor {
         const beta_req = preferences.loadRuntimeList('beta');
         const lts_req = preferences.loadRuntimeList('lts');
 
-        const [stable_res, beta_res] = await Promise.all([stable_req, beta_req]);
+        const [stable_res, beta_res, lts_res] = await Promise.all([stable_req, beta_req, lts_req]);
 
         /**
          * @type { { [key in RuntimeType]: RuntimeInfo[]? } }

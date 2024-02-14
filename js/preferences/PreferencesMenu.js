@@ -138,7 +138,7 @@ export class PreferencesMenu {
         );
 
         /** @type {RuntimeType[]} */
-        const runtime_types = ['stable', 'beta'];
+        const runtime_types = ['stable', 'beta', 'lts'];
 
         /** @type {boolean} */
         UIPreferences.addDropdown(
