@@ -1,5 +1,6 @@
 import { def_runtime_paths, igorPath } from '../utils/igor.js';
 import { fileExists, readFile, readdir, writeFile } from '../utils/file.js';
+import { Err } from '../utils/Err.js';
 
 /**
  * Handler for plugin preferences file, asnd
@@ -20,6 +21,10 @@ export class Preferences {
                 },
                 beta: {
                     search_path: def_runtime_paths.beta,
+                    choice: null
+                },
+                lts: {
+                    search_path: def_runtime_paths.lts,
                     choice: null
                 }
             }
@@ -108,14 +113,17 @@ export class Preferences {
     /**
      * Load the list of runtimes for the provided search path for a type.
      * @param {RuntimeType} [type] 
-     * @returns {Promise<Result<RuntimeInfo[], Error>>}
+     * @returns {Promise<Result<RuntimeInfo[]>>}
      */
     async loadRuntimeList(type = this.globalRuntimeType) {
         const opts = this.getGlobalRuntimeTypeOpts(type);
         const dir_res = await readdir(opts.search_path);
 
-        if ('err' in dir_res) {
-            return { err: dir_res.err, msg: `Failed to read search path "${opts.search_path}"` };
+        if (!dir_res.ok) {
+            return {
+                ok: false,
+                err: new Err(`Failed to read search path '${opts.search_path}'`, dir_res.err),
+            };
         }
 
         const igor_path_segment = igorPath(this.#join_path);
@@ -135,13 +143,12 @@ export class Preferences {
         // Search each result to check if its a valid runtime.
         // This 99% isn't required, but I wanted to do it anyway :)
         const valid = await Promise.all(
-            runtimes
-                .map(runtime => fileExists(runtime.igor_path))
+            runtimes.map(runtime => fileExists(runtime.igor_path))
         );
 
         return {
-            data: runtimes
-            .filter((_, i) => valid[i])
+            ok: true,
+            data: runtimes.filter((_, i) => valid[i])
         };
     }
 

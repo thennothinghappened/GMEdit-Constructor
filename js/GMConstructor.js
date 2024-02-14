@@ -4,6 +4,7 @@ import { Menu } from './Menu.js';
 import { getCurrentProject, saveOpenFiles } from './utils/editor.js';
 import { Preferences } from './preferences/Preferences.js';
 import { PreferencesMenu } from './preferences/PreferencesMenu.js';
+import { Err } from './utils/Err.js';
 
 /**
  * Main controller instance for the plugin!
@@ -25,7 +26,7 @@ export class GMConstructor {
      * List of runtimes for each type.
      * Populated after loading the list.
      * 
-     * @type { { stable: RuntimeInfo[]?, beta: RuntimeInfo[]? } }
+     * @type { { [key in RuntimeType]: RuntimeInfo[]? } }
      */
     runtimes;
 
@@ -48,7 +49,7 @@ export class GMConstructor {
      * @param {string} plugin_version Current version of the plugin
      * @param {Preferences} preferences Plugin preferences.
      * @param {CompileController} compileController
-     * @param {{ stable: RuntimeInfo[]?, beta: RuntimeInfo[]? }} runtimes 
+     * @param {{ [key in RuntimeType]: RuntimeInfo[]? }} runtimes 
      */
     constructor(
         plugin_name,
@@ -95,8 +96,8 @@ export class GMConstructor {
 
                 const res = await this.preferences.loadRuntimeList(type);
 
-                if ('err' in res) {
-                    console.error('Failed to load runtime list:', res.msg, res.err);
+                if (!res.ok) {
+                    console.error('Failed to load runtime list:', res.err);
                     return;
                 }
 
@@ -145,8 +146,8 @@ export class GMConstructor {
 
         const runtime_res = this.#getProjectRuntime(project);
 
-        if ('err' in runtime_res) {
-            console.error('Failed to find runtime for project:', runtime_res.err, runtime_res.msg);
+        if (!runtime_res.ok) {
+            console.error('Failed to find runtime for project:', runtime_res.err);
             return;
         }
 
@@ -159,8 +160,8 @@ export class GMConstructor {
             mode: 'VM'
         });
 
-        if ('err' in res) {
-            console.error(res.msg);
+        if (!res.ok) {
+            console.error('Failed to run Igor job:', res.err);
             return;
         }
 
@@ -170,7 +171,7 @@ export class GMConstructor {
     /**
      * Get the runtime to use for a given project.
      * @param {GMLProject} proj 
-     * @returns {Result<RuntimeInfo, 'No valid runtimes found'>}
+     * @returns {Result<RuntimeInfo>}
      */
     #getProjectRuntime(proj) {
         // TODO: we currently just grab the global.
@@ -180,8 +181,8 @@ export class GMConstructor {
         if (desired_runtime_list === null) {
             
             return {
-                err: 'No valid runtimes found',
-                msg: `Runtime type ${this.preferences.globalRuntimeType} list not loaded!`
+                ok: false,
+                err: new Err(`Runtime type ${this.preferences.globalRuntimeType} list not loaded!`)
             };
         }
 
@@ -190,12 +191,15 @@ export class GMConstructor {
 
         if (runtime === undefined) {
             return {
-                err: 'No valid runtimes found',
-                msg: `Failed to find any runtimes of type ${this.preferences.globalRuntimeType}`
+                ok: false,
+                err: new Err(`Failed to find any runtimes of type ${this.preferences.globalRuntimeType}`)
             };
         }
 
-        return { data: runtime };
+        return {
+            ok: true,
+            data: runtime
+        };
     }
 
     compileCurrent = () => {
@@ -224,39 +228,45 @@ export class GMConstructor {
 
         const stable_req = preferences.loadRuntimeList('stable');
         const beta_req = preferences.loadRuntimeList('beta');
+        const lts_req = preferences.loadRuntimeList('lts');
 
         const [stable_res, beta_res] = await Promise.all([stable_req, beta_req]);
 
         /**
-         * @type { { stable: RuntimeInfo[]?, beta: RuntimeInfo[]? } }
+         * @type { { [key in RuntimeType]: RuntimeInfo[]? } }
          */
         const runtimes = {
             stable: null,
-            beta: null
+            beta: null,
+            lts: null
         };
 
-        if ('err' in stable_res) {
-            console.warn('Failed to load stable runtimes list:', stable_res.msg, stable_res.err);
+        // TODO: separate the loading from picking defaults!
 
-            if (preferences.globalRuntimeType === 'stable' && !('err' in beta_res)) {
+        if (!stable_res.ok) {
+            console.warn('Failed to load stable runtimes list:', stable_res.err);
+
+            if (preferences.globalRuntimeType === 'stable' && beta_res.ok) {
                 console.warn('Switched to Beta runtimes');
 
                 preferences.setGlobalRuntimeType('beta');
                 await preferences.save();
             }
+
         } else {
             runtimes.stable = stable_res.data;
         }
 
-        if ('err' in beta_res) {
-            console.warn('Failed to load beta runtimes list:', beta_res.msg, beta_res.err);
+        if (!beta_res.ok) {
+            console.warn('Failed to load beta runtimes list:', beta_res.err);
 
-            if (preferences.globalRuntimeType === 'beta' && !('err' in stable_res)) {
+            if (preferences.globalRuntimeType === 'beta' && stable_res.ok) {
                 console.warn('Switched to Stable runtimes');
 
                 preferences.setGlobalRuntimeType('stable');
                 await preferences.save();
             }
+
         } else {
             runtimes.beta = beta_res.data;
         }

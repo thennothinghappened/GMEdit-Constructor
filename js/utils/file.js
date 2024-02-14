@@ -1,3 +1,4 @@
+import { Err } from './Err.js';
 
 /**
  * Promise version of `Electron_FS.exists`.
@@ -15,17 +16,23 @@ export function fileExists(path) {
 /**
  * Promise version of `Electron_FS.readFile`.
  * @param {string} path 
- * @returns {Promise<Result<string, Error>>}
+ * @returns {Promise<Result<string>>}
  */
 export function readFile(path) {
     return new Promise(res => {
         Electron_FS.readFile(path, (err, data) => {
-            if (err !== null) {
-                res({ err, msg: 'Failed to read file.' });
+
+            if (data === null) {
+                return res({ 
+                    ok: false,
+                    err: new Err(`Failed to read the file '${path}'`, err)
+                });
             }
 
-            // @ts-ignore
-            res({ data });
+            res({
+                ok: true,
+                data
+            });
         })
     });
 }
@@ -33,17 +40,22 @@ export function readFile(path) {
 /**
  * Promise version of `Electron_FS.readdir`.
  * @param {string} path 
- * @returns {Promise<Result<string[], Error>>}
+ * @returns {Promise<Result<string[]>>}
  */
 export function readdir(path) {
     return new Promise(res => {
         Electron_FS.readdir(path, (err, data) => {
-            if (err !== null) {
-                res({ err, msg: 'Failed to read directory.' });
+            if (data === null) {
+                return res({ 
+                    ok: false,
+                    err: new Err(`Failed to read contents of the directory '${path}'`, err)
+                });
             }
 
-            // @ts-ignore
-            res({ data });
+            res({ 
+                ok: true,
+                data
+            });
         })
     });
 }
@@ -52,17 +64,19 @@ export function readdir(path) {
  * Promise version of `Electron_FS.writeFile`.
  * @param {string} path 
  * @param {string} data
- * @returns {Promise<Result<void, Error>>}
+ * @returns {Promise<Result<void>>}
  */
 export function writeFile(path, data) {
     return new Promise(res => {
         Electron_FS.writeFile(path, data, (err) => {
             if (err !== null) {
-                res({ err, msg: 'Failed to write file.' });
+                return res({
+                    ok: false,
+                    err: new Err(`Failed to write the file '${path}'`, err)
+                });
             }
 
-            // @ts-ignore
-            res({ data: null });
+            res({ ok: true, data: undefined });
         })
     });
 }

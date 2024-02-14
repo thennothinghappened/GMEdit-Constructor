@@ -29,17 +29,19 @@ const igor_platform_map = {
  * Note that this only covers Windows and MacOS, elsewhere will crash trying to index these
  * as I don't know where the location is for Linux.
  * 
- * @type {{[key in NodeJS.Platform]: { stable: string, beta: string }}}
+ * @type {{[key in NodeJS.Platform]: { [key in RuntimeType]: string }}}
  */
 // @ts-ignore
 const def_runtime_platform_paths = {
     'win32': {
         stable: 'C:\\ProgramData\\GameMakerStudio2\\Cache\\runtimes',
-        beta: 'C:\\ProgramData\\GameMakerStudio2-Beta\\Cache\\runtimes'
+        beta: 'C:\\ProgramData\\GameMakerStudio2-Beta\\Cache\\runtimes',
+        lts: 'C:\\ProgramData\\GameMakerStudio2-LTS\\Cache\\runtimes'
     },
     'darwin': {
         stable: '/Users/Shared/GameMakerStudio2/Cache/runtimes',
-        beta: '/Users/Shared/GameMakerStudio2-Beta/Cache/runtimes'
+        beta: '/Users/Shared/GameMakerStudio2-Beta/Cache/runtimes',
+        lts: '/Users/Shared/GameMakerStudio2-LTS/Cache/runtimes'
     }
 };
 

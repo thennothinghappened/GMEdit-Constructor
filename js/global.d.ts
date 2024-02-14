@@ -5,8 +5,7 @@ declare type PreferencesData = {
         type: RuntimeType;
 
         type_opts: {
-            stable: RuntimePreference;
-            beta: RuntimePreference;
+            [key in RuntimeType]: RuntimePreference;
         };
     };
 
@@ -14,7 +13,10 @@ declare type PreferencesData = {
     save_on_run_task: boolean;
 }
 
-declare type RuntimeType = 'stable'|'beta';
+declare type RuntimeType = 
+    'stable'    |
+    'beta'      |
+    'lts'       ;
 
 declare type RuntimePreference = {
     /** Where we should search for the list of runtimes. */
@@ -32,7 +34,9 @@ declare type RuntimeInfo = {
     igor_path: string;
 };
 
-declare type Result<T, E> = { data: T } | { err: E, msg: any };
+declare type Result<T> = 
+    { ok: true, data: T }       |
+    { ok: false, err: Err }     ;
 
 declare type IgorSettings = {
     verb: IgorVerb;

@@ -2,6 +2,7 @@ import { getCurrentProject } from '../utils/editor.js';
 import { CompileLogViewer } from './CompileLogViewer.js';
 import { Job } from './Job.js';
 import { igor_platform_cmd_name } from '../utils/igor.js';
+import { Err } from '../utils/Err.js';
 
 /**
  * Container for controlling the list of compile jobs,
@@ -29,7 +30,7 @@ export class CompileController {
      * @param {GMLProject} project
      * @param {string} runtime_path
      * @param {IgorSettings} settings
-     * @returns {string[]}
+     * @returns {Result<string[]>}
      */
     #getFlagsForJob(project, runtime_path, settings) {
         const flags = [
@@ -45,12 +46,18 @@ export class CompileController {
                 break;
 
             default:
-                throw `Unhandled command case for flags: ${settings.verb}`;
+                return {
+                    ok: false,
+                    err: new Err(`Unhandled command case for flags: ${settings.verb}`)
+                }
         }
 
         flags.push(igor_platform_cmd_name, settings.verb);
 
-        return flags;
+        return {
+            ok: true,
+            data: flags
+        };
     }
    
     /**
@@ -58,13 +65,22 @@ export class CompileController {
      * @param {GMLProject} project
      * @param {RuntimeInfo} runtime
      * @param {IgorSettings} settings
-     * @returns {Result<Job, 'igor missing'>}
+     * @returns {Result<Job>}
      */
     runJob(project, runtime, settings) {
 
+        const flags_res = this.#getFlagsForJob(project, runtime.path, settings);
+
+        if (!flags_res.ok) {
+            return {
+                ok: false,
+                err: new Err('Failed to get Igor flags for this job!', flags_res.err)
+            }
+        }
+
         const proc = this.#spawn(
             runtime.igor_path,
-            this.#getFlagsForJob(project, runtime.path, settings),
+            flags_res.data,
             { cwd: project.dir }
         );
 
@@ -76,6 +92,7 @@ export class CompileController {
         });
 
         return {
+            ok: true,
             data: job
         };
 
