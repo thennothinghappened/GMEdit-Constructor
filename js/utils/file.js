@@ -22,7 +22,7 @@ export function readFile(path) {
     return new Promise(res => {
         Electron_FS.readFile(path, (err, data) => {
 
-            if (data === null) {
+            if (data === undefined) {
                 return res({ 
                     ok: false,
                     err: new Err(`Failed to read the file '${path}'`, err)
@@ -45,7 +45,7 @@ export function readFile(path) {
 export function readdir(path) {
     return new Promise(res => {
         Electron_FS.readdir(path, (err, data) => {
-            if (data === null) {
+            if (data === undefined) {
                 return res({ 
                     ok: false,
                     err: new Err(`Failed to read contents of the directory '${path}'`, err)
@@ -69,7 +69,7 @@ export function readdir(path) {
 export function writeFile(path, data) {
     return new Promise(res => {
         Electron_FS.writeFile(path, data, (err) => {
-            if (err !== null) {
+            if (err !== undefined) {
                 return res({
                     ok: false,
                     err: new Err(`Failed to write the file '${path}'`, err)

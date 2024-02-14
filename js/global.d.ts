@@ -79,9 +79,9 @@ declare class Electron_App {
 }
 
 declare class Electron_FS {
-    static readFile = function(path: string, cb: (err: Error?, data: string?) => void) {}
-    static readdir = function(path: string, cb: (err: Error?, files: string[]?) => void) {}
-    static writeFile = function(path: string, content: string, cb: (err: Error?) => void) {}
+    static readFile = function(path: string, cb: (err: Error|undefined, data: string|undefined) => void) {}
+    static readdir = function(path: string, cb: (err: Error|undefined, files: string[]|undefined) => void) {}
+    static writeFile = function(path: string, content: string, cb: (err: Error|undefined) => void) {}
     static existsSync = function(path: string): boolean {}
     static exists = function(path: string, cb: (exists: boolean) => void) {}
 }
