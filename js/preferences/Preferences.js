@@ -33,7 +33,8 @@ export class Preferences {
             }
         },
 
-        save_on_run_task: true
+        save_on_run_task: true,
+        reuse_compiler_tab: true,
     };
 
     /**
@@ -93,6 +94,14 @@ export class Preferences {
 
     set saveOnRunTask(save_on_run_task) {
         this.#prefs.save_on_run_task = save_on_run_task;
+    }
+
+    get reuseCompilerTab() {
+        return this.#prefs.save_on_run_task;
+    }
+
+    set reuseCompilerTab(reuse_compiler_tab) {
+        this.#prefs.reuse_compiler_tab = reuse_compiler_tab;
     }
 
     /**

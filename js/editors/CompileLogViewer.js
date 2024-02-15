@@ -2,6 +2,7 @@ import { Job } from '../compiler/Job.js';
 import { ConstructorEditorView, ConstructorViewFileKind } from './ConstructorEditorView.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
+const ChromeTabs = $gmedit['ui.ChromeTabs'];
 
 /**
  * File type for a compile job.
@@ -53,8 +54,6 @@ export class CompileLogViewer extends ConstructorEditorView {
 
         super(file);
 
-        this.job = job;
-
         this.element.classList.add('gm-constructor-viewer');
 
         const info = document.createElement('div');
@@ -64,7 +63,6 @@ export class CompileLogViewer extends ConstructorEditorView {
         stop_btn.type = 'button';
         stop_btn.value = 'Stop';
         stop_btn.className = 'stop';
-        stop_btn.onclick = this.job.stop;
 
         this.stop_btn = stop_btn;
 
@@ -74,7 +72,6 @@ export class CompileLogViewer extends ConstructorEditorView {
         cmd.type = 'text';
         cmd.readOnly = true;
         cmd.style.flexGrow = '1';
-        cmd.value = job.command;
 
         this.cmd = cmd;
 
@@ -87,6 +84,18 @@ export class CompileLogViewer extends ConstructorEditorView {
 
         this.element.appendChild(info);
         this.element.appendChild(this.log);
+
+        this.watchJob(job);
+    }
+
+    /**
+     * @param {Job} job
+     */
+    watchJob = (job) => {
+
+        this.job = job;
+
+        this.log.textContent = '';
 
         this.job.on('stdout', (content) => {
             const should_scroll =
@@ -104,21 +113,54 @@ export class CompileLogViewer extends ConstructorEditorView {
             this.cmd.value += ' - Finished';
             this.file.rename(KConstructorOutput.getJobName(this.job), '');
         });
+
+        this.stop_btn.onclick = this.job.stop;
+        this.cmd.value = this.job.command;
+
     }
+
 
     /**
      * Set up an editor tab for a Job, and view it.
      * @param {Job} job
+     * @param {Boolean} reuse Whether to reuse an existing tab.
+     * @returns {void}
      */
-    static view = (job) => {
-        const file = new GmlFile(
-            KConstructorOutput.getJobName(job),
-            null,
-            this.fileKind,
-            job
-        );
+    static view = (job, reuse) => {
+
+        if (!reuse) {
+
+            const file = new GmlFile(
+                KConstructorOutput.getJobName(job),
+                null,
+                this.fileKind,
+                job
+            );
+            
+            return GmlFile.openTab(file);
+            
+        }
+
+        const tabs = Array.from(ChromeTabs.getTabs());
+        const editors = tabs.map(tab => tab.gmlFile.editor);
+
+        /** @type {CompileLogViewer|undefined} */
+        // @ts-ignore
+        const compilerViewer = editors.find(editor => editor instanceof CompileLogViewer);
+
+        if (compilerViewer === undefined) {
+            return this.view(job, false);
+        }
+
+        compilerViewer.stopJob();
+        compilerViewer.watchJob(job);
         
-        GmlFile.openTab(file);
+        return compilerViewer.file.tabEl.click();
+
+    }
+
+    stopJob = () => {
+        this.job.stop();
     }
 
     /**
@@ -127,6 +169,6 @@ export class CompileLogViewer extends ConstructorEditorView {
      * on in the background.
      */
     destroy = () => {
-        this.job.stop();
+        this.stopJob();
     }
 }

@@ -109,9 +109,10 @@ export class CompileController {
     /**
      * Create a new editor instance for a given job.
      * @param {Job} job
+     * @param {Boolean} reuse Whether to reuse an existing tab.
      */
-    openEditorForJob(job) {
-        CompileLogViewer.view(job);
+    openEditorForJob(job, reuse) {
+        CompileLogViewer.view(job, reuse);
     }
 
     cleanup() {

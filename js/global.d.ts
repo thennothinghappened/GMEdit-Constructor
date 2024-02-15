@@ -11,6 +11,9 @@ declare type PreferencesData = {
 
     /** Whether to automatically save open files when a task runs. */
     save_on_run_task: boolean;
+
+    /** Whether to reuse the compile viewer tab between runs. */
+    reuse_compiler_tab: boolean;
 }
 
 declare type RuntimeType = 
@@ -247,8 +250,11 @@ declare class GmlFile {
     public codeEditor: EditCode;
     /** Whether the file has been modified. */
     public __changed: boolean;
+    /** The tab associated with this file. */
+    public tabEl: ChromeTab;
 
     public static next: GmlFile?;
+    public static current: GmlFile?;
 
     constructor(name: string, path: string?, kind: FileKind, data?: any) {
         this.name = name;

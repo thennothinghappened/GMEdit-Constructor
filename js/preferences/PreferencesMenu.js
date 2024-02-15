@@ -68,6 +68,18 @@ export class PreferencesMenu {
     #setSaveOnRunTask;
 
     /**
+     * Function to get whether we should reuse the compiler tab between runs.
+     * @type {() => boolean}
+     */
+    #getReuseCompilerTab;
+
+    /**
+     * Function to set whether we should reuse the compiler tab between runs.
+     * @type {(reuse_compiler_tab: boolean) => Promise<void>}
+     */
+    #setReuseCompilerTab;
+
+    /**
      * @param {string} plugin_name 
      * @param {string} plugin_version
      * 
@@ -81,6 +93,8 @@ export class PreferencesMenu {
      * 
      * @param {() => boolean} getSaveOnRunTask 
      * @param {(save_on_run_task: boolean) => Promise<void>} setSaveOnRunTask 
+     * @param {() => boolean} getReuseCompilerTab 
+     * @param {(reuse_compiler_tab: boolean) => Promise<void>} setReuseCompilerTab 
      */
     constructor(
         plugin_name,
@@ -95,7 +109,9 @@ export class PreferencesMenu {
         setRuntimeType,
 
         getSaveOnRunTask,
-        setSaveOnRunTask
+        setSaveOnRunTask,
+        getReuseCompilerTab,
+        setReuseCompilerTab
     ) {
 
         this.#plugin_version = plugin_version;
@@ -111,6 +127,8 @@ export class PreferencesMenu {
 
         this.#getSaveOnRunTask = getSaveOnRunTask;
         this.#setSaveOnRunTask = setSaveOnRunTask;
+        this.#getReuseCompilerTab = getReuseCompilerTab;
+        this.#setReuseCompilerTab = setReuseCompilerTab;
 
         if (!this.#createMenu(document.body)) {
             GMEdit.on('preferencesBuilt', this.#onPreferencesBuilt);
@@ -136,6 +154,13 @@ export class PreferencesMenu {
             'Save automatically when running a task',
             this.#getSaveOnRunTask(),
             this.#setSaveOnRunTask
+        );
+
+        UIPreferences.addCheckbox(
+            prefs_group,
+            'Reuse compiler output tab between runs',
+            this.#getReuseCompilerTab(),
+            this.#setReuseCompilerTab
         );
 
         /** @type {boolean} */

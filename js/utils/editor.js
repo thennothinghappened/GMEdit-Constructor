@@ -1,4 +1,7 @@
 
+const GmlFile = $gmedit['gml.file.GmlFile'];
+const ChromeTabs = $gmedit['ui.ChromeTabs'];
+
 /**
  * Get the currently open project.
  * @returns The current project
@@ -31,4 +34,16 @@ export function saveOpenFiles() {
             editor.gmlFile.save();
         }
     });
+}
+
+/**
+ * Get the currently chosen open tab.
+ */
+export function getCurrentTab() {
+    
+    const tabs = ChromeTabs.getTabs();
+    const current_file = GmlFile.current;
+
+    
+
 }

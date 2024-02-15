@@ -129,6 +129,13 @@ export class GMConstructor {
             async (save_on_run_task) => {
                 this.preferences.saveOnRunTask = save_on_run_task;
                 await this.preferences.save();
+            },
+
+            () => this.preferences.reuseCompilerTab,
+
+            async (reuse_compiler_tab) => {
+                this.preferences.reuseCompilerTab = reuse_compiler_tab;
+                await this.preferences.save();
             }
         );
     }
@@ -165,7 +172,7 @@ export class GMConstructor {
             return;
         }
 
-        this.compileController.openEditorForJob(res.data);
+        this.compileController.openEditorForJob(res.data, this.preferences.reuseCompilerTab);
     }
 
     /**
@@ -241,34 +248,22 @@ export class GMConstructor {
             LTS: null
         };
 
-        // TODO: separate the loading from picking defaults!
-
-        if (!stable_res.ok) {
-            console.warn('Failed to load stable runtimes list:', stable_res.err);
-
-            if (preferences.globalRuntimeType === 'Stable' && beta_res.ok) {
-                console.warn('Switched to Beta runtimes');
-
-                preferences.setGlobalRuntimeType('Beta');
-                await preferences.save();
-            }
-
-        } else {
+        if (stable_res.ok) {
             runtimes.Stable = stable_res.data;
+        } else {
+            console.debug('Failed to load Stable runtimes list', stable_res.err);
         }
 
-        if (!beta_res.ok) {
-            console.warn('Failed to load beta runtimes list:', beta_res.err);
-
-            if (preferences.globalRuntimeType === 'Beta' && stable_res.ok) {
-                console.warn('Switched to Stable runtimes');
-
-                preferences.setGlobalRuntimeType('Stable');
-                await preferences.save();
-            }
-
-        } else {
+        if (beta_res.ok) {
             runtimes.Beta = beta_res.data;
+        } else {
+            console.debug('Failed to load Beta runtimes list', beta_res.err);
+        }
+
+        if (lts_res.ok) {
+            runtimes.LTS = lts_res.data;
+        } else {
+            console.debug('Failed to load LTS runtimes list', lts_res.err);
         }
 
         // Setting up compilation //
