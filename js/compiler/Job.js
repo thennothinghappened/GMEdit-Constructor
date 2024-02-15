@@ -1,3 +1,4 @@
+import { JobCompilerError, JobPermissionError, JobRunnerError } from './JobError.js';
 
 /**
  * Wrapper for an Igor job.
@@ -12,14 +13,12 @@ export class Job {
     #project;
 
     #stdout = '';
-    #stderr = '';
 
     #stopped = false;
 
     /** @type {{[key in JobEvent]: Set<(data: any?) => void>}} */
     #listeners = {
         stdout: new Set(),
-        stderr: new Set(),
         output: new Set(),
         error: new Set(),
         stop: new Set()
@@ -37,28 +36,83 @@ export class Job {
 
         this.#process.once('exit', this.#onExit);
         this.#process.stdout?.on('data', this.#onStdoutData);
-        this.#process.stderr?.on('data', this.#onStderrData);
     }
 
     /**
      * @param {any?} chunk
      */
     #onStdoutData = (chunk) => {
-        this.#stdout += chunk.toString();
-        Job.#notify(this.#listeners.stdout, this.stdout);
-    }
 
-    /**
-     * @param {any?} chunk
-     */
-    #onStderrData = (chunk) => {
-        this.#stderr += chunk.toString();
-        Job.#notify(this.#listeners.stderr, this.stderr);
+        const str = chunk.toString();
+        this.#stdout += str;
+
+        Job.#notify(this.#listeners.stdout, this.stdout);
+
+        this.#parseStdoutData(str.trim());
     }
 
     #onExit = () => {
         Job.#notify(this.#listeners.stop);
         this.#process.removeAllListeners();
+    }
+
+    /**
+     * Parse stdout data being appended to look for errors!
+     * 
+     * TODO: very dirty quick code to get this running today, gonna make this multiple funcs.
+     * @param {String} str
+     */
+    #parseStdoutData = (str) => {
+
+        /// Runner error
+        const runner_error_string = 'ERROR!!! :: ';
+
+        if (str.startsWith(runner_error_string)) {
+
+            const err_string = str.slice(runner_error_string.length);
+            const err = new JobRunnerError(err_string);
+
+            return Job.#notify(this.#listeners.error, err);
+        }
+
+        /// Compiler error(s)
+        const permission_error_string = 'Permission Error : ';
+        const compiler_error_string = 'Error : ';
+
+        const lines = str.split('\n');
+
+        for (let i = 0; i < lines.length; i ++) {
+
+            const line = lines[i];
+
+            if (line.startsWith(compiler_error_string)) {
+
+                const err_string = line.slice(compiler_error_string.length);
+                const err = new JobCompilerError(err_string);
+    
+                Job.#notify(this.#listeners.error, err);
+
+                continue;
+    
+            }
+
+            if (line.startsWith(permission_error_string)) {
+
+                const reason_code_str = lines[i - 1];
+                const reason_code_split = reason_code_str?.split('-');
+                const reason_code = reason_code_split[1]?.trim();
+                
+                const err_string = line.slice(compiler_error_string.length);
+                const err = new JobPermissionError(err_string);
+    
+                Job.#notify(this.#listeners.error, err);
+
+                continue;
+
+            }
+
+        }
+
     }
 
     /**
@@ -89,9 +143,6 @@ export class Job {
 
     /** The `stdout` output of the job's process. */
 	get stdout() { return this.#stdout; }
-
-    /** The `stderr` output of the job's process. */
-	get stderr() { return this.#stderr; }
 
     /** Whether this job has stopped yet. */
 	get stopped() { return this.#stopped; }
