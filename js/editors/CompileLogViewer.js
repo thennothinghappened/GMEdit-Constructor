@@ -111,15 +111,13 @@ export class CompileLogViewer extends ConstructorEditorView {
 
         });
 
-        this.job.on('stop', () => {
+        this.job.on('stop', (errors) => {
+
             this.stop_btn.disabled = true;
             this.cmd.value += ' - Finished';
             this.file.rename(KConstructorOutput.getJobName(this.job), '');
-        });
 
-        this.job.on('error', (err) => {
-
-            this.errors.appendChild(err.displayHTML());
+            errors?.forEach(err => this.errors.appendChild(err.displayHTML()));
 
         });
 

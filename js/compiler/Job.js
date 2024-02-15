@@ -1,4 +1,5 @@
 import { JobCompilerError, JobPermissionError, JobRunnerError } from './JobError.js';
+import { job_parse_stdout } from './output-parsing/parse-stdout.js';
 
 /**
  * Wrapper for an Igor job.
@@ -20,7 +21,6 @@ export class Job {
     #listeners = {
         stdout: new Set(),
         output: new Set(),
-        error: new Set(),
         stop: new Set()
     };
     
@@ -48,71 +48,13 @@ export class Job {
 
         Job.#notify(this.#listeners.stdout, this.stdout);
 
-        this.#parseStdoutData(str.trim());
     }
 
     #onExit = () => {
-        Job.#notify(this.#listeners.stop);
+        
+        Job.#notify(this.#listeners.stop, job_parse_stdout(this.stdout));
         this.#process.removeAllListeners();
-    }
-
-    /**
-     * Parse stdout data being appended to look for errors!
-     * 
-     * TODO: very dirty quick code to get this running today, gonna make this multiple funcs.
-     * @param {String} str
-     */
-    #parseStdoutData = (str) => {
-
-        /// Runner error
-        const runner_error_string = 'ERROR!!! :: ';
-
-        if (str.startsWith(runner_error_string)) {
-
-            const err_string = str.slice(runner_error_string.length);
-            const err = new JobRunnerError(err_string);
-
-            return Job.#notify(this.#listeners.error, err);
-        }
-
-        /// Compiler error(s)
-        const permission_error_string = 'Permission Error : ';
-        const compiler_error_string = 'Error : ';
-
-        const lines = str.split('\n');
-
-        for (let i = 0; i < lines.length; i ++) {
-
-            const line = lines[i];
-
-            if (line.startsWith(compiler_error_string)) {
-
-                const err_string = line.slice(compiler_error_string.length);
-                const err = new JobCompilerError(err_string);
-    
-                Job.#notify(this.#listeners.error, err);
-
-                continue;
-    
-            }
-
-            if (line.startsWith(permission_error_string)) {
-
-                const reason_code_str = lines[i - 1];
-                const reason_code_split = reason_code_str?.split('-');
-                const reason_code = reason_code_split[1]?.trim();
-                
-                const err_string = line.slice(compiler_error_string.length);
-                const err = new JobPermissionError(err_string);
-    
-                Job.#notify(this.#listeners.error, err);
-
-                continue;
-
-            }
-
-        }
-
+        
     }
 
     /**
