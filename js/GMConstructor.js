@@ -80,7 +80,7 @@ export class GMConstructor {
             () => this.preferences.globalRuntimeType,
 
             (type) => this.runtimes[type]
-                ?.map(runtime => runtime.version) ?? [],
+                ?.map(runtime => runtime.version.toString()) ?? [],
 
             (type) => this.preferences
                 .getGlobalRuntimeTypeOpts(type).choice ?? null,
@@ -107,10 +107,10 @@ export class GMConstructor {
 
                 if (
                     choice !== undefined && 
-                    this.runtimes[type]?.find(runtimeInfo => runtimeInfo.version === choice) === undefined
+                    this.runtimes[type]?.find(runtimeInfo => runtimeInfo.version.toString() === choice) === undefined
                 ) {
                     console.warn(`Runtime version "${choice}" not available in new search path "${search_path}".`);
-                    this.preferences.setGlobalRuntimeChoice(type, this.runtimes[type]?.at(0)?.version ?? null);
+                    this.preferences.setGlobalRuntimeChoice(type, this.runtimes[type]?.at(0)?.version?.toString() ?? null);
                 }
             },
 
@@ -193,8 +193,8 @@ export class GMConstructor {
             };
         }
 
-        const version = this.preferences.getGlobalRuntimeTypeOpts().choice ?? desired_runtime_list[0]?.version;
-        const runtime = desired_runtime_list.find(runtime => runtime.version === version);
+        const version = this.preferences.getGlobalRuntimeTypeOpts().choice ?? desired_runtime_list[0]?.version.toString();
+        const runtime = desired_runtime_list.find(runtime => runtime.version.toString() === version.toString());
 
         if (runtime === undefined) {
             return {

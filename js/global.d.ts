@@ -28,11 +28,25 @@ declare type RuntimePreference = {
     choice: string?;
 };
 
+declare interface IRuntimeVersion {
+
+    year: number;
+    month: number;
+    major: number;
+    build: number;
+
+    /**
+     * Returns a negative number if this runtime is older than `other`, 0 for same, or postive for newer.
+     */
+    compare(other: IRuntimeVersion): number;
+
+}
+
 /**
  * Information for a specific found runtime.
  */
 declare type RuntimeInfo = {
-    version: string;
+    version: IRuntimeVersion;
     path: string;
     igor_path: string;
 };

@@ -1,4 +1,4 @@
-import { def_runtime_paths, igorPath } from '../utils/igor.js';
+import { def_runtime_paths, igorPath, runtime_version_parse } from '../utils/igor.js';
 import { fileExists, readFile, readdir, writeFile } from '../utils/file.js';
 import { Err } from '../utils/Err.js';
 
@@ -74,6 +74,7 @@ export class Preferences {
             const type_opts = loaded_prefs?.runtime_opts?.type_opts;
 
             for (const type of valid_runtime_types) {
+
                 if (!(type in type_opts)) {
 
                     console.warn(`Missing runtime type preference data for type '${type}', replacing with default.`);
@@ -164,17 +165,32 @@ export class Preferences {
 
         const igor_path_segment = igorPath(this.#join_path);
 
+        /** @type {RuntimeInfo[]} */
+        // @ts-thanks-for-epic-type-inference-it-really-works-here
+        // @ts-ignore
         const runtimes = dir_res.data
             .map(dirname => {
+
                 const path = this.#join_path(opts.search_path, dirname);
                 const igor_path = this.#join_path(path, igor_path_segment);
+
+                const version_res = runtime_version_parse(dirname);
+
+                if (!version_res.ok) {
+
+                    console.error(version_res.err);
+                    return null;
+                }
 
                 return {
                     path,
                     igor_path,
-                    version: dirname
+                    version: version_res.data
                 };
-            });
+
+            })
+            .filter(runtime => runtime !== null)
+            .sort((a, b) => b.version.compare(a.version));
 
         // Search each result to check if its a valid runtime.
         // This 99% isn't required, but I wanted to do it anyway :)
