@@ -1,3 +1,5 @@
+import { JobCompilerError, JobRunnerError } from './JobError.js';
+import { job_parse_stdout } from './output-parsing/parse-stdout.js';
 
 /**
  * Wrapper for an Igor job.
@@ -12,16 +14,13 @@ export class Job {
     #project;
 
     #stdout = '';
-    #stderr = '';
 
     #stopped = false;
 
     /** @type {{[key in JobEvent]: Set<(data: any?) => void>}} */
     #listeners = {
         stdout: new Set(),
-        stderr: new Set(),
         output: new Set(),
-        error: new Set(),
         stop: new Set()
     };
     
@@ -37,28 +36,25 @@ export class Job {
 
         this.#process.once('exit', this.#onExit);
         this.#process.stdout?.on('data', this.#onStdoutData);
-        this.#process.stderr?.on('data', this.#onStderrData);
     }
 
     /**
      * @param {any?} chunk
      */
     #onStdoutData = (chunk) => {
-        this.#stdout += chunk.toString();
-        Job.#notify(this.#listeners.stdout, this.stdout);
-    }
 
-    /**
-     * @param {any?} chunk
-     */
-    #onStderrData = (chunk) => {
-        this.#stderr += chunk.toString();
-        Job.#notify(this.#listeners.stderr, this.stderr);
+        const str = chunk.toString();
+        this.#stdout += str;
+
+        Job.#notify(this.#listeners.stdout, this.stdout);
+
     }
 
     #onExit = () => {
-        Job.#notify(this.#listeners.stop);
+        
+        Job.#notify(this.#listeners.stop, job_parse_stdout(this.stdout));
         this.#process.removeAllListeners();
+        
     }
 
     /**
@@ -89,9 +85,6 @@ export class Job {
 
     /** The `stdout` output of the job's process. */
 	get stdout() { return this.#stdout; }
-
-    /** The `stderr` output of the job's process. */
-	get stderr() { return this.#stderr; }
 
     /** Whether this job has stopped yet. */
 	get stopped() { return this.#stopped; }

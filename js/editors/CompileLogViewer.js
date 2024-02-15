@@ -59,31 +59,31 @@ export class CompileLogViewer extends ConstructorEditorView {
         const info = document.createElement('div');
         info.className = 'gm-constructor-info';
 
-        const stop_btn = document.createElement('input');
-        stop_btn.type = 'button';
-        stop_btn.value = 'Stop';
-        stop_btn.className = 'stop';
-
-        this.stop_btn = stop_btn;
+        this.stop_btn = document.createElement('input');
+        this.stop_btn.type = 'button';
+        this.stop_btn.value = 'Stop';
+        this.stop_btn.className = 'stop';
 
         info.appendChild(this.stop_btn);
 
-        const cmd = document.createElement('input');
-        cmd.type = 'text';
-        cmd.readOnly = true;
-        cmd.style.flexGrow = '1';
+        this.cmd = document.createElement('input');
+        this.cmd.type = 'text';
+        this.cmd.readOnly = true;
+        this.cmd.style.flexGrow = '1';
 
-        this.cmd = cmd;
-
-        info.appendChild(cmd);
-
-        const log = document.createElement('pre');
-        log.className = 'gm-constructor-log';
-
-        this.log = log;
+        info.appendChild(this.cmd);
 
         this.element.appendChild(info);
+
+        this.log = document.createElement('pre');
+        this.log.className = 'gm-constructor-log';
+
         this.element.appendChild(this.log);
+
+        this.errors = document.createElement('div');
+        this.errors.className = 'gm-constructor-errors'
+
+        this.element.appendChild(this.errors);
 
         this.watchJob(job);
     }
@@ -96,8 +96,10 @@ export class CompileLogViewer extends ConstructorEditorView {
         this.job = job;
 
         this.log.textContent = '';
+        this.errors.innerHTML = '';
 
         this.job.on('stdout', (content) => {
+
             const should_scroll =
                 (this.log.scrollTop + this.log.clientHeight) >= (this.log.scrollHeight - CompileLogViewer.scrollGrabMargin);
 
@@ -106,12 +108,17 @@ export class CompileLogViewer extends ConstructorEditorView {
             if (should_scroll) {
                 this.log.scrollTop = this.log.scrollHeight;
             }
+
         });
 
-        this.job.on('stop', () => {
+        this.job.on('stop', (errors) => {
+
             this.stop_btn.disabled = true;
             this.cmd.value += ' - Finished';
             this.file.rename(KConstructorOutput.getJobName(this.job), '');
+
+            errors?.forEach(err => this.errors.appendChild(err.displayHTML()));
+
         });
 
         this.stop_btn.onclick = this.job.stop;

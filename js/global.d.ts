@@ -53,9 +53,7 @@ declare type IgorVerb =
 
 declare type JobEvent =
     'stdout'    |
-    'stderr'    |
     'output'    |
-    'error'     |
     'stop'      ;
 
 declare type GMPlugin = {

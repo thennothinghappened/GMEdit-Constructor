@@ -1,7 +1,6 @@
 
 .gm-constructor-viewer {
-    display: flex;
-    flex-direction: column;
+    display: block;
 }
 
 .gm-constructor-info {
@@ -17,6 +16,21 @@
     flex-grow: 1;
 
     padding: 8px;
+    height: 70%;
+}
+
+.gm-constructor-errors {
+
+    padding: 8px;
+    
+    height: 30%;
+    overflow-y: scroll;
+
+}
+
+.gm-constructor-errors h1 {
+    font-size: medium;
+    line-height: 50%;
 }
 
 /** I know I shouldn't do this but it just looks nicer... */
