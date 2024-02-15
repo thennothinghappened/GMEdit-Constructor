@@ -1,4 +1,4 @@
-import { JobError } from '../JobError.js';
+import { JobCompilerError, JobError, JobRunnerError } from '../JobError.js';
 
 /**
  * @typedef StdoutEntry
@@ -17,6 +17,9 @@ export function job_parse_stdout(stdout) {
     const errors = [];
     const lines = stdout.split('\n');
 
+    const permission_error_string = 'Permission Error : ';
+    const compiler_error_string = 'Error : ';
+
     for (let i = 0; i < lines.length; i ++) {
 
         const runner_error = job_parse_runner_error(lines, i);
@@ -30,45 +33,22 @@ export function job_parse_stdout(stdout) {
 
         }
 
+        const line = lines[i];
+
+        if (line.startsWith(compiler_error_string)) {
+
+            const err_string = line.slice(compiler_error_string.length);
+            const err = new JobCompilerError(err_string);
+
+            errors.push(err);
+
+            continue;
+
+        }
+
     }
 
-    /// Compiler error(s)
-    // const permission_error_string = 'Permission Error : ';
-    // const compiler_error_string = 'Error : ';
-
-    // const lines = str.split('\n');
-
-    // for (let i = 0; i < lines.length; i ++) {
-
-    //     const line = lines[i];
-
-    //     if (line.startsWith(compiler_error_string)) {
-
-    //         const err_string = line.slice(compiler_error_string.length);
-    //         const err = new JobCompilerError(err_string);
-
-    //         Job.#notify(this.#listeners.error, err);
-
-    //         continue;
-
-    //     }
-
-    //     if (line.startsWith(permission_error_string)) {
-
-    //         const reason_code_str = lines[i - 1];
-    //         const reason_code_split = reason_code_str?.split('-');
-    //         const reason_code = reason_code_split[1]?.trim();
-            
-    //         const err_string = line.slice(compiler_error_string.length);
-    //         const err = new JobPermissionError(err_string);
-
-    //         Job.#notify(this.#listeners.error, err);
-
-    //         continue;
-
-    //     }
-
-    // }
+    return errors;
 
 }
 
@@ -107,39 +87,70 @@ function job_parse_runner_error(lines, first_line) {
         return null;
     }
 
-    /** `of <event name>` */
-    const event_name_line_prefix = 'of ';
-    const event_name_line_suffix = ',';
+    try {
 
-    const event_name_line = lines[first_line + 3]
-        // .slice(event_name_line_prefix.length)
-        // .slice(-event_name_line_suffix.length);
+        /** `of <event name>` */
+        const event_name_line_prefix = 'of ';
+        const event_name_line_suffix = ',';
 
-    /** `for object <name>:` */
-    const object_name_line_prefix = 'for object ';
-    const object_name_line_suffix = ':';
+        const event_name = lines[first_line + 3]
+            .split(event_name_line_prefix)[1]
+            .split(event_name_line_suffix)[0];
 
-    const object_name_line = lines[first_line + 4]
-        // .slice(object_name_line_prefix.length)
-        // .slice(-object_name_line_suffix.length);
+        /** `for object <name>:` */
+        const object_name_line_prefix = 'for object ';
+        const object_name_line_suffix = ':';
 
-    /** Stacktrace lines between the 'for object' line, and separator. */
-    const stacktrace_lines = lines.slice(first_line + 5, last_line - 1);
+        const object_name = lines[first_line + 4]
+            .split(object_name_line_prefix)[1]
+            .split(object_name_line_suffix)[0];
 
-    /** `gml_... (line x)` */
-    const error_site_line = lines[last_line];
+        /** Stacktrace lines between the 'for object' line, and separator. */
+        const stacktrace_lines = lines
+            .slice(first_line + 5, last_line - 1);
 
-    console.log(`
-    RUNNER ERROR:
-    ${event_name_line},
-    ${object_name_line},
-    ${stacktrace_lines},
-    ...
-    ${error_site_line}
-    `);
+        // foul code to remove empty beginning lines
+        for (let i = 0; i < stacktrace_lines.length; i ++) {
+            
+            const line = stacktrace_lines[i];
 
-    const event_name = event_name_line.substring
+            if (line.trim().length !== 0) {
+                break;
+            }
 
-    return null;
+            stacktrace_lines.splice(i, 1);
+            i --;
+
+        }
+
+        /** `gml_... (line x)` */
+        const error_site_str = lines[last_line];
+
+        const error_site_line_num = error_site_str
+            .split(')')[0]
+            .split('(line ')[1];
+        
+        const error_site_script = error_site_str
+            .split('(line')[0]
+            .trim();
+
+        return {
+            first_line,
+            last_line,
+            err: new JobRunnerError(
+                object_name,
+                event_name,
+                error_site_script,
+                error_site_line_num,
+                stacktrace_lines
+            )
+        };
+
+    } catch (err) {
+
+        console.error('Spaghetti code I had no faith in has indeed failed (failed to parse potential runner error message):', err);
+
+        return null;
+    }
 
 }

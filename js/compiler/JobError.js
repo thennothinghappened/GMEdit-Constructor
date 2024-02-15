@@ -72,10 +72,20 @@ export class JobCompilerError extends JobError {
 export class JobRunnerError extends JobError {
 
     /**
-     * @param {String} data 
+     * @param {String} object 
+     * @param {String} event 
+     * @param {String} script 
+     * @param {String} line_number 
+     * @param {String[]} stacktrace 
      */
-    constructor(data) {
+    constructor(object, event, script, line_number, stacktrace) {
         super();
+
+        this.object = object;
+        this.event = event;
+        this.script = script;
+        this.line_number = line_number;
+        this.stacktrace = stacktrace;
     }
 
     /**
@@ -90,54 +100,34 @@ export class JobRunnerError extends JobError {
 
         e.appendChild(title);
 
-        const body = document.createElement('pre');
-        body.textContent = this.err_data.toString();
+        const blurb1 = document.createElement('p');
+        blurb1.textContent = `On line ${this.line_number} of script ${this.script},`;
 
-        e.appendChild(body);
+        e.appendChild(blurb1);
 
-        return e;
+        const blurb2 = document.createElement('p');
+        blurb2.textContent = `In ${this.event} of object ${this.object}:`;
 
-    }
+        e.appendChild(blurb2);
 
-    toString() {
-        return `Job Runner Error: ${this.err_data}`;
-    }
+        const stacktrace = document.createElement('pre');
+        stacktrace.textContent = this.stacktrace.join('\n');
 
-}
-
-export class JobPermissionError extends JobError {
-
-    /**
-     * @param {String} data 
-     */
-    constructor(data) {
-        super();
-        this.data = data;
-    }
-
-    /**
-     * Get this error nicely formatted as HTML.
-     */
-    displayHTML() {
-        
-        const e = document.createElement('div');
-
-        const title = document.createElement('h1');
-        title.textContent = 'Runner Error';
-
-        e.appendChild(title);
-
-        const body = document.createElement('pre');
-        body.textContent = this.err_data.toString();
-
-        e.appendChild(body);
+        e.appendChild(stacktrace);
 
         return e;
 
     }
 
     toString() {
-        return `Job Runner Error: ${this.err_data}`;
+
+return `Runner Error:
+
+On line ${this.line_number} of script ${this.script},
+In ${this.event} of object ${this.object}:
+
+${this.stacktrace.join('\n')}`;
+
     }
 
 }
