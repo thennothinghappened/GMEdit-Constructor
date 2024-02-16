@@ -178,7 +178,9 @@ export class Preferences {
 
                 if (!version_res.ok) {
 
-                    console.error(version_res.err);
+                    const err = new Err(`Failed to parse an ${type} runtime version name for runtime at '${path}'`, version_res.err);
+                    console.warn(err.toString());
+
                     return null;
                 }
 
@@ -189,7 +191,7 @@ export class Preferences {
                 };
 
             })
-            .filter(runtime => runtime !== null)
+            .filter(/** @return {runtime is RuntimeInfo} */ (runtime) => runtime !== null)
             .sort((a, b) => b.version.compare(a.version));
 
         // Search each result to check if its a valid runtime.

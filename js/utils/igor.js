@@ -122,24 +122,32 @@ export class RuntimeVersion {
  */
 export function runtime_version_parse(str) {
 
-    const split = str
-        .split('runtime-')[1]
-        .split('.');
+    const expected_format = 'runtime-year.month.major.patch';
 
-    if (split.length !== 4) {
+    const split = str.split('runtime-');
+
+    if (split.length !== 2) {
         return {
             ok: false,
-            err: new Err(`Expected runtime version to be in format 'year.month.major.patch' - 4 values, found '${str}' - ${split.length} values.`)
+            err: new Err(`Expected runtime version to be in format '${expected_format}', found '${str}'`)
+        }
+    }
+
+    /** @type {[number, number, number, number]} */
+    // @ts-ignore
+    const numbers = split[1]
+        .split('.')
+        .map(number => Number(number));
+
+    if (numbers.length !== 4) {
+        return {
+            ok: false,
+            err: new Err(`Expected runtime version to be in format '${expected_format}' - 4 values, found '${str}' - ${numbers.length} values.`)
         };
     }
 
-    const year  = Number(split[0]);
-    const month = Number(split[1]);
-    const major = Number(split[2]);
-    const build = Number(split[3]);
-
-    for (const value of [year, month, major, build]) {
-        if (isNaN(value)) {
+    for (const number of numbers) {
+        if (isNaN(number)) {
             return {
                 ok: false,
                 err: new Err(`String '${str}' has a NaN runtime value`)
@@ -149,12 +157,7 @@ export function runtime_version_parse(str) {
 
     return {
         ok: true,
-        data: new RuntimeVersion(
-            year,
-            month,
-            major,
-            build
-        )
+        data: new RuntimeVersion(...numbers)
     };
 
 }
