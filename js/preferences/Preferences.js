@@ -159,7 +159,7 @@ export class Preferences {
         if (!dir_res.ok) {
             return {
                 ok: false,
-                err: new Err(`Failed to read search path '${opts.search_path}'`, dir_res.err),
+                err: new Err(`Failed to read search path '${opts.search_path}': ${dir_res.err}`),
             };
         }
 
@@ -230,10 +230,10 @@ export class Preferences {
                 try {
                     loaded_prefs = JSON.parse(res.data);
                 } catch (err) {
-                    console.error('Failed to read preferences:', err);
+                    console.error(`Failed to read preferences: ${err}`);
                 }
             } else {
-                console.error('Failed to read preferences:', res.err);
+                console.error(`Failed to read preferences: ${res.err}`);
             }
         }
 

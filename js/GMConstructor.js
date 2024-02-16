@@ -97,7 +97,7 @@ export class GMConstructor {
                 const res = await this.preferences.loadRuntimeList(type);
 
                 if (!res.ok) {
-                    console.error('Failed to load runtime list:', res.err);
+                    console.error(`Failed to load runtime list: ${res.err}`);
                     return;
                 }
 
@@ -154,7 +154,7 @@ export class GMConstructor {
         const runtime_res = this.#getProjectRuntime(project);
 
         if (!runtime_res.ok) {
-            console.error('Failed to find runtime for project:', runtime_res.err);
+            console.error(`Failed to find runtime for project: ${runtime_res.err}`);
             return;
         }
 
@@ -168,7 +168,7 @@ export class GMConstructor {
         });
 
         if (!res.ok) {
-            console.error('Failed to run Igor job:', res.err);
+            console.error(`Failed to run Igor job: ${res.err}`);
             return;
         }
 
@@ -251,19 +251,19 @@ export class GMConstructor {
         if (stable_res.ok) {
             runtimes.Stable = stable_res.data;
         } else {
-            console.debug('Failed to load Stable runtimes list', stable_res.err);
+            console.debug(`Failed to load Stable runtimes list: ${stable_res.err}`);
         }
 
         if (beta_res.ok) {
             runtimes.Beta = beta_res.data;
         } else {
-            console.debug('Failed to load Beta runtimes list', beta_res.err);
+            console.debug(`Failed to load Beta runtimes list: ${beta_res.err}`);
         }
 
         if (lts_res.ok) {
             runtimes.LTS = lts_res.data;
         } else {
-            console.debug('Failed to load LTS runtimes list', lts_res.err);
+            console.debug(`Failed to load LTS runtimes list: ${lts_res.err}`);
         }
 
         // Setting up compilation //
