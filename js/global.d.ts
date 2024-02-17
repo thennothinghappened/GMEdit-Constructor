@@ -103,7 +103,7 @@ declare type GMPlugin = {
 
 declare let gmConstructor: GMConstructor;
 
-declare type GMEdit_Event =
+declare type GMEditEvent =
     'preferencesBuilt'          |
     'projectPropertiesBuilt'    |
     'projectOpen'               |
@@ -111,8 +111,8 @@ declare type GMEdit_Event =
 
 declare class GMEdit {
     static register = function(name: string, body: GMPlugin) {}
-    static on = function(event: GMEdit_Event, callback: (event: Event) => void) {}
-    static off = function(event: GMEdit_Event, callback: (event: Event) => void) {}
+    static on = function(event: GMEditEvent, callback: (event: Event) => void) {}
+    static off = function(event: GMEditEvent, callback: (event: Event) => void) {}
 }
 
 declare class Electron_App {
@@ -173,7 +173,17 @@ declare type GMLProject = {
     config: string;
     dir: string;
     path: string;
+    properties: Object;
     isGMS23: boolean;
+}
+
+declare type GMLProjectYY = {
+    configs: GMLProjectConfig;
+}
+
+declare type GMLProjectConfig = {
+    children: GMLProjectConfig[];
+    name: string;
 }
 
 declare interface GMEditGMLProject {

@@ -1,7 +1,8 @@
 import * as compileController from './compiler/igor-controller.js';
 import { HamburgerOptions } from './ui/HamburgerOptions.js';
-import { project_current_get, open_files_save } from './utils/editor.js';
+import { project_current_get, open_files_save } from './utils/project.js';
 import * as preferences from './preferences/Preferences.js';
+import * as projectProperties from './preferences/ProjectProperties.js';
 import * as igor from './compiler/igor-paths.js';
 import { PreferencesMenu } from './ui/PreferencesMenu.js';
 import { Err } from './utils/Err.js';
@@ -172,6 +173,8 @@ export class GMConstructor {
             };
         }
 
+        projectProperties.__setup__();
+
         return {
             ok: true,
             data: new GMConstructor()
@@ -183,8 +186,9 @@ export class GMConstructor {
      */
     async cleanup() {
 
-        preferences.cleanup();
-        compileController.cleanup();
+        preferences.__cleanup__();
+        compileController.__cleanup__();
+        projectProperties.__cleanup__();
         this.hamburgerOptions.cleanup();
         
     }

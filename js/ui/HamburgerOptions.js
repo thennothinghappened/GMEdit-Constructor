@@ -1,4 +1,4 @@
-import { project_is_open } from '../utils/editor.js';
+import { project_is_open } from '../utils/project.js';
 
 const AceCommands = $gmedit['ace.AceCommands'];
 

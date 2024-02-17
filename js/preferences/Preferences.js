@@ -341,6 +341,6 @@ export async function __setup__() {
 /**
  * Called on deregistering the plugin.
  */
-export function cleanup() {
+export function __cleanup__() {
     return;
 }

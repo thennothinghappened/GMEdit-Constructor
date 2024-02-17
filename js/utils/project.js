@@ -4,7 +4,7 @@ const ChromeTabs = $gmedit['ui.ChromeTabs'];
 
 /**
  * Get the currently open project.
- * @returns The current project
+ * @returns {GMLProject|undefined}
  */
 export function project_current_get() {
     const proj = $gmedit['gml.Project'].current;
@@ -46,4 +46,25 @@ export function tab_current_get() {
 
     
 
+}
+
+/**
+ * Get the config tree for a project.
+ * @param {GMLProject} project 
+ * @returns {GMLProjectConfig}
+ */
+export function project_get_config_tree(project) {
+    return project_read_yy(project).configs;
+}
+
+/**
+ * Read the YY file of a given project.
+ * Code is by YAL's suggestion.
+ * 
+ * @param {GMLProject} project 
+ * @returns {GMLProjectYY}
+ */
+function project_read_yy(project) {
+    // @ts-ignore
+    return project.readYyFileSync(project.name)
 }

@@ -3,7 +3,7 @@
  * and starting new ones on projects.
  */
 
-import { project_current_get } from '../utils/editor.js';
+import { project_current_get } from '../utils/project.js';
 import { CompileLogViewer } from '../ui/editors/CompileLogViewer.js';
 import { Job } from './job/Job.js';
 import { igor_platform_cmd_name } from './igor-paths.js';
@@ -104,6 +104,6 @@ function job_flags_get(project, runtime_path, settings) {
     };
 }
 
-export function cleanup() {
+export function __cleanup__() {
     jobs.forEach(job => job.stop());
 }
