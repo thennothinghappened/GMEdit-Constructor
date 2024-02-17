@@ -8,8 +8,10 @@ export class Job {
 
     /** @type {IgorSettings} */
     #settings;
+
     /** @type {import('node:child_process').ChildProcess} */
     #process;
+    
     /** @type {GMLProject} */
     #project;
 
@@ -81,6 +83,24 @@ export class Job {
      */
     stop = () => {
         this.#process.kill();
+    }
+
+    /**
+     * Returns a promise that resolves when this job is complete.
+     * @returns {Promise<void>}
+     */
+    finished() {
+
+        if (this.stopped) {
+            return Promise.resolve();
+        }
+
+        return new Promise((res) => {
+            this.on('stop', () => {
+                res(undefined);
+            });
+        });
+
     }
 
     /** The `stdout` output of the job's process. */

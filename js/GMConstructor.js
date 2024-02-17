@@ -1,12 +1,11 @@
-import { CompileController } from './compiler/CompileController.js';
-// import { PreferencesMenu } from './preferences/PreferencesMenu.js';
-import { HamburgerOptions } from './HamburgerOptions.js';
-import { getCurrentProject, saveOpenFiles } from './utils/editor.js';
+import * as compileController from './compiler/igor-controller.js';
+import { HamburgerOptions } from './ui/HamburgerOptions.js';
+import { project_current_get, open_files_save } from './utils/editor.js';
 import * as preferences from './preferences/Preferences.js';
-import * as igor from './utils/igor.js';
-import { PreferencesMenu } from './preferences/PreferencesMenu.js';
+import * as igor from './compiler/igor-paths.js';
+import { PreferencesMenu } from './ui/PreferencesMenu.js';
 import { Err } from './utils/Err.js';
-import { ConstructorControlPanel } from './editors/ConstructorControlPanel.js';
+import { ConstructorControlPanel } from './ui/editors/ConstructorControlPanel.js';
 
 /**
  * Name of the plugin 
@@ -26,25 +25,13 @@ export let plugin_version;
 export class GMConstructor {
 
     /**
-     * Controller and handler for compile jobs.
-     * 
-     * @type {CompileController}
-     */
-    compileController;
-
-    /**
      * Quick actions menu.
      * 
      * @type {HamburgerOptions}
      */
     menu;
 
-    /**
-     * @param {CompileController} compileController
-     */
-    constructor(compileController) {
-
-        this.compileController = compileController;
+    constructor() {
 
         this.menu = new HamburgerOptions(
             this.onControlPanel,
@@ -58,10 +45,10 @@ export class GMConstructor {
 
     /**
      * Run a task on a given (or current) project.
-     * @param {IgorVerb} verb
+     * @param {IgorSettings} settings
      * @param {GMLProject} [project] 
      */
-    #runTask(verb, project = getCurrentProject()) {
+    async #runTask(settings, project = project_current_get()) {
 
         if (project === undefined) {
             return;
@@ -75,20 +62,17 @@ export class GMConstructor {
         }
 
         if (preferences.save_on_run_task_get()) {
-            saveOpenFiles();
+            open_files_save();
         }
 
-        const res = this.compileController.runJob(project, runtime_res.data, {
-            verb,
-            mode: 'VM'
-        });
+        const res = await compileController.job_run(project, runtime_res.data, settings);
 
         if (!res.ok) {
             console.error(`Failed to run Igor job: ${res.err}`);
             return;
         }
 
-        this.compileController.openEditorForJob(res.data, preferences.reuse_compiler_tab_get());
+        compileController.job_open_editor(res.data, preferences.reuse_compiler_tab_get());
     }
 
     /**
@@ -130,16 +114,35 @@ export class GMConstructor {
         ConstructorControlPanel.view();
     }
 
+    // yes this is VERY temporary
     compileCurrent = () => {
-        this.#runTask('Package');
+        this.#runTask({
+            platform: {win32: 'Windows', darwin: 'Mac'}[process.platform],
+            verb: 'Package',
+            runtime: 'VM',
+            threads: 8,
+            configName: 'Default'
+        });
     }
 
     cleanCurrent = () => {
-        this.#runTask('Clean');
+        this.#runTask({
+            platform: {win32: 'Windows', darwin: 'Mac'}[process.platform],
+            verb: 'Clean',
+            runtime: 'VM',
+            threads: 8,
+            configName: 'Default'
+        });
     }
 
     runCurrent = () => {
-        this.#runTask('Run');
+        this.#runTask({
+            platform: {win32: 'Windows', darwin: 'Mac'}[process.platform],
+            verb: 'Run',
+            runtime: 'VM',
+            threads: 8,
+            configName: 'Default'
+        });
     }
 
     /**
@@ -152,10 +155,12 @@ export class GMConstructor {
     static async create(_plugin_name, _plugin_version, node_path, node_child_process) {
 
         join_path = node_path.join;
-        igor.__setup__();
+        spawn = node_child_process.spawn;
 
         plugin_name = _plugin_name;
         plugin_version = _plugin_version;
+
+        igor.__setup__();
 
         // Setting up preferences //
         const preferences_res = await preferences.__setup__();
@@ -167,12 +172,9 @@ export class GMConstructor {
             };
         }
 
-        // Setting up compilation //
-        const compile_controller = new CompileController(node_child_process.spawn);
-
         return {
             ok: true,
-            data: new GMConstructor(compile_controller)
+            data: new GMConstructor()
         };
     }
 
@@ -182,7 +184,7 @@ export class GMConstructor {
     async cleanup() {
 
         preferences.cleanup();
-        this.compileController.cleanup();
+        compileController.cleanup();
         this.menu.cleanup();
         
     }
@@ -194,3 +196,10 @@ export class GMConstructor {
  * @type {import('node:path').join}
  */
 export let join_path;
+
+
+/** 
+ * Reference to NodeJS spawn.
+ * @type {import('node:child_process').spawn} 
+ */
+export let spawn;

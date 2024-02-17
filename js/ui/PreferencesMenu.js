@@ -1,6 +1,6 @@
 import { plugin_name, plugin_version } from '../GMConstructor.js';
 import { UIDropdownMutate } from '../utils/ui.js';
-import * as preferences from './Preferences.js';
+import * as preferences from '../preferences/Preferences.js';
 
 const UIPreferences = $gmedit['ui.Preferences'];
 

@@ -6,7 +6,7 @@ const ChromeTabs = $gmedit['ui.ChromeTabs'];
  * Get the currently open project.
  * @returns The current project
  */
-export function getCurrentProject() {
+export function project_current_get() {
     const proj = $gmedit['gml.Project'].current;
     
     if (proj?.path === '') {
@@ -19,14 +19,14 @@ export function getCurrentProject() {
 /**
  * @returns Whether any project is currently open.
  */
-export function isProjectOpen() {
-    return getCurrentProject() !== undefined;
+export function project_is_open() {
+    return project_current_get() !== undefined;
 }
 
 /**
  * Saves all unsaved open files in the editor.
  */
-export function saveOpenFiles() {
+export function open_files_save() {
     const tabs = $gmedit['ui.ChromeTabs'].getTabs();
 
     tabs.forEach(editor => {
@@ -39,7 +39,7 @@ export function saveOpenFiles() {
 /**
  * Get the currently chosen open tab.
  */
-export function getCurrentTab() {
+export function tab_current_get() {
     
     const tabs = ChromeTabs.getTabs();
     const current_file = GmlFile.current;

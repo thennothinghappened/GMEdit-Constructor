@@ -1,4 +1,4 @@
-import { Job } from '../compiler/Job.js';
+import { Job } from '../../compiler/job/Job.js';
 import { ConstructorEditorView, ConstructorViewFileKind } from './ConstructorEditorView.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
@@ -37,6 +37,13 @@ export class ConstructorControlPanel extends ConstructorEditorView {
     constructor(file) {
 
         super(file);
+
+        this.element.classList.add('gm-constructor-control-panel');
+
+        const title = document.createElement('h1');
+        title.textContent = ConstructorControlPanel.tabName;
+
+        this.element.appendChild(title);
 
         
 

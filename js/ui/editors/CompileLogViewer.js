@@ -1,4 +1,4 @@
-import { Job } from '../compiler/Job.js';
+import { Job } from '../../compiler/job/Job.js';
 import { ConstructorEditorView, ConstructorViewFileKind } from './ConstructorEditorView.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];

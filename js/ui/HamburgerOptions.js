@@ -1,4 +1,4 @@
-import { isProjectOpen } from './utils/editor.js';
+import { project_is_open } from '../utils/editor.js';
 
 const AceCommands = $gmedit['ace.AceCommands'];
 
@@ -67,7 +67,7 @@ export class HamburgerOptions {
         });
 
         this.#addMenuItems();
-        this.#setEnableMenuItems(isProjectOpen());
+        this.#setEnableMenuItems(project_is_open());
 
         this.#commands = {
             control_panel: {
@@ -187,11 +187,11 @@ export class HamburgerOptions {
     }
 
     #onProjectOpen = () => {
-        this.#setEnableMenuItems(isProjectOpen());
+        this.#setEnableMenuItems(project_is_open());
     }
 
     #onProjectClose = () => {
-        this.#setEnableMenuItems(isProjectOpen());
+        this.#setEnableMenuItems(project_is_open());
     }
 
     /**

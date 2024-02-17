@@ -1,12 +1,13 @@
 /**
- * Handler for plugin preferences file, asnd
- * project-specific preferences handling.
+ * Handler for plugin preferences file
+ * and runtime list.
  */
 
-import { def_runtime_paths, igor_path_segment, runtime_version_parse } from '../utils/igor.js';
+import { def_runtime_paths, igor_path_segment } from '../compiler/igor-paths.js';
 import { fileExists, readFile, readdir, writeFile } from '../utils/file.js';
 import { Err } from '../utils/Err.js';
 import { join_path, plugin_name } from '../GMConstructor.js';
+import { runtime_version_parse } from '../compiler/RuntimeVersion.js';
 
 /** @type {RuntimeType[]} */
 export const valid_runtime_types = ['Stable', 'Beta', 'LTS'];

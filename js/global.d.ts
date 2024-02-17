@@ -56,9 +56,35 @@ declare type Result<T> =
     { ok: false, err: Err }     ;
 
 declare type IgorSettings = {
+
+    platform: IgorPlatform;
     verb: IgorVerb;
-    mode: 'VM'|'YYC';
+    runtime: 'VM'|'YYC';
+    threads: number;
+    configName: string;
+
+    /**
+     * Launch the executable on the target device after building;
+     * same as the "Create Executable and Launch" option in the IDE
+     */
+    launch: boolean;
+
 }
+
+declare type IgorPlatform =
+    'OperaGX'           |
+    'Windows'           |
+    'Mac'               |
+    'Linux'             |
+    'HTML5'             |
+    'ios'               |
+    'Android'           |
+    'tvos'              |
+    'ps4'               |
+    'ps5'               |
+    'XBoxOne'           |
+    'XBoxOneSeriesXS'   |
+    'Switch'            ;
 
 declare type IgorVerb = 
     'Run'       |
