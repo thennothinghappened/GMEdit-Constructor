@@ -11,7 +11,10 @@
     const node_path = require('node:path');
 
     const load = (async () => {
-        await window.GMConstructor?.cleanup();
+
+        if ('GMConstructor' in window) {
+            await window.GMConstructor.cleanup();
+        }
 
         const { GMConstructor } = await import('./js/GMConstructor.js');
         window.GMConstructor = await GMConstructor.create(plugin_name, plugin_version, node_path, node_child_process);

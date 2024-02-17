@@ -4,6 +4,7 @@
  * @type {{[key in NodeJS.Platform]: {ext: string, path_name: string, cmd: string}}}
  */
 
+import { join_path } from '../GMConstructor.js';
 import { Err } from './Err.js';
 
 // @ts-ignore
@@ -51,12 +52,10 @@ const def_runtime_platform_paths = {
 export const def_runtime_paths = def_runtime_platform_paths[process.platform];
 
 /**
- * Get the local-to-runtime Igor path for the current platform & architecture.
- * @param {import('node:path').join} join_path
+ * The local-to-runtime Igor path for the current platform & architecture.
+ * @type {string}
  */
-export function igorPath(join_path) {
-    return join_path('bin', 'igor', igor_platform_map[process.platform].path_name, process.arch, `Igor${igor_platform_map[process.platform].ext}`);
-}
+export let igor_path_segment;
 
 /**
  * Igor platform name for our platform.
@@ -160,4 +159,11 @@ export function runtime_version_parse(str) {
         data: new RuntimeVersion(...numbers)
     };
 
+}
+
+/**
+ * Called when the plugin is loading.
+ */
+export function __setup__() {
+    igor_path_segment = join_path('bin', 'igor', igor_platform_map[process.platform].path_name, process.arch, `Igor${igor_platform_map[process.platform].ext}`);
 }

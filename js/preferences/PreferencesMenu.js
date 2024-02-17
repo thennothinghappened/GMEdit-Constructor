@@ -1,5 +1,6 @@
+import { plugin_name, plugin_version } from '../GMConstructor.js';
 import { UIDropdownMutate } from '../utils/ui.js';
-import { valid_runtime_types } from './Preferences.js';
+import * as preferences from './Preferences.js';
 
 const UIPreferences = $gmedit['ui.Preferences'];
 
@@ -11,124 +12,10 @@ export class PreferencesMenu {
     /** @type {string} */
     #ele_css_query;
 
-    #plugin_version;
+    constructor() {
 
-    /**
-     * Function to get the chosen default runtime type.
-     * @type {() => string}
-     */
-    #getRuntimeType;
-
-    /**
-     * Function to set the chosen runtime type to use.
-     * @type {(type: RuntimeType) => Promise<void>}
-     */
-    #setRuntimeType;
-
-    /**
-     * Function to get the search path for a given type.
-     * @type {(type: RuntimeType) => string}
-     */
-    #getRuntimeSearchPath;
-
-    /**
-     * Function to set the search path for a given runtime type.
-     * @type {(type: RuntimeType, search_path: string) => Promise<void>}
-     */
-    #setRuntimeSearchPath;
-    
-    /**
-     * Function to get a list of runtime version names for a given runtime type.
-     * @type {(type: RuntimeType) => string[]}
-     */
-    #getRuntimeVersions;
-
-    /**
-     * Function to get the chosen runtime version for a given type.
-     * @type {(type: RuntimeType) => string?}
-     */
-    #getRuntimeChoice;
-
-    /**
-     * Function to set the chosen runtime version for a given type.
-     * @type {(type: RuntimeType, choice: string) => Promise<void>}
-     */
-    #setRuntimeChoice;
-
-    /**
-     * Function to get whether we should save upon running a task.
-     * @type {() => boolean}
-     */
-    #getSaveOnRunTask;
-
-    /**
-     * Function to set whether we should save upon running a task.
-     * @type {(save_on_run_task: boolean) => Promise<void>}
-     */
-    #setSaveOnRunTask;
-
-    /**
-     * Function to get whether we should reuse the compiler tab between runs.
-     * @type {() => boolean}
-     */
-    #getReuseCompilerTab;
-
-    /**
-     * Function to set whether we should reuse the compiler tab between runs.
-     * @type {(reuse_compiler_tab: boolean) => Promise<void>}
-     */
-    #setReuseCompilerTab;
-
-    /**
-     * @param {string} plugin_name 
-     * @param {string} plugin_version
-     * 
-     * @param {() => string} getRuntimeType
-     * @param {(type: RuntimeType) => string[]} getRuntimeVersions
-     * @param {(type: RuntimeType) => string?} getRuntimeChoice
-     * @param {(type: RuntimeType) => string} getRuntimeSearchPath
-     * @param {(type: RuntimeType, search_path: string) => Promise<void>} setRuntimeSearchPath
-     * @param {(type: RuntimeType, choice: string) => Promise<void>} setRuntimeChoice
-     * @param {(type: RuntimeType) => Promise<void>} setRuntimeType
-     * 
-     * @param {() => boolean} getSaveOnRunTask 
-     * @param {(save_on_run_task: boolean) => Promise<void>} setSaveOnRunTask 
-     * @param {() => boolean} getReuseCompilerTab 
-     * @param {(reuse_compiler_tab: boolean) => Promise<void>} setReuseCompilerTab 
-     */
-    constructor(
-        plugin_name,
-        plugin_version,
-
-        getRuntimeType,
-        getRuntimeVersions,
-        getRuntimeChoice,
-        getRuntimeSearchPath,
-        setRuntimeSearchPath,
-        setRuntimeChoice,
-        setRuntimeType,
-
-        getSaveOnRunTask,
-        setSaveOnRunTask,
-        getReuseCompilerTab,
-        setReuseCompilerTab
-    ) {
-
-        this.#plugin_version = plugin_version;
         this.#ele_css_query = `.plugin-settings[for="${plugin_name}"]`;
-
-        this.#getRuntimeType = getRuntimeType;
-        this.#getRuntimeVersions = getRuntimeVersions;
-        this.#getRuntimeChoice = getRuntimeChoice;
-        this.#getRuntimeSearchPath = getRuntimeSearchPath;
-        this.#setRuntimeSearchPath = setRuntimeSearchPath;
-        this.#setRuntimeChoice = setRuntimeChoice;
-        this.#setRuntimeType = setRuntimeType;
-
-        this.#getSaveOnRunTask = getSaveOnRunTask;
-        this.#setSaveOnRunTask = setSaveOnRunTask;
-        this.#getReuseCompilerTab = getReuseCompilerTab;
-        this.#setReuseCompilerTab = setReuseCompilerTab;
+        this.preferences = preferences;
 
         if (!this.#createMenu(document.body)) {
             GMEdit.on('preferencesBuilt', this.#onPreferencesBuilt);
@@ -152,28 +39,28 @@ export class PreferencesMenu {
         UIPreferences.addCheckbox(
             prefs_group,
             'Save automatically when running a task',
-            this.#getSaveOnRunTask(),
-            this.#setSaveOnRunTask
+            preferences.save_on_run_task_get(),
+            preferences.save_on_run_task_set
         );
 
         UIPreferences.addCheckbox(
             prefs_group,
             'Reuse compiler output tab between runs',
-            this.#getReuseCompilerTab(),
-            this.#setReuseCompilerTab
+            preferences.save_on_run_task_get(),
+            preferences.reuse_compiler_tab_set
         );
 
         /** @type {boolean} */
         UIPreferences.addDropdown(
             prefs_group,
             'Default Runtime type',
-            this.#getRuntimeType(),
-            valid_runtime_types,
+            preferences.global_runtime_type_get(),
+            preferences.valid_runtime_types,
             // @ts-ignore
-           this.#setRuntimeType
+            preferences.global_runtime_type_set
         )
 
-        for (const type of valid_runtime_types) {
+        for (const type of preferences.valid_runtime_types) {
 
             const group = UIPreferences.addGroup(prefs_group, type);
 
@@ -183,33 +70,54 @@ export class PreferencesMenu {
             UIPreferences.addInput(
                 group,
                 'Search Path',
-                this.#getRuntimeSearchPath(type),
+                preferences.runtime_search_path_get(type),
                 async (path) => {
                     // Workaround for being called twice for some reason?
-                    if (path === this.#getRuntimeSearchPath(type)) {
+                    if (path === preferences.runtime_search_path_get(type)) {
                         return;
                     }
 
-                    await this.#setRuntimeSearchPath(type, path);
-                    UIDropdownMutate(version_dropdown, this.#getRuntimeVersions(type), this.#getRuntimeChoice(type) ?? '');
+                    await preferences.runtime_search_path_set(type, path);
+                    UIDropdownMutate(
+                        version_dropdown,
+                        this.#runtimeVersionStringsGetForType(type),
+                        preferences.global_runtime_choice_get(type) ?? ''
+                    );
                 }
             );
 
             version_dropdown = UIPreferences.addDropdown(
                 group,
                 'Version',
-                this.#getRuntimeChoice(type) ?? '',
-                this.#getRuntimeVersions(type),
-                async (choice) => {
-                    await this.#setRuntimeChoice(type, choice);
+                preferences.global_runtime_choice_get(type) ?? '',
+                this.#runtimeVersionStringsGetForType(type),
+                (choice) => {
+                    preferences.global_runtime_choice_set(type, choice);
                 }
             );
 
         }
 
-        UIPreferences.addText(prefs_group, `Version: ${this.#plugin_version}`);
+        UIPreferences.addText(prefs_group, `Version: ${plugin_version}`);
 
         return true;
+    }
+
+    /**
+     * Get an array of version strings for the given runtime type.
+     * @param {RuntimeType} type 
+     * @returns 
+     */
+    #runtimeVersionStringsGetForType(type) {
+        
+        const runtimes = preferences.runtime_versions_get_for_type(type);
+
+        if (runtimes === null) {
+            return [];
+        }
+
+        return runtimes.map(runtime => runtime.version.toString());
+
     }
 
     /**

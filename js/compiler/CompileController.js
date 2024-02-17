@@ -36,7 +36,8 @@ export class CompileController {
         const flags = [
             `/project=${project.path}`,
             `/config=${project.config}`,
-            `/rp=${runtime_path}`
+            `/rp=${runtime_path}`,
+            `/runtime=${settings.mode}`
         ];
 
         switch (settings.verb) {
