@@ -51,10 +51,24 @@ export function tab_current_get() {
 /**
  * Get the config tree for a project.
  * @param {GMLProject} project 
- * @returns {GMLProjectConfig}
+ * @returns {GMLProjectYYConfig}
  */
-export function project_get_config_tree(project) {
+export function project_config_tree_get(project) {
     return project_read_yy(project).configs;
+}
+
+/**
+ * Returns the config tree as an array of config names.
+ * @param {GMLProjectYYConfig} config 
+ * @returns {string[]}
+ */
+export function project_config_tree_to_array(config) {
+
+    const arr = config.children.flatMap(child => project_config_tree_to_array(child));
+    arr.push(config.name);
+
+    return arr.reverse();
+
 }
 
 /**

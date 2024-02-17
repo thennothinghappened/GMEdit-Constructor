@@ -1,8 +1,12 @@
 import { Job } from '../../compiler/job/Job.js';
+import { project_config_tree_get, project_config_tree_to_array, project_current_get, project_is_open } from '../../utils/project.js';
+import { h1 } from '../components/headings.js';
 import { ConstructorEditorView, ConstructorViewFileKind } from './ConstructorEditorView.js';
+import * as projectProperties from '../../preferences/ProjectProperties.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];
+const UIPreferences = $gmedit['ui.Preferences'];
 
 /**
  * File type for the control panel.
@@ -35,17 +39,57 @@ export class ConstructorControlPanel extends ConstructorEditorView {
      * @param {GmlFile} file
      */
     constructor(file) {
-
+        
         super(file);
 
         this.element.classList.add('gm-constructor-control-panel');
 
-        const title = document.createElement('h1');
-        title.textContent = ConstructorControlPanel.tabName;
+        this.element.appendChild(h1(ConstructorControlPanel.tabName));
 
-        this.element.appendChild(title);
-
+        this.projectSettings = UIPreferences.addGroup(this.element, 'Project Settings');
+        this.projectSettings.hidden = true;
         
+        GMEdit.on('projectOpen', this.onOpenProject);
+        GMEdit.on('projectClose', this.onCloseProject);
+
+        if (project_is_open()) {
+            this.onOpenProject();
+        }
+
+    }
+
+    onOpenProject = () => {
+
+        const project = project_current_get();
+
+        if (project === undefined) {
+            return;
+        }
+
+        this.projectSettingsSetup(project);
+        this.projectSettings.hidden = false;
+
+    }
+
+    onCloseProject = () => {
+        this.projectSettings.hidden = true;
+    }
+
+    /**
+     * Setup project-specific settings.
+     * @param {GMLProject} project 
+     */
+    projectSettingsSetup(project) {
+
+        const configs = project_config_tree_get(project);
+
+        UIPreferences.addDropdown(
+            this.projectSettings,
+            'Compile Config',
+            projectProperties.config_name_get(),
+            project_config_tree_to_array(configs),
+            projectProperties.config_name_set
+        );
 
     }
 
@@ -68,6 +112,11 @@ export class ConstructorControlPanel extends ConstructorEditorView {
         const file = new GmlFile(this.tabName, null, this.fileKind);
         return GmlFile.openTab(file);
 
+    }
+
+    destroy = () => {
+        GMEdit.off('projectOpen', this.onOpenProject);
+        GMEdit.off('projectClose', this.onCloseProject);
     }
 
 }

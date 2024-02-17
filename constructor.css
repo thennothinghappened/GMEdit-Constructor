@@ -1,6 +1,7 @@
 
 .gm-constructor-viewer {
-    display: block;
+    display: flex;
+    flex-direction: column;
 }
 
 .gm-constructor-control-panel {
@@ -15,17 +16,20 @@
 .gm-constructor-info {
     display: flex;
     flex-direction: row;
-    column-gap: 4px;
-
-    padding: 8px;
+    justify-content: space-between;
 }
 
 .gm-constructor-log {
-    overflow: scroll;
+
     flex-grow: 1;
+    overflow: scroll;
 
     padding: 8px;
     height: 70%;
+}
+
+.gm-constructor-log pre {
+    
 }
 
 .gm-constructor-errors {

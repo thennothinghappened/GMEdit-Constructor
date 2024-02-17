@@ -16,6 +16,18 @@ declare type PreferencesData = {
     reuse_compiler_tab: boolean;
 }
 
+/**
+ * Project-specific preferences data!
+ */
+declare type ProjectPreferencesData = {
+
+    /** 
+     * Name of the active config to compile with.
+     */
+    config_name: string;
+
+};
+
 declare type RuntimeType = 
     'Stable'    |
     'Beta'      |
@@ -218,11 +230,31 @@ declare class Electron_MenuItem {
 }
 
 declare interface GMEditUIPreferences {
-    addText:        (el: HTMLElement, label: string) => HTMLElement;
-    addCheckbox:    (el: HTMLElement, label: string, value: boolean, update: (value: boolean) => void) => HTMLElement;
-    addInput:       (el: HTMLElement, label: string, value: string, update: (value: string) => void) => HTMLElement;
-    addDropdown:    (el: HTMLElement, label: string, value: string, choices: string[], update: (value: string) => void) => HTMLElement;
-    addGroup:       (el: HTMLElement, label: string) => HTMLElement;
+    addText:        (parent: HTMLElement, label: string) => HTMLElement;
+    addWiki:        (parent: HTMLElement, url: string, label: string) => HTMLElement;
+    addCheckbox:    (parent: HTMLElement, label: string, value: boolean, update: (value: boolean) => void) => HTMLElement;
+    addInput:       (parent: HTMLElement, label: string, value: string, update: (value: string) => void) => HTMLElement;
+    addDropdown:    (parent: HTMLElement, label: string, value: string, choices: string[], update: (value: string) => void) => HTMLElement;
+    addGroup:       (parent: HTMLElement, label: string) => HTMLElement;
+    addButton:      (parent: HTMLElement, text: string, callback: () => void) => HTMLDivElement;
+    addBigButton:   (parent: HTMLElement, text: string, callback: () => void) => HTMLDivElement;
+}
+
+declare interface GMEditProjectProperties {
+
+    load(project: GMLProject): GMLProjectPropertiesData;
+    save(project: GMLProject, data: GMLProjectPropertiesData);
+    open();
+
+}
+
+declare type GMLProjectPropertiesData = {
+	
+	/** API override */
+	gmlVersion?: string;
+
+    'GMEdit-Constructor'?: Partial<ProjectPreferencesData>;
+	
 }
 
 declare interface GMEditUIMainMenu {
@@ -235,16 +267,16 @@ declare type GMLProject = {
     config: string;
     dir: string;
     path: string;
-    properties: Object;
+    properties: GMLProjectPropertiesData;
     isGMS23: boolean;
 }
 
 declare type GMLProjectYY = {
-    configs: GMLProjectConfig;
+    configs: GMLProjectYYConfig;
 }
 
-declare type GMLProjectConfig = {
-    children: GMLProjectConfig[];
+declare type GMLProjectYYConfig = {
+    children: GMLProjectYYConfig[];
     name: string;
 }
 
@@ -492,6 +524,7 @@ declare interface ChromeTab extends HTMLDivElement {
 declare type $GMEdit = {
     'ui.Preferences': GMEditUIPreferences;
     'ui.MainMenu': GMEditUIMainMenu;
+    'ui.project.ProjectProperties': GMEditProjectProperties;
     'ui.ChromeTabs': ChromeTabs;
     'gml.Project': GMEditGMLProject;
     'editors.Editor': typeof Editor;

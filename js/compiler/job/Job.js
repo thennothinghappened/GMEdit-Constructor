@@ -56,6 +56,8 @@ export class Job {
     }
 
     #onExit = () => {
+
+        this.#stopped = true;
         
         Job.#notify(this.#listeners.stop, job_parse_stdout(this.stdout));
         this.#process.removeAllListeners();

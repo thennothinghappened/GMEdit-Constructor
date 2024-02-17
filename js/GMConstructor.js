@@ -122,7 +122,7 @@ export class GMConstructor {
             verb: 'Package',
             runtime: 'VM',
             threads: 8,
-            configName: 'Default'
+            configName: projectProperties.config_name_get()
         });
     }
 
@@ -132,7 +132,7 @@ export class GMConstructor {
             verb: 'Clean',
             runtime: 'VM',
             threads: 8,
-            configName: 'Default'
+            configName: projectProperties.config_name_get()
         });
     }
 
@@ -142,7 +142,7 @@ export class GMConstructor {
             verb: 'Run',
             runtime: 'VM',
             threads: 8,
-            configName: 'Default'
+            configName: projectProperties.config_name_get()
         });
     }
 

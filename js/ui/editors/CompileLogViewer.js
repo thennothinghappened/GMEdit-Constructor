@@ -3,6 +3,7 @@ import { ConstructorEditorView, ConstructorViewFileKind } from './ConstructorEdi
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];
+const UIPreferences = $gmedit['ui.Preferences'];
 
 /**
  * File type for a compile job.
@@ -42,9 +43,17 @@ export class CompileLogViewer extends ConstructorEditorView {
     /** @type {Job} */
     job;
 
+    /** @type {HTMLInputElement} */
     stop_btn;
+
+    /** @type {HTMLPreElement} */
     log;
+
+    /** @type {HTMLDivElement} */
     cmd;
+
+    /** @type {HTMLFieldSetElement} */
+    errors;
 
     /**
      * @param {GmlFile} file
@@ -54,37 +63,7 @@ export class CompileLogViewer extends ConstructorEditorView {
 
         super(file);
 
-        this.element.classList.add('gm-constructor-viewer');
-
-        const info = document.createElement('div');
-        info.className = 'gm-constructor-info';
-
-        this.stop_btn = document.createElement('input');
-        this.stop_btn.type = 'button';
-        this.stop_btn.value = 'Stop';
-        this.stop_btn.className = 'stop';
-
-        info.appendChild(this.stop_btn);
-
-        this.cmd = document.createElement('input');
-        this.cmd.type = 'text';
-        this.cmd.readOnly = true;
-        this.cmd.style.flexGrow = '1';
-
-        info.appendChild(this.cmd);
-
-        this.element.appendChild(info);
-
-        this.log = document.createElement('pre');
-        this.log.className = 'gm-constructor-log';
-
-        this.element.appendChild(this.log);
-
-        this.errors = document.createElement('div');
-        this.errors.className = 'gm-constructor-errors'
-
-        this.element.appendChild(this.errors);
-
+        this.uiCreate(job);
         this.watchJob(job);
     }
 
@@ -94,9 +73,6 @@ export class CompileLogViewer extends ConstructorEditorView {
     watchJob = (job) => {
 
         this.job = job;
-
-        this.log.textContent = '';
-        this.errors.innerHTML = '';
 
         this.job.on('stdout', (content) => {
 
@@ -113,19 +89,45 @@ export class CompileLogViewer extends ConstructorEditorView {
 
         this.job.on('stop', (errors) => {
 
+            const job_name = KConstructorOutput.getJobName(this.job);
+
             this.stop_btn.disabled = true;
-            this.cmd.value += ' - Finished';
-            this.file.rename(KConstructorOutput.getJobName(this.job), '');
+            this.cmd.textContent = job_name;
+
+            this.file.rename(job_name, '');
 
             errors?.forEach(err => this.errors.appendChild(err.displayHTML()));
 
         });
 
-        this.stop_btn.onclick = this.job.stop;
-        this.cmd.value = this.job.command;
-
     }
 
+    /**
+     * Create the page UI
+     * @param {Job} job 
+     */
+    uiCreate(job) {
+
+        this.element.innerHTML = '';
+        this.element.classList.add('gm-constructor-viewer');
+
+        const info = UIPreferences.addGroup(this.element, 'Info');
+        info.classList.add('gm-constructor-info');
+
+        this.stop_btn = UIPreferences.addBigButton(info, 'Stop', this.stopJob).querySelector('input');
+
+        this.cmd = UIPreferences.addText(info, KConstructorOutput.getJobName(job));
+        this.cmd.classList.add('gm-constructor-info-cmd');
+
+        this.log = document.createElement('pre');
+        this.log.className = 'gm-constructor-log';
+
+        this.element.appendChild(this.log);
+
+        this.errors = UIPreferences.addGroup(this.element, 'Errors');
+        this.errors.classList.add('gm-constructor-errors');
+
+    }
 
     /**
      * Set up an editor tab for a Job, and view it.
@@ -160,6 +162,7 @@ export class CompileLogViewer extends ConstructorEditorView {
         }
 
         compilerViewer.stopJob();
+        compilerViewer.uiCreate(job);
         compilerViewer.watchJob(job);
         
         return compilerViewer.file.tabEl.click();
