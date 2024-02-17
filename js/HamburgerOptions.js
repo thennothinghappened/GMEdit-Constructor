@@ -2,26 +2,35 @@ import { isProjectOpen } from './utils/editor.js';
 
 const AceCommands = $gmedit['ace.AceCommands'];
 
-export class Menu {
+export class HamburgerOptions {
 
     #menu_items;
 
     #menu_items_container;
 
-    /** @type {{ [key in 'compile'|'clean'|'run']: AceCommand }} */
+    /** @type {{ [key in 'control_panel'|'compile'|'clean'|'run']: AceCommand }} */
     #commands;
 
     /**
+     * @param {() => void} onControlPanel 
      * @param {() => void} onCompile 
      * @param {() => void} onClean 
      * @param {() => void} onRun 
+     * @param {string} [controlPanelKey] Shortcut to view the control panel
      * @param {string} [compileKey] Shortcut to compile project
      * @param {string} [cleanKey] Shortcut to clean project
      * @param {string} [runKey] Shortcut to run project
      */
-    constructor(onCompile, onClean, onRun, compileKey = 'Ctrl+F5', cleanKey = 'Ctrl+F7', runKey = 'F5') {
+    constructor(onControlPanel, onCompile, onClean, onRun, controlPanelKey = 'Ctrl+`', compileKey = 'Ctrl+F5', cleanKey = 'Ctrl+F7', runKey = 'F5') {
 
         this.#menu_items = {
+            control_panel: new Electron_MenuItem({
+                id: 'constructor-control_panel',
+                label: 'Control Panel',
+                accelerator: controlPanelKey,
+                click: onControlPanel,
+                enabled: true
+            }),
             compile: new Electron_MenuItem({
                 id: 'constructor-compile',
                 label: 'Compile',
@@ -50,6 +59,7 @@ export class Menu {
             label: 'Constructor',
             enabled: false,
             submenu: [
+                this.#menu_items.control_panel,
                 this.#menu_items.compile,
                 this.#menu_items.clean,
                 this.#menu_items.run
@@ -60,6 +70,12 @@ export class Menu {
         this.#setEnableMenuItems(isProjectOpen());
 
         this.#commands = {
+            control_panel: {
+                name: 'panel',
+                title: 'Control Panel',
+                bindKey: { win: controlPanelKey, mac: controlPanelKey },
+                exec: onControlPanel
+            },
             compile: {
                 name: 'compile',
                 title: 'Compile',
@@ -145,12 +161,14 @@ export class Menu {
     }
 
     #addCommands() {
+        AceCommands.add(this.#commands.control_panel);
         AceCommands.add(this.#commands.compile);
         AceCommands.add(this.#commands.clean);
         AceCommands.add(this.#commands.run);
     }
 
     #removeCommands() {
+        AceCommands.remove(this.#commands.control_panel);
         AceCommands.remove(this.#commands.compile);
         AceCommands.remove(this.#commands.clean);
         AceCommands.remove(this.#commands.run);

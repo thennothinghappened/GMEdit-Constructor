@@ -1,11 +1,12 @@
 import { CompileController } from './compiler/CompileController.js';
 // import { PreferencesMenu } from './preferences/PreferencesMenu.js';
-import { Menu } from './Menu.js';
+import { HamburgerOptions } from './HamburgerOptions.js';
 import { getCurrentProject, saveOpenFiles } from './utils/editor.js';
 import * as preferences from './preferences/Preferences.js';
 import * as igor from './utils/igor.js';
 import { PreferencesMenu } from './preferences/PreferencesMenu.js';
 import { Err } from './utils/Err.js';
+import { ConstructorControlPanel } from './editors/ConstructorControlPanel.js';
 
 /**
  * Name of the plugin 
@@ -34,7 +35,7 @@ export class GMConstructor {
     /**
      * Quick actions menu.
      * 
-     * @type {Menu}
+     * @type {HamburgerOptions}
      */
     menu;
 
@@ -45,7 +46,8 @@ export class GMConstructor {
 
         this.compileController = compileController;
 
-        this.menu = new Menu(
+        this.menu = new HamburgerOptions(
+            this.onControlPanel,
             this.compileCurrent,
             this.cleanCurrent,
             this.runCurrent
@@ -122,6 +124,10 @@ export class GMConstructor {
             ok: true,
             data: runtime
         };
+    }
+
+    onControlPanel = () => {
+        ConstructorControlPanel.view();
     }
 
     compileCurrent = () => {
