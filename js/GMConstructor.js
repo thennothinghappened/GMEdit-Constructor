@@ -29,11 +29,11 @@ export class GMConstructor {
      * 
      * @type {HamburgerOptions}
      */
-    menu;
+    hamburgerOptions;
 
     constructor() {
 
-        this.menu = new HamburgerOptions(
+        this.hamburgerOptions = new HamburgerOptions(
             this.onControlPanel,
             this.compileCurrent,
             this.cleanCurrent,
@@ -185,7 +185,7 @@ export class GMConstructor {
 
         preferences.cleanup();
         compileController.cleanup();
-        this.menu.cleanup();
+        this.hamburgerOptions.cleanup();
         
     }
 

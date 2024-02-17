@@ -32,9 +32,12 @@ export class Job {
      * @param {GMLProject} project
      */
     constructor(settings, process, project) {
+        
         this.#settings = settings;
         this.#process = process;
         this.#project = project;
+
+        this.#stdout += this.#process.spawnargs.join(' ') + '\n\n';
 
         this.#process.once('exit', this.#onExit);
         this.#process.stdout?.on('data', this.#onStdoutData);
