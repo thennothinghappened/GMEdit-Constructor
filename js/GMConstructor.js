@@ -159,9 +159,14 @@ export class GMConstructor {
         if (rosetta_check(node_child_process.execSync)) {
 
             const err = new Err(`${_plugin_name} does not work correctly on Rosetta - please consider using GMEdit's native Arm64 build found at https://yellowafterlife.itch.io/gmedit`);
-
-            alert(err.toString());
             console.error(err);
+
+            Electron_Dialog.showMessageBox({
+                title: 'GMEdit-Constructor cannot load on Rosetta!',
+                message: err.message,
+                buttons: ['Dismiss'],
+                type: 'error'
+            });
 
             return {
                 ok: false,
@@ -216,13 +221,11 @@ export class GMConstructor {
  */
 export let join_path;
 
-
 /** 
  * Reference to NodeJS spawn.
  * @type {import('node:child_process').spawn} 
  */
 export let spawn;
-
 
 /**
  * Make sure we aren't running on rosetta, since GMEdit has
