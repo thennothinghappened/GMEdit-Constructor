@@ -155,6 +155,21 @@ export class GMConstructor {
      */
     static async create(_plugin_name, _plugin_version, node_path, node_child_process) {
 
+        // Prevent Constructor loading when running on Rosetta, since it has a bunch of issues there.
+        if (rosetta_check(node_child_process.execSync)) {
+
+            const err = new Err(`${_plugin_name} does not work correctly on Rosetta - please consider using GMEdit's native Arm64 build found at https://yellowafterlife.itch.io/gmedit`);
+
+            alert(err.toString());
+            console.error(err);
+
+            return {
+                ok: false,
+                err: err
+            };
+
+        }
+
         join_path = node_path.join;
         spawn = node_child_process.spawn;
 
@@ -207,3 +222,28 @@ export let join_path;
  * @type {import('node:child_process').spawn} 
  */
 export let spawn;
+
+
+/**
+ * Make sure we aren't running on rosetta, since GMEdit has
+ * a native build and Rosetta seems to cause some weirdness!
+ * 
+ * @param {import('node:child_process').execSync} execSync
+ */
+function rosetta_check(execSync) {
+
+    if (process.platform !== 'darwin') {
+        return false;
+    }
+
+    if (process.arch !== 'x64') {
+        return false;
+    }
+
+    const cmd = 'sysctl -n sysctl.proc_translated';
+    const output = execSync(cmd).toString('utf-8');
+
+    // If the return of this command is 1, we are running in Rosetta.
+    return output.includes('1');
+
+}
