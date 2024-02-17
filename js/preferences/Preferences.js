@@ -9,11 +9,11 @@ import { Err } from '../utils/Err.js';
 import { join_path, plugin_name } from '../GMConstructor.js';
 import { runtime_version_parse } from '../compiler/RuntimeVersion.js';
 
-/** @type {RuntimeType[]} */
+/** @type {RuntimeChannelType[]} */
 export const valid_runtime_types = ['Stable', 'Beta', 'LTS'];
 
 /** @type {PreferencesData} */
-const prefs = {
+const prefs_default = {
     runtime_opts: {
         // Default runtime to use is probably going to be stable.
         type: 'Stable',
@@ -38,11 +38,14 @@ const prefs = {
     reuse_compiler_tab: true,
 };
 
+/** @type {PreferencesData} */
+let prefs;
+
 /**
  * List of runtimes for each type.
  * Populated after loading the list.
  * 
- * @type { { [key in RuntimeType]: RuntimeInfo[]? } }
+ * @type { { [key in RuntimeChannelType]: RuntimeInfo[]? } }
  */
 const runtimes = {
     Stable: null,
@@ -99,7 +102,7 @@ export function global_runtime_type_get() {
 
 /**
  * The default runtime type used globally.
- * @param {RuntimeType} type 
+ * @param {RuntimeChannelType} type 
  */
 export function global_runtime_type_set(type) {
     prefs.runtime_opts.type = type;
@@ -108,7 +111,7 @@ export function global_runtime_type_set(type) {
 
 /**
  * Get the global choice for default runtime for a given type.
- * @param {RuntimeType} type 
+ * @param {RuntimeChannelType} type 
  */
 export function global_runtime_choice_get(type) {
     return prefs.runtime_opts.type_opts[type].choice;
@@ -116,7 +119,7 @@ export function global_runtime_choice_get(type) {
 
 /**
  * Set the global choice for default runtime for a given type.
- * @param {RuntimeType} type 
+ * @param {RuntimeChannelType} type 
  * @param {string?} choice 
  */
 export function global_runtime_choice_set(type, choice) {
@@ -126,7 +129,7 @@ export function global_runtime_choice_set(type, choice) {
 
 /**
  * Get the search path for runtime of a given type.
- *  @param {RuntimeType} type 
+ *  @param {RuntimeChannelType} type 
  */
 export function runtime_search_path_get(type) {
     return prefs.runtime_opts.type_opts[type].search_path;
@@ -134,7 +137,7 @@ export function runtime_search_path_get(type) {
 
 /**
  * Function to get a list of runtime version names for a given runtime type.
- * @param {RuntimeType} type
+ * @param {RuntimeChannelType} type
  * @returns {RuntimeInfo[]?}
  */
 export function runtime_versions_get_for_type(type) {
@@ -143,7 +146,7 @@ export function runtime_versions_get_for_type(type) {
 
 /**
  * Set the search path for runtime of a given type.
- * @param {RuntimeType} type 
+ * @param {RuntimeChannelType} type 
  * @param {string} search_path 
  */
 export async function runtime_search_path_set(type, search_path) {
@@ -183,7 +186,7 @@ export function save() {
 
 /**
  * Get the global runtime options for a given runtime type.
- * @param {RuntimeType} type 
+ * @param {RuntimeChannelType} type 
  */
 function global_runtime_opts_get(type = global_runtime_type_get()) {
     return prefs.runtime_opts.type_opts[type];
@@ -191,7 +194,7 @@ function global_runtime_opts_get(type = global_runtime_type_get()) {
 
 /**
  * Load the list of runtimes for the provided search path for a type.
- * @param {RuntimeType} [type] 
+ * @param {RuntimeChannelType} [type] 
  * @returns {Promise<Result<RuntimeInfo[]>>}
  */
 async function runtime_list_load_type(type = global_runtime_type_get()) {
@@ -306,6 +309,7 @@ export async function __setup__() {
 
     }
     
+    prefs = Object.create(prefs_default);
     Object.assign(prefs, loaded_prefs);
 
     const stable_req = runtime_list_load_type('Stable');

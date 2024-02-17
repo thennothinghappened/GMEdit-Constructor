@@ -42,7 +42,7 @@ export class ConstructorControlPanel extends ConstructorEditorView {
         
         super(file);
 
-        this.element.classList.add('gm-constructor-control-panel');
+        this.element.classList.add('gm-constructor-viewer', 'gm-constructor-control-panel', 'popout-window');
 
         this.element.appendChild(h1(ConstructorControlPanel.tabName));
 
@@ -85,7 +85,7 @@ export class ConstructorControlPanel extends ConstructorEditorView {
 
         UIPreferences.addDropdown(
             this.projectSettings,
-            'Compile Config',
+            'Build Configuration',
             projectProperties.config_name_get(),
             project_config_tree_to_array(configs),
             projectProperties.config_name_set

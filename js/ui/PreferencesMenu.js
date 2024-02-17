@@ -105,7 +105,7 @@ export class PreferencesMenu {
 
     /**
      * Get an array of version strings for the given runtime type.
-     * @param {RuntimeType} type 
+     * @param {RuntimeChannelType} type 
      * @returns 
      */
     #runtimeVersionStringsGetForType(type) {

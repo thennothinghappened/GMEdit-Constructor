@@ -33,7 +33,7 @@ const igor_platform_map = {
  * Note that this only covers Windows and MacOS, elsewhere will crash trying to index these
  * as I don't know where the location is for Linux.
  * 
- * @type {{[key in NodeJS.Platform]: { [key in RuntimeType]: string }}}
+ * @type {{[key in NodeJS.Platform]: { [key in RuntimeChannelType]: string }}}
  */
 // @ts-ignore
 const def_runtime_platform_paths = {

@@ -2,10 +2,10 @@ declare type PreferencesData = {
 
     /** Globally selected runtime options that may be overriden by projects. */
     runtime_opts: {
-        type: RuntimeType;
+        type: RuntimeChannelType;
 
         type_opts: {
-            [key in RuntimeType]: RuntimePreference;
+            [key in RuntimeChannelType]: RuntimePreference;
         };
     };
 
@@ -28,7 +28,7 @@ declare type ProjectPreferencesData = {
 
 };
 
-declare type RuntimeType = 
+declare type RuntimeChannelType = 
     'Stable'    |
     'Beta'      |
     'LTS'       ;
