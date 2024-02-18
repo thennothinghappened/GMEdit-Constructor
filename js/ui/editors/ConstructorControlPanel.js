@@ -2,7 +2,10 @@ import { Job } from '../../compiler/job/Job.js';
 import { project_config_tree_get, project_config_tree_to_array, project_current_get, project_is_open } from '../../utils/project.js';
 import { ConstructorEditorView, ConstructorViewFileKind } from './ConstructorEditorView.js';
 import * as projectProperties from '../../preferences/ProjectProperties.js';
+import * as preferences from '../../preferences/Preferences.js';
 import * as ui from '../ui-wrappers.js';
+import * as preferencesMenu from '../PreferencesMenu.js';
+import { plugin_name, plugin_version } from '../../GMConstructor.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];
@@ -28,12 +31,19 @@ class KConstructorControlPanel extends ConstructorViewFileKind {
 }
 
 /**
+ * @typedef {{ severity: MessageSeverity, title: string, err: IErr }} MessageContainer
+ */
+
+/**
  * Main 'control panel' for Constructor to make it a nicer experience to work with!
  */
 export class ConstructorControlPanel extends ConstructorEditorView {
 
     static fileKind = new KConstructorControlPanel();
     static tabName = 'GMEdit-Constructor Control Panel';
+
+    /** @type {MessageContainer[]} */
+    static messages = [];
 
     /**
      * @param {GmlFile} file
@@ -45,21 +55,28 @@ export class ConstructorControlPanel extends ConstructorEditorView {
         this.element.classList.add('gm-constructor-viewer', 'gm-constructor-control-panel', 'popout-window');
 
         this.element.appendChild(ui.h1(ConstructorControlPanel.tabName));
+        this.element.appendChild(ui.p(`Version: ${plugin_version}`));
 
-        this.errors = ui.group(this.element, 'Problems', [ui.text_button('Dismiss All', this.dismissAllErrors)]);
-        this.errors.classList.add('gm-constructor-control-panel-errors');
+        this.problems = ui.group(this.element, 'Problems', [ui.text_button('Dismiss All', ConstructorControlPanel.dismissAllErrors)]);
+        this.problems.classList.add('gm-constructor-control-panel-errors');
 
         this.projectSettings = UIPreferences.addGroup(this.element, 'Project Settings');
         this.projectSettings.hidden = true;
 
         this.globalSettings = UIPreferences.addGroup(this.element, 'Global Settings');
+
+        ConstructorControlPanel.messages.forEach(this.#showMessage);
         
-        GMEdit.on('projectOpen', this.onOpenProject);
-        GMEdit.on('projectClose', this.onCloseProject);
+        if (preferences.ready()) {
+            this.globalSettingsSetup();
+        }
 
         if (project_is_open()) {
             this.onOpenProject();
         }
+
+        GMEdit.on('projectOpen', this.onOpenProject);
+        GMEdit.on('projectClose', this.onCloseProject);
 
     }
 
@@ -68,15 +85,121 @@ export class ConstructorControlPanel extends ConstructorEditorView {
      * @param {string} title
      * @param {IErr} err
      */
+    static showError = (title, err) => {
+        return this.#appendMessage({ severity: 'error', title, err });
+    }
+
+    /**
+     * Show the user a warning in the UI.
+     * @param {string} title
+     * @param {IErr} err
+     */
+    static showWarning = (title, err) => {
+        return this.#appendMessage({ severity: 'warning', title, err });
+    }
+
+    /**
+     * Show the user a debug message in the UI.
+     * @param {string} title
+     * @param {IErr} err
+     */
+    static showDebug = (title, err) => {
+        return this.#appendMessage({ severity: 'debug', title, err });
+    }
+
+    /**
+     * Show the user an error in the UI.
+     * @param {string} title
+     * @param {IErr} err
+     */
     showError = (title, err) => {
+        return ConstructorControlPanel.showError(title, err);
+    }
 
-        console.error(`${title} - ${err}`);
+    /**
+     * Show the user a warning in the UI.
+     * @param {string} title
+     * @param {IErr} err
+     */
+    showWarning = (title, err) => {
+        return ConstructorControlPanel.showWarning(title, err);
+    }
 
-        const error = ui.group(this.errors, title, [
-            ui.text_button('Dismiss', () => error.remove())
+    /**
+     * Show the user a debug message in the UI.
+     * @param {string} title
+     * @param {IErr} err
+     */
+    showDebug = (title, err) => {
+        return ConstructorControlPanel.showDebug(title, err);
+    }
+
+    /**
+     * Show the user a message in the UI.
+     * @param {MessageContainer} message
+     */
+    static #appendMessage = (message) => {
+
+        /** 
+         * @type { {[key in MessageSeverity]: (message?: any) => void} }
+         */
+        const severity_logs = {
+            error: console.error,
+            warning: console.warn,
+            debug: console.info
+        };
+
+        const { severity, title, err } = message;
+
+        this.messages.push(message);
+
+        const log = severity_logs[severity];
+        log(`${title} - ${err}`);
+
+        const controlPanel = this.find();
+
+        if (controlPanel !== undefined) {
+            controlPanel.#showMessage(message);
+        }
+
+        return this;
+
+    }
+
+    /**
+     * Show the user a message in the UI.
+     * @param {MessageContainer} message
+     */
+    #showMessage = (message) => {
+
+        /** 
+         * @type { {[key in MessageSeverity]: string[]} }
+         */
+        const severity_classes = {
+            error: ['gm-constructor-error'],
+            warning: ['gm-constructor-warning', 'collapsed'],
+            debug: ['gm-constructor-debug', 'collapsed']
+        };
+
+        const { severity, title, err } = message;
+
+        const css_classes = severity_classes[severity];
+
+        const error = ui.group(this.problems, title, [
+            ui.text_button('Dismiss', () => {
+                error.remove();
+
+                const index = ConstructorControlPanel.messages.indexOf(message);
+
+                if (index === -1) {
+                    return;
+                }
+
+                ConstructorControlPanel.messages.splice(index, 1);
+            })
         ]);
 
-        error.classList.add('gm-constructor-error');
+        error.classList.add(...css_classes);
 
         if (err.solution !== undefined) {
             error.appendChild(ui.p(err.solution));
@@ -93,26 +216,37 @@ export class ConstructorControlPanel extends ConstructorEditorView {
     /**
      * Dismiss all errors in the panel.
      */
-    dismissAllErrors = () => {
+    static dismissAllErrors = () => {
 
-        for (const element of Array.from(this.errors.children)) {
-            if (element instanceof HTMLFieldSetElement) {
-                element.remove();
+        const controlPanel = this.find();
+
+        if (controlPanel !== undefined) {
+
+            for (const element of Array.from(controlPanel.problems.children)) {
+                if (element instanceof HTMLFieldSetElement) {
+                    element.remove();
+                }
             }
         }
+
+        this.messages = [];
     }
 
     /**
      * View the control panel.
+     * @param {boolean} [focus] Whether to bring the panel into focus.
      * @returns {ConstructorControlPanel}
      */
-    static view = () => {
+    static view = (focus = true) => {
 
         const controlPanel = this.find();
 
         if (controlPanel !== undefined) {
             
-            controlPanel.file.tabEl.click();
+            if (focus) {
+                controlPanel.file.tabEl.click();
+            }
+
             return controlPanel;
         }
 
@@ -147,13 +281,24 @@ export class ConstructorControlPanel extends ConstructorEditorView {
             return;
         }
 
+        // Just makes sure we aren't repeating ourselves.
+        this.onCloseProject();
+
         this.projectSettingsSetup(project);
         this.projectSettings.hidden = false;
 
     }
 
     onCloseProject = () => {
+        
         this.projectSettings.hidden = true;
+        
+        for (const element of Array.from(this.projectSettings.children)) {
+            if (!(element instanceof HTMLLegendElement)) {
+                element.remove();
+            }
+        }
+
     }
 
     /**
@@ -161,6 +306,8 @@ export class ConstructorControlPanel extends ConstructorEditorView {
      * @param {GMLProject} project 
      */
     projectSettingsSetup(project) {
+
+        this.projectSettings.appendChild(ui.em(`Configure behaviour for ${project.displayName}.`));
 
         const configs = project_config_tree_get(project);
 
@@ -172,14 +319,32 @@ export class ConstructorControlPanel extends ConstructorEditorView {
             projectProperties.config_name_set
         );
 
+        UIPreferences.addDropdown(
+            this.projectSettings,
+            'Runtime Channel Type',
+            projectProperties.runtime_channel_type_get(),
+            [...preferences.valid_runtime_types, 'Use Default'],
+            (value) => {
+
+                if (value === 'Use Default') {
+                    projectProperties.runtime_channel_type_set(undefined);
+                    return;
+                }
+
+                // @ts-ignore
+                projectProperties.runtime_channel_type_set(value);
+            }
+        );
+
     }
 
     /**
      * Setup the global preferences.
      */
     globalSettingsSetup() {
-        
-        
+
+        this.globalSettings.appendChild(ui.em(`Configure the default behaviour of ${plugin_name}.`));
+        preferencesMenu.menu_create(this.globalSettings);
 
     }
 

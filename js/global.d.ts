@@ -95,6 +95,7 @@ declare type RuntimeInfo = {
  */
 declare interface IErr extends Error {
 
+    readonly title?: string;
     readonly solution?: string;
 
     stackFormat(): string;
@@ -102,6 +103,11 @@ declare interface IErr extends Error {
     toString(): string;
 
 }
+
+declare type MessageSeverity =
+    'error'     |
+    'warning'   |
+    'debug'     ;
 
 declare type Result<T> = 
     { ok: true, data: T }       |

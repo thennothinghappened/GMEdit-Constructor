@@ -6,12 +6,14 @@
 export class Err extends Error {
 
     /**
-     * @param {String} message 
-     * @param {Error|null} [cause] 
+     * @param {string} message 
+     * @param {any?} [cause] 
      * @param {string} [solution] 
+     * @param {string} [title]
      */
-    constructor(message, cause = null, solution) {
+    constructor(message, cause = null, solution, title) {
         super(message, { cause });
+        this.title = title;
         this.solution = solution;
     }
 
@@ -24,7 +26,7 @@ export class Err extends Error {
         const cause_str = this.cause
             .toString()
             .split('\n')
-            .join('\n\t');
+            .join('\n    ');
 
         const caused_by_str = `Caused by ${cause_str}\n`;
 
@@ -32,7 +34,7 @@ export class Err extends Error {
     }
 
     toString() {
-        return `Error:\n${this.message}\n${this.stackFormat()}`;
+        return `${this.title ?? 'Error'}: \n${this.message}\n${this.stackFormat()}`;
     }
 
 }

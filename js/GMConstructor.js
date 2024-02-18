@@ -4,7 +4,7 @@ import { project_current_get, open_files_save } from './utils/project.js';
 import * as preferences from './preferences/Preferences.js';
 import * as projectProperties from './preferences/ProjectProperties.js';
 import * as igorPaths from './compiler/igor-paths.js';
-import { PreferencesMenu } from './ui/PreferencesMenu.js';
+import * as preferencesMenu from './ui/PreferencesMenu.js';
 import { Err } from './utils/Err.js';
 import { ConstructorControlPanel } from './ui/editors/ConstructorControlPanel.js';
 
@@ -40,8 +40,7 @@ export class GMConstructor {
             this.cleanCurrent,
             this.runCurrent
         );
-
-        this.prefsMenu = new PreferencesMenu();
+        
     }
 
     /**
@@ -67,7 +66,7 @@ export class GMConstructor {
             );
 
             return ConstructorControlPanel
-                .view()
+                .view(true)
                 .showError(err.message, err);
         }
 
@@ -78,15 +77,22 @@ export class GMConstructor {
         const res = await compileController.job_run(project, runtime_res.data, settings);
 
         if (!res.ok) {
-            console.error(`Failed to run Igor job: ${res.err}`);
-            return;
+
+            const err = new Err(
+                `Failed to run Igor job!`,
+                res.err
+            );
+
+            return ConstructorControlPanel
+                .view(true)
+                .showError(err.message, err)
         }
 
         compileController.job_open_editor(res.data, preferences.reuse_compiler_tab_get());
     }
 
     onControlPanel = () => {
-        ConstructorControlPanel.view();
+        ConstructorControlPanel.view(true);
     }
 
     // yes this is VERY temporary
@@ -168,6 +174,7 @@ export class GMConstructor {
         }
 
         projectProperties.__setup__();
+        preferencesMenu.__setup__();
 
         return {
             ok: true,

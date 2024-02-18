@@ -83,6 +83,18 @@ export function p(text) {
 }
 
 /**
+ * Create an em block.
+ * @param {string} text 
+ * @returns {HTMLElement}
+ */
+export function em(text) {
+    const em = document.createElement('em');
+    em.textContent = text;
+
+    return em;
+}
+
+/**
  * Create a h1.
  * @param {string} text 
  * @returns {HTMLHeadingElement}

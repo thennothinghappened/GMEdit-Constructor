@@ -1,3 +1,5 @@
+import { ConstructorControlPanel } from '../../../ui/editors/ConstructorControlPanel.js';
+import { Err } from '../../../utils/Err.js';
 import { JobCompilerError, JobError, JobRunnerError } from '../JobError.js';
 
 /**
@@ -146,9 +148,17 @@ function job_parse_runner_error(lines, first_line) {
             )
         };
 
-    } catch (err) {
+    } catch (err_cause) {
 
-        console.error('Spaghetti code I had no faith in has indeed failed (failed to parse potential runner error message):', err);
+        ConstructorControlPanel
+            .view(false)
+            .showWarning(
+                'Failed to parse potential runner error message',
+                new Err(
+                    'Spaghetti code I had no faith in has indeed failed.', 
+                    err_cause
+                )
+            );
 
         return null;
     }

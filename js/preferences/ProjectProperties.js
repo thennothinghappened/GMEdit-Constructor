@@ -7,26 +7,11 @@ import { project_current_get, project_config_tree_get } from '../utils/project.j
 import * as preferences from './Preferences.js';
 const ProjectProperties = $gmedit['ui.project.ProjectProperties'];
 
-/** @type {Readonly<ProjectPreferencesData>} */
-const properties_default = {
-
-    config_name: 'Default',
-
-    get runtime_type() {
-        return preferences.runtime_channel_type_get();
-    },
-    
-    get runtime_version() {
-        return preferences.runtime_version_get();
-    }
-    
-};
-
 /**
  * The current properties instance.
- * @type {ProjectPreferencesData}
+ * @type {Partial<ProjectPreferencesData>}
  */
-let properties = Object.create(properties_default);
+let properties = {};
 
 export function __setup__() {
 
@@ -42,9 +27,10 @@ export function __cleanup__() {
 
 /**
  * Get the active compile config name.
+ * @returns {string}
  */
 export function config_name_get() {
-    return properties.config_name;
+    return properties.config_name ?? 'Default';
 }
 
 /**
@@ -61,23 +47,19 @@ export function config_name_set(config_name) {
  * @returns {RuntimeChannelType}
  */
 export function runtime_channel_type_get() {
-    return properties.runtime_type;
+    return properties.runtime_type ?? preferences.runtime_channel_type_get();
 }
 
 /**
  * Set the desired runtime channel type.
- * @param {RuntimeChannelType|null} runtime_type 
+ * @param {RuntimeChannelType|undefined} runtime_type 
  */
 export function runtime_channel_type_set(runtime_type) {
-    
-    if (runtime_type === null) {
-        // @ts-ignore
-        delete properties.runtime_type;
-        return save();
-    }
 
+    console.log(runtime_type);
     properties.runtime_type = runtime_type;
     return save();
+
 }
 
 /**
@@ -86,7 +68,7 @@ export function runtime_channel_type_set(runtime_type) {
  */
 export function runtime_get() {
 
-    const type = properties.runtime_type;
+    const type = runtime_channel_type_get();
     const desired_runtime_list = preferences.runtime_versions_get_for_type(type);
 
     if (desired_runtime_list === null) {
@@ -140,7 +122,7 @@ function on_project_open() {
         return;
     }
 
-    properties = Object.create(properties_default);
+    properties = {};
 
     const saved = project.properties['GMEdit-Constructor'];
     

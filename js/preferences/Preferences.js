@@ -8,6 +8,7 @@ import { fileExists, readFile, readdir, writeFile } from '../utils/file.js';
 import { Err } from '../utils/Err.js';
 import { join_path, plugin_name } from '../GMConstructor.js';
 import { runtime_version_parse } from '../compiler/RuntimeVersion.js';
+import { ConstructorControlPanel } from '../ui/editors/ConstructorControlPanel.js';
 
 /** @type {RuntimeChannelType[]} */
 export const valid_runtime_types = ['Stable', 'Beta', 'LTS'];
@@ -58,6 +59,15 @@ const runtimes = {
  * @type {string}
  */
 let save_path;
+
+let __ready__ = false;
+
+/**
+ * Returns whether the preferences are loaded.
+ */
+export function ready() {
+    return __ready__;
+}
 
 /**
  * Get whether to reuse a compiler tab.
@@ -159,8 +169,16 @@ export async function runtime_search_path_set(type, search_path) {
     const res = await runtime_list_load_type(type);
 
     if (!res.ok) {
-        console.error(`Failed to load runtime list: ${res.err}`);
-        return;
+
+        const err = new Err(
+            `Failed to load ${type} runtime list`,
+            res.err,
+            'Make sure the search path is valid!'
+        );
+
+        return ConstructorControlPanel
+            .view(true)
+            .showError(err.message, err);
     }
 
     runtimes[type] = res.data;
@@ -171,7 +189,13 @@ export async function runtime_search_path_set(type, search_path) {
         choice !== undefined && 
         runtimes[type]?.find(runtimeInfo => runtimeInfo.version.toString() === choice) === undefined
     ) {
-        console.warn(`Runtime version "${choice}" not available in new search path "${search_path}".`);
+
+        const err = new Err(`Runtime version "${choice}" not available in new search path "${search_path}".`);
+
+        ConstructorControlPanel
+            .view(false)
+            .showWarning(err.message, err);
+        
         runtime_version_set(type, runtimes[type]?.at(0)?.version?.toString() ?? null);
     }
 
@@ -234,7 +258,8 @@ async function runtime_list_load_path(type, search_path) {
             if (!version_res.ok) {
 
                 const err = new Err(`Failed to parse runtime version name for runtime at '${path}'`, version_res.err);
-                console.warn(err.toString());
+                
+                ConstructorControlPanel.showWarning(err.message, err);
 
                 return null;
             }
@@ -245,7 +270,14 @@ async function runtime_list_load_path(type, search_path) {
 
             if (!supported_res.ok) {
 
-                console.warn(`Ignoring runtime ${runtime} - ${supported_res.err.message}`);
+                const err = new Err(
+                    `Ignoring unsupported runtime ${runtime}`, 
+                    supported_res.err,
+                    `${plugin_name} only supports runtimes >2022.x, and below 2024.2[xx] currently. See stack trace for more details.`
+                );
+                
+                ConstructorControlPanel.showWarning(err.message, err);
+                
                 return null;
             }
 
@@ -285,13 +317,33 @@ export async function __setup__() {
         const res = await readFile(save_path);
 
         if (res.ok) {
+
             try {
                 loaded_prefs = JSON.parse(res.data);
-            } catch (err) {
-                console.error(`Failed to read preferences: ${err}`);
+            } catch (err_cause) {
+
+                const err = new Err(
+                    'Failed to read preferences', 
+                    err_cause,
+                    `Please check your preferences file (${save_path}) for syntax errors as you must have edited it manually - see stacktrace below.`
+                );
+
+                ConstructorControlPanel
+                    .view(false)
+                    .showWarning(err.message, err);
             }
+
         } else {
-            console.error(`Failed to read preferences: ${res.err}`);
+
+            const err = new Err(
+                'Failed to read preferences', 
+                res.err,
+                `Please check your preferences file (${save_path}) for errors and ensure GMEdit has read permissions - see stacktrace below.`
+            );
+
+            ConstructorControlPanel
+                .view(false)
+                .showWarning(err.message, err);
         }
     }
 
@@ -332,20 +384,22 @@ export async function __setup__() {
     if (stable_res.ok) {
         runtimes.Stable = stable_res.data;
     } else {
-        console.debug(`Failed to load Stable runtimes list: ${stable_res.err}`);
+        ConstructorControlPanel.showDebug('Failed to load Stable runtimes list', stable_res.err);
     }
 
     if (beta_res.ok) {
         runtimes.Beta = beta_res.data;
     } else {
-        console.debug(`Failed to load Beta runtimes list: ${beta_res.err}`);
+        ConstructorControlPanel.showDebug('Failed to load Beta runtimes list', beta_res.err);
     }
 
     if (lts_res.ok) {
         runtimes.LTS = lts_res.data;
     } else {
-        console.debug(`Failed to load LTS runtimes list: ${lts_res.err}`);
+        ConstructorControlPanel.showDebug('Failed to load LTS runtimes list', lts_res.err);
     }
+
+    __ready__ = true;
 
     return {
         ok: true,
