@@ -1,18 +1,20 @@
 /**
- * Handler for plugin preferences file, asnd
- * project-specific preferences handling.
+ * Handler for plugin preferences file
+ * and runtime list.
  */
 
-import { def_runtime_paths, igor_path_segment, runtime_version_parse } from '../utils/igor.js';
+import { def_runtime_paths, igor_path_segment } from '../compiler/igor-paths.js';
 import { fileExists, readFile, readdir, writeFile } from '../utils/file.js';
 import { Err } from '../utils/Err.js';
 import { join_path, plugin_name } from '../GMConstructor.js';
+import { runtime_version_parse } from '../compiler/RuntimeVersion.js';
+import { ConstructorControlPanel } from '../ui/editors/ConstructorControlPanel.js';
 
-/** @type {RuntimeType[]} */
+/** @type {RuntimeChannelType[]} */
 export const valid_runtime_types = ['Stable', 'Beta', 'LTS'];
 
-/** @type {PreferencesData} */
-const prefs = {
+/** @type {Readonly<PreferencesData>} */
+const prefs_default = {
     runtime_opts: {
         // Default runtime to use is probably going to be stable.
         type: 'Stable',
@@ -37,11 +39,14 @@ const prefs = {
     reuse_compiler_tab: true,
 };
 
+/** @type {PreferencesData} */
+let prefs = Object.create(prefs_default);
+
 /**
  * List of runtimes for each type.
  * Populated after loading the list.
  * 
- * @type { { [key in RuntimeType]: RuntimeInfo[]? } }
+ * @type { { [key in RuntimeChannelType]: RuntimeInfo[]? } }
  */
 const runtimes = {
     Stable: null,
@@ -54,6 +59,15 @@ const runtimes = {
  * @type {string}
  */
 let save_path;
+
+let __ready__ = false;
+
+/**
+ * Returns whether the preferences are loaded.
+ */
+export function ready() {
+    return __ready__;
+}
 
 /**
  * Get whether to reuse a compiler tab.
@@ -92,40 +106,40 @@ export function save_on_run_task_set(save_on_run_task) {
 /**
  * The default runtime type used globally.
  */
-export function global_runtime_type_get() {
+export function runtime_channel_type_get() {
     return prefs.runtime_opts.type;
 }
 
 /**
  * The default runtime type used globally.
- * @param {RuntimeType} type 
+ * @param {RuntimeChannelType} type 
  */
-export function global_runtime_type_set(type) {
+export function runtime_channel_type_set(type) {
     prefs.runtime_opts.type = type;
     return save();
 }
 
 /**
  * Get the global choice for default runtime for a given type.
- * @param {RuntimeType} type 
+ * @param {RuntimeChannelType} [type] 
  */
-export function global_runtime_choice_get(type) {
+export function runtime_version_get(type = runtime_channel_type_get()) {
     return prefs.runtime_opts.type_opts[type].choice;
 }
 
 /**
  * Set the global choice for default runtime for a given type.
- * @param {RuntimeType} type 
+ * @param {RuntimeChannelType} type 
  * @param {string?} choice 
  */
-export function global_runtime_choice_set(type, choice) {
+export function runtime_version_set(type, choice) {
     prefs.runtime_opts.type_opts[type].choice = choice;
     return save();
 }
 
 /**
  * Get the search path for runtime of a given type.
- *  @param {RuntimeType} type 
+ *  @param {RuntimeChannelType} type 
  */
 export function runtime_search_path_get(type) {
     return prefs.runtime_opts.type_opts[type].search_path;
@@ -133,7 +147,7 @@ export function runtime_search_path_get(type) {
 
 /**
  * Function to get a list of runtime version names for a given runtime type.
- * @param {RuntimeType} type
+ * @param {RuntimeChannelType} type
  * @returns {RuntimeInfo[]?}
  */
 export function runtime_versions_get_for_type(type) {
@@ -142,7 +156,7 @@ export function runtime_versions_get_for_type(type) {
 
 /**
  * Set the search path for runtime of a given type.
- * @param {RuntimeType} type 
+ * @param {RuntimeChannelType} type 
  * @param {string} search_path 
  */
 export async function runtime_search_path_set(type, search_path) {
@@ -155,20 +169,34 @@ export async function runtime_search_path_set(type, search_path) {
     const res = await runtime_list_load_type(type);
 
     if (!res.ok) {
-        console.error(`Failed to load runtime list: ${res.err}`);
-        return;
+
+        const err = new Err(
+            `Failed to load ${type} runtime list`,
+            res.err,
+            'Make sure the search path is valid!'
+        );
+
+        return ConstructorControlPanel
+            .view(true)
+            .showError(err.message, err);
     }
 
     runtimes[type] = res.data;
 
-    const choice = global_runtime_choice_get(type);
+    const choice = runtime_version_get(type);
 
     if (
         choice !== undefined && 
         runtimes[type]?.find(runtimeInfo => runtimeInfo.version.toString() === choice) === undefined
     ) {
-        console.warn(`Runtime version "${choice}" not available in new search path "${search_path}".`);
-        global_runtime_choice_set(type, runtimes[type]?.at(0)?.version?.toString() ?? null);
+
+        const err = new Err(`Runtime version "${choice}" not available in new search path "${search_path}".`);
+
+        ConstructorControlPanel
+            .view(false)
+            .showWarning(err.message, err);
+        
+        runtime_version_set(type, runtimes[type]?.at(0)?.version?.toString() ?? null);
     }
 
 }
@@ -182,29 +210,30 @@ export function save() {
 
 /**
  * Get the global runtime options for a given runtime type.
- * @param {RuntimeType} type 
+ * @param {RuntimeChannelType} type 
  */
-function global_runtime_opts_get(type = global_runtime_type_get()) {
+function global_runtime_opts_get(type = runtime_channel_type_get()) {
     return prefs.runtime_opts.type_opts[type];
 }
 
 /**
  * Load the list of runtimes for the provided search path for a type.
- * @param {RuntimeType} [type] 
+ * @param {RuntimeChannelType} [type] 
  * @returns {Promise<Result<RuntimeInfo[]>>}
  */
-async function runtime_list_load_type(type = global_runtime_type_get()) {
+async function runtime_list_load_type(type = runtime_channel_type_get()) {
 
     const { search_path } = global_runtime_opts_get(type);
-    return runtime_list_load_path(search_path);
+    return runtime_list_load_path(type, search_path);
 }
 
 /**
  * Load the list of runtimes for the provided search path.
+ * @param {RuntimeChannelType} type 
  * @param {String} search_path 
  * @returns {Promise<Result<RuntimeInfo[]>>}
  */
-async function runtime_list_load_path(search_path) {
+async function runtime_list_load_path(type, search_path) {
 
     const dir_res = await readdir(search_path);
 
@@ -224,20 +253,38 @@ async function runtime_list_load_path(search_path) {
             const path = join_path(search_path, dirname);
             const igor_path = join_path(path, igor_path_segment);
 
-            const version_res = runtime_version_parse(dirname);
+            const version_res = runtime_version_parse(type, dirname);
 
             if (!version_res.ok) {
 
                 const err = new Err(`Failed to parse runtime version name for runtime at '${path}'`, version_res.err);
-                console.warn(err.toString());
+                
+                ConstructorControlPanel.showWarning(err.message, err);
 
+                return null;
+            }
+
+            const runtime = version_res.data;
+
+            const supported_res = runtime.supported();
+
+            if (!supported_res.ok) {
+
+                const err = new Err(
+                    `Ignoring unsupported runtime ${runtime}`, 
+                    supported_res.err,
+                    `${plugin_name} only supports runtimes >2022.x, and below 2024.2[xx] currently. See stack trace for more details.`
+                );
+                
+                ConstructorControlPanel.showDebug(err.message, err);
+                
                 return null;
             }
 
             return {
                 path,
                 igor_path,
-                version: version_res.data
+                version: runtime
             };
 
         })
@@ -270,20 +317,44 @@ export async function __setup__() {
         const res = await readFile(save_path);
 
         if (res.ok) {
+
             try {
                 loaded_prefs = JSON.parse(res.data);
-            } catch (err) {
-                console.error(`Failed to read preferences: ${err}`);
+            } catch (err_cause) {
+
+                const err = new Err(
+                    'Failed to read preferences', 
+                    err_cause,
+                    `Please check your preferences file (${save_path}) for syntax errors as you must have edited it manually - see stacktrace below.`
+                );
+
+                ConstructorControlPanel
+                    .view(true)
+                    .showError(err.message, err);
             }
+
         } else {
-            console.error(`Failed to read preferences: ${res.err}`);
+
+            const err = new Err(
+                'Failed to read preferences', 
+                res.err,
+                `Please check your preferences file (${save_path}) for errors and ensure GMEdit has read permissions - see stacktrace below.`
+            );
+
+            ConstructorControlPanel
+                .view(true)
+                .showError(err.message, err);
         }
     }
 
     if (loaded_prefs?.runtime_opts?.type !== undefined) {
         if (!valid_runtime_types.includes(loaded_prefs.runtime_opts.type)) {
 
-            console.warn(`Found invalid preferred runtime type '${loaded_prefs.runtime_opts.type}', changed to ${prefs.runtime_opts.type}`);
+            ConstructorControlPanel.showWarning(
+                `Invalid preferred runtime type`,
+                new Err(`'${loaded_prefs.runtime_opts.type}' is invalid, changed to ${prefs.runtime_opts.type}`)
+            );
+            
             loaded_prefs.runtime_opts.type = prefs.runtime_opts.type;
 
         }
@@ -297,7 +368,10 @@ export async function __setup__() {
 
             if (!(type in type_opts)) {
 
-                console.warn(`Missing runtime type preference data for type '${type}', replacing with default.`);
+                ConstructorControlPanel.showWarning(
+                    'Missing runtime type preference data',
+                    new Err(`Missing runtime type preference data for type '${type}', replacing with default.`)
+                );
                 loaded_prefs.runtime_opts.type_opts[type] = prefs.runtime_opts.type_opts[type];
 
             }
@@ -305,6 +379,7 @@ export async function __setup__() {
 
     }
     
+    prefs = Object.create(prefs_default);
     Object.assign(prefs, loaded_prefs);
 
     const stable_req = runtime_list_load_type('Stable');
@@ -316,20 +391,22 @@ export async function __setup__() {
     if (stable_res.ok) {
         runtimes.Stable = stable_res.data;
     } else {
-        console.debug(`Failed to load Stable runtimes list: ${stable_res.err}`);
+        ConstructorControlPanel.showDebug('Failed to load Stable runtimes list', stable_res.err);
     }
 
     if (beta_res.ok) {
         runtimes.Beta = beta_res.data;
     } else {
-        console.debug(`Failed to load Beta runtimes list: ${beta_res.err}`);
+        ConstructorControlPanel.showDebug('Failed to load Beta runtimes list', beta_res.err);
     }
 
     if (lts_res.ok) {
         runtimes.LTS = lts_res.data;
     } else {
-        console.debug(`Failed to load LTS runtimes list: ${lts_res.err}`);
+        ConstructorControlPanel.showDebug('Failed to load LTS runtimes list', lts_res.err);
     }
+
+    __ready__ = true;
 
     return {
         ok: true,
@@ -340,6 +417,6 @@ export async function __setup__() {
 /**
  * Called on deregistering the plugin.
  */
-export function cleanup() {
+export function __cleanup__() {
     return;
 }

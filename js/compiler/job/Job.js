@@ -8,8 +8,10 @@ export class Job {
 
     /** @type {IgorSettings} */
     #settings;
+
     /** @type {import('node:child_process').ChildProcess} */
     #process;
+    
     /** @type {GMLProject} */
     #project;
 
@@ -30,9 +32,12 @@ export class Job {
      * @param {GMLProject} project
      */
     constructor(settings, process, project) {
+        
         this.#settings = settings;
         this.#process = process;
         this.#project = project;
+
+        this.#stdout += this.#process.spawnargs.join(' ') + '\n\n';
 
         this.#process.once('exit', this.#onExit);
         this.#process.stdout?.on('data', this.#onStdoutData);
@@ -51,6 +56,8 @@ export class Job {
     }
 
     #onExit = () => {
+
+        this.#stopped = true;
         
         Job.#notify(this.#listeners.stop, job_parse_stdout(this.stdout));
         this.#process.removeAllListeners();
@@ -81,6 +88,24 @@ export class Job {
      */
     stop = () => {
         this.#process.kill();
+    }
+
+    /**
+     * Returns a promise that resolves when this job is complete.
+     * @returns {Promise<void>}
+     */
+    finished() {
+
+        if (this.stopped) {
+            return Promise.resolve();
+        }
+
+        return new Promise((res) => {
+            this.on('stop', () => {
+                res(undefined);
+            });
+        });
+
     }
 
     /** The `stdout` output of the job's process. */

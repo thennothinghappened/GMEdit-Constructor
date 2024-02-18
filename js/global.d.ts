@@ -2,10 +2,10 @@ declare type PreferencesData = {
 
     /** Globally selected runtime options that may be overriden by projects. */
     runtime_opts: {
-        type: RuntimeType;
+        type: RuntimeChannelType;
 
         type_opts: {
-            [key in RuntimeType]: RuntimePreference;
+            [key in RuntimeChannelType]: RuntimePreference;
         };
     };
 
@@ -16,7 +16,29 @@ declare type PreferencesData = {
     reuse_compiler_tab: boolean;
 }
 
-declare type RuntimeType = 
+/**
+ * Project-specific preferences data!
+ */
+declare type ProjectPreferencesData = {
+
+    /** 
+     * Name of the active config to compile with.
+     */
+    config_name: string;
+
+    /**
+     * Chosen runtime type to use.
+     */
+    runtime_type: RuntimeChannelType;
+
+    /**
+     * Chosen runtime version to use.
+     */
+    runtime_version: string?;
+
+};
+
+declare type RuntimeChannelType = 
     'Stable'    |
     'Beta'      |
     'LTS'       ;
@@ -24,21 +46,38 @@ declare type RuntimeType =
 declare type RuntimePreference = {
     /** Where we should search for the list of runtimes. */
     search_path: string;
+    
     /** Chosen runtime to use. */
     choice: string?;
 };
 
+/**
+ * Representation of a version of a GM runtime.
+ */
 declare interface IRuntimeVersion {
 
-    year: number;
-    month: number;
-    major: number;
-    build: number;
+    readonly year: number;
+    readonly month: number;
+    readonly major: number;
+    readonly build: number;
+
+    /**
+     * What type of runtime this is.
+     */
+    readonly type: RuntimeChannelType;
 
     /**
      * Returns a negative number if this runtime is older than `other`, 0 for same, or postive for newer.
      */
     compare(other: IRuntimeVersion): number;
+
+    /**
+     * Returns whether this runtime version is supported by Constructor.
+     * At the moment, as LTS is broken (for unknown reasons), this means LTS runtimes
+     * are excluded, as as is >=2024.2 Stable, or >=2024.200.0.490 Beta, which
+     * contain the project format changes (which GMEdit does not yet support.)
+     */
+    supported(): Result<void>;
 
 }
 
@@ -51,13 +90,109 @@ declare type RuntimeInfo = {
     igor_path: string;
 };
 
+/**
+ * Base error type we use to try and be descriptive to the user :)
+ */
+declare interface IErr extends Error {
+
+    readonly title?: string;
+    readonly solution?: string;
+
+    stackFormat(): string;
+
+    toString(): string;
+
+}
+
+declare type MessageSeverity =
+    'error'     |
+    'warning'   |
+    'debug'     ;
+
 declare type Result<T> = 
     { ok: true, data: T }       |
-    { ok: false, err: Err }     ;
+    { ok: false, err: IErr }     ;
 
+/**
+ * Settings for running an Igor Job.
+ */
 declare type IgorSettings = {
+
+    /**
+     * Which platform the action will run for.
+     */
+    platform: IgorPlatform;
+
+    /**
+     * The Igor action to run.
+     */
     verb: IgorVerb;
-    mode: 'VM'|'YYC';
+
+    /**
+     * Which runtime to use - default is VM.
+     */
+    runtime: 'VM'|'YYC';
+
+    /**
+     * How many threads to use for this compilation.
+     */
+    threads: number;
+
+    /**
+     * Name of the Build Config to use for this compilation.
+     */
+    configName: string;
+
+    /**
+     * Launch the executable on the target device after building;
+     * same as the "Create Executable and Launch" option in the IDE
+     */
+    launch: boolean;
+
+}
+
+/**
+ * A supported platform for Igor to target.
+ */
+declare type IgorPlatform =
+    'OperaGX'           |
+    'Windows'           |
+    'Mac'               |
+    'Linux'             |
+    'HTML5'             |
+    'ios'               |
+    'Android'           |
+    'tvos'              |
+    'ps4'               |
+    'ps5'               |
+    'XBoxOne'           |
+    'XBoxOneSeriesXS'   |
+    'Switch'            ;
+
+/**
+ * Host (OS) platform information for Igor.
+ */
+declare type IgorPlatformInfo = {
+
+    /** Extension of the `Igor` executable for the target platform's runtime. */
+    platform_executable_extension: string;
+
+    /** Platform-specific path segment of the `Igor` executable. */
+    platform_path_name: string;
+
+    /** {@link IgorPlatform} to native build for the host OS. */
+    user_platform: IgorPlatform;
+
+    /**
+     * Default directories as per https://manual-en.yoyogames.com/Settings/Building_via_Command_Line.htm
+     * to find runtimes.
+     * 
+     * Note that this only covers Windows and MacOS, elsewhere will crash trying to index these
+     * as I don't know where the location is for Linux.
+     */
+    default_runtime_paths: {
+        [key in RuntimeChannelType]: string
+    };
 }
 
 declare type IgorVerb = 
@@ -77,7 +212,7 @@ declare type GMPlugin = {
 
 declare let gmConstructor: GMConstructor;
 
-declare type GMEdit_Event =
+declare type GMEditEvent =
     'preferencesBuilt'          |
     'projectPropertiesBuilt'    |
     'projectOpen'               |
@@ -85,21 +220,83 @@ declare type GMEdit_Event =
 
 declare class GMEdit {
     static register = function(name: string, body: GMPlugin) {}
-    static on = function(event: GMEdit_Event, callback: (event: Event) => void) {}
-    static off = function(event: GMEdit_Event, callback: (event: Event) => void) {}
+    static on = function(event: GMEditEvent, callback: (event: Event) => void) {}
+    static off = function(event: GMEditEvent, callback: (event: Event) => void) {}
 }
 
-declare class Electron_App {
-    static getPath = function(name: string): string {}
+declare interface IElectronApp {
+    getPath:        (name: string) => string;
 }
 
-declare class Electron_FS {
-    static readFile = function(path: string, cb: (err: Error|undefined, data: string|undefined) => void) {}
-    static readdir = function(path: string, cb: (err: Error|undefined, files: string[]|undefined) => void) {}
-    static writeFile = function(path: string, content: string, cb: (err: Error|undefined) => void) {}
-    static existsSync = function(path: string): boolean {}
-    static exists = function(path: string, cb: (exists: boolean) => void) {}
+declare interface IElectronFS {
+    readFile:       (path: string, cb: (err: Error|undefined, data: string|undefined) => void) => void;
+    readdir:        (path: string, cb: (err: Error|undefined, files: string[]|undefined) => void) => void;
+    writeFile:      (path: string, content: string, cb: (err: Error|undefined) => void) => void;
+    existsSync:     (path: string) => boolean;
+    exists:         (path: string, cb: (exists: boolean) => void) => void;
 }
+
+declare interface IElectronDialog {
+    showMessageBox: (options: DialogMessageOptions) => number;
+}
+
+declare type DialogMessageType =
+	'none'      |
+	/** On Windows, "question" displays the same icon as "info" */
+	'info'      |
+	/** On macOS, both "warning" and "error" display the same warning icon. */
+	'error'     |
+	/** On Windows, "question" displays the same icon as "info" */
+	'question'  |
+	/** On macOS, both "warning" and "error" display the same warning icon. */
+	'warning'   ;
+
+
+declare type DialogMessageOptions = {
+	/**
+	 * On Windows, "question" displays the same icon as "info", unless you set an icon using the "icon" option.
+	 * On macOS, both "warning" and "error" display the same warning icon.
+	 */
+	type?: DialogMessageType,
+	
+	/**
+	 * Array of texts for buttons.
+	 * On Windows, an empty array will result in one button labeled "OK".
+	 */
+	buttons: string[],
+	
+	/** Content of the message box. */
+	message: string,
+	
+	/** Title of the message box, some platforms will not show it. */
+	title?: string,
+	
+	/** Extra information of the message. */
+	detail?: string,
+	
+	/**  If provided, the message box will include a checkbox with the given label. */
+	checkboxLabel?: string,
+	
+	/** Initial checked state of the checkbox. false by default. */
+	checkboxChecked?: boolean,
+	
+	/**
+	 * The index of the button to be used to cancel the dialog, via the Esc key.
+	 * By default this is assigned to the first button with "cancel" or "no" as the label.
+	 * If no such labeled buttons exist and this option is not set, 0 will be used as the return value.
+	 */
+	cancelId?: number,
+	
+	/** Index of the button in the buttons array which will be selected by default when the message box opens. */
+	defaultId?: number,
+	
+	/**
+	 * On Windows Electron will try to figure out which one of the buttons are common buttons (like "Cancel" or "Yes"), and show the others as command links in the dialog.
+	 * This can make the dialog appear in the style of modern Windows apps.
+	 * If you don't like this behavior, you can set noLink to true
+	 */
+	noLink?: boolean,
+};
 
 declare type Electron_MenuItemProps = {
     id: string,
@@ -130,11 +327,31 @@ declare class Electron_MenuItem {
 }
 
 declare interface GMEditUIPreferences {
-    addText:        (el: HTMLElement, label: string) => HTMLElement;
-    addCheckbox:    (el: HTMLElement, label: string, value: boolean, update: (value: boolean) => void) => HTMLElement;
-    addInput:       (el: HTMLElement, label: string, value: string, update: (value: string) => void) => HTMLElement;
-    addDropdown:    (el: HTMLElement, label: string, value: string, choices: string[], update: (value: string) => void) => HTMLElement;
-    addGroup:       (el: HTMLElement, label: string) => HTMLElement;
+    addText:        (parent: HTMLElement, label: string) => HTMLElement;
+    addWiki:        (parent: HTMLElement, url: string, label: string) => HTMLElement;
+    addCheckbox:    (parent: HTMLElement, label: string, value: boolean, update: (value: boolean) => void) => HTMLElement;
+    addInput:       (parent: HTMLElement, label: string, value: string, update: (value: string) => void) => HTMLElement;
+    addDropdown:    (parent: HTMLElement, label: string, value: string, choices: string[], update: (value: string) => void) => HTMLElement;
+    addGroup:       (parent: HTMLElement, label: string) => HTMLFieldSetElement;
+    addButton:      (parent: HTMLElement, text: string, callback: () => void) => HTMLDivElement;
+    addBigButton:   (parent: HTMLElement, text: string, callback: () => void) => HTMLDivElement;
+}
+
+declare interface GMEditProjectProperties {
+
+    load(project: GMLProject): GMLProjectPropertiesData;
+    save(project: GMLProject, data: GMLProjectPropertiesData);
+    open();
+
+}
+
+declare type GMLProjectPropertiesData = {
+	
+	/** API override */
+	gmlVersion?: string;
+
+    'GMEdit-Constructor'?: Partial<ProjectPreferencesData>;
+	
 }
 
 declare interface GMEditUIMainMenu {
@@ -147,7 +364,17 @@ declare type GMLProject = {
     config: string;
     dir: string;
     path: string;
+    properties: GMLProjectPropertiesData;
     isGMS23: boolean;
+}
+
+declare type GMLProjectYY = {
+    configs: GMLProjectYYConfig;
+}
+
+declare type GMLProjectYYConfig = {
+    children: GMLProjectYYConfig[];
+    name: string;
 }
 
 declare interface GMEditGMLProject {
@@ -187,58 +414,15 @@ class FileKind {
      * Called by a GmlFile upon creation, initialising said file of this type.
      * Should assign the file.editor by least.
      */
-    public init = (file: GmlFile, data: any): void => {
-        
-    }
+    public init = (file: GmlFile, data: any): void => {}
 
     /** We're asked to bring `nav` into view */
-    public navigate = (editor: Editor, nav: GmlFileNav): boolean => {
-        return false;
-    }
+    public navigate = (editor: Editor, nav: GmlFileNav): boolean => {}
 
     public getTabContext = (file: GmlFile, data: any): string => {
         if (file.path != null) return file.path;
         return file.name;
     }
-}
-
-/**
- * ...
- * @author YellowAfterlife
- */
-class KCode extends FileKind {
-
-    /** language mode path for Ace */
-    public modePath: string = 'ace/mode/text';
-
-    /** whether to do a GmlSeeker pass after saving to update definitions */
-    public indexOnSave: boolean = false;
-    
-    /**
-     * Whether to set GmlFile.changed when code gets changed
-     * @see AceStatusBar.update
-     */
-    public setChangedOnEdits: boolean = true;
-
-    constructor() {
-        super();
-    }
-
-    override public init = (file: GmlFile, data: any) => {
-        file.codeEditor = new EditCode(file, modePath);
-        file.editor = file.codeEditor;
-    }
-
-    public loadCode = (editor: EditCode, data: any): string => {
-        return data != null ? data : editor.file.readContent();
-    }
-
-    public saveCode = (editor: EditCode, code: string): boolean => {
-        if (editor.file.path == null) return false;
-        return editor.file.writeContent(code);
-    }
-
-    
 }
 
 /**
@@ -280,79 +464,23 @@ declare class GmlFile {
         this.editor.ready();
     }
 
-    public close = (): void => {
-        this.editor.stateSave();
-        this.editor.destroy();
-    }
+    public close = (): void => {}
 
-    public getAceSession = (): AceSession? => {
-        return this.codeEditor?.session ?? null;
-    }
+    public getAceSession = (): AceSession? => {}
 
-    public static open = (name: string, path: string, nav?: GmlFileNav): GmlFile? => {
-        path = Path.normalize(path);
-        // todo: perhaps completely eliminate 'name' from here and rely on file data
-        // see if there's an existing tab for this:
-        for (tabEl in ui.ChromeTabs.element.querySelectorEls('.chrome-tab')) {
-            const gmlFile: GmlFile = tabEl.gmlFile;
-            if (gmlFile !== null && gmlFile.path === path) {
-                tabEl.click();
-                if (nav != null) Main.window.setTimeout(function() {
-                    gmlFile.navigate(nav);
-                });
-                return gmlFile;
-            }
-        }
-        
-        let kind: FileKind;
-        let data: any?;
-
-        // determine what to do with the file:
-        if (nav !== null && nav.kind !== null) {
-            kind = nav.kind;
-            data = null;
-        } else {
-            const kd = GmlFileKindTools.detect(path);
-            kind = kd.kind;
-            data = kd.data;
-        }
-
-        if (
-            kind instanceof file.kind.misc.KExtern &&
-            (!electron.Electron.isAvailable() ||
-             nav != null && nav.noExtern        )
-        ) {
-            kind = file.kind.misc.KPlain.inst;
-        }
-
-        return kind.create(name, path, data, nav);
-    }
+    public static open = (name: string, path: string, nav?: GmlFileNav): GmlFile? => {}
 
     /**
      * Loads the current code
      * @param data If provided, is used instead of reading from FS.
      */
-    public load = (data: any?) => {
-        this.editor.load(data);
-    }
+    public load = (data: any?) => {}
 
-    public static openTab = (file: GmlFile) => {
-        file.editor.stateLoad();
-        // addTab doesn't return the new tab so we bind it up in the 'active tab change' event:
-        GmlFile.next = file;
-        ui.ChromeTabs.addTab(file.name);
-    }
+    public static openTab = (file: GmlFile) => {}
 
-    public rename = (newName: string, newPath: string): void => {
-        this.name = newName;
-        this.path = newPath;
+    public rename = (newName: string, newPath: string): void => {}
 
-        this.context = this.kind.getTabContext(this, {});
-    }
-
-    public save(): void {
-
-    }
+    public save(): void {}
 }
 
 /**
@@ -396,39 +524,6 @@ declare class Editor {
  * ...
  * @author YellowAfterlife
  */
-class EditCode extends Editor {
-    
-    public static currentNew: EditCode = null;
-    public static container: HTMLElement;
-
-    public session: AceSession;
-    public kind: KCode;
-
-    private modePath: string;
-
-    constructor(file: GmlFile, modePath: string) {
-        super(file);
-
-        this.kind = file.kind;
-        this.element = EditCode.container;
-    }
-
-    override public stateLoad = () => {
-        if (file.path != null) {
-            AceSessionData.restore(this);
-        }
-    }
-
-    override public stateSave = () => {
-        AceSessionData.store(this);
-    }
-
-}
-
-/**
- * ...
- * @author YellowAfterlife
- */
 class KCode extends FileKind {
     
     /** language mode path for Ace */
@@ -447,40 +542,12 @@ class KCode extends FileKind {
         super();
     }
     
-    override public init = (file: GmlFile, data?: any): void => {
-        file.codeEditor = new EditCode(file, modePath);
-        file.editor = file.codeEditor;
-    }
+    override public init = (file: GmlFile, data?: any): void => {}
     
-    public loadCode = (editor: EditCode, data?: any): string => {
-        return data != null ? data : editor.file.readContent();
-    }
+    public loadCode = (editor: EditCode, data?: any): string => {}
 
-    public saveCode = (editor: EditCode, code: string): boolean => {
-        if (editor.file.path == null) return false;
-        return editor.file.writeContent(code);
-    }
-    
-    /**
-     * Executed after getting the code from loadCode for pre-processing
-     * @return Modified code
-     */
-    public preproc = (editor: EditCode, code: string): string => {
-        return code;
-    }
-    
-    /**
-     * Executed before passing the code to saveCode for post-processing
-     * Whatever returned from here is then passed to saveCode.
-     * @return New code or null on error
-     */
-    public postproc = (editor: EditCode, code: string): string => {
-        return code;
-    }
-    
-    public gatherGotoTargets = (editor: EditCode): AceAutoCompleteItems|null => {
-        return null;
-    }
+    public saveCode = (editor: EditCode, code: string): boolean => {}
+
 }
 
 /**
@@ -491,16 +558,10 @@ class EditCode extends Editor {
     
     public static currentNew: EditCode? = null;
     public static container: Element;
+
     public session: AceSession;
     public kind: KCode;
     private modePath: string;
-    
-    public locals: Dictionary<GmlLocals> = GmlLocals.defaultMap;
-    public imports: Dictionary<GmlImports> = GmlImports.defaultMap;
-    
-    public lambdaList: Array<string> = [];
-    public lambdaMap: Dictionary<string> = new Dictionary();
-    public lambdas: Dictionary<GmlExtLambda> = new Dictionary();
     
     constructor(file: GmlFile, modePath: string) {
         super(file);
@@ -509,262 +570,19 @@ class EditCode extends Editor {
         this.element = container;
     }
     
-    override public ready = (): void => {
-        if (GmlAPI.version.config.indexingMode == Local) {
-            GmlSeeker.runSync(file.path, file.code, null, file.kind);
-        }
-
-        let _prev = currentNew;
-        currentNew = this;
-        // todo: this does not seem to cache per-version, but not a performance hit either?
-        
-        session = AceTools.createSession(file.code, { path: modePath, version: GmlAPI.version });
-        AceTools.bindSession(session, this);
-        
-        if (Project.current != null && Project.current.properties.indentWithTabs != null) {
-            session.setOption('useSoftTabs', !Project.current.properties.indentWithTabs);
-        } else if (Preferences.current.detectTab) {
-            if (Nativestring.contains(file.code, '\n\t')) {
-                session.setOption('useSoftTabs', false);
-            } else if (Nativestring.contains(file.code, '\n  ')) {
-                session.setOption('useSoftTabs', true);
-            } else {
-                session.setOption('useSoftTabs', Preferences.current.tabSpaces);
-            }
-        } else {
-            session.setOption('useSoftTabs', Preferences.current.tabSpaces);
-        }
-
-        if (Project.current != null && Project.current.properties.indentSize != null) {
-            session.setOption('tabSize', Std.int(Project.current.properties.indentSize));
-        }
-
-        Preferences.hookSetOption(session);
-
-        if (modePath === 'ace/mode/javascript') {
-            session.setOption('useWorker', false);
-        }
-        
-        currentNew = _prev;
-        
-        let data = file.path != null ? GmlSeekData.map[file.path] : null;
-        if (data != null) {
-            locals = data.locals;
-            if (data.imports != null) imports = data.imports;
-        }
-    }
+    override public ready = (): void => {}
     
-    override public stateLoad = () => {
-        if (file.path != null) AceSessionData.restore(this);
-    }
-    override public stateSave = () => {
-        AceSessionData.store(this);
-    }
+    override public stateLoad = () => {}
+
+    override public stateSave = () => {}
     
-    override public focusGain = (prev:Editor): void => {
-        super.focusGain(prev);
-        Main.aceEditor.setSession(session);
-    }
-    
-    public setLoadError = (text: string) => {
-        file.code = text;
-        file.path = null;
-        file.kind = KExtern.inst;
-        return text;
-    }
-    override public load = (data: any): void => {
-        let src = kind.loadCode(this, data);
-        src = kind.preproc(this, src);
-        file.code = src;
-        file.syncTime();
-    }
-    
-    public postpImport = (val: string): { val: string, sessionChanged: boolean } => {
-        let val_preImport = val;
-        let path = file.path;
+    override public focusGain = (prev: Editor): void => {}
 
-        val = GmlExtImport.post(val, this);
+    override public load = (data: any): void => {}
 
-        if (val == null) {
-            Dialog.showError(GmlExtImport.errorText);
-            return null;
-        }
+    override public save = (): boolean => {}
 
-        // if there are imports, check if we should be updating the code
-        let data = path !== null ? GmlSeekData.map[path] : null;
-        let sessionChanged = false;
-        let hadImports = data != null && data.imports !== null;
-
-        if (hadImports || GmlExtImport.post_numImports > 0) {
-            let next = GmlExtImport.pre(val, this);
-
-            if (data != null && data.imports != null) {
-                imports = data.imports;
-            } else imports = GmlImports.defaultMap;
-
-            if (next != val_preImport) {
-                const sd = AceSessionData.get(this);
-                const session = session;
-                session.doc.setValue(next);
-                AceSessionData.set(this, sd);
-                sessionChanged = true;
-
-                Main.window.setTimeout(() => {
-                    const undoManager = session.getUndoManager();
-
-                    if (!Preferences.current.allowImportUndo) {
-                        session.setUndoManager(undoManager);
-                        undoManager.reset();
-                    }
-
-                    undoManager.markClean();
-                    file.changed = false;
-                });
-            } else if (!hadImports) {
-                // if we didn't have imports before, data.imports would
-                // be null and thus our imports were left untransformed.
-                // But now they are OK so we can do it again and right.
-                val = GmlExtImport.post(val_preImport, this);
-                if (val == null) {
-                    Main.window.alert(GmlExtImport.errorText);
-                    return null;
-                }
-            }
-        }
-
-        return { val: val, sessionChanged: sessionChanged };
-    }
-    
-    public setSaveError = (text:string): void => {
-        Dialog.showError(text);
-    }
-
-    override public save = (): boolean => {
-        let code = session.getValue();
-        GmlFileBackup.save(file, code);
-        
-        code = kind.postproc(this, code);
-        if (code == null) return false;
-        
-        let ok = kind.saveCode(this, code);
-        if (!ok) return false;
-        
-        file.savePost(code);
-        return true;
-    }
-
-    override public checkChanges = (): void => {
-        const act = Preferences.current.fileChangeAction;
-        if (act == null) return;
-
-        const status = kind.checkForChanges(this);
-
-        if (status < 0) {
-            switch (Dialog.showMessageBox({
-                title: 'File missing: ' + file.name,
-                message: 'The source file is no longer found on disk. '
-                    + 'What would you like to do?',
-                buttons: [
-                    'Keep editing',
-                    'Close the file'
-                ], cancelId: 0,
-            })) {
-                case 1: {
-                    file.path = null;
-                    Main.window.setTimeout(function() {
-                        file.tabEl.querySelector('.chrome-tab-close').click();
-                    });
-                    return;
-                };
-                default: file.path = null;
-            }
-            return;
-        }
-
-        if (status > 0) try {
-            let prev = file.code;
-            file.load();
-            
-            const rxr = /\\r/g;
-            let check_0 = Nativestring.trimRight(prev);
-            check_0 = Nativestring.replaceExt(check_0, rxr, '');
-            let check_1 = Nativestring.trimRight(file.code);
-            check_1 = Nativestring.replaceExt(check_1, rxr, '');
-            
-            const finishChange = (): void => {
-                session.setValue(file.code);
-                plugins.PluginEvents.fileReload({file:file});
-                let path = file.path;
-
-                if (path != null) {
-                    const data = GmlSeekData.map[path];
-                    if (data != null) {
-                        kind.index(path, file.readContent(), data.main, true);
-                        if (GmlAPI.version.config.indexingMode == Local) file.liveApply();
-                        session.gmlScopes.updateOnSave();
-                        let next = GmlSeekData.map[path];
-                        if (locals != locals) {
-                            locals = locals;
-                            if (GmlFile.current == file) session.bgTokenizer.start(0);
-                        }
-                    }
-                }
-                if (kind === KGml && kind.canSyntaxCheck) {
-                    let check = parsers.linter.GmlLinter.getOption(q.q.onLoad);
-                    if (check) parsers.linter.GmlLinter.runFor(this);
-                }
-            }
-
-            let dlg: number = 0;
-            if (check_0 == check_1) {
-                // OK!
-            } else if (!file.changed) {
-                if (act != Ask) {
-                    finishChange();
-                } else dlg = 1;
-            } else dlg = 2;
-
-            if (dlg != 0) {
-                printSize = (b: number) => {
-                    toFixed = (f: number):string => {
-                        return f(2);
-                    }
-                    if (b < 10000) return b + 'B';
-                    b /= 1024;
-                    if (b < 10000) return toFixed(b) + 'KB';
-                    b /= 1024;
-                    if (b < 10000) return toFixed(b) + 'MB';
-                    b /= 1024;
-                    return toFixed(b) + 'GB';
-                }
-                let sz1 = printSize(file.code.length);
-                let sz2 = printSize(session.getValue().length);
-                let bt = Dialog.showMessageBox({
-                    title: 'File conflict for ' + file.name,
-                    message: 'Source file changed ($sz1) ' + (dlg == 2
-                        ? 'but you have unsaved changes ($sz2)'
-                        : 'while the current version is $sz2'
-                    ) + '. What would you like to do?',
-                    buttons: ['Reload file', 'Keep current', 'Open changes in a new tab'],
-                    cancelId: 1,
-                });
-
-                switch (bt) {
-                    case 0: {
-                        finishChange();
-                    };
-                    case 1: { };
-                    case 2: {
-                        let name1 = file.name + ' <copy>';
-                        GmlFile.next = new GmlFile(name1, null, file.kind, file.code);
-                        ui.ChromeTabs.addTab(name1);
-                    };
-                }
-            }
-        } catch (e: any) {
-            Main.console.error('Error applying changes: ', e);
-        }
-    }
+    override public checkChanges = (): void => {}
 }
 
 declare interface Ace {
@@ -803,6 +621,7 @@ declare interface ChromeTab extends HTMLDivElement {
 declare type $GMEdit = {
     'ui.Preferences': GMEditUIPreferences;
     'ui.MainMenu': GMEditUIMainMenu;
+    'ui.project.ProjectProperties': GMEditProjectProperties;
     'ui.ChromeTabs': ChromeTabs;
     'gml.Project': GMEditGMLProject;
     'editors.Editor': typeof Editor;
@@ -815,3 +634,7 @@ declare type $GMEdit = {
 
 declare const $gmedit: $GMEdit;
 declare const ace: Ace;
+
+declare const Electron_App: IElectronApp;
+declare const Electron_FS: IElectronFS;
+declare const Electron_Dialog: IElectronDialog;

@@ -1,12 +1,12 @@
-import { CompileController } from './compiler/CompileController.js';
-// import { PreferencesMenu } from './preferences/PreferencesMenu.js';
-import { HamburgerOptions } from './HamburgerOptions.js';
-import { getCurrentProject, saveOpenFiles } from './utils/editor.js';
+import * as compileController from './compiler/igor-controller.js';
+import { HamburgerOptions } from './ui/HamburgerOptions.js';
+import { project_current_get, open_files_save } from './utils/project.js';
 import * as preferences from './preferences/Preferences.js';
-import * as igor from './utils/igor.js';
-import { PreferencesMenu } from './preferences/PreferencesMenu.js';
+import * as projectProperties from './preferences/ProjectProperties.js';
+import * as igorPaths from './compiler/igor-paths.js';
+import * as preferencesMenu from './ui/PreferencesMenu.js';
 import { Err } from './utils/Err.js';
-import { ConstructorControlPanel } from './editors/ConstructorControlPanel.js';
+import { ConstructorControlPanel } from './ui/editors/ConstructorControlPanel.js';
 
 /**
  * Name of the plugin 
@@ -26,120 +26,104 @@ export let plugin_version;
 export class GMConstructor {
 
     /**
-     * Controller and handler for compile jobs.
-     * 
-     * @type {CompileController}
-     */
-    compileController;
-
-    /**
      * Quick actions menu.
      * 
      * @type {HamburgerOptions}
      */
-    menu;
+    hamburgerOptions;
 
-    /**
-     * @param {CompileController} compileController
-     */
-    constructor(compileController) {
+    constructor() {
 
-        this.compileController = compileController;
-
-        this.menu = new HamburgerOptions(
+        this.hamburgerOptions = new HamburgerOptions(
             this.onControlPanel,
             this.compileCurrent,
             this.cleanCurrent,
             this.runCurrent
         );
-
-        this.prefsMenu = new PreferencesMenu();
+        
     }
 
     /**
      * Run a task on a given (or current) project.
-     * @param {IgorVerb} verb
+     * @param {IgorSettings} settings
      * @param {GMLProject} [project] 
      */
-    #runTask(verb, project = getCurrentProject()) {
+    async #runTask(settings, project = project_current_get()) {
 
         if (project === undefined) {
             return;
         }
 
-        const runtime_res = this.#getProjectRuntime(project);
+        const runtime_type = projectProperties.runtime_channel_type_get();
+        const runtime_res = projectProperties.runtime_get();
 
         if (!runtime_res.ok) {
-            console.error(`Failed to find runtime for project: ${runtime_res.err}`);
-            return;
+
+            const err = new Err(
+                `No ${runtime_type} runtimes available to compile!`,
+                runtime_res.err,
+                `Try specifying a different runtime channel type below, or check the runtime search path for ${runtime_type} runtimes.`
+            );
+
+            return ConstructorControlPanel
+                .view(true)
+                .showError(err.message, err);
         }
 
         if (preferences.save_on_run_task_get()) {
-            saveOpenFiles();
+            open_files_save();
         }
 
-        const res = this.compileController.runJob(project, runtime_res.data, {
-            verb,
-            mode: 'VM'
-        });
+        const res = await compileController.job_run(project, runtime_res.data, settings);
 
         if (!res.ok) {
-            console.error(`Failed to run Igor job: ${res.err}`);
-            return;
+
+            const err = new Err(
+                `Failed to run Igor job!`,
+                res.err
+            );
+
+            return ConstructorControlPanel
+                .view(true)
+                .showError(err.message, err)
         }
 
-        this.compileController.openEditorForJob(res.data, preferences.reuse_compiler_tab_get());
-    }
-
-    /**
-     * Get the runtime to use for a given project.
-     * @param {GMLProject} proj 
-     * @returns {Result<RuntimeInfo>}
-     */
-    #getProjectRuntime(proj) {
-
-        // TODO: we currently just grab the global.
-        
-        const type = preferences.global_runtime_type_get();
-        const desired_runtime_list = preferences.runtime_versions_get_for_type(type);
-
-        if (desired_runtime_list === null) {
-            return {
-                ok: false,
-                err: new Err(`Runtime type ${type} list not loaded!`)
-            };
-        }
-
-        const version = preferences.global_runtime_choice_get(type) ?? desired_runtime_list[0]?.version?.toString();
-        const runtime = desired_runtime_list.find(runtime => runtime.version.toString() === version);
-
-        if (runtime === undefined) {
-            return {
-                ok: false,
-                err: new Err(`Failed to find any runtimes of type ${type}`)
-            };
-        }
-
-        return {
-            ok: true,
-            data: runtime
-        };
+        compileController.job_open_editor(res.data, preferences.reuse_compiler_tab_get());
     }
 
     onControlPanel = () => {
-        ConstructorControlPanel.view();
+        ConstructorControlPanel.view(true);
     }
 
+    // yes this is VERY temporary
     compileCurrent = () => {
-        this.#runTask('Package');
+        this.#runTask({
+            platform: igorPaths.igor_user_platform,
+            verb: 'Package',
+            runtime: 'VM',
+            threads: 8,
+            configName: projectProperties.config_name_get()
+        });
     }
 
     cleanCurrent = () => {
-        this.#runTask('Clean');
+        this.#runTask({
+            platform: {win32: 'Windows', darwin: 'Mac'}[process.platform],
+            verb: 'Clean',
+            runtime: 'VM',
+            threads: 8,
+            configName: projectProperties.config_name_get()
+        });
     }
 
     runCurrent = () => {
-        this.#runTask('Run');
+        this.#runTask({
+            platform: {win32: 'Windows', darwin: 'Mac'}[process.platform],
+            verb: 'Run',
+            runtime: 'VM',
+            threads: 8,
+            configName: projectProperties.config_name_get()
+        });
     }
 
     /**
@@ -155,9 +139,14 @@ export class GMConstructor {
         if (rosetta_check(node_child_process.execSync)) {
 
             const err = new Err(`${_plugin_name} does not work correctly on Rosetta - please consider using GMEdit's native Arm64 build found at https://yellowafterlife.itch.io/gmedit`);
-
-            alert(err.toString());
             console.error(err);
+
+            Electron_Dialog.showMessageBox({
+                title: 'GMEdit-Constructor cannot load on Rosetta!',
+                message: err.message,
+                buttons: ['Dismiss'],
+                type: 'error'
+            });
 
             return {
                 ok: false,
@@ -167,10 +156,12 @@ export class GMConstructor {
         }
 
         join_path = node_path.join;
-        igor.__setup__();
+        spawn = node_child_process.spawn;
 
         plugin_name = _plugin_name;
         plugin_version = _plugin_version;
+
+        igorPaths.__setup__();
 
         // Setting up preferences //
         const preferences_res = await preferences.__setup__();
@@ -182,12 +173,12 @@ export class GMConstructor {
             };
         }
 
-        // Setting up compilation //
-        const compile_controller = new CompileController(node_child_process.spawn);
+        projectProperties.__setup__();
+        preferencesMenu.__setup__();
 
         return {
             ok: true,
-            data: new GMConstructor(compile_controller)
+            data: new GMConstructor()
         };
     }
 
@@ -196,9 +187,10 @@ export class GMConstructor {
      */
     async cleanup() {
 
-        preferences.cleanup();
-        this.compileController.cleanup();
-        this.menu.cleanup();
+        preferences.__cleanup__();
+        compileController.__cleanup__();
+        projectProperties.__cleanup__();
+        this.hamburgerOptions.cleanup();
         
     }
 
@@ -209,6 +201,12 @@ export class GMConstructor {
  * @type {import('node:path').join}
  */
 export let join_path;
+
+/** 
+ * Reference to NodeJS spawn.
+ * @type {import('node:child_process').spawn} 
+ */
+export let spawn;
 
 /**
  * Make sure we aren't running on rosetta, since GMEdit has
