@@ -27,7 +27,7 @@ git clone https://github.com/thennothinghappened/GMEdit-Constructor %appdata%\Ac
 
 ### MacOS
 ```sh
-git clone https://github.com/thennothinghappened/GMEdit-Constructor ~/Library/Application Support/AceGM/GMEdit/plugins/GMEdit-Constructor
+git clone https://github.com/thennothinghappened/GMEdit-Constructor "~/Library/Application Support/AceGM/GMEdit/plugins/GMEdit-Constructor"
 ```
 
 See [GMEdit#Installing plugins](https://github.com/YellowAfterlife/GMEdit/wiki/Using-plugins#installing-plugins)
