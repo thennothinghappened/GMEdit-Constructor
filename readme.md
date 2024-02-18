@@ -51,6 +51,7 @@ Maybe later these can be customisable :)
   - Remote compilation for other platforms using `devices.json` (compile on another machine via `ssh` as you can in the IDE)
 - YYC support
 - Option for docked console as opposed to full-window
+- Automatic check for updates
 
 ## Issues
 If you have any issues with Constructor, feel free to either ask on Discord (below), or make a post on the [GitHub Issues](<https://github.com/thennothinghappened/GMEdit-Constructor/issues>) page. I'll try to get back to you when I can, but no guarantees.
