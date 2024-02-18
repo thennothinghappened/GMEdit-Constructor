@@ -1,4 +1,6 @@
+import { Err } from '../utils/Err.js';
 import { project_is_open } from '../utils/project.js';
+import { ConstructorControlPanel } from './editors/ConstructorControlPanel.js';
 
 const AceCommands = $gmedit['ace.AceCommands'];
 
@@ -129,7 +131,10 @@ export class HamburgerOptions {
         // for https://github.com/electron/electron/issues/527
 
         if (this.#menu_items_container.submenu === undefined || existing.submenu === undefined) {
-            return console.error('Menu items submenu missing!');
+            return ConstructorControlPanel.showError(
+                'Hamburger Menu items submenu missing!',
+                new Err('Menu items submenu missing!', undefined, 'Please report this on GitHub.')
+            );
         }
 
         for (const item of this.#menu_items_container.submenu.items) {
@@ -147,13 +152,17 @@ export class HamburgerOptions {
         const existing = this.#findExistingMenu();
 
         if (existing === undefined) {
-            console.error('Failed to deinitialize popup menu, can\'t find existing instance');
-            return;
+            return ConstructorControlPanel.showError(
+                'Failed to deinitialize popup menu, can\'t find existing instance',
+                new Err('Failed to deinitialize popup menu, can\'t find existing instance', undefined, 'Please report this on GitHub.')
+            );
         }
 
         if (existing.submenu === undefined) {
-            console.error('Menu items submenu missing!');
-            return;
+            return ConstructorControlPanel.showError(
+                'Hamburger Menu items submenu missing!',
+                new Err('Menu items submenu missing!', undefined, 'Please report this on GitHub.')
+            );
         }
 
         existing.visible = false;

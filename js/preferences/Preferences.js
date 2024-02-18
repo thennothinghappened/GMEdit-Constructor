@@ -276,7 +276,7 @@ async function runtime_list_load_path(type, search_path) {
                     `${plugin_name} only supports runtimes >2022.x, and below 2024.2[xx] currently. See stack trace for more details.`
                 );
                 
-                ConstructorControlPanel.showWarning(err.message, err);
+                ConstructorControlPanel.showDebug(err.message, err);
                 
                 return null;
             }
@@ -329,8 +329,8 @@ export async function __setup__() {
                 );
 
                 ConstructorControlPanel
-                    .view(false)
-                    .showWarning(err.message, err);
+                    .view(true)
+                    .showError(err.message, err);
             }
 
         } else {
@@ -342,15 +342,19 @@ export async function __setup__() {
             );
 
             ConstructorControlPanel
-                .view(false)
-                .showWarning(err.message, err);
+                .view(true)
+                .showError(err.message, err);
         }
     }
 
     if (loaded_prefs?.runtime_opts?.type !== undefined) {
         if (!valid_runtime_types.includes(loaded_prefs.runtime_opts.type)) {
 
-            console.warn(`Found invalid preferred runtime type '${loaded_prefs.runtime_opts.type}', changed to ${prefs.runtime_opts.type}`);
+            ConstructorControlPanel.showWarning(
+                `Invalid preferred runtime type`,
+                new Err(`'${loaded_prefs.runtime_opts.type}' is invalid, changed to ${prefs.runtime_opts.type}`)
+            );
+            
             loaded_prefs.runtime_opts.type = prefs.runtime_opts.type;
 
         }
@@ -364,7 +368,10 @@ export async function __setup__() {
 
             if (!(type in type_opts)) {
 
-                console.warn(`Missing runtime type preference data for type '${type}', replacing with default.`);
+                ConstructorControlPanel.showWarning(
+                    'Missing runtime type preference data',
+                    new Err(`Missing runtime type preference data for type '${type}', replacing with default.`)
+                );
                 loaded_prefs.runtime_opts.type_opts[type] = prefs.runtime_opts.type_opts[type];
 
             }
