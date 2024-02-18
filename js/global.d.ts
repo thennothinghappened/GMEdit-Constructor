@@ -26,6 +26,16 @@ declare type ProjectPreferencesData = {
      */
     config_name: string;
 
+    /**
+     * Chosen runtime type to use.
+     */
+    runtime_type: RuntimeChannelType;
+
+    /**
+     * Chosen runtime version to use.
+     */
+    runtime_version: string?;
+
 };
 
 declare type RuntimeChannelType = 
@@ -36,21 +46,38 @@ declare type RuntimeChannelType =
 declare type RuntimePreference = {
     /** Where we should search for the list of runtimes. */
     search_path: string;
+    
     /** Chosen runtime to use. */
     choice: string?;
 };
 
+/**
+ * Representation of a version of a GM runtime.
+ */
 declare interface IRuntimeVersion {
 
-    year: number;
-    month: number;
-    major: number;
-    build: number;
+    readonly year: number;
+    readonly month: number;
+    readonly major: number;
+    readonly build: number;
+
+    /**
+     * What type of runtime this is.
+     */
+    readonly type: RuntimeChannelType;
 
     /**
      * Returns a negative number if this runtime is older than `other`, 0 for same, or postive for newer.
      */
     compare(other: IRuntimeVersion): number;
+
+    /**
+     * Returns whether this runtime version is supported by Constructor.
+     * At the moment, as LTS is broken (for unknown reasons), this means LTS runtimes
+     * are excluded, as as is >=2024.2 Stable, or >=2024.200.0.490 Beta, which
+     * contain the project format changes (which GMEdit does not yet support.)
+     */
+    supported(): Result<void>;
 
 }
 
@@ -63,16 +90,51 @@ declare type RuntimeInfo = {
     igor_path: string;
 };
 
+/**
+ * Base error type we use to try and be descriptive to the user :)
+ */
+declare interface IErr extends Error {
+
+    readonly solution?: string;
+
+    stackFormat(): string;
+
+    toString(): string;
+
+}
+
 declare type Result<T> = 
     { ok: true, data: T }       |
-    { ok: false, err: Err }     ;
+    { ok: false, err: IErr }     ;
 
+/**
+ * Settings for running an Igor Job.
+ */
 declare type IgorSettings = {
 
+    /**
+     * Which platform the action will run for.
+     */
     platform: IgorPlatform;
+
+    /**
+     * The Igor action to run.
+     */
     verb: IgorVerb;
+
+    /**
+     * Which runtime to use - default is VM.
+     */
     runtime: 'VM'|'YYC';
+
+    /**
+     * How many threads to use for this compilation.
+     */
     threads: number;
+
+    /**
+     * Name of the Build Config to use for this compilation.
+     */
     configName: string;
 
     /**
@@ -83,6 +145,9 @@ declare type IgorSettings = {
 
 }
 
+/**
+ * A supported platform for Igor to target.
+ */
 declare type IgorPlatform =
     'OperaGX'           |
     'Windows'           |
@@ -97,6 +162,32 @@ declare type IgorPlatform =
     'XBoxOne'           |
     'XBoxOneSeriesXS'   |
     'Switch'            ;
+
+/**
+ * Host (OS) platform information for Igor.
+ */
+declare type IgorPlatformInfo = {
+
+    /** Extension of the `Igor` executable for the target platform's runtime. */
+    platform_executable_extension: string;
+
+    /** Platform-specific path segment of the `Igor` executable. */
+    platform_path_name: string;
+
+    /** {@link IgorPlatform} to native build for the host OS. */
+    user_platform: IgorPlatform;
+
+    /**
+     * Default directories as per https://manual-en.yoyogames.com/Settings/Building_via_Command_Line.htm
+     * to find runtimes.
+     * 
+     * Note that this only covers Windows and MacOS, elsewhere will crash trying to index these
+     * as I don't know where the location is for Linux.
+     */
+    default_runtime_paths: {
+        [key in RuntimeChannelType]: string
+    };
+}
 
 declare type IgorVerb = 
     'Run'       |
@@ -235,7 +326,7 @@ declare interface GMEditUIPreferences {
     addCheckbox:    (parent: HTMLElement, label: string, value: boolean, update: (value: boolean) => void) => HTMLElement;
     addInput:       (parent: HTMLElement, label: string, value: string, update: (value: string) => void) => HTMLElement;
     addDropdown:    (parent: HTMLElement, label: string, value: string, choices: string[], update: (value: string) => void) => HTMLElement;
-    addGroup:       (parent: HTMLElement, label: string) => HTMLElement;
+    addGroup:       (parent: HTMLElement, label: string) => HTMLFieldSetElement;
     addButton:      (parent: HTMLElement, text: string, callback: () => void) => HTMLDivElement;
     addBigButton:   (parent: HTMLElement, text: string, callback: () => void) => HTMLDivElement;
 }

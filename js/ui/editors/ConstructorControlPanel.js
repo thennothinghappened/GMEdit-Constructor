@@ -1,8 +1,8 @@
 import { Job } from '../../compiler/job/Job.js';
 import { project_config_tree_get, project_config_tree_to_array, project_current_get, project_is_open } from '../../utils/project.js';
-import { h1 } from '../components/headings.js';
 import { ConstructorEditorView, ConstructorViewFileKind } from './ConstructorEditorView.js';
 import * as projectProperties from '../../preferences/ProjectProperties.js';
+import * as ui from '../ui-wrappers.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];
@@ -44,10 +44,15 @@ export class ConstructorControlPanel extends ConstructorEditorView {
 
         this.element.classList.add('gm-constructor-viewer', 'gm-constructor-control-panel', 'popout-window');
 
-        this.element.appendChild(h1(ConstructorControlPanel.tabName));
+        this.element.appendChild(ui.h1(ConstructorControlPanel.tabName));
+
+        this.errors = ui.group(this.element, 'Problems', [ui.text_button('Dismiss All', this.dismissAllErrors)]);
+        this.errors.classList.add('gm-constructor-control-panel-errors');
 
         this.projectSettings = UIPreferences.addGroup(this.element, 'Project Settings');
         this.projectSettings.hidden = true;
+
+        this.globalSettings = UIPreferences.addGroup(this.element, 'Global Settings');
         
         GMEdit.on('projectOpen', this.onOpenProject);
         GMEdit.on('projectClose', this.onCloseProject);
@@ -56,6 +61,82 @@ export class ConstructorControlPanel extends ConstructorEditorView {
             this.onOpenProject();
         }
 
+    }
+
+    /**
+     * Show the user an error in the UI.
+     * @param {string} title
+     * @param {IErr} err
+     */
+    showError = (title, err) => {
+
+        console.error(`${title} - ${err}`);
+
+        const error = ui.group(this.errors, title, [
+            ui.text_button('Dismiss', () => error.remove())
+        ]);
+
+        error.classList.add('gm-constructor-error');
+
+        if (err.solution !== undefined) {
+            error.appendChild(ui.p(err.solution));
+        }
+        
+        const stacktrace = UIPreferences.addGroup(error, 'Stack trace (click to expand)');
+        stacktrace.appendChild(ui.pre(err.toString()));
+        stacktrace.classList.add('collapsed');
+
+        return this;
+
+    }
+
+    /**
+     * Dismiss all errors in the panel.
+     */
+    dismissAllErrors = () => {
+
+        for (const element of Array.from(this.errors.children)) {
+            if (element instanceof HTMLFieldSetElement) {
+                element.remove();
+            }
+        }
+    }
+
+    /**
+     * View the control panel.
+     * @returns {ConstructorControlPanel}
+     */
+    static view = () => {
+
+        const controlPanel = this.find();
+
+        if (controlPanel !== undefined) {
+            
+            controlPanel.file.tabEl.click();
+            return controlPanel;
+        }
+
+        const file = new GmlFile(this.tabName, null, this.fileKind);
+        GmlFile.openTab(file);
+
+        // @ts-ignore
+        return file.editor;
+
+    }
+
+    /**
+     * Find the existing open control panel, if it is open.
+     * @returns {ConstructorControlPanel|undefined}
+     */
+    static find = () => {
+
+        const tabs = Array.from(ChromeTabs.getTabs());
+        const editors = tabs.map(tab => tab.gmlFile.editor);
+
+        return editors.find(
+            /** @returns {editor is ConstructorControlPanel} */ 
+            (editor) => editor instanceof ConstructorControlPanel
+        );
     }
 
     onOpenProject = () => {
@@ -94,23 +175,11 @@ export class ConstructorControlPanel extends ConstructorEditorView {
     }
 
     /**
-     * View the control panel.
+     * Setup the global preferences.
      */
-    static view = () => {
-
-        const tabs = Array.from(ChromeTabs.getTabs());
-        const editors = tabs.map(tab => tab.gmlFile.editor);
-
-        /** @type {ConstructorControlPanel|undefined} */
-        // @ts-ignore
-        const controlPanel = editors.find(editor => editor instanceof ConstructorControlPanel);
-
-        if (controlPanel !== undefined) {
-            return controlPanel.file.tabEl.click();
-        }
-
-        const file = new GmlFile(this.tabName, null, this.fileKind);
-        return GmlFile.openTab(file);
+    globalSettingsSetup() {
+        
+        
 
     }
 

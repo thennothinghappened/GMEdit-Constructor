@@ -54,10 +54,10 @@ export class PreferencesMenu {
         UIPreferences.addDropdown(
             prefs_group,
             'Default Runtime type',
-            preferences.global_runtime_type_get(),
+            preferences.runtime_channel_type_get(),
             preferences.valid_runtime_types,
             // @ts-ignore
-            preferences.global_runtime_type_set
+            preferences.runtime_channel_type_set
         )
 
         for (const type of preferences.valid_runtime_types) {
@@ -81,7 +81,7 @@ export class PreferencesMenu {
                     UIDropdownMutate(
                         version_dropdown,
                         this.#runtimeVersionStringsGetForType(type),
-                        preferences.global_runtime_choice_get(type) ?? ''
+                        preferences.runtime_version_get(type) ?? ''
                     );
                 }
             );
@@ -89,10 +89,10 @@ export class PreferencesMenu {
             version_dropdown = UIPreferences.addDropdown(
                 group,
                 'Version',
-                preferences.global_runtime_choice_get(type) ?? '',
+                preferences.runtime_version_get(type) ?? '',
                 this.#runtimeVersionStringsGetForType(type),
                 (choice) => {
-                    preferences.global_runtime_choice_set(type, choice);
+                    preferences.runtime_version_set(type, choice);
                 }
             );
 

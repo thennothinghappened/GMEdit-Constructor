@@ -1,5 +1,6 @@
 import { Job } from '../../compiler/job/Job.js';
 import { ConstructorEditorView, ConstructorViewFileKind } from './ConstructorEditorView.js';
+import * as ui from '../ui-wrappers.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];
@@ -119,7 +120,7 @@ export class CompileLogViewer extends ConstructorEditorView {
         this.cmd = UIPreferences.addText(info, KConstructorOutput.getJobName(job));
         this.cmd.classList.add('gm-constructor-info-cmd');
 
-        this.log = document.createElement('pre');
+        this.log = ui.pre('');
         this.log.className = 'gm-constructor-log';
 
         this.element.appendChild(this.log);

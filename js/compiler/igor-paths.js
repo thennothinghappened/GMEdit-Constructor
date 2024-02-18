@@ -1,55 +1,53 @@
 
-/**
- * Mappings of NodeJS platforms to various Igor information.
- * @type {{[key in NodeJS.Platform]: {ext: string, path_name: string, cmd: string}}}
- */
-
 import { join_path } from '../GMConstructor.js';
 import { Err } from '../utils/Err.js';
 
-// @ts-ignore
+/**
+ * Mappings of NodeJS platforms to various Igor information.
+ * @type {{[key in NodeJS.Platform]: IgorPlatformInfo}}
+ */
 const igor_platform_map = {
     'win32': {
-        ext: '.exe',
-        path_name: 'windows',
-        cmd: 'Windows'
+        platform_executable_extension: '.exe',
+        platform_path_name: 'windows',
+        user_platform: 'Windows',
+        default_runtime_paths: {
+            Stable: 'C:\\ProgramData\\GameMakerStudio2\\Cache\\runtimes',
+            Beta:   'C:\\ProgramData\\GameMakerStudio2-Beta\\Cache\\runtimes',
+            LTS:    'C:\\ProgramData\\GameMakerStudio2-LTS\\Cache\\runtimes'
+        }
     },
     'darwin': {
-        ext: '',
-        path_name: 'osx',
-        cmd: 'Mac'
+        platform_executable_extension: '',
+        platform_path_name: 'osx',
+        user_platform: 'Mac',
+        default_runtime_paths: {
+            Stable: '/Users/Shared/GameMakerStudio2/Cache/runtimes',
+            Beta:   '/Users/Shared/GameMakerStudio2-Beta/Cache/runtimes',
+            LTS:    '/Users/Shared/GameMakerStudio2-LTS/Cache/runtimes'
+        }
     },
     'linux': {
-        ext: '',
-        path_name: 'ubuntu', // TODO: can't check this right now
-        cmd: 'Linux'
+        platform_executable_extension: '',
+        platform_path_name: 'ubuntu', // TODO: can't check this right now
+        user_platform: 'Linux',
+        default_runtime_paths: {
+            Stable: '/please/specify/your/runtime/paths',
+            Beta:   '/please/specify/your/runtime/paths',
+            LTS:    '/please/specify/your/runtime/paths'
+        }
     }
 };
 
 /**
- * Default directories as per https://manual-en.yoyogames.com/Settings/Building_via_Command_Line.htm
- * to find runtimes.
- * 
- * Note that this only covers Windows and MacOS, elsewhere will crash trying to index these
- * as I don't know where the location is for Linux.
- * 
- * @type {{[key in NodeJS.Platform]: { [key in RuntimeChannelType]: string }}}
+ * Default paths to the runtimes for the host OS.
  */
-// @ts-ignore
-const def_runtime_platform_paths = {
-    'win32': {
-        Stable: 'C:\\ProgramData\\GameMakerStudio2\\Cache\\runtimes',
-        Beta: 'C:\\ProgramData\\GameMakerStudio2-Beta\\Cache\\runtimes',
-        LTS: 'C:\\ProgramData\\GameMakerStudio2-LTS\\Cache\\runtimes'
-    },
-    'darwin': {
-        Stable: '/Users/Shared/GameMakerStudio2/Cache/runtimes',
-        Beta: '/Users/Shared/GameMakerStudio2-Beta/Cache/runtimes',
-        LTS: '/Users/Shared/GameMakerStudio2-LTS/Cache/runtimes'
-    }
-};
+export const def_runtime_paths = igor_platform_map[process.platform].default_runtime_paths;
 
-export const def_runtime_paths = def_runtime_platform_paths[process.platform];
+/**
+ * {@link IgorPlatform} to native build for the host OS. 
+ */
+export const igor_user_platform = igor_platform_map[process.platform].user_platform;
 
 /**
  * The local-to-runtime Igor path for the current platform & architecture.
@@ -60,11 +58,11 @@ export let igor_path_segment;
 /**
  * Igor platform name for our platform.
  */
-export const igor_platform_cmd_name = igor_platform_map[process.platform].cmd;
+export const igor_platform_cmd_name = igor_platform_map[process.platform].user_platform;
 
 /**
  * Called when the plugin is loading.
  */
 export function __setup__() {
-    igor_path_segment = join_path('bin', 'igor', igor_platform_map[process.platform].path_name, process.arch, `Igor${igor_platform_map[process.platform].ext}`);
+    igor_path_segment = join_path('bin', 'igor', igor_platform_map[process.platform].platform_path_name, process.arch, `Igor${igor_platform_map[process.platform].platform_executable_extension}`);
 }

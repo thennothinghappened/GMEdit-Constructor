@@ -3,7 +3,7 @@ import { HamburgerOptions } from './ui/HamburgerOptions.js';
 import { project_current_get, open_files_save } from './utils/project.js';
 import * as preferences from './preferences/Preferences.js';
 import * as projectProperties from './preferences/ProjectProperties.js';
-import * as igor from './compiler/igor-paths.js';
+import * as igorPaths from './compiler/igor-paths.js';
 import { PreferencesMenu } from './ui/PreferencesMenu.js';
 import { Err } from './utils/Err.js';
 import { ConstructorControlPanel } from './ui/editors/ConstructorControlPanel.js';
@@ -55,11 +55,20 @@ export class GMConstructor {
             return;
         }
 
-        const runtime_res = this.#getProjectRuntime(project);
+        const runtime_type = projectProperties.runtime_channel_type_get();
+        const runtime_res = projectProperties.runtime_get();
 
         if (!runtime_res.ok) {
-            console.error(`Failed to find runtime for project: ${runtime_res.err}`);
-            return;
+
+            const err = new Err(
+                `No ${runtime_type} runtimes available to compile!`,
+                runtime_res.err,
+                `Try specifying a different runtime channel type below, or check the runtime search path for ${runtime_type} runtimes.`
+            );
+
+            return ConstructorControlPanel
+                .view()
+                .showError(err.message, err);
         }
 
         if (preferences.save_on_run_task_get()) {
@@ -76,41 +85,6 @@ export class GMConstructor {
         compileController.job_open_editor(res.data, preferences.reuse_compiler_tab_get());
     }
 
-    /**
-     * Get the runtime to use for a given project.
-     * @param {GMLProject} proj 
-     * @returns {Result<RuntimeInfo>}
-     */
-    #getProjectRuntime(proj) {
-
-        // TODO: we currently just grab the global.
-        
-        const type = preferences.global_runtime_type_get();
-        const desired_runtime_list = preferences.runtime_versions_get_for_type(type);
-
-        if (desired_runtime_list === null) {
-            return {
-                ok: false,
-                err: new Err(`Runtime type ${type} list not loaded!`)
-            };
-        }
-
-        const version = preferences.global_runtime_choice_get(type) ?? desired_runtime_list[0]?.version?.toString();
-        const runtime = desired_runtime_list.find(runtime => runtime.version.toString() === version);
-
-        if (runtime === undefined) {
-            return {
-                ok: false,
-                err: new Err(`Failed to find any runtimes of type ${type}`)
-            };
-        }
-
-        return {
-            ok: true,
-            data: runtime
-        };
-    }
-
     onControlPanel = () => {
         ConstructorControlPanel.view();
     }
@@ -118,7 +92,7 @@ export class GMConstructor {
     // yes this is VERY temporary
     compileCurrent = () => {
         this.#runTask({
-            platform: {win32: 'Windows', darwin: 'Mac'}[process.platform],
+            platform: igorPaths.igor_user_platform,
             verb: 'Package',
             runtime: 'VM',
             threads: 8,
@@ -181,7 +155,7 @@ export class GMConstructor {
         plugin_name = _plugin_name;
         plugin_version = _plugin_version;
 
-        igor.__setup__();
+        igorPaths.__setup__();
 
         // Setting up preferences //
         const preferences_res = await preferences.__setup__();

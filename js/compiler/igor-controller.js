@@ -78,7 +78,7 @@ function job_remove(job) {
 function job_flags_get(project, runtime_path, settings) {
     const flags = [
         `/project=${project.path}`,
-        `/config=${settings.configName}`,
+        `/config="${settings.configName}"`,
         `/rp=${runtime_path}`,
         `/runtime=${settings.runtime}`
     ];

@@ -6,12 +6,14 @@ import { Err } from '../utils/Err.js';
 export class RuntimeVersion {
 
     /**
+     * @param {RuntimeChannelType} type 
      * @param {Number} year 
      * @param {Number} month 
      * @param {Number} major 
      * @param {Number} build 
      */
-    constructor(year, month, major, build) {
+    constructor(type, year, month, major, build) {
+        this.type = type;
         this.year = year;
         this.month = month; 
         this.major = major; 
@@ -30,6 +32,12 @@ export class RuntimeVersion {
             return Math.sign(year_diff);
         }
 
+        const month_diff = this.month - other.month;
+
+        if (month_diff !== 0) {
+            return Math.sign(month_diff);
+        }
+
         const major_diff = this.major - other.major;
 
         if (major_diff !== 0) {
@@ -46,18 +54,73 @@ export class RuntimeVersion {
 
     }
 
+    /**
+     * Returns whether this runtime version is supported by Constructor.
+     * At the moment, as LTS is broken (for unknown reasons), this means LTS runtimes
+     * are excluded, as as is >=2024.2 Stable, or >=2024.200.0.490 Beta, which
+     * contain the project format changes (which GMEdit does not yet support.)
+     * 
+     * @returns {Result<void>}
+     */
+    supported() {
+
+        if (this.type === 'LTS' || this.year <= 2022) {
+            return {
+                ok: false,
+                err: new Err(`LTS or <=2022 builds are currently non-functional (see https://github.com/thennothinghappened/GMEdit-Constructor/issues/5)`)
+            }
+        }
+
+        if (this.year < 2024) {
+            return {
+                ok: true,
+                data: undefined
+            };
+        }
+
+        let limit;
+
+        switch (this.type) {
+            case 'Beta': {
+                limit = new RuntimeVersion('Beta', 2024, 200, 0, 490);
+                break;
+            }
+
+            case 'Stable': {
+                limit = new RuntimeVersion('Beta', 2024, 2, 0, 0);
+                break;
+            }
+        }
+
+        if (this.compare(limit) >= 0) {
+            return {
+                ok: false,
+                err: new Err(`${this.type} runtimes >=${limit} are not supported (this runtime = ${this}) due to GM's Prefabs Stage 1, not yet supported by GMEdit.`)
+            };
+        }
+
+        return {
+            ok: true,
+            data: undefined
+        };
+
+    }
+
     toString() {
         return `runtime-${this.year}.${this.month}.${this.major}.${this.build}`;
     }
 
 }
 
+window.RuntimeVersion = RuntimeVersion;
+
 /**
  * Attempt to parse a runtime version from a string.
+ * @param {RuntimeChannelType} type
  * @param {String} str 
  * @returns {Result<IRuntimeVersion>}
  */
-export function runtime_version_parse(str) {
+export function runtime_version_parse(type, str) {
 
     const expected_format = 'runtime-year.month.major.patch';
 
@@ -94,7 +157,7 @@ export function runtime_version_parse(str) {
 
     return {
         ok: true,
-        data: new RuntimeVersion(...numbers)
+        data: new RuntimeVersion(type, ...numbers)
     };
 
 }

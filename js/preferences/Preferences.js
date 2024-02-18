@@ -12,7 +12,7 @@ import { runtime_version_parse } from '../compiler/RuntimeVersion.js';
 /** @type {RuntimeChannelType[]} */
 export const valid_runtime_types = ['Stable', 'Beta', 'LTS'];
 
-/** @type {PreferencesData} */
+/** @type {Readonly<PreferencesData>} */
 const prefs_default = {
     runtime_opts: {
         // Default runtime to use is probably going to be stable.
@@ -39,7 +39,7 @@ const prefs_default = {
 };
 
 /** @type {PreferencesData} */
-let prefs;
+let prefs = Object.create(prefs_default);
 
 /**
  * List of runtimes for each type.
@@ -96,7 +96,7 @@ export function save_on_run_task_set(save_on_run_task) {
 /**
  * The default runtime type used globally.
  */
-export function global_runtime_type_get() {
+export function runtime_channel_type_get() {
     return prefs.runtime_opts.type;
 }
 
@@ -104,16 +104,16 @@ export function global_runtime_type_get() {
  * The default runtime type used globally.
  * @param {RuntimeChannelType} type 
  */
-export function global_runtime_type_set(type) {
+export function runtime_channel_type_set(type) {
     prefs.runtime_opts.type = type;
     return save();
 }
 
 /**
  * Get the global choice for default runtime for a given type.
- * @param {RuntimeChannelType} type 
+ * @param {RuntimeChannelType} [type] 
  */
-export function global_runtime_choice_get(type) {
+export function runtime_version_get(type = runtime_channel_type_get()) {
     return prefs.runtime_opts.type_opts[type].choice;
 }
 
@@ -122,7 +122,7 @@ export function global_runtime_choice_get(type) {
  * @param {RuntimeChannelType} type 
  * @param {string?} choice 
  */
-export function global_runtime_choice_set(type, choice) {
+export function runtime_version_set(type, choice) {
     prefs.runtime_opts.type_opts[type].choice = choice;
     return save();
 }
@@ -165,14 +165,14 @@ export async function runtime_search_path_set(type, search_path) {
 
     runtimes[type] = res.data;
 
-    const choice = global_runtime_choice_get(type);
+    const choice = runtime_version_get(type);
 
     if (
         choice !== undefined && 
         runtimes[type]?.find(runtimeInfo => runtimeInfo.version.toString() === choice) === undefined
     ) {
         console.warn(`Runtime version "${choice}" not available in new search path "${search_path}".`);
-        global_runtime_choice_set(type, runtimes[type]?.at(0)?.version?.toString() ?? null);
+        runtime_version_set(type, runtimes[type]?.at(0)?.version?.toString() ?? null);
     }
 
 }
@@ -188,7 +188,7 @@ export function save() {
  * Get the global runtime options for a given runtime type.
  * @param {RuntimeChannelType} type 
  */
-function global_runtime_opts_get(type = global_runtime_type_get()) {
+function global_runtime_opts_get(type = runtime_channel_type_get()) {
     return prefs.runtime_opts.type_opts[type];
 }
 
@@ -197,18 +197,19 @@ function global_runtime_opts_get(type = global_runtime_type_get()) {
  * @param {RuntimeChannelType} [type] 
  * @returns {Promise<Result<RuntimeInfo[]>>}
  */
-async function runtime_list_load_type(type = global_runtime_type_get()) {
+async function runtime_list_load_type(type = runtime_channel_type_get()) {
 
     const { search_path } = global_runtime_opts_get(type);
-    return runtime_list_load_path(search_path);
+    return runtime_list_load_path(type, search_path);
 }
 
 /**
  * Load the list of runtimes for the provided search path.
+ * @param {RuntimeChannelType} type 
  * @param {String} search_path 
  * @returns {Promise<Result<RuntimeInfo[]>>}
  */
-async function runtime_list_load_path(search_path) {
+async function runtime_list_load_path(type, search_path) {
 
     const dir_res = await readdir(search_path);
 
@@ -228,7 +229,7 @@ async function runtime_list_load_path(search_path) {
             const path = join_path(search_path, dirname);
             const igor_path = join_path(path, igor_path_segment);
 
-            const version_res = runtime_version_parse(dirname);
+            const version_res = runtime_version_parse(type, dirname);
 
             if (!version_res.ok) {
 
@@ -238,10 +239,20 @@ async function runtime_list_load_path(search_path) {
                 return null;
             }
 
+            const runtime = version_res.data;
+
+            const supported_res = runtime.supported();
+
+            if (!supported_res.ok) {
+
+                console.warn(`Ignoring runtime ${runtime} - ${supported_res.err.message}`);
+                return null;
+            }
+
             return {
                 path,
                 igor_path,
-                version: version_res.data
+                version: runtime
             };
 
         })

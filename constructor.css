@@ -9,13 +9,57 @@
 
 }
 
+.gm-constructor-viewer fieldset {
+    border-radius: 5px;
+    transition: 0.25s ease;
+}
+
+.gm-constructor-viewer > fieldset > legend {
+    font-size: large;
+}
+
+.gm-constructor-viewer legend {
+    cursor: pointer;
+}
+
 .gm-constructor-control-panel {
 
-    display: block;
     overflow-y: scroll;
+
+    width: 100%;
 
     padding: 8px;
 
+}
+
+.gm-constructor-control-panel-errors {
+    
+}
+
+.gm-constructor-control-panel-errors > fieldset {
+    
+}
+
+fieldset.gm-constructor-error {
+    background-color: rgba(189, 98, 98, 0.209);
+}
+
+.gm-constructor-control-panel-errors > fieldset > p {
+    margin: 8px 0;
+}
+
+.gm-constructor-control-panel-errors > fieldset > pre {
+    word-break: break-all;
+    white-space: pre-wrap;
+}
+
+.gm-constructor-control-panel fieldset {
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+.gm-constructor-control-panel fieldset legend {
+    font-weight: bold;
 }
 
 .gm-constructor-info {
