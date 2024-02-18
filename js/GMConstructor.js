@@ -108,7 +108,7 @@ export class GMConstructor {
 
     cleanCurrent = () => {
         this.#runTask({
-            platform: {win32: 'Windows', darwin: 'Mac'}[process.platform],
+            platform: igorPaths.igor_user_platform,
             verb: 'Clean',
             runtime: 'VM',
             threads: 8,
@@ -118,7 +118,7 @@ export class GMConstructor {
 
     runCurrent = () => {
         this.#runTask({
-            platform: {win32: 'Windows', darwin: 'Mac'}[process.platform],
+            platform: igorPaths.igor_user_platform,
             verb: 'Run',
             runtime: 'VM',
             threads: 8,

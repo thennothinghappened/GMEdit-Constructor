@@ -147,7 +147,7 @@ declare type IgorSettings = {
      * Launch the executable on the target device after building;
      * same as the "Create Executable and Launch" option in the IDE
      */
-    launch: boolean;
+    launch?: boolean;
 
 }
 
