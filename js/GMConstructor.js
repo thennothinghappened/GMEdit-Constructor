@@ -224,7 +224,7 @@ function rosetta_check(execSync) {
         return false;
     }
 
-    const cmd = 'sysctl -n sysctl.proc_translated';
+    const cmd = 'sysctl -in sysctl.proc_translated';
     const output = execSync(cmd).toString('utf-8');
 
     // If the return of this command is 1, we are running in Rosetta.
