@@ -1,6 +1,6 @@
 import * as compileController from './compiler/igor-controller.js';
 import { HamburgerOptions } from './ui/HamburgerOptions.js';
-import { project_current_get, open_files_save } from './utils/project.js';
+import { project_current_get, open_files_save, project_format_get } from './utils/project.js';
 import * as preferences from './preferences/Preferences.js';
 import * as projectProperties from './preferences/ProjectProperties.js';
 import * as igorPaths from './compiler/igor-paths.js';
@@ -63,6 +63,37 @@ export class GMConstructor {
                 `No ${runtime_type} runtimes available to compile!`,
                 runtime_res.err,
                 `Try specifying a different runtime channel type below, or check the runtime search path for ${runtime_type} runtimes.`
+            );
+
+            return ConstructorControlPanel
+                .view(true)
+                .showError(err.message, err);
+        }
+
+        const runtime = runtime_res.data;
+
+        const supported_res = runtime.version.supportedByProject(project);
+
+        if (!supported_res.ok) {
+
+            const err = new Err(
+                `Failed to check runtime version '${runtime.version}' is compatible with the project!`,
+                supported_res.err
+            );
+
+            return ConstructorControlPanel
+                .view(true)
+                .showError(err.message, err);
+        }
+
+        const supported = supported_res.data;
+
+        if (!supported) {
+
+            const err = new Err(
+                `Runtime version '${runtime.version}' is not compatible with this project format!`,
+                undefined,
+                `This project is of format ${project_format_get(project)}, where the selected runtime is format ${runtime.version.format}. Please select a matching runtime (2024.2 and up are YYv2)`
             );
 
             return ConstructorControlPanel

@@ -60,6 +60,7 @@ declare interface IRuntimeVersion {
     readonly month: number;
     readonly major: number;
     readonly build: number;
+    readonly format: YYProjectFormat;
 
     /**
      * What type of runtime this is.
@@ -73,11 +74,18 @@ declare interface IRuntimeVersion {
 
     /**
      * Returns whether this runtime version is supported by Constructor.
-     * At the moment, as LTS is broken (for unknown reasons), this means LTS runtimes
-     * are excluded, as as is >=2024.2 Stable, or >=2024.200.0.490 Beta, which
-     * contain the project format changes (which GMEdit does not yet support.)
+     * At the moment, as LTS is broken, this means LTS runtimes
+     * are excluded.
      */
     supported(): Result<void>;
+
+    /**
+     * Returns whether this runtime version is supported by a given project.
+     * 
+     * Projects on 2023.11 and earlier use a different format to 2024.2 and greater
+     * as per [Prefabs Phase 1](https://github.com/YoYoGames/GameMaker-Bugs/issues/3218).
+     */
+    supportedByProject(project: GMLProject): Result<boolean>;
 
 }
 
@@ -370,12 +378,25 @@ declare type GMLProject = {
 
 declare type GMLProjectYY = {
     configs: GMLProjectYYConfig;
-}
+} & YYFile;
+
+declare type YYFile = {
+    resourceVersion: string;
+    resourceType: string;
+};
 
 declare type GMLProjectYYConfig = {
     children: GMLProjectYYConfig[];
     name: string;
 }
+
+/**
+ * Project format type for the loaded project.
+ */
+declare type YYProjectFormat =
+    'outdated'  |
+    'YYv1'      |
+    'YYv2'      ;
 
 declare interface GMEditGMLProject {
     current: GMLProject;

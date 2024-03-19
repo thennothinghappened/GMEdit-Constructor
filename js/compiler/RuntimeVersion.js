@@ -1,4 +1,5 @@
 import { Err } from '../utils/Err.js';
+import { project_format_get } from '../utils/project.js';
 
 /**
  * @implements {IRuntimeVersion}
@@ -18,6 +19,25 @@ export class RuntimeVersion {
         this.month = month; 
         this.major = major; 
         this.build = build; 
+    }
+
+    /**
+     * @returns {YYProjectFormat}
+     */
+    get format() {
+        if (this.year < 2024) {
+            return 'YYv1';
+        }
+
+        if (this.year > 2024 || this.month !== 200) {
+            return 'YYv2';
+        }
+
+        if (this.build <= 490) {
+            return 'YYv2';
+        }
+
+        return 'YYv1';
     }
 
     /**
@@ -56,9 +76,8 @@ export class RuntimeVersion {
 
     /**
      * Returns whether this runtime version is supported by Constructor.
-     * At the moment, as LTS is broken (for unknown reasons), this means LTS runtimes
-     * are excluded, as as is >=2024.2 Stable, or >=2024.200.0.490 Beta, which
-     * contain the project format changes (which GMEdit does not yet support.)
+     * At the moment, as LTS is broken, this means LTS runtimes
+     * are excluded.
      * 
      * @returns {Result<void>}
      */
@@ -71,37 +90,41 @@ export class RuntimeVersion {
             }
         }
 
-        if (this.year < 2024) {
-            return {
-                ok: true,
-                data: undefined
-            };
-        }
-
-        let limit;
-
-        switch (this.type) {
-            case 'Beta': {
-                limit = new RuntimeVersion('Beta', 2024, 200, 0, 490);
-                break;
-            }
-
-            case 'Stable': {
-                limit = new RuntimeVersion('Beta', 2024, 2, 0, 0);
-                break;
-            }
-        }
-
-        if (this.compare(limit) >= 0) {
-            return {
-                ok: false,
-                err: new Err(`${this.type} runtimes >=${limit} are not supported (this runtime = ${this}) due to GM's Prefabs Stage 1, not yet supported by GMEdit.`)
-            };
-        }
-
         return {
             ok: true,
             data: undefined
+        };
+
+    }
+
+    /**
+     * Returns whether this runtime version is supported by a given project.
+     * 
+     * Projects on 2023.11 and earlier use a different format to 2024.2 and greater
+     * as per [Prefabs Phase 1](https://github.com/YoYoGames/GameMaker-Bugs/issues/3218).
+     * 
+     * @param {GMLProject} project 
+     * @returns {Result<boolean>}
+     */
+    supportedByProject(project) {
+
+        const project_format_res = project_format_get(project);
+
+        if (!project_format_res.ok) {
+            return {
+                ok: false,
+                err: new Err(
+                    `Failed to get project format version to check support for project '${project.displayName}'`,
+                    project_format_res.err
+                )
+            };
+        }
+
+        const project_format = project_format_res.data;
+
+        return {
+            ok: true,
+            data: (project_format === this.format)
         };
 
     }
@@ -111,8 +134,6 @@ export class RuntimeVersion {
     }
 
 }
-
-window.RuntimeVersion = RuntimeVersion;
 
 /**
  * Attempt to parse a runtime version from a string.

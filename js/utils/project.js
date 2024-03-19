@@ -1,3 +1,4 @@
+import { Err } from './Err.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];
@@ -72,6 +73,46 @@ export function project_config_tree_to_array(config) {
 }
 
 /**
+ * Returns what kind of project YY format we're running.
+ * @param {GMLProject} project 
+ * @returns {Result<YYProjectFormat>}
+ */
+export function project_format_get(project) {
+    
+    if (!project.isGMS23) {
+        return {
+            ok: true,
+            data: 'outdated'
+        };
+    }
+
+    const yy = project_read_yy(project);
+    
+    if (yy.resourceVersion === '2.0') {
+        return {
+            ok: true,
+            data: 'YYv2'
+        };
+    }
+
+    if (yy.resourceVersion === '1.0') {
+        return {
+            ok: true,
+            data: 'YYv1'
+        };
+    }
+
+    return {
+        ok: false,
+        err: new Err(
+            `Unknown project YY version '${yy.resourceVersion}'`,
+            'Expected 1.0 or 2.0',
+            'Is this a GM(:S 2) game? Is this plugin up to date?'
+        )
+    };
+}
+
+/**
  * Read the YY file of a given project.
  * Code is by YAL's suggestion.
  * 
@@ -80,5 +121,5 @@ export function project_config_tree_to_array(config) {
  */
 function project_read_yy(project) {
     // @ts-ignore
-    return project.readYyFileSync(project.name)
+    return project.readYyFileSync(project.name);
 }
