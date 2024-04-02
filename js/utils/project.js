@@ -87,15 +87,16 @@ export function project_format_get(project) {
     }
 
     const yy = project_read_yy(project);
+    const version = Number(yy.resourceVersion);
     
-    if (yy.resourceVersion === '2.0') {
+    if (version === 2) {
         return {
             ok: true,
             data: 'YYv2'
         };
     }
 
-    if (yy.resourceVersion === '1.0') {
+    if (version < 2) {
         return {
             ok: true,
             data: 'YYv1'
