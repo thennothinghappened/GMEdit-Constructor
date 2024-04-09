@@ -41,6 +41,7 @@ export class Job {
 
         this.#process.once('exit', this.#onExit);
         this.#process.stdout?.on('data', this.#onStdoutData);
+        this.#process.stderr?.on('data', this.#onStdoutData);
     }
 
     /**
