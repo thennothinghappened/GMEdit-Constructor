@@ -659,3 +659,7 @@ declare const ace: Ace;
 declare const Electron_App: IElectronApp;
 declare const Electron_FS: IElectronFS;
 declare const Electron_Dialog: IElectronDialog;
+
+declare interface Window {
+    GMConstructor?: GMConstructor
+}

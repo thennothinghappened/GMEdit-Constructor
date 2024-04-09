@@ -17,7 +17,17 @@
         }
 
         const { GMConstructor } = await import('./js/GMConstructor.js');
-        window.GMConstructor = await GMConstructor.create(plugin_name, plugin_version, node_path, node_child_process);
+        const res = await GMConstructor.create(plugin_name, plugin_version, node_path, node_child_process);
+
+        if (!res.ok) {
+            
+            alert('Failed to launch Constructor, see the JavaScript console for details.');
+            console.error('Failed to launch Constructor!', res.err);
+
+            return;
+        }
+
+        window.GMConstructor = res.data;
     });
 
     GMEdit.register(plugin_name, {
