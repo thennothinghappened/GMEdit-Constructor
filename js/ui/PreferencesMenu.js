@@ -33,8 +33,9 @@ export function __cleanup__() {
 /**
  * Create the preferences menu within the given group.
  * @param {HTMLElement} prefs_group
+ * @param {Function?} [on_change_runtime_channel]
  */
-export function menu_create(prefs_group) {
+export function menu_create(prefs_group, on_change_runtime_channel) {
 
     UIPreferences.addCheckbox(
         prefs_group,
@@ -52,12 +53,25 @@ export function menu_create(prefs_group) {
 
     UIPreferences.addDropdown(
         prefs_group,
+        'Runner Type',
+        preferences.runner_get(),
+        preferences.valid_runner_types,
+        // @ts-ignore
+        preferences.runner_set
+    );
+
+    UIPreferences.addDropdown(
+        prefs_group,
         'Runtime Channel Type',
         preferences.runtime_channel_type_get(),
         preferences.valid_runtime_types,
-        // @ts-ignore
-        preferences.runtime_channel_type_set
-    )
+        (value) => {
+            // @ts-ignore
+            preferences.runtime_channel_type_set(value);
+            if (on_change_runtime_channel)
+                on_change_runtime_channel();
+        }
+    );
 
     for (const type of preferences.valid_runtime_types) {
 
@@ -65,6 +79,9 @@ export function menu_create(prefs_group) {
 
         /** @type {HTMLElement} */
         let version_dropdown;
+
+        /** @type {HTMLElement} */
+        let user_dropdown;
 
         UIPreferences.addInput(
             group,
@@ -79,8 +96,7 @@ export function menu_create(prefs_group) {
                 await preferences.runtime_search_path_set(type, path);
                 UIDropdownMutate(
                     version_dropdown,
-                    runtime_version_strings_get_for_type(type),
-                    preferences.runtime_version_get(type) ?? ''
+                    runtime_version_strings_get_for_type(type)
                 );
             }
         );
@@ -95,6 +111,34 @@ export function menu_create(prefs_group) {
             }
         );
 
+        UIPreferences.addInput(
+            group,
+            'User Data Path',
+            preferences.users_search_path_get(type),
+            async (path) => {
+                // Workaround for being called twice for some reason?
+                if (path === preferences.users_search_path_get(type)) {
+                    return;
+                }
+
+                await preferences.users_search_path_set(type, path);
+                UIDropdownMutate(
+                    user_dropdown,
+                    user_strings_get_for_type(type)
+                );
+            }
+        );
+
+        user_dropdown = UIPreferences.addDropdown(
+            group,
+            'User',
+            preferences.user_get(type) ?? '',
+            user_strings_get_for_type(type),
+            (choice) => {
+                preferences.user_set(type, choice);
+            }
+        );
+
     }
 
     UIPreferences.addText(prefs_group, `Version: ${plugin_version}`);
@@ -106,7 +150,7 @@ export function menu_create(prefs_group) {
  * @param {RuntimeChannelType} type 
  * @returns 
  */
-function runtime_version_strings_get_for_type(type) {
+export function runtime_version_strings_get_for_type(type) {
     
     const runtimes = preferences.runtime_versions_get_for_type(type);
 
@@ -115,6 +159,23 @@ function runtime_version_strings_get_for_type(type) {
     }
 
     return runtimes.map(runtime => runtime.version.toString());
+
+}
+
+/**
+ * Get an array of username strings for the given runtime type.
+ * @param {RuntimeChannelType} type 
+ * @returns 
+ */
+function user_strings_get_for_type(type) {
+    
+    const users = preferences.users_get_for_type(type);
+
+    if (users === null) {
+        return [];
+    }
+
+    return users.map(user => user.name.toString());
 
 }
 

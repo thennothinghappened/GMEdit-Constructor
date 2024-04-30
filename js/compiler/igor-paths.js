@@ -2,6 +2,9 @@
 import { join_path } from '../GMConstructor.js';
 import { Err } from '../utils/Err.js';
 
+const process = require('node:process');
+const appdata = process.env?.AppData ?? '';
+
 /**
  * Mappings of NodeJS platforms to various Igor information.
  * @type {{[key in NodeJS.Platform]: IgorPlatformInfo}}
@@ -15,7 +18,12 @@ const igor_platform_map = {
             Stable: 'C:\\ProgramData\\GameMakerStudio2\\Cache\\runtimes',
             Beta:   'C:\\ProgramData\\GameMakerStudio2-Beta\\Cache\\runtimes',
             LTS:    'C:\\ProgramData\\GameMakerStudio2-LTS\\Cache\\runtimes'
-        }
+        },
+        default_user_paths: {
+            Stable: appdata + '\\GameMakerStudio2',
+            Beta:   appdata + '\\GameMakerStudio2-Beta',
+            LTS:    appdata + '\\GameMakerStudio2-LTS'
+        },
     },
     'darwin': {
         platform_executable_extension: '',
@@ -25,16 +33,27 @@ const igor_platform_map = {
             Stable: '/Users/Shared/GameMakerStudio2/Cache/runtimes',
             Beta:   '/Users/Shared/GameMakerStudio2-Beta/Cache/runtimes',
             LTS:    '/Users/Shared/GameMakerStudio2-LTS/Cache/runtimes'
+        },
+        default_user_paths: {
+            Stable: '~/.config/GameMakerStudio2',
+            Beta:   '~/.config/GameMakerStudio2-Beta',
+            LTS:    '~/.config/GameMakerStudio2-LTS'
         }
     },
     'linux': {
         platform_executable_extension: '',
         platform_path_name: 'ubuntu', // TODO: can't check this right now
         user_platform: 'Linux',
+        users_path: '/please/specify/your/userdata/paths',
         default_runtime_paths: {
             Stable: '/please/specify/your/runtime/paths',
             Beta:   '/please/specify/your/runtime/paths',
             LTS:    '/please/specify/your/runtime/paths'
+        },
+        default_user_paths: {
+            Stable: '/please/specify/your/userdata/paths',
+            Beta:   '/please/specify/your/userdata/paths',
+            LTS:    '/please/specify/your/userdata/paths'
         }
     }
 };
@@ -43,6 +62,11 @@ const igor_platform_map = {
  * Default paths to the runtimes for the host OS.
  */
 export const def_runtime_paths = igor_platform_map[process.platform].default_runtime_paths;
+
+/**
+ * Default paths to the userdata folders for the host OS.
+ */
+export const def_user_paths = igor_platform_map[process.platform].default_user_paths;
 
 /**
  * {@link IgorPlatform} to native build for the host OS. 

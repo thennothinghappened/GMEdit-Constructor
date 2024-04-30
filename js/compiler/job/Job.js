@@ -18,6 +18,9 @@ export class Job {
     #stdout = '';
 
     #stopped = false;
+    
+    /** @type {number|null} */
+    #exitCode = null;
 
     /** @type {{[key in JobEvent]: Set<(data: any?) => void>}} */
     #listeners = {
@@ -59,6 +62,8 @@ export class Job {
     #onExit = () => {
 
         this.#stopped = true;
+        if (this.#exitCode != -1)
+            this.#exitCode = this.#process.exitCode;
         
         Job.#notify(this.#listeners.stop, job_parse_stdout(this.stdout));
         this.#process.removeAllListeners();
@@ -88,6 +93,7 @@ export class Job {
      * Stop the job.
      */
     stop = () => {
+        this.#exitCode = -1;
         this.#process.kill();
     }
 
@@ -114,6 +120,9 @@ export class Job {
 
     /** Whether this job has stopped yet. */
 	get stopped() { return this.#stopped; }
+
+    /** The exit code of this process (or -1 for cancelled). */
+	get exitCode() { return this.#exitCode; }
 
     /** The command this job is running. */
 	get command() { return this.#settings.verb; }

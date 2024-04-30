@@ -56,6 +56,7 @@ export class GMConstructor {
 
         const runtime_type = projectProperties.runtime_channel_type_get();
         const runtime_res = projectProperties.runtime_get();
+        const user_res = projectProperties.user_get();
 
         if (!runtime_res.ok) {
 
@@ -105,7 +106,7 @@ export class GMConstructor {
             open_files_save();
         }
 
-        const res = await compileController.job_run(project, runtime_res.data, settings);
+        const res = await compileController.job_run(project, runtime_res.data, user_res.ok ? user_res.data : null, settings);
 
         if (!res.ok) {
 
@@ -131,7 +132,7 @@ export class GMConstructor {
         this.#runTask({
             platform: igorPaths.igor_user_platform,
             verb: 'Package',
-            runtime: 'VM',
+            runner: projectProperties.runner_get(),
             threads: 8,
             configName: projectProperties.config_name_get()
         });
@@ -141,7 +142,7 @@ export class GMConstructor {
         this.#runTask({
             platform: igorPaths.igor_user_platform,
             verb: 'Clean',
-            runtime: 'VM',
+            runner: projectProperties.runner_get(),
             threads: 8,
             configName: projectProperties.config_name_get()
         });
@@ -151,7 +152,7 @@ export class GMConstructor {
         this.#runTask({
             platform: igorPaths.igor_user_platform,
             verb: 'Run',
-            runtime: 'VM',
+            runner: projectProperties.runner_get(),
             threads: 8,
             configName: projectProperties.config_name_get()
         });

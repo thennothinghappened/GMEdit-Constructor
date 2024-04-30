@@ -3,6 +3,7 @@ declare type PreferencesData = {
     /** Globally selected runtime options that may be overriden by projects. */
     runtime_opts: {
         type: RuntimeChannelType;
+        runner: RunnerType;
 
         type_opts: {
             [key in RuntimeChannelType]: RuntimePreference;
@@ -34,7 +35,12 @@ declare type ProjectPreferencesData = {
     /**
      * Chosen runtime version to use.
      */
-    runtime_version: string?;
+    runtime_version: string;
+
+    /**
+     * Chosen runner type to use.
+     */
+    runner: RunnerType;
 
 };
 
@@ -43,12 +49,22 @@ declare type RuntimeChannelType =
     'Beta'      |
     'LTS'       ;
 
+declare type RunnerType =
+    'VM'  |
+    'YYC' ;
+
 declare type RuntimePreference = {
     /** Where we should search for the list of runtimes. */
     search_path: string;
-    
+
+    /** Where we should search for the list of users. */
+    users_path: string;
+
     /** Chosen runtime to use. */
     choice: string?;
+
+    /** Chosen user to use. */
+    user: string?;
 };
 
 /**
@@ -74,8 +90,6 @@ declare interface IRuntimeVersion {
 
     /**
      * Returns whether this runtime version is supported by Constructor.
-     * At the moment, as LTS is broken, this means LTS runtimes
-     * are excluded.
      */
     supported(): Result<void>;
 
@@ -96,6 +110,14 @@ declare type RuntimeInfo = {
     version: IRuntimeVersion;
     path: string;
     igor_path: string;
+};
+
+/**
+ * Information for a specific found user.
+ */
+declare type UserInfo = {
+    path: string;
+    name: string;
 };
 
 /**
@@ -137,9 +159,9 @@ declare type IgorSettings = {
     verb: IgorVerb;
 
     /**
-     * Which runtime to use - default is VM.
+     * Which runner to use - default is VM.
      */
-    runtime: 'VM'|'YYC';
+    runner: RunnerType;
 
     /**
      * How many threads to use for this compilation.
@@ -150,6 +172,11 @@ declare type IgorSettings = {
      * Name of the Build Config to use for this compilation.
      */
     configName: string;
+
+    /**
+     * Path to the user folder. Required for packaging.
+     */
+    userFolder?: string;
 
     /**
      * Launch the executable on the target device after building;
@@ -201,12 +228,24 @@ declare type IgorPlatformInfo = {
     default_runtime_paths: {
         [key in RuntimeChannelType]: string
     };
+
+    /**
+     * Default directories as per https://manual-en.yoyogames.com/Settings/Building_via_Command_Line.htm
+     * to find user folders.
+     * 
+     * Note that this only covers Windows and MacOS, elsewhere will crash trying to index these
+     * as I don't know where the location is for Linux.
+     */
+    default_user_paths: {
+        [key in RuntimeChannelType]: string
+    };
 }
 
 declare type IgorVerb = 
-    'Run'       |
-    'Package'   |
-    'Clean'     ;
+    'Run'        |
+    'Package'    |
+    'PackageZip' |
+    'Clean'      ;
 
 declare type JobEvent =
     'stdout'    |
