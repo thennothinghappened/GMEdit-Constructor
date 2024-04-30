@@ -29,7 +29,7 @@ class KConstructorOutput extends ConstructorViewFileKind {
      */
     static getJobName = (job) => {
         return `${job.projectDisplayName} - ${job.command}${
-            job.stopped ? (' - ' + (job.exitCode == -1 ? 'Stopped' : ((job.exitCode != null && job.exitCode > 0) ? 'Failed' : 'Finished'))) : ''
+            job.stopped ? (' - ' + (job.exitCode === -1 ? 'Stopped' : ((job.exitCode !== null && job.exitCode > 0) ? 'Failed' : 'Finished'))) : ''
         }`;
     }
 

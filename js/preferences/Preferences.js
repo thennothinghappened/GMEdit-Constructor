@@ -613,6 +613,20 @@ export async function __setup__() {
         ConstructorControlPanel.showDebug('Failed to load LTS users list', user_lts_res.err);
     }
 
+    // If some runtimes/users aren't filled in but there is an available runtime version/user,
+    // fill them in automatically
+    for (const runtime_type of valid_runtime_types) {
+        const options = prefs.runtime_opts.type_opts[runtime_type];
+        if (!options.choice && runtimes[runtime_type] && (runtimes[runtime_type]?.length ?? 0) > 0) {
+            // @ts-ignore
+            options.choice = runtimes[runtime_type][0].version.toString();
+        }
+        if (!options.user && users[runtime_type] && (users[runtime_type]?.length ?? 0) > 0) {
+            // @ts-ignore
+            options.user = users[runtime_type][0].name.toString();
+        }
+    }
+
     __ready__ = true;
 
     return {

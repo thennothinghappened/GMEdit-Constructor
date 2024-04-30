@@ -190,7 +190,7 @@ export class HamburgerOptions {
     #setEnableMenuItems = (enabled) => {
         // @ts-ignore
         for (const item of this.#menu_items_container.submenu.items) {
-            if (item.id != 'constructor-control_panel')
+            if (item.id !== 'constructor-control_panel')
                 item.enabled = enabled;
         }
     }

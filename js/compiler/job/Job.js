@@ -62,7 +62,7 @@ export class Job {
     #onExit = () => {
 
         this.#stopped = true;
-        if (this.#exitCode != -1)
+        if (this.#exitCode !== -1)
             this.#exitCode = this.#process.exitCode;
         
         Job.#notify(this.#listeners.stop, job_parse_stdout(this.stdout));
