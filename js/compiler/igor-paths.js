@@ -3,7 +3,7 @@ import { join_path } from '../GMConstructor.js';
 import { Err } from '../utils/Err.js';
 
 const process = require('node:process');
-const appdata = process.env?.AppData ?? '';
+const appdata = process.env?.AppData ?? 'C:\\Users\\PLEASE_SPECIFY_USERNAME\\AppData\\Roaming';
 
 /**
  * Mappings of NodeJS platforms to various Igor information.
@@ -44,16 +44,15 @@ const igor_platform_map = {
         platform_executable_extension: '',
         platform_path_name: 'ubuntu', // TODO: can't check this right now
         user_platform: 'Linux',
-        users_path: '/please/specify/your/userdata/paths',
         default_runtime_paths: {
             Stable: '/please/specify/your/runtime/paths',
             Beta:   '/please/specify/your/runtime/paths',
             LTS:    '/please/specify/your/runtime/paths'
         },
         default_user_paths: {
-            Stable: '/please/specify/your/userdata/paths',
-            Beta:   '/please/specify/your/userdata/paths',
-            LTS:    '/please/specify/your/userdata/paths'
+            Stable: '/please/specify/your/user/paths',
+            Beta:   '/please/specify/your/user/paths',
+            LTS:    '/please/specify/your/user/paths'
         }
     }
 };
