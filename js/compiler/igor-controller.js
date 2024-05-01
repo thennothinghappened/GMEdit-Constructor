@@ -24,8 +24,8 @@ const jobs = [];
 export async function job_run(project, runtime, user, settings) {
 
     // for some reason if we don't clear the cache directory, changes won't apply in yyc
-    if (settings.runner === "YYC") {
-        await rm(project.dir + "/cache/", {recursive: true, force: true});
+    if (settings.runner === 'YYC') {
+        await rm(project.dir + '/cache/', {recursive: true, force: true});
     }
 
     const flags_res = job_flags_get(project, runtime.path, user?.path ?? null, settings);
@@ -93,7 +93,7 @@ function job_flags_get(project, runtime_path, user_path, settings) {
         `/rp=${runtime_path}`,
         `/runtime=${settings.runner}`,
         `/v`,
-        `/tf=${project.dir}/output/${projectName}${output_exts[igor_platform_cmd_name] ?? ""}`
+        `/tf=${project.dir}/output/${projectName}${output_exts[igor_platform_cmd_name] ?? ''}`
     ];
     if (user_path) {
         flags.push(`/uf=${user_path}`);

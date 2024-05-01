@@ -60,9 +60,9 @@ const igor_platform_map = {
  * @type {{[K in IgorPlatform]?: string}}
 */
 export const output_exts = {
-    Windows: ".zip",
-    Mac: ".zip",
-    Linux: ".appimage",
+    Windows: '.zip',
+    Mac: '.zip',
+    Linux: '.appimage',
 };
 
 /**
