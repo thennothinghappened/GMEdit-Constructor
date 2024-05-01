@@ -68,8 +68,9 @@ export function menu_create(prefs_group, on_change_runtime_channel) {
         (value) => {
             // @ts-ignore
             preferences.runtime_channel_type_set(value);
-            if (on_change_runtime_channel)
+            if (on_change_runtime_channel) {
                 on_change_runtime_channel();
+            }
         }
     );
 
@@ -92,7 +93,6 @@ export function menu_create(prefs_group, on_change_runtime_channel) {
                 if (path === preferences.runtime_search_path_get(type)) {
                     return;
                 }
-
                 await preferences.runtime_search_path_set(type, path);
                 UIDropdownMutate(
                     version_dropdown,
@@ -120,7 +120,6 @@ export function menu_create(prefs_group, on_change_runtime_channel) {
                 if (path === preferences.users_search_path_get(type)) {
                     return;
                 }
-
                 await preferences.users_search_path_set(type, path);
                 UIDropdownMutate(
                     user_dropdown,

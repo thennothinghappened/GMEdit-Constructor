@@ -252,6 +252,10 @@ declare type JobEvent =
     'output'    |
     'stop'      ;
 
+declare type JobStatus = 
+    { status: 'running' } |
+    { status: 'stopped', stoppedByUser: boolean, exitCode: number };
+
 declare type GMPlugin = {
     init: () => void,
     cleanup: () => void

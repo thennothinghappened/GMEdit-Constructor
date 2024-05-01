@@ -5,14 +5,13 @@
 
 import { CompileLogViewer } from '../ui/editors/CompileLogViewer.js';
 import { Job } from './job/Job.js';
-import { igor_platform_cmd_name } from './igor-paths.js';
+import { igor_platform_cmd_name, output_exts } from './igor-paths.js';
 import { Err } from '../utils/Err.js';
-import { spawn } from '../GMConstructor.js';
+import { project_current_get } from '../utils/project.js';
+import { spawn, rm } from '../GMConstructor.js';
 
 /** @type {Job[]} */
 const jobs = [];
-
-const fs = require("node:fs/promises");
 
 /**
  * Run a new job on a given project.
@@ -26,7 +25,7 @@ export async function job_run(project, runtime, user, settings) {
 
     // for some reason if we don't clear the cache directory, changes won't apply in yyc
     if (settings.runner === "YYC") {
-        await fs.rm(project.dir + "/cache/", {recursive: true, force: true});
+        await rm(project.dir + "/cache/", {recursive: true, force: true});
     }
 
     const flags_res = job_flags_get(project, runtime.path, user?.path ?? null, settings);
@@ -85,18 +84,8 @@ function job_remove(job) {
  */
 function job_flags_get(project, runtime_path, user_path, settings) {
 
-    /**
-     * @type {{[K in IgorPlatform]?: string}}
-    */
-    const exts = {
-        Windows: ".zip",
-        Mac: ".zip",
-        Linux: ".appimage",
-    };
-
-    let projectName = $gmedit['gml.Project'].current.name;
-    // Remove .yyp file extension
-    projectName = projectName.substring(0, projectName.length - 4);
+    // not sure if project_current_get can return undefined in this context but just to be (type)-safe
+    let projectName = project_current_get()?.displayName ?? 'project';
 
     const flags = [
         `/project=${project.path}`,
@@ -104,15 +93,17 @@ function job_flags_get(project, runtime_path, user_path, settings) {
         `/rp=${runtime_path}`,
         `/runtime=${settings.runner}`,
         `/v`,
-        `/tf=${project.dir}/output/${projectName}${exts[igor_platform_cmd_name] ?? ""}`
+        `/tf=${project.dir}/output/${projectName}${output_exts[igor_platform_cmd_name] ?? ""}`
     ];
-    if (user_path)
+    if (user_path) {
         flags.push(`/uf=${user_path}`);
+    }
 
     switch (settings.verb) {
         case 'Package':
-            if (['Windows', 'Mac'].includes(igor_platform_cmd_name))
+            if (['Windows', 'Mac'].includes(igor_platform_cmd_name)) {
                 settings.verb = 'PackageZip';
+            }
             break;
 
         case 'Run':

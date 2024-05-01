@@ -136,14 +136,6 @@ export function runner_get() {
 
 /**
  * The default runner type used globally.
- * @returns {RunnerType}
- */
-export function runner_project_get() {
-    return prefs.runtime_opts.runner;
-}
-
-/**
- * The default runner type used globally.
  * @param {RunnerType} runner 
  */
 export function runner_set(runner) {
@@ -562,70 +554,45 @@ export async function __setup__() {
 
     }
     
+    // prefs_default has to be cloned (instead of using Object.create),
+    // otherwise properties inside other objects won't be saved into the config file,
+    // as JSON.stringify doesn't stringify properties in object prototypes
     prefs = structuredClone(prefs_default);
     deep_assign(prefs, loaded_prefs);
 
-    const stable_req = runtime_list_load_type('Stable');
-    const beta_req = runtime_list_load_type('Beta');
-    const lts_req = runtime_list_load_type('LTS');
-    const user_stable_req = user_list_load_type('Stable');
-    const user_beta_req = user_list_load_type('Beta');
-    const user_lts_req = user_list_load_type('LTS');
-
-    const [
-        stable_res, beta_res, lts_res,
-        user_stable_res, user_beta_res, user_lts_res,
-    ] = await Promise.all([stable_req, beta_req, lts_req, user_stable_req, user_beta_req, user_lts_req]);
-
-    if (stable_res.ok) {
-        runtimes.Stable = stable_res.data;
-    } else {
-        ConstructorControlPanel.showDebug('Failed to load Stable runtimes list', stable_res.err);
-    }
-
-    if (beta_res.ok) {
-        runtimes.Beta = beta_res.data;
-    } else {
-        ConstructorControlPanel.showDebug('Failed to load Beta runtimes list', beta_res.err);
-    }
-
-    if (lts_res.ok) {
-        runtimes.LTS = lts_res.data;
-    } else {
-        ConstructorControlPanel.showDebug('Failed to load LTS runtimes list', lts_res.err);
-    }
-
-    if (user_stable_res.ok) {
-        users.Stable = user_stable_res.data;
-    } else {
-        ConstructorControlPanel.showDebug('Failed to load Stable users list', user_stable_res.err);
-    }
-
-    if (user_beta_res.ok) {
-        users.Beta = user_beta_res.data;
-    } else {
-        ConstructorControlPanel.showDebug('Failed to load Beta users list', user_beta_res.err);
-    }
-
-    if (user_lts_res.ok) {
-        users.LTS = user_lts_res.data;
-    } else {
-        ConstructorControlPanel.showDebug('Failed to load LTS users list', user_lts_res.err);
-    }
-
-    // If some runtimes/users aren't filled in but there is an available runtime version/user,
-    // fill them in automatically
+    /** @type {Promise<Result<RuntimeInfo[] | UserInfo[]>>[]} */
+    const reqs = [];
     for (const runtime_type of valid_runtime_types) {
         const options = prefs.runtime_opts.type_opts[runtime_type];
-        if (!options.choice && runtimes[runtime_type] && (runtimes[runtime_type]?.length ?? 0) > 0) {
-            // @ts-ignore
-            options.choice = runtimes[runtime_type][0].version.toString();
-        }
-        if (!options.user && users[runtime_type] && (users[runtime_type]?.length ?? 0) > 0) {
-            // @ts-ignore
-            options.user = users[runtime_type][0].name.toString();
-        }
+        reqs.push(runtime_list_load_type(runtime_type)
+            .then((result) => {
+                if (result.ok) {
+                    runtimes[runtime_type] = result.data;
+                } else {
+                    ConstructorControlPanel.showDebug(`Failed to load ${runtime_type} runtimes list`, result.err);
+                }
+                if (!options.choice && runtimes[runtime_type] && (runtimes[runtime_type]?.length ?? 0) > 0) {
+                    // @ts-ignore
+                    options.choice = runtimes[runtime_type][0].version.toString();
+                }
+                return result;
+            }));
+        reqs.push(user_list_load_type(runtime_type)
+            .then((result) => {
+                if (result.ok) {
+                    users[runtime_type] = result.data;
+                } else {
+                    ConstructorControlPanel.showDebug(`Failed to load ${runtime_type} users list`, result.err);
+                }
+                if (!options.user && users[runtime_type] && (users[runtime_type]?.length ?? 0) > 0) {
+                    // @ts-ignore
+                    options.user = users[runtime_type][0].name.toString();
+                }
+                return result;
+            }));
     }
+
+    await Promise.all(reqs);
 
     __ready__ = true;
 

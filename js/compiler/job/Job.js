@@ -17,10 +17,10 @@ export class Job {
 
     #stdout = '';
 
-    #stopped = false;
-    
-    /** @type {number|null} */
-    #exitCode = null;
+    /** @type {JobStatus} */
+    #status = { status: 'running' };
+
+    #statusDisplay = '';
 
     /** @type {{[key in JobEvent]: Set<(data: any?) => void>}} */
     #listeners = {
@@ -61,9 +61,17 @@ export class Job {
 
     #onExit = () => {
 
-        this.#stopped = true;
-        if (this.#exitCode !== -1)
-            this.#exitCode = this.#process.exitCode;
+        if (this.#status.status === 'running') {
+            this.#status = { status: 'stopped', stoppedByUser: false, exitCode: this.#process.exitCode ?? 0 };
+        }
+
+        if (this.#status.stoppedByUser) {
+            this.#statusDisplay = 'Stopped';
+        } else if (this.#status.exitCode > 0) {
+            this.#statusDisplay = 'Failed';
+        } else {
+            this.#statusDisplay = 'Finished';
+        }
         
         Job.#notify(this.#listeners.stop, job_parse_stdout(this.stdout));
         this.#process.removeAllListeners();
@@ -93,7 +101,7 @@ export class Job {
      * Stop the job.
      */
     stop = () => {
-        this.#exitCode = -1;
+        this.#status = { status: 'stopped', stoppedByUser: true, exitCode: 0 };
         this.#process.kill();
     }
 
@@ -103,7 +111,7 @@ export class Job {
      */
     finished() {
 
-        if (this.stopped) {
+        if (this.#status.status === 'stopped') {
             return Promise.resolve();
         }
 
@@ -118,11 +126,8 @@ export class Job {
     /** The `stdout` output of the job's process. */
 	get stdout() { return this.#stdout; }
 
-    /** Whether this job has stopped yet. */
-	get stopped() { return this.#stopped; }
-
-    /** The exit code of this process (or -1 for cancelled). */
-	get exitCode() { return this.#exitCode; }
+    /** Whether this job has stopped yet, and info on how it was stopped. */
+	get status() { return this.#status; }
 
     /** The command this job is running. */
 	get command() { return this.#settings.verb; }
@@ -132,6 +137,9 @@ export class Job {
 
     /** The display name of the project this job is running for. */
 	get projectDisplayName() { return this.#project.displayName; }
+
+    /** A string which contains if the job is running (empty string), Stopped (by the user), Finished or Failed. */
+	get statusDisplay() { return this.#statusDisplay; }
 
     /** The directory of the project this job is running for. */
 	get projectDir() { return this.#project.dir; }

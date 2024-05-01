@@ -101,7 +101,7 @@ export function runtime_channel_type_set(runtime_type) {
  * @returns {string|null}
  */
 export function runtime_version_get() {
-    return properties.runtime_version ?? preferences.runtime_version_get(runtime_project_channel_type_get());
+    return properties.runtime_version ?? preferences.runtime_version_get(runtime_channel_type_get());
 }
 
 /**

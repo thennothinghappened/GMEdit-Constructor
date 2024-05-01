@@ -28,9 +28,8 @@ class KConstructorOutput extends ConstructorViewFileKind {
      * @param {Job} job
      */
     static getJobName = (job) => {
-        return `${job.projectDisplayName} - ${job.command}${
-            job.stopped ? (' - ' + (job.exitCode === -1 ? 'Stopped' : ((job.exitCode !== null && job.exitCode > 0) ? 'Failed' : 'Finished'))) : ''
-        }`;
+        const statusDisplay = job.statusDisplay === '' ? '' : (' - ' + job.statusDisplay);
+        return `${job.projectDisplayName} - ${job.command}${statusDisplay}`;
     }
 
 }
@@ -173,8 +172,9 @@ export class CompileLogViewer extends ConstructorEditorView {
     }
 
     stopJob = () => {
-        if (!this.job.stopped)
+        if (this.job.status.status !== 'stopped') {
             this.job.stop();
+        }
     }
 
     /**

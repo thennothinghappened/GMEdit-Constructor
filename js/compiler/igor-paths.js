@@ -1,9 +1,7 @@
 
 import { join_path } from '../GMConstructor.js';
-import { Err } from '../utils/Err.js';
 
-const process = require('node:process');
-const appdata = process.env?.AppData ?? 'C:\\Users\\PLEASE_SPECIFY_USERNAME\\AppData\\Roaming';
+const windowsAppdata = process.env?.AppData ?? 'C:\\Users\\PLEASE_SPECIFY_USERNAME\\AppData\\Roaming';
 
 /**
  * Mappings of NodeJS platforms to various Igor information.
@@ -20,9 +18,9 @@ const igor_platform_map = {
             LTS:    'C:\\ProgramData\\GameMakerStudio2-LTS\\Cache\\runtimes'
         },
         default_user_paths: {
-            Stable: appdata + '\\GameMakerStudio2',
-            Beta:   appdata + '\\GameMakerStudio2-Beta',
-            LTS:    appdata + '\\GameMakerStudio2-LTS'
+            Stable: windowsAppdata + '\\GameMakerStudio2',
+            Beta:   windowsAppdata + '\\GameMakerStudio2-Beta',
+            LTS:    windowsAppdata + '\\GameMakerStudio2-LTS'
         },
     },
     'darwin': {
@@ -55,6 +53,16 @@ const igor_platform_map = {
             LTS:    '/please/specify/your/user/paths'
         }
     }
+};
+
+/**
+ * Mappings of Igor targets to output file extensions. TODO: other targets
+ * @type {{[K in IgorPlatform]?: string}}
+*/
+export const output_exts = {
+    Windows: ".zip",
+    Mac: ".zip",
+    Linux: ".appimage",
 };
 
 /**
