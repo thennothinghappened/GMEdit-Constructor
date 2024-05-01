@@ -572,7 +572,7 @@ export async function __setup__() {
                 } else {
                     ConstructorControlPanel.showDebug(`Failed to load ${runtime_type} runtimes list`, result.err);
                 }
-                if (!options.choice && runtimes[runtime_type] && (runtimes[runtime_type]?.length ?? 0) > 0) {
+                if ((options.choice === undefined || options.choice === null) && runtimes[runtime_type] && (runtimes[runtime_type]?.length ?? 0) > 0) {
                     // @ts-ignore
                     options.choice = runtimes[runtime_type][0].version.toString();
                 }
@@ -585,7 +585,7 @@ export async function __setup__() {
                 } else {
                     ConstructorControlPanel.showDebug(`Failed to load ${runtime_type} users list`, result.err);
                 }
-                if (!options.user && users[runtime_type] && (users[runtime_type]?.length ?? 0) > 0) {
+                if ((options.user === undefined || options.user === null) && users[runtime_type] && (users[runtime_type]?.length ?? 0) > 0) {
                     // @ts-ignore
                     options.user = users[runtime_type][0].name.toString();
                 }
