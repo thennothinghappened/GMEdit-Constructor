@@ -565,46 +565,60 @@ export async function __setup__() {
     prefs = structuredClone(prefs_default);
     deep_assign(prefs, loaded_prefs);
 
-    /** @type {Promise<Result<RuntimeInfo[] | UserInfo[]>>[]} */
+    /** @type {Promise<any?>[]} */
     const reqs = [];
+
     for (const runtime_type of valid_runtime_types) {
+
         const options = prefs.runtime_opts.type_opts[runtime_type];
+
         reqs.push(runtime_list_load_type(runtime_type)
             .then((result) => {
-                if (result.ok) {
-                    runtimes[runtime_type] = result.data;
-                } else {
-                    ConstructorControlPanel.showDebug(`Failed to load ${runtime_type} runtimes list`, result.err);
+
+                if (!result.ok) {
+
+                    options.choice = null;
+
+                    ConstructorControlPanel
+                        .showDebug(`Failed to load ${runtime_type} runtimes list`, result.err);
+
+                    return;
                 }
 
-                if (options.choice !== undefined && options.choice !== null) {
-                    return result;
+                const runtimes_found = result.data;
+
+                if (options.choice === null && runtimes_found.length > 0) {
+                    options.choice = runtimes_found[0].version.toString();
                 }
-                if (!runtimes[runtime_type] || (runtimes[runtime_type]?.length ?? 0) == 0) {
-                    return result;
-                }
-                // @ts-ignore
-                options.choice = runtimes[runtime_type][0].version.toString();
-                return result;
+
+                runtimes[runtime_type] = runtimes_found;
+
             }));
+            
         reqs.push(user_list_load_type(runtime_type)
             .then((result) => {
-                if (result.ok) {
-                    users[runtime_type] = result.data;
-                } else {
-                    ConstructorControlPanel.showDebug(`Failed to load ${runtime_type} users list`, result.err);
+
+                if (!result.ok) {
+
+                    options.user = null;
+
+                    ConstructorControlPanel
+                        .showDebug(`Failed to load ${runtime_type} users list`, result.err);
+
+                    return;
+
+                }
+
+                const users_found = result.data;
+
+                if (options.user === null && users_found.length > 0) {
+                    options.user = users_found[0].name.toString();
                 }
                 
-                if (options.user !== undefined && options.user !== null) {
-                    return result;
-                }
-                if (!users[runtime_type] || (users[runtime_type]?.length ?? 0) == 0) {
-                    return result;
-                }
-                // @ts-ignore
-                options.user = users[runtime_type][0].name.toString();
-                return result;
+                users[runtime_type] = users_found;
+
             }));
+        
     }
 
     await Promise.all(reqs);
