@@ -7,8 +7,7 @@ import { CompileLogViewer } from '../ui/editors/CompileLogViewer.js';
 import { Job } from './job/Job.js';
 import { igor_platform_cmd_name, output_exts } from './igor-paths.js';
 import { Err } from '../utils/Err.js';
-import { project_current_get } from '../utils/project.js';
-import { spawn, rm } from '../GMConstructor.js';
+import { join_path, spawn, rm } from '../GMConstructor.js';
 
 /** @type {Job[]} */
 const jobs = [];
@@ -22,11 +21,6 @@ const jobs = [];
  * @returns {Promise<Result<Job>>}
  */
 export async function job_run(project, runtime, user, settings) {
-
-    // for some reason if we don't clear the cache directory, changes won't apply in yyc
-    if (settings.runner === 'YYC') {
-        await rm(project.dir + '/cache/', {recursive: true, force: true});
-    }
 
     const flags_res = job_flags_get(project, runtime.path, user?.path ?? null, settings);
 
@@ -84,8 +78,7 @@ function job_remove(job) {
  */
 function job_flags_get(project, runtime_path, user_path, settings) {
 
-    // not sure if project_current_get can return undefined in this context but just to be (type)-safe
-    let projectName = project_current_get()?.displayName ?? 'project';
+    let projectName = project.displayName;
 
     const flags = [
         `/project=${project.path}`,
@@ -97,6 +90,10 @@ function job_flags_get(project, runtime_path, user_path, settings) {
     ];
     if (user_path) {
         flags.push(`/uf=${user_path}`);
+    }
+    // ignore cache, this fixes changes not applying in yyc
+    if (settings.runner === 'YYC') {
+        flags.push('/ic');
     }
 
     switch (settings.verb) {
