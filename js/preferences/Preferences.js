@@ -11,8 +11,11 @@ import { join_path, plugin_name } from '../GMConstructor.js';
 import { runtime_version_parse } from '../compiler/RuntimeVersion.js';
 import { ConstructorControlPanel } from '../ui/editors/ConstructorControlPanel.js';
 
-/** @type {RuntimeChannelType[]} */
-export const valid_runtime_types = ['Stable', 'Beta', 'LTS'];
+/**
+ * List of recognised GameMaker IDE/Runtime channel types.
+ * @type {GMChannelType[]} 
+ */
+export const gm_channel_types = ['Stable', 'Beta', 'LTS'];
 
 /** @type {RunnerType[]} */
 export const valid_runner_types = ['VM', 'YYC'];
@@ -57,7 +60,7 @@ let prefs = Object.create(prefs_default);
  * List of runtimes for each type.
  * Populated after loading the list.
  * 
- * @type { { [key in RuntimeChannelType]: RuntimeInfo[]? } }
+ * @type { { [key in GMChannelType]: RuntimeInfo[]? } }
  */
 const runtimes = {
     Stable: null,
@@ -69,7 +72,7 @@ const runtimes = {
  * List of users for each type.
  * Populated after loading the list.
  * 
- * @type { { [key in RuntimeChannelType]: UserInfo[]? } }
+ * @type { { [key in GMChannelType]: UserInfo[]? } }
  */
 const users = {
     Stable: null,
@@ -154,7 +157,7 @@ export function runtime_channel_type_get() {
 
 /**
  * The default runtime type used globally.
- * @param {RuntimeChannelType} type 
+ * @param {GMChannelType} type 
  */
 export function runtime_channel_type_set(type) {
     prefs.runtime_opts.type = type;
@@ -163,7 +166,7 @@ export function runtime_channel_type_set(type) {
 
 /**
  * Get the global choice for default runtime for a given type.
- * @param {RuntimeChannelType} [type] 
+ * @param {GMChannelType} [type] 
  */
 export function runtime_version_get(type = runtime_channel_type_get()) {
     return prefs.runtime_opts.type_opts[type].choice;
@@ -171,7 +174,7 @@ export function runtime_version_get(type = runtime_channel_type_get()) {
 
 /**
  * Set the global choice for default runtime for a given type.
- * @param {RuntimeChannelType} type 
+ * @param {GMChannelType} type 
  * @param {string?} choice 
  */
 export function runtime_version_set(type, choice) {
@@ -181,7 +184,7 @@ export function runtime_version_set(type, choice) {
 
 /**
  * Get the global choice for default user for a given type.
- * @param {RuntimeChannelType} [type] 
+ * @param {GMChannelType} [type] 
  */
 export function user_get(type = runtime_channel_type_get()) {
     return prefs.runtime_opts.type_opts[type].user;
@@ -189,7 +192,7 @@ export function user_get(type = runtime_channel_type_get()) {
 
 /**
  * Set the global choice for default runtime for a given type.
- * @param {RuntimeChannelType} type 
+ * @param {GMChannelType} type 
  * @param {string?} user 
  */
 export function user_set(type, user) {
@@ -199,7 +202,7 @@ export function user_set(type, user) {
 
 /**
  * Get the search path for runtime of a given type.
- *  @param {RuntimeChannelType} type 
+ *  @param {GMChannelType} type 
  */
 export function runtime_search_path_get(type) {
     return prefs.runtime_opts.type_opts[type].search_path;
@@ -207,7 +210,7 @@ export function runtime_search_path_get(type) {
 
 /**
  * Get the users path for runtime of a given type.
- *  @param {RuntimeChannelType} type 
+ *  @param {GMChannelType} type 
  */
 export function users_search_path_get(type) {
     return prefs.runtime_opts.type_opts[type].users_path;
@@ -215,7 +218,7 @@ export function users_search_path_get(type) {
 
 /**
  * Function to get a list of runtime version names for a given runtime type.
- * @param {RuntimeChannelType} type
+ * @param {GMChannelType} type
  * @returns {RuntimeInfo[]?}
  */
 export function runtime_versions_get_for_type(type) {
@@ -224,7 +227,7 @@ export function runtime_versions_get_for_type(type) {
 
 /**
  * Function to get a list of user names for a given runtime type.
- * @param {RuntimeChannelType} type
+ * @param {GMChannelType} type
  * @returns {UserInfo[]?}
  */
 export function users_get_for_type(type) {
@@ -233,7 +236,7 @@ export function users_get_for_type(type) {
 
 /**
  * Set the search path for runtime of a given type.
- * @param {RuntimeChannelType} type 
+ * @param {GMChannelType} type 
  * @param {string} search_path 
  */
 export async function runtime_search_path_set(type, search_path) {
@@ -280,7 +283,7 @@ export async function runtime_search_path_set(type, search_path) {
 
 /**
  * Set the users path for runtime of a given type.
- * @param {RuntimeChannelType} type 
+ * @param {GMChannelType} type 
  * @param {string} users_path 
  */
 export async function users_search_path_set(type, users_path) {
@@ -334,7 +337,7 @@ export function save() {
 
 /**
  * Get the global runtime options for a given runtime type.
- * @param {RuntimeChannelType} type 
+ * @param {GMChannelType} type 
  */
 function global_runtime_opts_get(type = runtime_channel_type_get()) {
     return prefs.runtime_opts.type_opts[type];
@@ -342,7 +345,7 @@ function global_runtime_opts_get(type = runtime_channel_type_get()) {
 
 /**
  * Load the list of runtimes for the provided search path for a type.
- * @param {RuntimeChannelType} [type] 
+ * @param {GMChannelType} [type] 
  * @returns {Promise<Result<RuntimeInfo[]>>}
  */
 async function runtime_list_load_type(type = runtime_channel_type_get()) {
@@ -353,7 +356,7 @@ async function runtime_list_load_type(type = runtime_channel_type_get()) {
 
 /**
  * Load the list of users for the provided users path for a type.
- * @param {RuntimeChannelType} [type] 
+ * @param {GMChannelType} [type] 
  * @returns {Promise<Result<UserInfo[]>>}
  */
 async function user_list_load_type(type = runtime_channel_type_get()) {
@@ -364,7 +367,7 @@ async function user_list_load_type(type = runtime_channel_type_get()) {
 
 /**
  * Load the list of runtimes for the provided search path.
- * @param {RuntimeChannelType} type 
+ * @param {GMChannelType} type 
  * @param {String} search_path 
  * @returns {Promise<Result<RuntimeInfo[]>>}
  */
@@ -446,7 +449,7 @@ async function runtime_list_load_path(type, search_path) {
 
 /**
  * Load the list of users for the provided search path.
- * @param {RuntimeChannelType} type 
+ * @param {GMChannelType} type 
  * @param {String} users_path 
  * @returns {Promise<Result<UserInfo[]>>}
  */
@@ -528,7 +531,7 @@ export async function __setup__() {
     }
 
     if (loaded_prefs?.runtime_opts?.type !== undefined) {
-        if (!valid_runtime_types.includes(loaded_prefs.runtime_opts.type)) {
+        if (!gm_channel_types.includes(loaded_prefs.runtime_opts.type)) {
 
             ConstructorControlPanel.showWarning(
                 `Invalid preferred runtime type`,
@@ -544,7 +547,7 @@ export async function __setup__() {
 
         const type_opts = loaded_prefs?.runtime_opts?.type_opts;
 
-        for (const type of valid_runtime_types) {
+        for (const type of gm_channel_types) {
 
             if (!(type in type_opts)) {
 
@@ -565,14 +568,14 @@ export async function __setup__() {
     prefs = structuredClone(prefs_default);
     deep_assign(prefs, loaded_prefs);
 
-    /** @type {Promise<any?>[]} */
+    /** @type {Promise<any>[]} */
     const reqs = [];
 
-    for (const runtime_type of valid_runtime_types) {
+    for (const type of gm_channel_types) {
 
-        const options = prefs.runtime_opts.type_opts[runtime_type];
+        const options = prefs.runtime_opts.type_opts[type];
 
-        reqs.push(runtime_list_load_type(runtime_type)
+        reqs.push(runtime_list_load_type(type)
             .then((result) => {
 
                 if (!result.ok) {
@@ -580,7 +583,7 @@ export async function __setup__() {
                     options.choice = null;
 
                     ConstructorControlPanel
-                        .showDebug(`Failed to load ${runtime_type} runtimes list`, result.err);
+                        .showDebug(`Failed to load ${type} runtimes list`, result.err);
 
                     return;
                 }
@@ -591,11 +594,11 @@ export async function __setup__() {
                     options.choice = runtimes_found[0].version.toString();
                 }
 
-                runtimes[runtime_type] = runtimes_found;
+                runtimes[type] = runtimes_found;
 
             }));
             
-        reqs.push(user_list_load_type(runtime_type)
+        reqs.push(user_list_load_type(type)
             .then((result) => {
 
                 if (!result.ok) {
@@ -603,7 +606,7 @@ export async function __setup__() {
                     options.user = null;
 
                     ConstructorControlPanel
-                        .showDebug(`Failed to load ${runtime_type} users list`, result.err);
+                        .showDebug(`Failed to load ${type} users list`, result.err);
 
                     return;
 
@@ -615,7 +618,7 @@ export async function __setup__() {
                     options.user = users_found[0].name.toString();
                 }
                 
-                users[runtime_type] = users_found;
+                users[type] = users_found;
 
             }));
         

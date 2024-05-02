@@ -7,7 +7,7 @@ import { project_format_get } from '../utils/project.js';
 export class RuntimeVersion {
 
     /**
-     * @param {RuntimeChannelType} type 
+     * @param {GMChannelType} type 
      * @param {Number} year 
      * @param {Number} month 
      * @param {Number} major 
@@ -128,7 +128,7 @@ export class RuntimeVersion {
 
 /**
  * Attempt to parse a runtime version from a string.
- * @param {RuntimeChannelType} type
+ * @param {GMChannelType} type
  * @param {String} str 
  * @returns {Result<IRuntimeVersion>}
  */

@@ -2,11 +2,11 @@ declare type PreferencesData = {
 
     /** Globally selected runtime options that may be overriden by projects. */
     runtime_opts: {
-        type: RuntimeChannelType;
+        type: GMChannelType;
         runner: RunnerType;
 
         type_opts: {
-            [key in RuntimeChannelType]: RuntimePreference;
+            [key in GMChannelType]: RuntimePreference;
         };
     };
 
@@ -30,7 +30,7 @@ declare type ProjectPreferencesData = {
     /**
      * Chosen runtime type to use.
      */
-    runtime_type: RuntimeChannelType;
+    runtime_type: GMChannelType;
 
     /**
      * Chosen runtime version to use.
@@ -44,7 +44,7 @@ declare type ProjectPreferencesData = {
 
 };
 
-declare type RuntimeChannelType = 
+declare type GMChannelType = 
     'Stable'    |
     'Beta'      |
     'LTS'       ;
@@ -81,7 +81,7 @@ declare interface IRuntimeVersion {
     /**
      * What type of runtime this is.
      */
-    readonly type: RuntimeChannelType;
+    readonly type: GMChannelType;
 
     /**
      * Returns a negative number if this runtime is older than `other`, 0 for same, or postive for newer.
@@ -226,7 +226,7 @@ declare type IgorPlatformInfo = {
      * as I don't know where the location is for Linux.
      */
     default_runtime_paths: {
-        [key in RuntimeChannelType]: string
+        [key in GMChannelType]: string
     };
 
     /**
@@ -237,7 +237,7 @@ declare type IgorPlatformInfo = {
      * as I don't know where the location is for Linux.
      */
     default_user_paths: {
-        [key in RuntimeChannelType]: string
+        [key in GMChannelType]: string
     };
 }
 

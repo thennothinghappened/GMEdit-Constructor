@@ -71,7 +71,7 @@ export function runner_set(runner) {
 
 /**
  * Get the desired runtime channel type.
- * @returns {RuntimeChannelType}
+ * @returns {GMChannelType}
  */
 export function runtime_channel_type_get() {
     return properties.runtime_type ?? preferences.runtime_channel_type_get();
@@ -79,7 +79,7 @@ export function runtime_channel_type_get() {
 
 /**
  * Get the desired runtime channel type for this project (without falling back to the global option).
- * @returns {RuntimeChannelType|undefined}
+ * @returns {GMChannelType|undefined}
  */
 export function runtime_project_channel_type_get() {
     return properties.runtime_type;
@@ -87,7 +87,7 @@ export function runtime_project_channel_type_get() {
 
 /**
  * Set the desired runtime channel type.
- * @param {RuntimeChannelType|undefined} runtime_type 
+ * @param {GMChannelType|undefined} runtime_type 
  */
 export function runtime_channel_type_set(runtime_type) {
 

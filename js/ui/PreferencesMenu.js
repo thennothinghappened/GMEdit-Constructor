@@ -64,7 +64,7 @@ export function menu_create(prefs_group, on_change_runtime_channel) {
         prefs_group,
         'Runtime Channel Type',
         preferences.runtime_channel_type_get(),
-        preferences.valid_runtime_types,
+        preferences.gm_channel_types,
         (value) => {
             // @ts-ignore
             preferences.runtime_channel_type_set(value);
@@ -74,7 +74,7 @@ export function menu_create(prefs_group, on_change_runtime_channel) {
         }
     );
 
-    for (const type of preferences.valid_runtime_types) {
+    for (const type of preferences.gm_channel_types) {
 
         const group = UIPreferences.addGroup(prefs_group, type);
 
@@ -146,7 +146,7 @@ export function menu_create(prefs_group, on_change_runtime_channel) {
 
 /**
  * Get an array of version strings for the given runtime type.
- * @param {RuntimeChannelType} type 
+ * @param {GMChannelType} type 
  * @returns 
  */
 export function runtime_version_strings_get_for_type(type) {
@@ -163,7 +163,7 @@ export function runtime_version_strings_get_for_type(type) {
 
 /**
  * Get an array of username strings for the given runtime type.
- * @param {RuntimeChannelType} type 
+ * @param {GMChannelType} type 
  * @returns 
  */
 function user_strings_get_for_type(type) {

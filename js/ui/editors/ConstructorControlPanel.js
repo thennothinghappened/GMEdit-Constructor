@@ -351,7 +351,7 @@ export class ConstructorControlPanel extends ConstructorEditorView {
             this.projectSettings,
             'Runtime Channel Type',
             projectProperties.runtime_project_channel_type_get() ?? USE_DEFAULT,
-            [...preferences.valid_runtime_types, USE_DEFAULT],
+            [...preferences.gm_channel_types, USE_DEFAULT],
             (value) => {
 
                 if (value === USE_DEFAULT) {
