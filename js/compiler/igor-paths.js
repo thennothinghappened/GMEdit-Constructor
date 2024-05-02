@@ -33,9 +33,9 @@ const igor_platform_map = {
             LTS:    '/Users/Shared/GameMakerStudio2-LTS/Cache/runtimes'
         },
         default_user_paths: {
-            Stable: '~/.config/GameMakerStudio2',
-            Beta:   '~/.config/GameMakerStudio2-Beta',
-            LTS:    '~/.config/GameMakerStudio2-LTS'
+            Stable: process.env.HOME + '/.config/GameMakerStudio2',
+            Beta:   process.env.HOME + '/.config/GameMakerStudio2-Beta',
+            LTS:    process.env.HOME + '/.config/GameMakerStudio2-LTS'
         }
     },
     'linux': {
