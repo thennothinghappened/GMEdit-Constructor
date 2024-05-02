@@ -1,16 +1,23 @@
+
 /**
- * @param {any} to
- * @param {any} obj
- * @returns {any}
+ * Assign the given `target` object to include the properties of the source, while respecting
+ * nested objects, unlike `Object.assign()`.
+ * 
+ * @param {Record<string|number, any>} target The object being assigned.
+ * @param {Record<string|number, any>} source The object from which to copy properties from.
+ * @returns {Record<string|number, any>}
  */
-export function deep_assign(to, obj) {
-	if (!(obj instanceof Object) || !(to instanceof Object)) return to;
-	for (const key of Object.keys(obj)) {
-		if (to[key] instanceof Object) {
-			deep_assign(to[key], obj[key]);
+export function deep_assign(target, source) {
+
+	for (const key of Object.keys(source)) {
+
+		if ((target[key] instanceof Object) && (source[key] instanceof Object)) {
+			deep_assign(target[key], source[key]);
 		} else {
-			to[key] = obj[key];
+			target[key] = source[key];
 		}
+
 	}
-	return to;
+
+	return target;
 }
