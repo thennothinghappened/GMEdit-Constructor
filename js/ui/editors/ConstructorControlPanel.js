@@ -52,6 +52,9 @@ export class ConstructorControlPanel extends ConstructorEditorView {
     /** @type {MessageContainer[]} */
     static messages = [];
 
+    /** @type {HTMLElement?} */
+    #runtimeVersionDropdown = null;
+
     /**
      * @param {GmlFile} file
      */
@@ -299,7 +302,7 @@ export class ConstructorControlPanel extends ConstructorEditorView {
     onCloseProject = () => {
         
         this.projectSettings.hidden = true;
-        this.#runtime_version_dropdown = null;
+        this.#runtimeVersionDropdown = null;
         
         for (const element of Array.from(this.projectSettings.children)) {
             if (!(element instanceof HTMLLegendElement)) {
@@ -308,9 +311,6 @@ export class ConstructorControlPanel extends ConstructorEditorView {
         }
 
     }
-
-    /** @type {HTMLElement?} */
-    #runtime_version_dropdown = null;
 
     /**
      * Setup project-specific settings.
@@ -366,7 +366,7 @@ export class ConstructorControlPanel extends ConstructorEditorView {
             }
         );
 
-        this.#runtime_version_dropdown = UIPreferences.addDropdown(
+        this.#runtimeVersionDropdown = UIPreferences.addDropdown(
             this.projectSettings,
             'Runtime Version',
             projectProperties.runtime_project_version_get() ?? USE_DEFAULT,
@@ -406,18 +406,18 @@ export class ConstructorControlPanel extends ConstructorEditorView {
      * Mutate the runtime version dropdown to correspond to the set runtime channel.
      */
     updateRuntimeVersionDropdown() {
-        if (this.#runtime_version_dropdown === null) {
+        if (this.#runtimeVersionDropdown === null) {
             return;
         }
 
         const type = projectProperties.runtime_channel_type_get();
         UIDropdownMutate(
-            this.#runtime_version_dropdown,
+            this.#runtimeVersionDropdown,
             [...preferencesMenu.runtime_version_strings_get_for_type(type), USE_DEFAULT],
             USE_DEFAULT
         );
 
-        const dropdown = /** @type {HTMLSelectElement} */(this.#runtime_version_dropdown);
+        const dropdown = /** @type {HTMLSelectElement} */(this.#runtimeVersionDropdown);
         if (dropdown.value === USE_DEFAULT) {
             projectProperties.runtime_version_set(undefined);
         } else {
