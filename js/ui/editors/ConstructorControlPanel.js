@@ -52,7 +52,7 @@ export class ConstructorControlPanel extends ConstructorEditorView {
     /** @type {MessageContainer[]} */
     static messages = [];
 
-    /** @type {HTMLElement?} */
+    /** @type {HTMLDivElement?} */
     #runtimeVersionDropdown = null;
 
     /**

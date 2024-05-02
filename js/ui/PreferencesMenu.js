@@ -68,7 +68,8 @@ export function menu_create(prefs_group, on_change_runtime_channel) {
         (value) => {
             // @ts-ignore
             preferences.runtime_channel_type_set(value);
-            if (on_change_runtime_channel) {
+
+            if (on_change_runtime_channel !== undefined) {
                 on_change_runtime_channel();
             }
         }
@@ -78,10 +79,10 @@ export function menu_create(prefs_group, on_change_runtime_channel) {
 
         const group = UIPreferences.addGroup(prefs_group, type);
 
-        /** @type {HTMLElement} */
+        /** @type {HTMLDivElement} */
         let version_dropdown;
 
-        /** @type {HTMLElement} */
+        /** @type {HTMLDivElement} */
         let user_dropdown;
 
         UIPreferences.addInput(
@@ -93,7 +94,9 @@ export function menu_create(prefs_group, on_change_runtime_channel) {
                 if (path === preferences.runtime_search_path_get(type)) {
                     return;
                 }
+                
                 await preferences.runtime_search_path_set(type, path);
+
                 UIDropdownMutate(
                     version_dropdown,
                     runtime_version_strings_get_for_type(type)
@@ -120,7 +123,9 @@ export function menu_create(prefs_group, on_change_runtime_channel) {
                 if (path === preferences.users_search_path_get(type)) {
                     return;
                 }
+
                 await preferences.users_search_path_set(type, path);
+
                 UIDropdownMutate(
                     user_dropdown,
                     user_strings_get_for_type(type)
@@ -195,5 +200,6 @@ function on_preferences_built(ev) {
     if (prefs_el instanceof HTMLDivElement) {
         menu_create(prefs_el);
     }
+
 }
 
