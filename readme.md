@@ -8,6 +8,7 @@ Constructor can currently compile for the current build target (your OS), and ca
 ## Features
  - [x] **Run compile, run and clean jobs** (technically can be in parallel!)
    - [x] Stop jobs by closing their tab
+   - [x] YYC Support
  - [x] **View compile output** (duh)
  - [x] **Compile and runner error parsing** (view them nice and neat rather than scrolling the log!)
  - [x] **Runtime selection & project-specific properties**
@@ -49,7 +50,6 @@ Maybe later these can be customisable :)
   - HTML5
   - Android
   - Remote compilation for other platforms using `devices.json` (compile on another machine via `ssh` as you can in the IDE)
-- YYC support
 - Option for docked console as opposed to full-window
 - Automatic check for updates
 
