@@ -370,6 +370,11 @@ async function user_list_load_type(type = runtime_channel_type_get()) {
  */
 async function runtime_list_load_path(type, search_path) {
 
+    /**
+     * List of filenames we'll just skip as obviously invalid.
+     */
+    const IGNORED_NAMES = ['.DS_Store'];
+
     const dir_res = await readdir(search_path);
 
     if (!dir_res.ok) {
@@ -385,6 +390,10 @@ async function runtime_list_load_path(type, search_path) {
     const runtimes = dir_res.data
         .map(dirname => {
 
+            if (IGNORED_NAMES.includes(dirname)) {
+                return null;
+            }
+
             const path = join_path(search_path, dirname);
             const igor_path = join_path(path, igor_path_segment);
 
@@ -393,7 +402,6 @@ async function runtime_list_load_path(type, search_path) {
             if (!version_res.ok) {
 
                 const err = new Err(`Failed to parse runtime version name for runtime at '${path}'`, version_res.err);
-                
                 ConstructorControlPanel.showWarning(err.message, err);
 
                 return null;
