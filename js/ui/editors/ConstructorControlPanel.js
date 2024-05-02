@@ -1,5 +1,6 @@
 import { Job } from '../../compiler/job/Job.js';
 import { project_config_tree_get, project_config_tree_to_array, project_current_get, project_is_open } from '../../utils/project.js';
+import { UIDropdownMutate } from '../../utils/ui.js';
 import { ConstructorEditorView, ConstructorViewFileKind } from './ConstructorEditorView.js';
 import * as projectProperties from '../../preferences/ProjectProperties.js';
 import * as preferences from '../../preferences/Preferences.js';
@@ -10,6 +11,12 @@ import { plugin_name, plugin_version } from '../../GMConstructor.js';
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];
 const UIPreferences = $gmedit['ui.Preferences'];
+
+/**
+ * Used for runtime/user select dropdowns, to default to the global settings.
+ * Corresponds to `undefined` in the actual preferences files.
+ */
+const USE_DEFAULT = 'Use Default';
 
 /**
  * File type for the control panel.
@@ -292,6 +299,7 @@ export class ConstructorControlPanel extends ConstructorEditorView {
     onCloseProject = () => {
         
         this.projectSettings.hidden = true;
+        this.#runtime_version_dropdown = null;
         
         for (const element of Array.from(this.projectSettings.children)) {
             if (!(element instanceof HTMLLegendElement)) {
@@ -300,6 +308,9 @@ export class ConstructorControlPanel extends ConstructorEditorView {
         }
 
     }
+
+    /** @type {HTMLElement?} */
+    #runtime_version_dropdown = null;
 
     /**
      * Setup project-specific settings.
@@ -321,18 +332,55 @@ export class ConstructorControlPanel extends ConstructorEditorView {
 
         UIPreferences.addDropdown(
             this.projectSettings,
-            'Runtime Channel Type',
-            projectProperties.runtime_channel_type_get(),
-            [...preferences.valid_runtime_types, 'Use Default'],
+            'Runner Type',
+            projectProperties.runner_project_get() ?? USE_DEFAULT,
+            [...preferences.valid_runner_types, USE_DEFAULT],
             (value) => {
 
-                if (value === 'Use Default') {
-                    projectProperties.runtime_channel_type_set(undefined);
+                if (value === USE_DEFAULT) {
+                    projectProperties.runner_set(undefined);
                     return;
                 }
 
                 // @ts-ignore
-                projectProperties.runtime_channel_type_set(value);
+                projectProperties.runner_set(value);
+            }
+        );
+
+        UIPreferences.addDropdown(
+            this.projectSettings,
+            'Runtime Channel Type',
+            projectProperties.runtime_project_channel_type_get() ?? USE_DEFAULT,
+            [...preferences.valid_runtime_types, USE_DEFAULT],
+            (value) => {
+
+                if (value === USE_DEFAULT) {
+                    projectProperties.runtime_channel_type_set(undefined);
+                } else {
+                    // @ts-ignore
+                    projectProperties.runtime_channel_type_set(value);
+                }
+                
+                this.updateRuntimeVersionDropdown();
+
+            }
+        );
+
+        this.#runtime_version_dropdown = UIPreferences.addDropdown(
+            this.projectSettings,
+            'Runtime Version',
+            projectProperties.runtime_project_version_get() ?? USE_DEFAULT,
+            [...preferencesMenu.runtime_version_strings_get_for_type(projectProperties.runtime_channel_type_get()), USE_DEFAULT],
+            (value) => {
+
+                if (value === USE_DEFAULT) {
+                    projectProperties.runtime_version_set(undefined);
+                    return;
+                }
+
+                // @ts-ignore
+                projectProperties.runtime_version_set(value);
+
             }
         );
 
@@ -344,8 +392,37 @@ export class ConstructorControlPanel extends ConstructorEditorView {
     globalSettingsSetup() {
 
         this.globalSettings.appendChild(ui.em(`Configure the default behaviour of ${plugin_name}.`));
-        preferencesMenu.menu_create(this.globalSettings);
+        preferencesMenu.menu_create(this.globalSettings, () => {
+            // If the project channel type is set to something other than Use Default
+            if (projectProperties.runtime_project_channel_type_get() !== undefined) {
+                return;
+            }
 
+            this.updateRuntimeVersionDropdown();
+        });
+    }
+
+    /**
+     * Mutate the runtime version dropdown to correspond to the set runtime channel.
+     */
+    updateRuntimeVersionDropdown() {
+        if (this.#runtime_version_dropdown === null) {
+            return;
+        }
+
+        const type = projectProperties.runtime_channel_type_get();
+        UIDropdownMutate(
+            this.#runtime_version_dropdown,
+            [...preferencesMenu.runtime_version_strings_get_for_type(type), USE_DEFAULT],
+            USE_DEFAULT
+        );
+
+        const dropdown = /** @type {HTMLSelectElement} */(this.#runtime_version_dropdown);
+        if (dropdown.value === USE_DEFAULT) {
+            projectProperties.runtime_version_set(undefined);
+        } else {
+            projectProperties.runtime_version_set(dropdown.value);
+        }
     }
 
     destroy = () => {

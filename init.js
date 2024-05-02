@@ -9,6 +9,7 @@
 
     const node_child_process = require('node:child_process');
     const node_path = require('node:path');
+    const node_fs = require('node:fs/promises');
 
     const load = (async () => {
 
@@ -17,7 +18,7 @@
         }
 
         const { GMConstructor } = await import('./js/GMConstructor.js');
-        const res = await GMConstructor.create(plugin_name, plugin_version, node_path, node_child_process);
+        const res = await GMConstructor.create(plugin_name, plugin_version, node_path, node_child_process, node_fs);
 
         if (!res.ok) {
             

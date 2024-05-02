@@ -3,9 +3,10 @@
  * and runtime list.
  */
 
-import { def_runtime_paths, igor_path_segment } from '../compiler/igor-paths.js';
+import { def_runtime_paths, def_user_paths, igor_path_segment } from '../compiler/igor-paths.js';
 import { fileExists, readFile, readdir, writeFile } from '../utils/file.js';
 import { Err } from '../utils/Err.js';
+import { deep_assign } from '../utils/object.js';
 import { join_path, plugin_name } from '../GMConstructor.js';
 import { runtime_version_parse } from '../compiler/RuntimeVersion.js';
 import { ConstructorControlPanel } from '../ui/editors/ConstructorControlPanel.js';
@@ -13,24 +14,34 @@ import { ConstructorControlPanel } from '../ui/editors/ConstructorControlPanel.j
 /** @type {RuntimeChannelType[]} */
 export const valid_runtime_types = ['Stable', 'Beta', 'LTS'];
 
+/** @type {RunnerType[]} */
+export const valid_runner_types = ['VM', 'YYC'];
+
 /** @type {Readonly<PreferencesData>} */
 const prefs_default = {
     runtime_opts: {
         // Default runtime to use is probably going to be stable.
         type: 'Stable',
+        runner: 'VM',
 
         type_opts: {
             Stable: {
                 search_path: def_runtime_paths.Stable,
-                choice: null
+                users_path: def_user_paths.Stable,
+                choice: null,
+                user: null
             },
             Beta: {
                 search_path: def_runtime_paths.Beta,
-                choice: null
+                users_path: def_user_paths.Beta,
+                choice: null,
+                user: null
             },
             LTS: {
                 search_path: def_runtime_paths.LTS,
-                choice: null
+                users_path: def_user_paths.LTS,
+                choice: null,
+                user: null
             }
         }
     },
@@ -49,6 +60,18 @@ let prefs = Object.create(prefs_default);
  * @type { { [key in RuntimeChannelType]: RuntimeInfo[]? } }
  */
 const runtimes = {
+    Stable: null,
+    Beta: null,
+    LTS: null
+};
+
+/**
+ * List of users for each type.
+ * Populated after loading the list.
+ * 
+ * @type { { [key in RuntimeChannelType]: UserInfo[]? } }
+ */
+const users = {
     Stable: null,
     Beta: null,
     LTS: null
@@ -104,6 +127,25 @@ export function save_on_run_task_set(save_on_run_task) {
 }
 
 /**
+ * Get the desired runner type.
+ * @returns {RunnerType}
+ */
+export function runner_get() {
+    return prefs.runtime_opts.runner;
+}
+
+/**
+ * The default runner type used globally.
+ * @param {RunnerType} runner 
+ */
+export function runner_set(runner) {
+
+    prefs.runtime_opts.runner = runner;
+    return save();
+
+}
+
+/**
  * The default runtime type used globally.
  */
 export function runtime_channel_type_get() {
@@ -138,11 +180,37 @@ export function runtime_version_set(type, choice) {
 }
 
 /**
+ * Get the global choice for default user for a given type.
+ * @param {RuntimeChannelType} [type] 
+ */
+export function user_get(type = runtime_channel_type_get()) {
+    return prefs.runtime_opts.type_opts[type].user;
+}
+
+/**
+ * Set the global choice for default runtime for a given type.
+ * @param {RuntimeChannelType} type 
+ * @param {string?} user 
+ */
+export function user_set(type, user) {
+    prefs.runtime_opts.type_opts[type].user = user;
+    return save();
+}
+
+/**
  * Get the search path for runtime of a given type.
  *  @param {RuntimeChannelType} type 
  */
 export function runtime_search_path_get(type) {
     return prefs.runtime_opts.type_opts[type].search_path;
+}
+
+/**
+ * Get the users path for runtime of a given type.
+ *  @param {RuntimeChannelType} type 
+ */
+export function users_search_path_get(type) {
+    return prefs.runtime_opts.type_opts[type].users_path;
 }
 
 /**
@@ -152,6 +220,15 @@ export function runtime_search_path_get(type) {
  */
 export function runtime_versions_get_for_type(type) {
    return runtimes[type];
+};
+
+/**
+ * Function to get a list of user names for a given runtime type.
+ * @param {RuntimeChannelType} type
+ * @returns {UserInfo[]?}
+ */
+export function users_get_for_type(type) {
+   return users[type];
 };
 
 /**
@@ -202,6 +279,53 @@ export async function runtime_search_path_set(type, search_path) {
 }
 
 /**
+ * Set the users path for runtime of a given type.
+ * @param {RuntimeChannelType} type 
+ * @param {string} users_path 
+ */
+export async function users_search_path_set(type, users_path) {
+
+    prefs.runtime_opts.type_opts[type].users_path = users_path;
+    await save();
+
+    users[type] = null;
+
+    const res = await user_list_load_type(type);
+
+    if (!res.ok) {
+
+        const err = new Err(
+            `Failed to load ${type} user list`,
+            res.err,
+            'Make sure the users path is valid!'
+        );
+
+        return ConstructorControlPanel
+            .view(true)
+            .showError(err.message, err);
+    }
+
+    users[type] = res.data;
+
+    const choice = user_get(type);
+
+    if (
+        choice !== undefined && 
+        users[type]?.find(user => user.name === choice) === undefined
+    ) {
+
+        const err = new Err(`User "${choice}" not available in new users path "${users_path}".`);
+
+        ConstructorControlPanel
+            .view(false)
+            .showWarning(err.message, err);
+        
+        user_set(type, users[type]?.at(0)?.name?.toString() ?? null);
+    }
+
+}
+
+/**
  * Save preferences back to the file.
  */
 export function save() {
@@ -225,6 +349,17 @@ async function runtime_list_load_type(type = runtime_channel_type_get()) {
 
     const { search_path } = global_runtime_opts_get(type);
     return runtime_list_load_path(type, search_path);
+}
+
+/**
+ * Load the list of users for the provided users path for a type.
+ * @param {RuntimeChannelType} [type] 
+ * @returns {Promise<Result<UserInfo[]>>}
+ */
+async function user_list_load_type(type = runtime_channel_type_get()) {
+
+    const { users_path } = global_runtime_opts_get(type);
+    return user_list_load_path(type, users_path);
 }
 
 /**
@@ -304,6 +439,47 @@ async function runtime_list_load_path(type, search_path) {
 }
 
 /**
+ * Load the list of users for the provided search path.
+ * @param {RuntimeChannelType} type 
+ * @param {String} users_path 
+ * @returns {Promise<Result<UserInfo[]>>}
+ */
+async function user_list_load_path(type, users_path) {
+
+    const dir_res = await readdir(users_path);
+    
+    if (!dir_res.ok) {
+        return {
+            ok: false,
+            err: new Err(`Failed to read users path '${users_path}': ${dir_res.err}`),
+        };
+    }
+
+    /** @type {UserInfo[]} */
+    // @ts-thanks-for-epic-type-inference-it-really-works-here
+    // @ts-ignore
+    const users = dir_res.data
+        .map(dirname => {
+            return {
+                path: join_path(users_path, dirname),
+                name: dirname
+            };
+        })
+        .sort((a, b) => +(a.name > b.name));
+
+    // Search each result to check if it's actually a valid user, or just a folder in the users folder
+    // (e.g Cache).
+    const valid = await Promise.all(
+        users.map(user => fileExists(join_path(user.path, 'local_settings.json')))
+    );
+
+    return {
+        ok: true,
+        data: users.filter((_, i) => valid[i])
+    };
+}
+
+/**
  * Init a new instance of Preferences asynchronously (requires loading file.)
  * @returns {Promise<Result<void>>}
  */
@@ -379,32 +555,55 @@ export async function __setup__() {
 
     }
     
-    prefs = Object.create(prefs_default);
-    Object.assign(prefs, loaded_prefs);
+    // prefs_default has to be cloned (instead of using Object.create),
+    // otherwise properties inside other objects won't be saved into the config file,
+    // as JSON.stringify doesn't stringify properties in object prototypes
+    prefs = structuredClone(prefs_default);
+    deep_assign(prefs, loaded_prefs);
 
-    const stable_req = runtime_list_load_type('Stable');
-    const beta_req = runtime_list_load_type('Beta');
-    const lts_req = runtime_list_load_type('LTS');
+    /** @type {Promise<Result<RuntimeInfo[] | UserInfo[]>>[]} */
+    const reqs = [];
+    for (const runtime_type of valid_runtime_types) {
+        const options = prefs.runtime_opts.type_opts[runtime_type];
+        reqs.push(runtime_list_load_type(runtime_type)
+            .then((result) => {
+                if (result.ok) {
+                    runtimes[runtime_type] = result.data;
+                } else {
+                    ConstructorControlPanel.showDebug(`Failed to load ${runtime_type} runtimes list`, result.err);
+                }
 
-    const [stable_res, beta_res, lts_res] = await Promise.all([stable_req, beta_req, lts_req]);
-
-    if (stable_res.ok) {
-        runtimes.Stable = stable_res.data;
-    } else {
-        ConstructorControlPanel.showDebug('Failed to load Stable runtimes list', stable_res.err);
+                if (options.choice !== undefined && options.choice !== null) {
+                    return result;
+                }
+                if (!runtimes[runtime_type] || (runtimes[runtime_type]?.length ?? 0) == 0) {
+                    return result;
+                }
+                // @ts-ignore
+                options.choice = runtimes[runtime_type][0].version.toString();
+                return result;
+            }));
+        reqs.push(user_list_load_type(runtime_type)
+            .then((result) => {
+                if (result.ok) {
+                    users[runtime_type] = result.data;
+                } else {
+                    ConstructorControlPanel.showDebug(`Failed to load ${runtime_type} users list`, result.err);
+                }
+                
+                if (options.user !== undefined && options.user !== null) {
+                    return result;
+                }
+                if (!users[runtime_type] || (users[runtime_type]?.length ?? 0) == 0) {
+                    return result;
+                }
+                // @ts-ignore
+                options.user = users[runtime_type][0].name.toString();
+                return result;
+            }));
     }
 
-    if (beta_res.ok) {
-        runtimes.Beta = beta_res.data;
-    } else {
-        ConstructorControlPanel.showDebug('Failed to load Beta runtimes list', beta_res.err);
-    }
-
-    if (lts_res.ok) {
-        runtimes.LTS = lts_res.data;
-    } else {
-        ConstructorControlPanel.showDebug('Failed to load LTS runtimes list', lts_res.err);
-    }
+    await Promise.all(reqs);
 
     __ready__ = true;
 

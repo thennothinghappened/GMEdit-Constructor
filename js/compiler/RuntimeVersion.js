@@ -76,19 +76,10 @@ export class RuntimeVersion {
 
     /**
      * Returns whether this runtime version is supported by Constructor.
-     * At the moment, as LTS is broken, this means LTS runtimes
-     * are excluded.
      * 
      * @returns {Result<void>}
      */
     supported() {
-
-        if (this.type === 'LTS' || this.year <= 2022) {
-            return {
-                ok: false,
-                err: new Err(`LTS or <=2022 builds are currently non-functional (see https://github.com/thennothinghappened/GMEdit-Constructor/issues/5)`)
-            }
-        }
 
         return {
             ok: true,

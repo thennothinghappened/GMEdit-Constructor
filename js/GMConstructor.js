@@ -56,6 +56,7 @@ export class GMConstructor {
 
         const runtime_type = projectProperties.runtime_channel_type_get();
         const runtime_res = projectProperties.runtime_get();
+        const user_res = projectProperties.user_get();
 
         if (!runtime_res.ok) {
 
@@ -105,7 +106,7 @@ export class GMConstructor {
             open_files_save();
         }
 
-        const res = await compileController.job_run(project, runtime_res.data, settings);
+        const res = await compileController.job_run(project, runtime_res.data, user_res.ok ? user_res.data : null, settings);
 
         if (!res.ok) {
 
@@ -131,7 +132,7 @@ export class GMConstructor {
         this.#runTask({
             platform: igorPaths.igor_user_platform,
             verb: 'Package',
-            runtime: 'VM',
+            runner: projectProperties.runner_get(),
             threads: 8,
             configName: projectProperties.config_name_get()
         });
@@ -141,7 +142,7 @@ export class GMConstructor {
         this.#runTask({
             platform: igorPaths.igor_user_platform,
             verb: 'Clean',
-            runtime: 'VM',
+            runner: projectProperties.runner_get(),
             threads: 8,
             configName: projectProperties.config_name_get()
         });
@@ -151,7 +152,7 @@ export class GMConstructor {
         this.#runTask({
             platform: igorPaths.igor_user_platform,
             verb: 'Run',
-            runtime: 'VM',
+            runner: projectProperties.runner_get(),
             threads: 8,
             configName: projectProperties.config_name_get()
         });
@@ -163,10 +164,11 @@ export class GMConstructor {
      * @param {string} _plugin_version Current version of the plugin
      * @param {import('node:path')} node_path 
      * @param {import('node:child_process')} node_child_process
+     * @param {import('node:fs/promises')} node_fs
      * 
      * @returns {Promise<Result<GMConstructor>>}
      */
-    static async create(_plugin_name, _plugin_version, node_path, node_child_process) {
+    static async create(_plugin_name, _plugin_version, node_path, node_child_process, node_fs) {
 
         // Prevent Constructor loading when running on Rosetta, since it has a bunch of issues there.
         if (rosetta_check(node_child_process.execSync)) {
@@ -190,6 +192,7 @@ export class GMConstructor {
 
         join_path = node_path.join;
         spawn = node_child_process.spawn;
+        rm = node_fs.rm;
 
         plugin_name = _plugin_name;
         plugin_version = _plugin_version;
@@ -240,6 +243,12 @@ export let join_path;
  * @type {import('node:child_process').spawn} 
  */
 export let spawn;
+
+/** 
+ * Reference to NodeJS rm.
+ * @type {import('node:fs/promises').rm} 
+ */
+export let rm;
 
 /**
  * Make sure we aren't running on rosetta, since GMEdit has

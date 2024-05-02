@@ -13,6 +13,8 @@ export function UIDropdownMutate(root, opts, value) {
     // @ts-ignore
     const sel = root.querySelector('select');
 
+    const oldValue = sel.value;
+
     for (const el of Array.from(sel.childNodes)) {
         sel.removeChild(el);
     }
@@ -25,7 +27,9 @@ export function UIDropdownMutate(root, opts, value) {
         sel.appendChild(el);
     }
 
-    if (value === undefined && opts.includes(sel.value)) {
-        sel.value = '';
+    if (opts.includes(oldValue)) {
+        sel.value = oldValue;
+    } else {
+        sel.value = value ?? opts[0] ?? '';
     }
 }

@@ -59,7 +59,7 @@ export class HamburgerOptions {
         this.#menu_items_container = new Electron_MenuItem({
             id: 'constructor-menu',
             label: 'Constructor',
-            enabled: false,
+            enabled: true,
             submenu: [
                 this.#menu_items.control_panel,
                 this.#menu_items.compile,
@@ -188,10 +188,11 @@ export class HamburgerOptions {
      * @param {boolean} enabled
      */
     #setEnableMenuItems = (enabled) => {
-        this.#menu_items_container.enabled = enabled;
         // @ts-ignore
         for (const item of this.#menu_items_container.submenu.items) {
-            item.enabled = enabled;
+            if (item.id !== 'constructor-control_panel') {
+                item.enabled = enabled;
+            }
         }
     }
 

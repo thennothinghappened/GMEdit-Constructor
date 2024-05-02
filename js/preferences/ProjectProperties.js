@@ -43,6 +43,33 @@ export function config_name_set(config_name) {
 }
 
 /**
+ * Get the desired runner type.
+ * @returns {RunnerType}
+ */
+export function runner_get() {
+    return properties.runner ?? preferences.runner_get();
+}
+
+/**
+ * Get the desired runner type for this project (without falling back to the global option).
+ * @returns {RunnerType|undefined}
+ */
+export function runner_project_get() {
+    return properties.runner;
+}
+
+/**
+ * Set the desired runtime channel type.
+ * @param {RunnerType|undefined} runner 
+ */
+export function runner_set(runner) {
+
+    properties.runner = runner;
+    return save();
+
+}
+
+/**
  * Get the desired runtime channel type.
  * @returns {RuntimeChannelType}
  */
@@ -51,19 +78,53 @@ export function runtime_channel_type_get() {
 }
 
 /**
+ * Get the desired runtime channel type for this project (without falling back to the global option).
+ * @returns {RuntimeChannelType|undefined}
+ */
+export function runtime_project_channel_type_get() {
+    return properties.runtime_type;
+}
+
+/**
  * Set the desired runtime channel type.
  * @param {RuntimeChannelType|undefined} runtime_type 
  */
 export function runtime_channel_type_set(runtime_type) {
 
-    console.log(runtime_type);
     properties.runtime_type = runtime_type;
     return save();
 
 }
 
 /**
- * Get the runtime to use for the current project.
+ * Get the desired runtime version for this project.
+ * @returns {string|null}
+ */
+export function runtime_version_get() {
+    return properties.runtime_version ?? preferences.runtime_version_get(runtime_channel_type_get());
+}
+
+/**
+ * Get the desired runtime channel type for this project (without falling back to the global option).
+ * @returns {string|undefined}
+ */
+export function runtime_project_version_get() {
+    return properties.runtime_version;
+}
+
+/**
+ * Set the desired runtime channel type.
+ * @param {string|undefined} runtime_type 
+ */
+export function runtime_version_set(runtime_type) {
+
+    properties.runtime_version = runtime_type;
+    return save();
+
+}
+
+/**
+ * Get the runtime version to use for the current project.
  * @returns {Result<RuntimeInfo>}
  */
 export function runtime_get() {
@@ -78,7 +139,7 @@ export function runtime_get() {
         };
     }
 
-    const version = preferences.runtime_version_get(type) ?? desired_runtime_list[0]?.version?.toString();
+    const version = runtime_version_get() ?? desired_runtime_list[0]?.version?.toString();
     const runtime = desired_runtime_list.find(runtime => runtime.version.toString() === version);
 
     if (runtime === undefined) {
@@ -91,6 +152,38 @@ export function runtime_get() {
     return {
         ok: true,
         data: runtime
+    };
+}
+/**
+
+ * Get the user to use for the current project.
+ * @returns {Result<UserInfo>}
+ */
+export function user_get() {
+
+    const type = runtime_channel_type_get();
+    const desired_user_list = preferences.users_get_for_type(type);
+
+    if (desired_user_list === null) {
+        return {
+            ok: false,
+            err: new Err(`Users for runtime ${type} list not loaded!`)
+        };
+    }
+
+    const name = preferences.user_get(type) ?? desired_user_list[0]?.name?.toString();
+    const user = desired_user_list.find(user => user.name.toString() === name);
+
+    if (user === undefined) {
+        return {
+            ok: false,
+            err: new Err(`Failed to find any users for runtime ${type}`)
+        };
+    }
+
+    return {
+        ok: true,
+        data: user
     };
 }
 

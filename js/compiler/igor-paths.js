@@ -1,6 +1,7 @@
 
 import { join_path } from '../GMConstructor.js';
-import { Err } from '../utils/Err.js';
+
+const windowsAppdata = process.env?.AppData ?? 'C:\\Users\\PLEASE_SPECIFY_USERNAME\\AppData\\Roaming';
 
 /**
  * Mappings of NodeJS platforms to various Igor information.
@@ -15,7 +16,12 @@ const igor_platform_map = {
             Stable: 'C:\\ProgramData\\GameMakerStudio2\\Cache\\runtimes',
             Beta:   'C:\\ProgramData\\GameMakerStudio2-Beta\\Cache\\runtimes',
             LTS:    'C:\\ProgramData\\GameMakerStudio2-LTS\\Cache\\runtimes'
-        }
+        },
+        default_user_paths: {
+            Stable: windowsAppdata + '\\GameMakerStudio2',
+            Beta:   windowsAppdata + '\\GameMakerStudio2-Beta',
+            LTS:    windowsAppdata + '\\GameMakerStudio2-LTS'
+        },
     },
     'darwin': {
         platform_executable_extension: '',
@@ -25,6 +31,11 @@ const igor_platform_map = {
             Stable: '/Users/Shared/GameMakerStudio2/Cache/runtimes',
             Beta:   '/Users/Shared/GameMakerStudio2-Beta/Cache/runtimes',
             LTS:    '/Users/Shared/GameMakerStudio2-LTS/Cache/runtimes'
+        },
+        default_user_paths: {
+            Stable: '~/.config/GameMakerStudio2',
+            Beta:   '~/.config/GameMakerStudio2-Beta',
+            LTS:    '~/.config/GameMakerStudio2-LTS'
         }
     },
     'linux': {
@@ -35,14 +46,34 @@ const igor_platform_map = {
             Stable: '/please/specify/your/runtime/paths',
             Beta:   '/please/specify/your/runtime/paths',
             LTS:    '/please/specify/your/runtime/paths'
+        },
+        default_user_paths: {
+            Stable: '/please/specify/your/user/paths',
+            Beta:   '/please/specify/your/user/paths',
+            LTS:    '/please/specify/your/user/paths'
         }
     }
+};
+
+/**
+ * Mappings of Igor targets to output file extensions. TODO: other targets
+ * @type {{[K in IgorPlatform]?: string}}
+*/
+export const output_exts = {
+    Windows: '.zip',
+    Mac: '.zip',
+    Linux: '.appimage',
 };
 
 /**
  * Default paths to the runtimes for the host OS.
  */
 export const def_runtime_paths = igor_platform_map[process.platform].default_runtime_paths;
+
+/**
+ * Default paths to the userdata folders for the host OS.
+ */
+export const def_user_paths = igor_platform_map[process.platform].default_user_paths;
 
 /**
  * {@link IgorPlatform} to native build for the host OS. 
