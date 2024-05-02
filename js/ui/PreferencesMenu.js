@@ -33,7 +33,7 @@ export function __cleanup__() {
 /**
  * Create the preferences menu within the given group.
  * @param {HTMLElement} prefs_group
- * @param {Function?} [on_change_runtime_channel]
+ * @param {() => void} [on_change_runtime_channel]
  */
 export function menu_create(prefs_group, on_change_runtime_channel) {
 
