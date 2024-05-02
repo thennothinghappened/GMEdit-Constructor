@@ -151,8 +151,6 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
 
     }
 
-    UIPreferences.addText(prefs_group, `Version: ${plugin_version}`);
-
 }
 
 /**
@@ -201,10 +199,13 @@ function on_preferences_built(ev) {
         target = ev.target;
     }
 
-    const prefs_el = target.querySelector(ele_css_query);
+    const prefs_group = target.querySelector(ele_css_query);
 
-    if (prefs_el instanceof HTMLDivElement) {
-        menu_create(prefs_el);
+    if (prefs_group instanceof HTMLDivElement) {
+
+        menu_create(prefs_group);
+        UIPreferences.addText(prefs_group, `Version: ${plugin_version}`);
+        
     }
 
 }
