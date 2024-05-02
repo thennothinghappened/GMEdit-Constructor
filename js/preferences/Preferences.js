@@ -385,8 +385,6 @@ async function runtime_list_load_path(type, search_path) {
     }
 
     /** @type {RuntimeInfo[]} */
-    // @ts-thanks-for-epic-type-inference-it-really-works-here
-    // @ts-ignore
     const runtimes = dir_res.data
         .map(dirname => {
 
@@ -464,8 +462,6 @@ async function user_list_load_path(type, users_path) {
     }
 
     /** @type {UserInfo[]} */
-    // @ts-thanks-for-epic-type-inference-it-really-works-here
-    // @ts-ignore
     const users = dir_res.data
         .map(dirname => {
             return {
