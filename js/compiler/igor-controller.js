@@ -7,7 +7,7 @@ import { CompileLogViewer } from '../ui/editors/CompileLogViewer.js';
 import { Job } from './job/Job.js';
 import { igor_platform_cmd_name, output_exts } from './igor-paths.js';
 import { Err } from '../utils/Err.js';
-import { join_path, spawn, rm } from '../GMConstructor.js';
+import { join_path, spawn } from '../GMConstructor.js';
 
 /** @type {Job[]} */
 const jobs = [];
