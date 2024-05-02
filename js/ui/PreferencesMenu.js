@@ -16,7 +16,7 @@ let ele_css_query;
  */
 export function __setup__() {
 
-    ele_css_query = `.plugin-settings[for="${plugin_name}"]`;
+    ele_css_query = `.plugin-settings[for^="${plugin_name}"]`;
 
     on_preferences_built();
 
