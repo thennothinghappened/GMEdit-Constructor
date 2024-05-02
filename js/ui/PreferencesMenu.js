@@ -32,10 +32,10 @@ export function __cleanup__() {
 
 /**
  * Create the preferences menu within the given group.
- * @param {HTMLElement} prefs_group
- * @param {() => void} [on_change_runtime_channel]
+ * @param {HTMLElement} prefs_group Root Group element to add the preferences to.
+ * @param {() => void} [on_refresh_runtime_settings] Callback to run on modifying runtime settings.
  */
-export function menu_create(prefs_group, on_change_runtime_channel) {
+export function menu_create(prefs_group, on_refresh_runtime_settings) {
 
     UIPreferences.addCheckbox(
         prefs_group,
@@ -69,8 +69,8 @@ export function menu_create(prefs_group, on_change_runtime_channel) {
             // @ts-ignore
             preferences.runtime_channel_type_set(value);
 
-            if (on_change_runtime_channel !== undefined) {
-                on_change_runtime_channel();
+            if (on_refresh_runtime_settings !== undefined) {
+                on_refresh_runtime_settings();
             }
         }
     );
@@ -90,6 +90,7 @@ export function menu_create(prefs_group, on_change_runtime_channel) {
             'Search Path',
             preferences.runtime_search_path_get(type),
             async (path) => {
+                
                 // Workaround for being called twice for some reason?
                 if (path === preferences.runtime_search_path_get(type)) {
                     return;
@@ -101,6 +102,11 @@ export function menu_create(prefs_group, on_change_runtime_channel) {
                     version_dropdown,
                     runtime_version_strings_get_for_type(type)
                 );
+
+                if (on_refresh_runtime_settings !== undefined) {
+                    on_refresh_runtime_settings();
+                }
+
             }
         );
 
