@@ -15,6 +15,7 @@ Constructor can currently compile for the current build target (your OS), and ca
    - [x] Project build configuration select (`#macro SOMETHING:Config ...` support)
  - [x] **Control Panel** (*see screenshot below*)
    - [x] Centralised error display for build and configuration problems
+ - [x] Automatic check for updates
 
 ![image](https://github.com/thennothinghappened/GMEdit-Constructor/assets/35243139/6cde8fc7-ed20-4680-88a3-9207c5b0b938)
 
@@ -51,7 +52,6 @@ Maybe later these can be customisable :)
   - Android
   - Remote compilation for other platforms using `devices.json` (compile on another machine via `ssh` as you can in the IDE)
 - Option for docked console as opposed to full-window
-- Automatic check for updates
 
 ## Issues
 If you have any issues with Constructor, feel free to either ask on Discord (below), or make a post on the [GitHub Issues](<https://github.com/thennothinghappened/GMEdit-Constructor/issues>) page. I'll try to get back to you when I can, but no guarantees.
