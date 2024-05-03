@@ -482,7 +482,11 @@ async function user_list_load_path(type, users_path) {
     // Search each result to check if it's actually a valid user, or just a folder in the users folder
     // (e.g Cache).
     const valid = await Promise.all(
-        users.map(user => fileExists(join_path(user.path, 'local_settings.json')))
+        users.map(
+            async user => await fileExists(join_path(user.path, 'license.plist'))
+                || await fileExists(join_path(user.path, 'local_settings.json'))
+                || await fileExists(join_path(user.path, 'timestamp'))
+        )
     );
 
     return {
