@@ -15,6 +15,10 @@ declare type PreferencesData = {
 
     /** Whether to reuse the compile viewer tab between runs. */
     reuse_compiler_tab: boolean;
+
+    /** Whether we should check for updates on startup. */
+    check_for_updates: boolean;
+    
 }
 
 /**

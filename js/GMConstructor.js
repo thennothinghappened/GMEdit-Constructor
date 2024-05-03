@@ -7,6 +7,8 @@ import * as igorPaths from './compiler/igor-paths.js';
 import * as preferencesMenu from './ui/PreferencesMenu.js';
 import { Err } from './utils/Err.js';
 import { ConstructorControlPanel } from './ui/editors/ConstructorControlPanel.js';
+import { SemVer } from './utils/update-checker/SemVer.js';
+import { plugin_update_check } from './utils/update-checker/UpdateChecker.js';
 
 /**
  * Name of the plugin 
@@ -19,6 +21,18 @@ export let plugin_name;
  * @type {String}
  */
 export let plugin_version;
+
+/**
+ * Reference to NodeJS path join.
+ * @type {import('node:path').join}
+ */
+export let join_path;
+
+/** 
+ * Reference to NodeJS spawn.
+ * @type {import('node:child_process').spawn} 
+ */
+export let spawn;
 
 /**
  * Main controller instance for the plugin!
@@ -160,6 +174,7 @@ export class GMConstructor {
 
     /**
      * Create an instance of the plugin.
+     * 
      * @param {string} _plugin_name Name of the plugin - redundant, but saves typing it everywhere.
      * @param {string} _plugin_version Current version of the plugin
      * @param {import('node:path')} node_path 
@@ -210,6 +225,37 @@ export class GMConstructor {
         projectProperties.__setup__();
         preferencesMenu.__setup__();
 
+        // Check for updates //
+        if (preferences.update_check_get()) {
+
+            plugin_update_check()
+                .then(res => {
+                    
+                    if (!res.ok) {
+                        return ConstructorControlPanel.showWarning(
+                            'Failed to check for plugin updates.',
+                            res.err
+                        );
+                    }
+
+                    if (!res.data.update_available) {
+                        return;
+                    }
+
+                    // Bit silly to use an error message for this but it works :P
+                    ConstructorControlPanel.showWarning(
+                        'An update is available for Constructor!',
+                        new Err(
+                            'There is an update available.',
+                            'Update Check',
+                            `${plugin_name} ${res.data.version} is available on GitHub! ${res.data.url}`
+                        )
+                    );
+
+                });
+            
+        }
+
         return {
             ok: true,
             data: new GMConstructor()
@@ -224,23 +270,11 @@ export class GMConstructor {
         preferences.__cleanup__();
         compileController.__cleanup__();
         projectProperties.__cleanup__();
-        this.hamburgerOptions.cleanup();
+        this.hamburgerOptions.__cleanup__();
         
     }
 
 }
-
-/**
- * Reference to NodeJS path join.
- * @type {import('node:path').join}
- */
-export let join_path;
-
-/** 
- * Reference to NodeJS spawn.
- * @type {import('node:child_process').spawn} 
- */
-export let spawn;
 
 /**
  * Make sure we aren't running on rosetta, since GMEdit has

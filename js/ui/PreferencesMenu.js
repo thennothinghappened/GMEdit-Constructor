@@ -39,6 +39,13 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
 
     UIPreferences.addCheckbox(
         prefs_group,
+        'Automatically check for updates on startup',
+        preferences.update_check_get(),
+        preferences.update_check_set
+    );
+
+    UIPreferences.addCheckbox(
+        prefs_group,
         'Save automatically when running a task',
         preferences.save_on_run_task_get(),
         preferences.save_on_run_task_set

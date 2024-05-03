@@ -213,7 +213,7 @@ export class HamburgerOptions {
      * plugins, only reload them, so this is done with
      * the intent to get it ready to re-use.
      */
-    cleanup() {
+    __cleanup__() {
         this.#removeMenuItems();
         this.#removeCommands();
 

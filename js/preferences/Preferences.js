@@ -51,6 +51,7 @@ const prefs_default = {
 
     save_on_run_task: true,
     reuse_compiler_tab: true,
+    check_for_updates: true
 };
 
 /** @type {PreferencesData} */
@@ -126,6 +127,23 @@ export function save_on_run_task_get() {
  */
 export function save_on_run_task_set(save_on_run_task) {
     prefs.save_on_run_task = save_on_run_task;
+    return save();
+}
+
+/**
+ * Get whether we should automatically check for updates on startup.
+ * @returns {Boolean}
+ */
+export function update_check_get() {
+    return prefs.check_for_updates;
+}
+
+/**
+ * Set whether we should automatically check for updates on startup.
+ * @param {Boolean} check_for_updates 
+ */
+export function update_check_set(check_for_updates) {
+    prefs.check_for_updates = check_for_updates;
     return save();
 }
 
