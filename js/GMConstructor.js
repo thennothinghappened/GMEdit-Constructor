@@ -248,7 +248,7 @@ export class GMConstructor {
                         new Err(
                             'There is an update available.',
                             'Update Check',
-                            `${plugin_name} ${res.data.version} is available on GitHub! ${res.data.url}`
+                            `${plugin_name} ${res.data.version} is available on GitHub!\n\n${res.data.url}`
                         )
                     );
 

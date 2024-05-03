@@ -45,6 +45,10 @@
     
 }
 
+.gm-constructor-control-panel-errors > fieldset > p {
+    white-space: pre-wrap;
+}
+
 fieldset.gm-constructor-error {
     background-color: rgba(189, 98, 98, 0.209);
 }
