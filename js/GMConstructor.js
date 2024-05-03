@@ -105,10 +105,17 @@ export class GMConstructor {
 
         if (!supported) {
 
+            const format_res = project_format_get(project);
+            let format = '[Unknown Format]';
+
+            if (format_res.ok) {
+                format = format_res.data;
+            }
+
             const err = new Err(
                 `Runtime version '${runtime.version}' is not compatible with this project format!`,
                 undefined,
-                `This project is of format ${project_format_get(project)}, where the selected runtime is format ${runtime.version.format}. Please select a matching runtime (2024.2 and up are YYv2)`
+                `This project is of format ${format}, where the selected runtime is format ${runtime.version.format}. Please select a matching runtime (2024.2 and up are YYv2)`
             );
 
             return ConstructorControlPanel
