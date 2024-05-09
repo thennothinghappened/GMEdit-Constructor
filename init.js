@@ -17,7 +17,12 @@
         }
 
         const { GMConstructor } = await import('./js/GMConstructor.js');
-        const res = await GMConstructor.create(plugin_name, plugin_version, node_path, node_child_process);
+
+        const res = await GMConstructor.create(plugin_name, plugin_version, node_path, node_child_process)
+            .catch(err => ({
+                ok: false,
+                err: err
+            }));
 
         if (!res.ok) {
             
@@ -27,6 +32,7 @@
             return;
         }
 
+        // @ts-ignore
         window.GMConstructor = res.data;
     });
 
