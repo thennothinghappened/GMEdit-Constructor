@@ -520,6 +520,8 @@ async function user_list_load_path(type, users_path) {
 export async function __setup__() {
 
     save_path = join_path(Electron_App.getPath('userData'), 'GMEdit', 'config', `${plugin_name}.json`);
+
+    /** @type {Partial<PreferencesData>|undefined} */
     let loaded_prefs = undefined;
 
     if (await fileExists(save_path)) {
@@ -593,7 +595,10 @@ export async function __setup__() {
     // otherwise properties inside other objects won't be saved into the config file,
     // as JSON.stringify doesn't stringify properties in object prototypes
     prefs = structuredClone(prefs_default);
-    deep_assign(prefs, loaded_prefs);
+
+    if (loaded_prefs !== undefined) {
+        deep_assign(prefs, loaded_prefs);
+    }
 
     /** @type {Promise<any>[]} */
     const reqs = [];
