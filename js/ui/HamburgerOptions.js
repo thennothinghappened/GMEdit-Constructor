@@ -88,8 +88,8 @@ export class HamburgerOptions {
                 exec: onControlPanel
             },
             compile: {
-                name: 'compile',
-                title: 'Compile',
+                name: 'package',
+                title: 'Package',
                 bindKey: { win: packageKey, mac: packageKey },
                 exec: onPackage
             },
