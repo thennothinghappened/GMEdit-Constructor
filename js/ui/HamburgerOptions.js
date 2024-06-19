@@ -1,233 +1,188 @@
-import { Err } from '../utils/Err.js';
+/**
+ * Handler for the hamburger menu options.
+ */
+
+import { GMConstructor } from '../GMConstructor.js';
 import { project_is_open } from '../utils/project.js';
-import { ConstructorControlPanel } from './editors/ConstructorControlPanel.js';
 
-const AceCommands = $gmedit['ace.AceCommands'];
+const KeyboardShortcutsHandler = $gmedit['ui.KeyboardShortcuts'].hashHandler;
+const Menu = $gmedit['ui.MainMenu'].menu;
 
-export class HamburgerOptions {
+/**
+ * Default set of key binds to use. These are overwritten by the user if they choose.
+ */
+const default_binds = {
+    control_panel: 'Ctrl+`',
+    package: 'Ctrl+F5',
+    clean: 'Ctrl+F7',
+    run: 'F5'
+};
 
-    #menu_items;
+/** @type {Electron_MenuItem} */
+let constructor_menu;
 
-    #menu_items_container;
+/** @type {Array<AceCommand>} */
+let commands;
 
-    /** @type {{ [key in 'control_panel'|'compile'|'clean'|'run']: AceCommand }} */
-    #commands;
+export function __setup__() {
 
-    /**
-     * @param {() => void} onControlPanel 
-     * @param {() => void} onPackage 
-     * @param {() => void} onClean 
-     * @param {() => void} onRun 
-     * @param {string} [controlPanelKey] Shortcut to view the control panel.
-     * @param {string} [packageKey] Shortcut to package the project executable.
-     * @param {string} [cleanKey] Shortcut to clean the project.
-     * @param {string} [runKey] Shortcut to run the project.
-     */
-    constructor(
-        onControlPanel,
-        onPackage,
-        onClean,
-        onRun, 
-        controlPanelKey = 'Ctrl+`',
-        packageKey = 'Ctrl+F5',
-        cleanKey = 'Ctrl+F7',
-        runKey = 'F5'
-    ) {
+    commands = [
+        {
+            name: 'constructor-panel',
+            title: 'Constructor - Control Panel',
+            bindKey: { win: default_binds.control_panel, mac: default_binds.control_panel },
+            exec: on_control_panel
+        },
+        {
+            name: 'constructor-package',
+            title: 'Constructor - Package',
+            bindKey: { win: default_binds.package, mac: default_binds.package },
+            exec: on_package
+        },
+        {
+            name: 'constructor-clean',
+            title: 'Constructor - Clean',
+            bindKey: { win: default_binds.clean, mac: default_binds.clean },
+            exec: on_clean
+        },
+        {
+            name: 'constructor-run',
+            title: 'Constructor - Run',
+            bindKey: { win: default_binds.run, mac: default_binds.run },
+            exec: on_run
+        }
+    ];
+    
+    menu_register();
+    commands_register();
 
-        this.#menu_items = {
-            control_panel: new Electron_MenuItem({
+    menu_items_enable(project_is_open());
+
+    GMEdit.on('projectOpen', on_project_open);
+    GMEdit.on('projectClose', on_project_close);
+
+}
+
+/**
+ * Clean up our menu and remove event listeners.
+ */
+export function __cleanup__() {
+
+    // We can't remove existing menu items at the top level, so leave them be.
+    commands_deregister();
+
+    GMEdit.off('projectOpen', on_project_open);
+    GMEdit.off('projectClose', on_project_close);
+
+}
+
+function on_control_panel() {
+    if (window.GMConstructor instanceof GMConstructor) {
+        window.GMConstructor.onControlPanel();
+    }
+}
+
+function on_package() {
+    if (window.GMConstructor instanceof GMConstructor) {
+        window.GMConstructor.packageCurrent();
+    }
+}
+
+function on_clean() {
+    if (window.GMConstructor instanceof GMConstructor) {
+        window.GMConstructor.cleanCurrent();
+    }
+}
+
+function on_run() {
+    if (window.GMConstructor instanceof GMConstructor) {
+        window.GMConstructor.runCurrent();
+    }
+}
+
+function on_project_open() {
+    menu_items_enable(project_is_open());
+}
+
+function on_project_close() {
+    menu_items_enable(project_is_open());
+}
+
+/**
+ * Add our menu items to the tool list, if they don't already exist.
+ */
+function menu_register() {
+
+    const existing_menu = Menu.items.find(item => item.id === 'constructor');
+
+    if (existing_menu !== undefined) {
+        constructor_menu = existing_menu;
+        return;
+    }
+
+    constructor_menu = new Electron_MenuItem({
+        id: 'constructor',
+        label: 'Constructor',
+        submenu: [
+            new Electron_MenuItem({
                 id: 'constructor-control_panel',
                 label: 'Control Panel',
-                accelerator: controlPanelKey,
-                click: onControlPanel,
+                accelerator: default_binds.control_panel,
+                click: on_control_panel,
                 enabled: true
             }),
-            compile: new Electron_MenuItem({
-                id: 'constructor-package',
+            new Electron_MenuItem({
+                id: 'constructor-project-package',
                 label: 'Package',
-                accelerator: packageKey,
-                click: onPackage,
+                accelerator: default_binds.package,
+                click: on_package,
                 enabled: false
             }),
-            clean: new Electron_MenuItem({
-                id: 'constructor-clean',
+            new Electron_MenuItem({
+                id: 'constructor-project-clean',
                 label: 'Clean',
-                accelerator: cleanKey,
-                click: onClean,
+                accelerator: default_binds.clean,
+                click: on_clean,
                 enabled: false
             }),
-            run: new Electron_MenuItem({
-                id: 'constructor-run',
+            new Electron_MenuItem({
+                id: 'constructor-project-run',
                 label: 'Run',
-                accelerator: runKey,
-                click: onRun,
+                accelerator: default_binds.run,
+                click: on_run,
                 enabled: false
             })
-        };
+        ]
+    });
 
-        this.#menu_items_container = new Electron_MenuItem({
-            id: 'constructor-menu',
-            label: 'Constructor',
-            enabled: true,
-            submenu: [
-                this.#menu_items.control_panel,
-                this.#menu_items.compile,
-                this.#menu_items.clean,
-                this.#menu_items.run
-            ]
-        });
+    Menu.append(constructor_menu);
 
-        this.#addMenuItems();
-        this.#setEnableMenuItems(project_is_open());
+}
 
-        this.#commands = {
-            control_panel: {
-                name: 'panel',
-                title: 'Control Panel',
-                bindKey: { win: controlPanelKey, mac: controlPanelKey },
-                exec: onControlPanel
-            },
-            compile: {
-                name: 'package',
-                title: 'Package',
-                bindKey: { win: packageKey, mac: packageKey },
-                exec: onPackage
-            },
-            clean: {
-                name: 'clean',
-                title: 'Clean',
-                bindKey: { win: cleanKey, mac: cleanKey },
-                exec: onClean
-            },
-            run: {
-                name: 'run',
-                title: 'Run',
-                bindKey: { win: runKey, mac: runKey },
-                exec: onRun
-            }
-        };
-
-        this.#addCommands();
-
-        GMEdit.on('projectOpen', this.#onProjectOpen);
-        GMEdit.on('projectClose', this.#onProjectClose);
+function commands_register() {
+    for (const command of commands) {
+        KeyboardShortcutsHandler.addCommand(command);
     }
+}
 
-    /**
-     * Part of the workaround for reusing existing menu, since we can't
-     * delete its item properly.
-     */
-    #findExistingMenu() {
-        return $gmedit['ui.MainMenu'].menu.items
-            .find(item => item.id === this.#menu_items_container.id);
+function commands_deregister() {
+    for (const command of commands) {
+        KeyboardShortcutsHandler.removeCommand(command, true);
     }
+}
 
-    /**
-     * Add our menu items to the tool list. If we already had a submenu,
-     * we reuse it due to a limitation with Electron (see below).
-     */
-    #addMenuItems() {
+/**
+ * Toggle whether menu items are enabled.
+ * @param {boolean} enabled
+ */
+function menu_items_enable(enabled) {
+    
+    const items = constructor_menu.submenu
+        ?.items
+        ?.filter(item => item.id.startsWith('constructor-project')) ?? [];
 
-        const menu = $gmedit['ui.MainMenu'].menu;
-        const existing = this.#findExistingMenu();
-
-        if (existing === undefined) {
-            menu.append(this.#menu_items_container);
-            return;
-        }
-
-        // Reusing the existing menu. This is a silly workaround
-        // for https://github.com/electron/electron/issues/527
-
-        if (this.#menu_items_container.submenu === undefined || existing.submenu === undefined) {
-            return ConstructorControlPanel.showError(
-                'Hamburger Menu items submenu missing!',
-                new Err('Menu items submenu missing!', undefined, 'Please report this on GitHub.')
-            );
-        }
-
-        for (const item of this.#menu_items_container.submenu.items) {
-            existing.submenu.append(item);
-        }
-
-        this.#menu_items_container = existing;
-        this.#menu_items_container.visible = true;
-    }
-
-    /**
-     * Remove our existing menu for cleanup.
-     */
-    #removeMenuItems() {
-        const existing = this.#findExistingMenu();
-
-        if (existing === undefined) {
-            return ConstructorControlPanel.showError(
-                'Failed to deinitialize popup menu, can\'t find existing instance',
-                new Err('Failed to deinitialize popup menu, can\'t find existing instance', undefined, 'Please report this on GitHub.')
-            );
-        }
-
-        if (existing.submenu === undefined) {
-            return ConstructorControlPanel.showError(
-                'Hamburger Menu items submenu missing!',
-                new Err('Menu items submenu missing!', undefined, 'Please report this on GitHub.')
-            );
-        }
-
-        existing.visible = false;
-        existing.submenu.clear();
-    }
-
-    #addCommands() {
-        AceCommands.add(this.#commands.control_panel);
-        AceCommands.add(this.#commands.compile);
-        AceCommands.add(this.#commands.clean);
-        AceCommands.add(this.#commands.run);
-    }
-
-    #removeCommands() {
-        AceCommands.remove(this.#commands.control_panel);
-        AceCommands.remove(this.#commands.compile);
-        AceCommands.remove(this.#commands.clean);
-        AceCommands.remove(this.#commands.run);
-    }
-
-    /**
-     * Toggle whether menu items are enabled.
-     * @param {boolean} enabled
-     */
-    #setEnableMenuItems = (enabled) => {
-        // @ts-ignore
-        for (const item of this.#menu_items_container.submenu.items) {
-            if (item.id !== 'constructor-control_panel') {
-                item.enabled = enabled;
-            }
-        }
-    }
-
-    #onProjectOpen = () => {
-        this.#setEnableMenuItems(project_is_open());
-    }
-
-    #onProjectClose = () => {
-        this.#setEnableMenuItems(project_is_open());
-    }
-
-    /**
-     * Clean up our menu and remove event listeners.
-     * 
-     * Unfortunately we can't remove the top level menu,
-     * so we clear out the items and disable it. GMEdit
-     * does not provide a way (that I know of) to disable
-     * plugins, only reload them, so this is done with
-     * the intent to get it ready to re-use.
-     */
-    __cleanup__() {
-        this.#removeMenuItems();
-        this.#removeCommands();
-
-        GMEdit.off('projectOpen', this.#onProjectOpen);
-        GMEdit.off('projectClose', this.#onProjectClose);
+    for (const item of items) {
+        item.enabled = enabled;
     }
 
 }

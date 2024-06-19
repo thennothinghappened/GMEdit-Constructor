@@ -373,12 +373,14 @@ declare type Electron_Menu = {
 }
 
 declare class Electron_MenuItem {
+
     constructor(props: Electron_MenuItemProps) {}
 
     id: string;
     enabled: boolean;
     visible?: boolean;
     submenu?: Electron_Menu;
+
 }
 
 declare interface GMEditUIPreferences {
@@ -671,11 +673,23 @@ declare type AceCommand = {
 
 declare interface AceCommands {
 
-    add: (comamnd: AceCommand) => void;
+    add: (command: AceCommand) => void;
     addToPalette: (command: AceCommand) => void;
 
     remove: (comamnd: AceCommand) => void;
     removeFromPalette: (comamnd: AceCommand) => void;
+}
+
+declare interface AceHashHandler {
+    addCommand: (command: AceCommand) => void;
+    removeCommand: (command: AceCommand, keepCommand: boolean) => void;
+}
+
+declare interface GMEditKeyboardShortcuts {
+    /**
+     * Handler for global keyboard shortcuts.
+     */
+    hashHandler: AceHashHandler;
 }
 
 declare interface ChromeTabs {
@@ -691,6 +705,7 @@ declare type $GMEdit = {
     'ui.MainMenu': GMEditUIMainMenu;
     'ui.project.ProjectProperties': GMEditProjectProperties;
     'ui.ChromeTabs': ChromeTabs;
+    'ui.KeyboardShortcuts': GMEditKeyboardShortcuts;
     'gml.Project': GMEditGMLProject;
     'editors.Editor': typeof Editor;
     'file.FileKind': typeof FileKind;
@@ -708,5 +723,5 @@ declare const Electron_FS: IElectronFS;
 declare const Electron_Dialog: IElectronDialog;
 
 declare interface Window {
-    GMConstructor?: GMConstructor
+    GMConstructor?: GMConstructor;
 }

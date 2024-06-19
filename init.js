@@ -12,13 +12,18 @@
 
     const load = (async () => {
 
+        /** Whether we are reloading from another existing instance. */
+        let reloading = false;
+
         if ('GMConstructor' in window) {
+            reloading = true;
             await window.GMConstructor.cleanup();
         }
 
         const { GMConstructor } = await import('./js/GMConstructor.js');
 
-        const res = await GMConstructor.create(plugin_name, plugin_version, node_path, node_child_process)
+        const res = await GMConstructor
+            .create(plugin_name, plugin_version, node_path, node_child_process, reloading)
             .catch(err => ({
                 ok: false,
                 err: err

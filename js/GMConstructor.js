@@ -1,5 +1,5 @@
 import * as compileController from './compiler/igor-controller.js';
-import { HamburgerOptions } from './ui/HamburgerOptions.js';
+import * as hamburgerOptions from './ui/HamburgerOptions.js';
 import { project_current_get, open_files_save, project_format_get } from './utils/project.js';
 import * as preferences from './preferences/Preferences.js';
 import * as projectProperties from './preferences/ProjectProperties.js';
@@ -38,24 +38,6 @@ export let spawn;
  * Main controller instance for the plugin!
  */
 export class GMConstructor {
-
-    /**
-     * Quick actions menu.
-     * 
-     * @type {HamburgerOptions}
-     */
-    hamburgerOptions;
-
-    constructor() {
-
-        this.hamburgerOptions = new HamburgerOptions(
-            this.onControlPanel,
-            this.packageCurrent,
-            this.cleanCurrent,
-            this.runCurrent
-        );
-        
-    }
 
     /**
      * Run a task on a given (or current) project.
@@ -186,10 +168,11 @@ export class GMConstructor {
      * @param {string} _plugin_version Current version of the plugin
      * @param {import('node:path')} node_path 
      * @param {import('node:child_process')} node_child_process
+     * @param {boolean} reloading Whether we are reloading from an existing previous Constructor instance.
      * 
      * @returns {Promise<Result<GMConstructor>>}
      */
-    static async create(_plugin_name, _plugin_version, node_path, node_child_process) {
+    static async create(_plugin_name, _plugin_version, node_path, node_child_process, reloading) {
 
         // Prevent Constructor loading when running on Rosetta, since it has a bunch of issues there.
         if (rosetta_check(node_child_process.execSync)) {
@@ -231,6 +214,7 @@ export class GMConstructor {
 
         projectProperties.__setup__();
         preferencesMenu.__setup__();
+        hamburgerOptions.__setup__();
 
         // Check for updates //
         if (preferences.update_check_get()) {
@@ -277,7 +261,7 @@ export class GMConstructor {
         preferences.__cleanup__();
         compileController.__cleanup__();
         projectProperties.__cleanup__();
-        this.hamburgerOptions.__cleanup__();
+        hamburgerOptions.__cleanup__();
         
     }
 
