@@ -93,26 +93,30 @@ fieldset.gm-constructor-debug {
     justify-content: space-between;
 }
 
+.gm-constructor-info > div > div {
+    display: inline-block;
+    margin-right: 5px;
+}
+
 .gm-constructor-log {
 
     flex-grow: 1;
     overflow: scroll;
 
+    margin: 0;
     padding: 8px;
     height: 70%;
+
 }
 
 .gm-constructor-log pre {
     
 }
 
-.gm-constructor-errors {
-
+.gm-constructor-errors:not(.collapsed) {
     padding: 8px;
-    
     height: 30%;
     overflow-y: scroll;
-
 }
 
 .gm-constructor-errors h1 {

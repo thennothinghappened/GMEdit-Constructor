@@ -48,6 +48,9 @@ export class CompileLogViewer extends ConstructorEditorView {
     /** @type {HTMLInputElement} */
     stop_btn;
 
+    /** @type {HTMLInputElement} */
+    go_to_bottom_btn;
+
     /** @type {HTMLPreElement} */
     log;
 
@@ -84,7 +87,7 @@ export class CompileLogViewer extends ConstructorEditorView {
             this.log.textContent = content;
 
             if (should_scroll) {
-                this.log.scrollTop = this.log.scrollHeight;
+                this.goToBottom();
             }
 
         });
@@ -99,6 +102,9 @@ export class CompileLogViewer extends ConstructorEditorView {
             this.file.rename(job_name, '');
 
             errors?.forEach(err => this.errors.appendChild(err.displayHTML()));
+            
+            this.errors.classList.remove('collapsed');
+            this.goToBottom();
 
         });
 
@@ -116,7 +122,16 @@ export class CompileLogViewer extends ConstructorEditorView {
         const info = UIPreferences.addGroup(this.element, 'Info');
         info.classList.add('gm-constructor-info');
 
-        this.stop_btn = UIPreferences.addBigButton(info, 'Stop', this.stopJob).querySelector('input');
+        const info_button_group = document.createElement('div');
+        info.appendChild(info_button_group);
+
+        this.stop_btn = UIPreferences
+            .addBigButton(info_button_group, 'Stop', this.stopJob)
+            .querySelector('input');
+        
+        this.go_to_bottom_btn = UIPreferences
+            .addBigButton(info_button_group, 'Go to bottom', this.goToBottom)
+            .querySelector('input');
 
         this.cmd = UIPreferences.addText(info, KConstructorOutput.getJobName(job));
         this.cmd.classList.add('gm-constructor-info-cmd');
@@ -128,6 +143,7 @@ export class CompileLogViewer extends ConstructorEditorView {
 
         this.errors = UIPreferences.addGroup(this.element, 'Errors');
         this.errors.classList.add('gm-constructor-errors');
+        this.errors.classList.add('collapsed');
 
     }
 
@@ -169,6 +185,13 @@ export class CompileLogViewer extends ConstructorEditorView {
         
         return compilerViewer.file.tabEl.click();
 
+    }
+
+    /**
+     * Go the the bottom of the log.
+     */
+    goToBottom = () => {
+        this.log.scrollTop = this.log.scrollHeight;
     }
 
     stopJob = () => {
