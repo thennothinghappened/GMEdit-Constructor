@@ -37,12 +37,12 @@ for more details!
 
 ## Shortcuts
 
-| Shortcut          | Key                |
-| ----------------- | ------------------ |
-| **Control Panel** | <kbd>Ctrl+\`</kbd> |
-| **Compile**       | <kbd>Ctrl+F5</kbd> |
-| **Clean**         | <kbd>Ctrl+F7</kbd> |
-| **Run**           | <kbd>F5</kbd>      |
+| Shortcut                          | Key                |
+| --------------------------------- | ------------------ |
+| View the Control Panel            | <kbd>Ctrl+\`</kbd> |
+| Run the current project           | <kbd>F5</kbd>      |
+| Clean the current project's files | <kbd>Ctrl+F7</kbd> |
+| Package the current project       | <kbd>Ctrl+F5</kbd> |
 
 Maybe later these can be customisable :)
 
