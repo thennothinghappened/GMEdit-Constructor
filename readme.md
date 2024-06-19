@@ -35,7 +35,7 @@ git clone https://github.com/thennothinghappened/GMEdit-Constructor "~/Library/A
 See [GMEdit#Installing plugins](https://github.com/YellowAfterlife/GMEdit/wiki/Using-plugins#installing-plugins)
 for more details!
 
-## Shortcuts
+## Keyboard Shortcuts
 
 | Shortcut                          | Key                |
 | --------------------------------- | ------------------ |
@@ -44,7 +44,8 @@ for more details!
 | Clean the current project's files | <kbd>Ctrl+F7</kbd> |
 | Package the current project       | <kbd>Ctrl+F5</kbd> |
 
-Maybe later these can be customisable :)
+The above are the defaults provided. You can rebind these through GMEdit's
+**Edit Keyboard Shortcuts** option in Preferences!
 
 ## Planned features include:
 - **Support for other targets**:
