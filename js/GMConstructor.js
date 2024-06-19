@@ -50,7 +50,7 @@ export class GMConstructor {
 
         this.hamburgerOptions = new HamburgerOptions(
             this.onControlPanel,
-            this.compileCurrent,
+            this.packageCurrent,
             this.cleanCurrent,
             this.runCurrent
         );
@@ -149,7 +149,7 @@ export class GMConstructor {
     }
 
     // yes this is VERY temporary
-    compileCurrent = () => {
+    packageCurrent = () => {
         this.#runTask({
             platform: igorPaths.igor_user_platform,
             verb: 'Package',

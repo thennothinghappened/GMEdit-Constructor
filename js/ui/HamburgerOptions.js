@@ -15,15 +15,24 @@ export class HamburgerOptions {
 
     /**
      * @param {() => void} onControlPanel 
-     * @param {() => void} onCompile 
+     * @param {() => void} onPackage 
      * @param {() => void} onClean 
      * @param {() => void} onRun 
-     * @param {string} [controlPanelKey] Shortcut to view the control panel
-     * @param {string} [compileKey] Shortcut to compile project
-     * @param {string} [cleanKey] Shortcut to clean project
-     * @param {string} [runKey] Shortcut to run project
+     * @param {string} [controlPanelKey] Shortcut to view the control panel.
+     * @param {string} [packageKey] Shortcut to package the project executable.
+     * @param {string} [cleanKey] Shortcut to clean the project.
+     * @param {string} [runKey] Shortcut to run the project.
      */
-    constructor(onControlPanel, onCompile, onClean, onRun, controlPanelKey = 'Ctrl+`', compileKey = 'Ctrl+F5', cleanKey = 'Ctrl+F7', runKey = 'F5') {
+    constructor(
+        onControlPanel,
+        onPackage,
+        onClean,
+        onRun, 
+        controlPanelKey = 'Ctrl+`',
+        packageKey = 'Ctrl+F5',
+        cleanKey = 'Ctrl+F7',
+        runKey = 'F5'
+    ) {
 
         this.#menu_items = {
             control_panel: new Electron_MenuItem({
@@ -34,10 +43,10 @@ export class HamburgerOptions {
                 enabled: true
             }),
             compile: new Electron_MenuItem({
-                id: 'constructor-compile',
-                label: 'Compile',
-                accelerator: compileKey,
-                click: onCompile,
+                id: 'constructor-package',
+                label: 'Package',
+                accelerator: packageKey,
+                click: onPackage,
                 enabled: false
             }),
             clean: new Electron_MenuItem({
@@ -81,8 +90,8 @@ export class HamburgerOptions {
             compile: {
                 name: 'compile',
                 title: 'Compile',
-                bindKey: { win: compileKey, mac: compileKey },
-                exec: onCompile
+                bindKey: { win: packageKey, mac: packageKey },
+                exec: onPackage
             },
             clean: {
                 name: 'clean',
