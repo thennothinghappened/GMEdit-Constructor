@@ -25,23 +25,38 @@ export class RuntimeVersion {
      * @returns {YYProjectFormat}
      */
     get format() {
+
+        // All 2023 or lower are YYv1.
         if (this.year < 2024) {
-            return 'YYv1';
+            return '2023.11';
         }
 
-        if (this.year > 2024 || this.month !== 200) {
-            return 'YYv2';
+        if (this.year === 2024) {
+
+            // Runtime 2024.200.0.490 was first to YYv2.
+            if (this.month === 200) {
+                if (this.build < 490) {
+                    return '2023.11';
+                } else {
+                    return '2024.2';
+                }
+            }
+
+            // 2024.2 is incompatible with 2024.4+.
+            if (this.month === 2) {
+                return '2024.2';
+            }
+            
         }
 
-        if (this.build <= 490) {
-            return 'YYv2';
-        }
+        return '2024.4+';
 
-        return 'YYv1';
     }
 
     /**
-     * Returns a negative number if this runtime is older than `other`, 0 for same, or postive for newer.
+     * Returns a negative number if this runtime is older than `other`, 0 for same, or positive for
+     * newer.
+     * 
      * @param {RuntimeVersion} other 
      */
     compare(other) {
@@ -128,6 +143,7 @@ export class RuntimeVersion {
 
 /**
  * Attempt to parse a runtime version from a string.
+ * 
  * @param {GMChannelType} type
  * @param {String} str 
  * @returns {Result<IRuntimeVersion>}

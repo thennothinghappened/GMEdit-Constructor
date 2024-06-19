@@ -74,6 +74,7 @@ export function project_config_tree_to_array(config) {
 
 /**
  * Returns what kind of project YY format we're running.
+ * 
  * @param {GMLProject} project 
  * @returns {Result<YYProjectFormat>}
  */
@@ -88,27 +89,37 @@ export function project_format_get(project) {
 
     const yy = project_read_yy(project);
     const version = Number(yy.resourceVersion);
-    
-    if (version === 2) {
-        return {
-            ok: true,
-            data: 'YYv2'
-        };
-    }
 
     if (version < 2) {
         return {
             ok: true,
-            data: 'YYv1'
+            data: '2023.11'
         };
     }
+    
+    if (version === 2) {
 
+        // Differentiate 2024.2 and 2024.4. The latter has the `resourceType` field on the project.
+        if ('resourceType' in yy) {
+            return {
+                ok: true,
+                data: '2024.4+'
+            };
+        }
+        
+        return {
+            ok: true,
+            data: '2024.2'
+        };
+
+    }
+    
     return {
         ok: false,
         err: new Err(
             `Unknown project YY version '${yy.resourceVersion}'`,
-            'Expected 1.0 or 2.0',
-            'Is this a GM(:S 2) game? Is this plugin up to date?'
+            'Expected 1.x or 2.0',
+            'Is Constructor up to date?'
         )
     };
 }
@@ -121,6 +132,5 @@ export function project_format_get(project) {
  * @returns {GMLProjectYY}
  */
 function project_read_yy(project) {
-    // @ts-ignore
     return project.readYyFileSync(project.name);
 }

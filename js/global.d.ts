@@ -80,6 +80,10 @@ declare interface IRuntimeVersion {
     readonly month: number;
     readonly major: number;
     readonly build: number;
+
+    /**
+     * The expected YY format this runtime requires.
+     */
     readonly format: YYProjectFormat;
 
     /**
@@ -415,7 +419,8 @@ declare interface GMEditUIMainMenu {
     menu: Electron_Menu
 }
 
-declare type GMLProject = {
+declare interface GMLProject {
+
     name: string;
     displayName: string;
     config: string;
@@ -423,6 +428,15 @@ declare type GMLProject = {
     path: string;
     properties: GMLProjectPropertiesData;
     isGMS23: boolean;
+
+    /**
+     * Synchronously read a YY file to JSON.
+     * 
+     * @param path The path of the YY file to read.
+     * @returns YY file as JSON.
+     */
+    readYyFileSync: (path: string) => GMLProjectYY;
+
 }
 
 declare type GMLProjectYY = {
@@ -444,8 +458,9 @@ declare type GMLProjectYYConfig = {
  */
 declare type YYProjectFormat =
     'outdated'  |
-    'YYv1'      |
-    'YYv2'      ;
+    '2023.11'   |
+    '2024.2'    |
+    '2024.4+'   ;
 
 declare interface GMEditGMLProject {
     current: GMLProject;

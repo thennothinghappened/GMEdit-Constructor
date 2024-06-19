@@ -97,7 +97,7 @@ export class GMConstructor {
             const err = new Err(
                 `Runtime version '${runtime.version}' is not compatible with this project format!`,
                 undefined,
-                `This project is of format ${format}, where the selected runtime is format ${runtime.version.format}. Please select a matching runtime (2024.2 and up are YYv2)`
+                `This project is in the YY ${format} format, where the chosen runtime (${runtime.version}) expects the ${runtime.version.format} format.\n\nPlease pick a matching runtime, or you can convert your project to the desired format using ProjectTool in the IDE.`
             );
 
             return ConstructorControlPanel
