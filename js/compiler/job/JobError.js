@@ -84,9 +84,10 @@ export class JobRunnerError extends JobError {
         
         const group = ui.group(parent, 'Runner Error');
 
-        const blurb = ui.p(`On line ${this.line_number} of script ${this.script},`);
+        const blurb = document.createElement('p');
+        blurb.append('In the event ', ui.b(this.event), ' for object ', ui.code(this.object), ',');
         blurb.appendChild(document.createElement('br'));
-        blurb.append(`In ${this.event} of object ${this.object}:`);
+        blurb.append('On line ', ui.b(this.line_number), ' of script ', ui.code(this.script), ':');
 
         group.appendChild(blurb);
 

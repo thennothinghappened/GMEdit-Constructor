@@ -115,6 +115,7 @@ fieldset.gm-constructor-debug {
 
 .gm-constructor-errors:not(.collapsed) {
     height: 100%;
+    min-width: 0;
     overflow-y: auto;
 }
 
@@ -122,9 +123,8 @@ fieldset.gm-constructor-debug {
     display: none;
 }
 
-.gm-constructor-errors h1 {
+.gm-constructor-errors {
     font-size: medium;
-    line-height: 50%;
 }
 
 /** I know I shouldn't do this but it just looks nicer... */

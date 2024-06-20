@@ -88,6 +88,32 @@ export function p(text) {
 }
 
 /**
+ * Create bold text.
+ * 
+ * @param {string} text 
+ * @returns {HTMLElement}
+ */
+export function b(text) {
+    const b = document.createElement('b');
+    b.textContent = text;
+
+    return b;
+}
+
+/**
+ * Create monospaced code styled text.
+ * 
+ * @param {string} text 
+ * @returns {HTMLElement}
+ */
+export function code(text) {
+    const code = document.createElement('code');
+    code.textContent = text;
+
+    return code;
+}
+
+/**
  * Create an em block.
  * @param {string} text 
  * @returns {HTMLElement}
