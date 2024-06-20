@@ -1,6 +1,7 @@
 import { Job } from '../../compiler/job/Job.js';
 import { ConstructorEditorView, ConstructorViewFileKind } from './ConstructorEditorView.js';
 import * as ui from '../ui-wrappers.js';
+import { JobError } from '../../compiler/job/JobError.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];
@@ -45,17 +46,11 @@ export class CompileLogViewer extends ConstructorEditorView {
     /** @type {Job} */
     job;
 
-    /** @type {HTMLInputElement} */
-    stop_btn;
-
-    /** @type {HTMLInputElement} */
-    go_to_bottom_btn;
+    /** @type {UIGroup} */
+    info_group;
 
     /** @type {HTMLPreElement} */
     log;
-
-    /** @type {HTMLDivElement} */
-    cmd;
 
     /** @type {HTMLFieldSetElement} */
     errors;
@@ -82,7 +77,7 @@ export class CompileLogViewer extends ConstructorEditorView {
         this.job.on('stdout', (content) => {
 
             const should_scroll =
-                (this.log.scrollTop + this.log.clientHeight) >= (this.log.scrollHeight - CompileLogViewer.scrollGrabMargin);
+                (this.info_group.scrollTop + this.info_group.clientHeight) >= (this.info_group.scrollHeight - CompileLogViewer.scrollGrabMargin);
 
             this.log.textContent = content;
 
@@ -92,19 +87,24 @@ export class CompileLogViewer extends ConstructorEditorView {
 
         });
 
-        this.job.on('stop', (errors) => {
+        this.job.on('stop', (/** @type {Array<JobError>} */ errors) => {
 
             const job_name = KConstructorOutput.getJobName(this.job);
 
-            this.stop_btn.disabled = true;
-            this.cmd.textContent = job_name;
+            this.info_group.legend.childNodes[0].textContent = job_name;
 
             this.file.rename(job_name, '');
 
-            errors?.forEach(err => this.errors.appendChild(err.displayHTML()));
-            
-            this.errors.classList.remove('collapsed');
-            this.goToBottom();
+            if (errors.length > 0) {
+
+                for (const err of errors) {
+                    err.displayHTML(this.errors);
+                }
+                
+                this.errors.classList.remove('collapsed', 'hidden');
+                this.goToBottom();
+                
+            }
 
         });
 
@@ -117,33 +117,21 @@ export class CompileLogViewer extends ConstructorEditorView {
     uiCreate(job) {
 
         this.element.innerHTML = '';
-        this.element.classList.add('gm-constructor-viewer');
+        this.element.classList.add('gm-constructor-viewer', 'popout-window');
 
-        const info = UIPreferences.addGroup(this.element, 'Info');
-        info.classList.add('gm-constructor-info');
-
-        const info_button_group = document.createElement('div');
-        info.appendChild(info_button_group);
-
-        this.stop_btn = UIPreferences
-            .addBigButton(info_button_group, 'Stop', this.stopJob)
-            .querySelector('input');
+        this.info_group = ui.group(this.element, KConstructorOutput.getJobName(job), [
+            ui.text_button('Stop', this.stopJob),
+            ui.text_button('Go to bottom', this.goToBottom)
+        ]);
+        this.info_group.classList.add('gm-constructor-info');
         
-        this.go_to_bottom_btn = UIPreferences
-            .addBigButton(info_button_group, 'Go to bottom', this.goToBottom)
-            .querySelector('input');
-
-        this.cmd = UIPreferences.addText(info, KConstructorOutput.getJobName(job));
-        this.cmd.classList.add('gm-constructor-info-cmd');
-
         this.log = ui.pre('');
         this.log.className = 'gm-constructor-log';
-
-        this.element.appendChild(this.log);
+        this.info_group.appendChild(this.log);
 
         this.errors = UIPreferences.addGroup(this.element, 'Errors');
         this.errors.classList.add('gm-constructor-errors');
-        this.errors.classList.add('collapsed');
+        this.errors.classList.add('collapsed', 'hidden');
 
     }
 
@@ -191,7 +179,7 @@ export class CompileLogViewer extends ConstructorEditorView {
      * Go the the bottom of the log.
      */
     goToBottom = () => {
-        this.log.scrollTop = this.log.scrollHeight;
+        this.info_group.scrollTop = this.info_group.scrollHeight;
     }
 
     stopJob = () => {

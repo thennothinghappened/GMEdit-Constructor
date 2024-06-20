@@ -466,6 +466,10 @@ declare interface GMEditGMLProject {
     current: GMLProject;
 }
 
+type UIGroup = { 
+    legend: HTMLLegendElement;
+} & HTMLFieldSetElement;
+
 /**
  * ...
  * @author YellowAfterlife

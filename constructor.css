@@ -27,7 +27,6 @@
     overflow-y: scroll;
 
     width: 100%;
-
     padding: 8px;
 
 }
@@ -70,12 +69,15 @@ fieldset.gm-constructor-debug {
     white-space: pre-wrap;
 }
 
-.gm-constructor-control-panel fieldset {
+.gm-constructor-page fieldset {
     padding: 8px;
+}
+
+.gm-constructor-control-panel fieldset {
     margin: 10px 0;
 }
 
-.gm-constructor-control-panel fieldset legend {
+.gm-constructor-page fieldset legend {
     font-weight: bold;
 }
 
@@ -88,35 +90,41 @@ fieldset.gm-constructor-debug {
 }
 
 .gm-constructor-info {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    flex-grow: 1;
+    flex-shrink: 2;
+    overflow: auto;
+    min-width: 0;
 }
 
-.gm-constructor-info > div > div {
-    display: inline-block;
-    margin-right: 5px;
+.gm-constructor-info > legend {
+    padding: 4px;
+}
+
+.gm-constructor-info.collapsed {
+    opacity: 1 !important;
+}
+
+.gm-constructor-info.collapsed .gm-constructor-log {
+    display: block
 }
 
 .gm-constructor-log {
-
-    flex-grow: 1;
-    overflow: scroll;
-
     margin: 0;
-    padding: 8px;
-    height: 70%;
-
+    min-width: 0;
 }
 
-.gm-constructor-log pre {
-    
+.gm-constructor-errors.hidden {
+    height: 0;
+    visibility: hidden;
 }
 
 .gm-constructor-errors:not(.collapsed) {
-    padding: 8px;
     height: 30%;
-    overflow-y: scroll;
+    overflow-y: auto;
+}
+
+.gm-constructor-errors.collapsed > :not(legend) {
+    display: none;
 }
 
 .gm-constructor-errors h1 {

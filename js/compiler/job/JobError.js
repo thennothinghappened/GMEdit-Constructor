@@ -1,3 +1,4 @@
+import * as ui from '../../ui/ui-wrappers.js';
 
 /**
  * An error that occured during a Job running.
@@ -8,21 +9,14 @@ export class JobError {
 
     /**
      * Get this error nicely formatted as HTML.
+     * @param {HTMLElement} parent The parent element to attach to.
      */
-    displayHTML() {
+    displayHTML(parent) {
         
-        const e = document.createElement('div');
-
-        const title = document.createElement('h1');
-        title.textContent = 'Job Error';
-
-        e.appendChild(title);
-
+        const group = ui.group(parent, 'Job Error');
         const body = document.createElement('pre');
 
-        e.appendChild(body);
-
-        return e;
+        group.appendChild(body);
 
     }
 
@@ -44,22 +38,16 @@ export class JobCompilerError extends JobError {
 
     /**
      * Get this error nicely formatted as HTML.
+     * @param {HTMLElement} parent The parent element to attach to.
      */
-    displayHTML() {
+    displayHTML(parent) {
         
-        const e = document.createElement('div');
-
-        const title = document.createElement('h1');
-        title.textContent = 'Compilation Error';
-
-        e.appendChild(title);
+        const group = ui.group(parent, 'Compilation Error');
 
         const body = document.createElement('pre');
         body.textContent = this.data.toString();
 
-        e.appendChild(body);
-
-        return e;
+        group.appendChild(body);
 
     }
 
@@ -90,32 +78,22 @@ export class JobRunnerError extends JobError {
 
     /**
      * Get this error nicely formatted as HTML.
+     * @param {HTMLElement} parent The parent element to attach to.
      */
-    displayHTML() {
+    displayHTML(parent) {
         
-        const e = document.createElement('div');
+        const group = ui.group(parent, 'Runner Error');
 
-        const title = document.createElement('h1');
-        title.textContent = 'Runner Error';
+        const blurb = ui.p(`On line ${this.line_number} of script ${this.script},`);
+        blurb.appendChild(document.createElement('br'));
+        blurb.append(`In ${this.event} of object ${this.object}:`);
 
-        e.appendChild(title);
-
-        const blurb1 = document.createElement('p');
-        blurb1.textContent = `On line ${this.line_number} of script ${this.script},`;
-
-        e.appendChild(blurb1);
-
-        const blurb2 = document.createElement('p');
-        blurb2.textContent = `In ${this.event} of object ${this.object}:`;
-
-        e.appendChild(blurb2);
+        group.appendChild(blurb);
 
         const stacktrace = document.createElement('pre');
         stacktrace.textContent = this.stacktrace.join('\n');
 
-        e.appendChild(stacktrace);
-
-        return e;
+        group.appendChild(stacktrace);
 
     }
 

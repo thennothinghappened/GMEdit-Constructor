@@ -59,7 +59,7 @@ export class ConstructorEditorView extends Editor {
         super(file);
 
         this.element = document.createElement('div');
-        this.element.classList.add('gm-constructor-view');
+        this.element.classList.add('gm-constructor-page');
 
     }
 

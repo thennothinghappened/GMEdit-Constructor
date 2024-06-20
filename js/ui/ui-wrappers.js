@@ -6,39 +6,44 @@ const UIPreferences = $gmedit['ui.Preferences'];
 
 /**
  * Create a group of elements.
+ * 
  * @param {HTMLElement} parent 
  * @param {string} label
- * @param {HTMLAnchorElement[]} buttons
- * @returns {HTMLFieldSetElement}
+ * @param {HTMLAnchorElement[]|undefined} [buttons]
+ * @returns {UIGroup}
  */
-export function group(parent, label, buttons) {
+export function group(parent, label, buttons = undefined) {
 
-    const group = UIPreferences.addGroup(parent, label);
-
-    /** @type {HTMLLegendElement} */
+    /** @type {UIGroup} */
     // @ts-ignore
-    const legend = group.querySelector('legend');
+    const group = UIPreferences.addGroup(parent, label);
+    // @ts-ignore
+    group.legend = group.querySelector('legend');
 
-    legend.appendChild(document.createTextNode(' ('));
-
-    for (const button of buttons) {
+    if (buttons !== undefined) {
         
-        legend.appendChild(button);
+        group.legend.appendChild(document.createTextNode(' ('));
+        
+        for (const button of buttons) {
+            
+            group.legend.appendChild(button);
 
-        if (button !== buttons.at(-1)) {
-            legend.appendChild(document.createTextNode('; '));
+            if (button !== buttons.at(-1)) {
+                group.legend.appendChild(document.createTextNode('; '));
+            }
+
         }
 
+        group.legend.appendChild(document.createTextNode(')'));
     }
-
-    legend.appendChild(document.createTextNode(')'));
 
     return group;
 
 }
 
 /**
- * Create a group of elements.
+ * Create an inline text link that runs a callback.
+ * 
  * @param {string} label
  * @param {(ev: MouseEvent) => void} callback
  * @returns {HTMLAnchorElement}
@@ -47,7 +52,7 @@ export function text_button(label, callback) {
 
     const anchor = document.createElement('a');
     anchor.textContent = label;
-    anchor.href = '';
+    anchor.href = 'javascript:void(0)';
 
     anchor.addEventListener('click', (ev) => {
         ev.preventDefault();
