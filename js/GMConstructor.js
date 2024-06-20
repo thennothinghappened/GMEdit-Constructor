@@ -9,6 +9,7 @@ import { Err } from './utils/Err.js';
 import { ConstructorControlPanel } from './ui/editors/ConstructorControlPanel.js';
 import { SemVer } from './utils/update-checker/SemVer.js';
 import { plugin_update_check } from './utils/update-checker/UpdateChecker.js';
+import * as constructorEditorView from './ui/editors/ConstructorEditorView.js';
 
 /**
  * Name of the plugin 
@@ -215,6 +216,7 @@ export class GMConstructor {
         projectProperties.__setup__();
         preferencesMenu.__setup__();
         hamburgerOptions.__setup__();
+        constructorEditorView.__setup__();
 
         // Check for updates //
         if (preferences.update_check_get()) {
@@ -262,6 +264,7 @@ export class GMConstructor {
         compileController.__cleanup__();
         projectProperties.__cleanup__();
         hamburgerOptions.__cleanup__();
+        constructorEditorView.__cleanup__();
         
     }
 

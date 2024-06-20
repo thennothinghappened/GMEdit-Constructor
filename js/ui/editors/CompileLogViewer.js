@@ -47,13 +47,18 @@ export class CompileLogViewer extends ConstructorEditorView {
     job;
 
     /** @type {UIGroup} */
-    info_group;
+    infoGroup;
 
     /** @type {HTMLPreElement} */
-    log;
+    logText;
 
     /** @type {HTMLFieldSetElement} */
-    errors;
+    errorsGroup;
+
+    /** The saved X-position of the log to return to on restoring the UI. */
+    savedScrollX = 0;
+    /** The saved Y-position of the log to return to on restoring the UI. */
+    savedScrollY = 0;
 
     /**
      * @param {GmlFile} file
@@ -62,24 +67,25 @@ export class CompileLogViewer extends ConstructorEditorView {
     constructor(file, job) {
 
         super(file);
+        
+        this.job = job;
 
-        this.uiCreate(job);
-        this.watchJob(job);
+        this.uiCreate();
+        this.startWatchingJob();
+
     }
 
     /**
-     * @param {Job} job
+     * Start watching the job this viewer is assigned to.
      */
-    watchJob = (job) => {
+    startWatchingJob = () => {
 
-        this.job = job;
-
-        this.job.on('stdout', (content) => {
+        this.job.on('stdout', (/** @type {string} */ content) => {
 
             const should_scroll =
-                (this.info_group.scrollTop + this.info_group.clientHeight) >= (this.info_group.scrollHeight - CompileLogViewer.scrollGrabMargin);
+                (this.infoGroup.scrollTop + this.infoGroup.clientHeight) >= (this.infoGroup.scrollHeight - CompileLogViewer.scrollGrabMargin);
 
-            this.log.textContent = content;
+            this.logText.textContent = content;
 
             if (should_scroll) {
                 this.goToBottom();
@@ -91,18 +97,18 @@ export class CompileLogViewer extends ConstructorEditorView {
 
             const job_name = KConstructorOutput.getJobName(this.job);
 
-            this.info_group.legend.childNodes[0].textContent = job_name;
+            this.infoGroup.legend.childNodes[0].textContent = job_name;
 
             this.file.rename(job_name, '');
 
             if (errors.length > 0) {
 
-                for (const err of errors) {
-                    err.displayHTML(this.errors);
+                for (const error of errors) {
+                    error.displayHTML(this.errorsGroup);
                 }
                 
-                this.errors.hidden = false;
-                this.errors.classList.remove('collapsed');
+                this.errorsGroup.hidden = false;
+                this.errorsGroup.classList.remove('collapsed');
                 this.goToBottom();
                 
             }
@@ -112,29 +118,42 @@ export class CompileLogViewer extends ConstructorEditorView {
     }
 
     /**
-     * Create the page UI
-     * @param {Job} job 
+     * Setup the page UI.
      */
-    uiCreate(job) {
+    uiCreate() {
 
         this.element.innerHTML = '';
         this.element.classList.add('gm-constructor-viewer', 'popout-window');
 
-        this.info_group = ui.group(this.element, KConstructorOutput.getJobName(job), [
+        this.infoGroup = ui.group(this.element, KConstructorOutput.getJobName(this.job), [
             ui.text_button('Stop', this.stopJob),
             ui.text_button('Go to bottom', this.goToBottom)
         ]);
-        this.info_group.classList.add('gm-constructor-info');
+        this.infoGroup.classList.add('gm-constructor-info');
         
-        this.log = ui.pre('');
-        this.log.className = 'gm-constructor-log';
-        this.info_group.appendChild(this.log);
+        this.logText = document.createElement('pre');
+        this.logText.className = 'gm-constructor-log';
 
-        this.errors = UIPreferences.addGroup(this.element, 'Errors');
-        this.errors.classList.add('gm-constructor-errors');
-        this.errors.classList.add('collapsed');
-        this.errors.hidden = true;
+        this.infoGroup.addEventListener('scroll', () => {
+            this.savedScrollX = this.infoGroup.scrollTop;
+            this.savedScrollY = this.infoGroup.scrollLeft;
+        });
 
+        this.infoGroup.appendChild(this.logText);
+
+        this.errorsGroup = ui.group(this.element, 'Errors');
+        this.errorsGroup.classList.add('gm-constructor-errors');
+        this.errorsGroup.classList.add('collapsed');
+        this.errorsGroup.hidden = true;
+
+    }
+
+    /**
+     * Restore the log scroll position when tabbing back in.
+     */
+    onSelectEditor = () => {
+        this.infoGroup.scrollTop = this.savedScrollX;
+        this.infoGroup.scrollLeft = this.savedScrollY;
     }
 
     /**
@@ -147,15 +166,9 @@ export class CompileLogViewer extends ConstructorEditorView {
 
         if (!reuse) {
 
-            const file = new GmlFile(
-                KConstructorOutput.getJobName(job),
-                null,
-                this.fileKind,
-                job
-            );
-            
+            const file = new GmlFile(KConstructorOutput.getJobName(job), null, this.fileKind, job);
             return GmlFile.openTab(file);
-            
+
         }
 
         const tabs = Array.from(ChromeTabs.getTabs());
@@ -163,17 +176,19 @@ export class CompileLogViewer extends ConstructorEditorView {
 
         /** @type {CompileLogViewer|undefined} */
         // @ts-ignore
-        const compilerViewer = editors.find(editor => editor instanceof CompileLogViewer);
+        const viewer = editors.find(editor => editor instanceof CompileLogViewer);
 
-        if (compilerViewer === undefined) {
+        if (viewer === undefined) {
             return this.view(job, false);
         }
 
-        compilerViewer.stopJob();
-        compilerViewer.uiCreate(job);
-        compilerViewer.watchJob(job);
+        viewer.stopJob();
         
-        return compilerViewer.file.tabEl.click();
+        viewer.job = job;
+        viewer.uiCreate();
+        viewer.startWatchingJob();
+        
+        return viewer.focus();
 
     }
 
@@ -181,7 +196,7 @@ export class CompileLogViewer extends ConstructorEditorView {
      * Go the the bottom of the log.
      */
     goToBottom = () => {
-        this.info_group.scrollTop = this.info_group.scrollHeight;
+        this.infoGroup.scrollTop = this.infoGroup.scrollHeight;
     }
 
     stopJob = () => {

@@ -60,7 +60,23 @@ export class ConstructorEditorView extends Editor {
 
         this.element = document.createElement('div');
         this.element.classList.add('gm-constructor-page');
+        // @ts-ignore
+        this.element.__gmedit_constructor_editor = this;
 
+    }
+
+    /**
+     * Callback to run when this editor is no longer the current tab.
+     */
+    onDeselectEditor = () => {
+        return;
+    }
+
+    /**
+     * Callback to run when this editor becomes the current tab.
+     */
+    onSelectEditor = () => {
+        return;
     }
 
     /**
@@ -69,4 +85,76 @@ export class ConstructorEditorView extends Editor {
     destroy = () => {
         return;
     }
+
+    /**
+     * Bring this tab into focus.
+     */
+    focus = () => {
+        this.file.tabEl.click();
+    }
+
+}
+
+/**
+ * Observer for watching mutations to the tab list so we can find when our tabs are added or
+ * removed.
+ */
+const mutation_observer = new MutationObserver((mutations) => {
+
+    for (const mutation of mutations) {
+
+        for (const removedNode of Array.from(mutation.removedNodes)) {
+            
+            if (
+                '__gmedit_constructor_editor' in removedNode && 
+                removedNode.__gmedit_constructor_editor instanceof ConstructorEditorView
+            ) {
+                removedNode.__gmedit_constructor_editor.onDeselectEditor();
+            }
+
+        }
+
+        for (const addedNode of Array.from(mutation.addedNodes)) {
+            
+            if (
+                '__gmedit_constructor_editor' in addedNode && 
+                addedNode.__gmedit_constructor_editor instanceof ConstructorEditorView
+            ) {
+                addedNode.__gmedit_constructor_editor.onSelectEditor();
+            }
+
+        }
+
+    }
+
+});
+
+/** 
+ * The target for the observer, which is the tab body.
+ * 
+ * @type {HTMLDivElement?}
+ */
+let mutation_observer_target = null;
+
+/**
+ * Setup the mutation observer to watch tab changes.
+ */
+export function __setup__() {
+
+    mutation_observer_target = document.querySelector('.tabview');
+
+    if (mutation_observer_target !== null) {
+        mutation_observer.observe(mutation_observer_target, {
+            childList: true
+        });
+    }
+
+}
+
+/**
+ * Disconnect the mutation observer.
+ */
+export function __cleanup__() {
+    mutation_observer.disconnect();
+    mutation_observer_target = null;
 }

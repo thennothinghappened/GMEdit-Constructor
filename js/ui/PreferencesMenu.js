@@ -5,6 +5,7 @@
 import { plugin_name, plugin_version } from '../GMConstructor.js';
 import { UIDropdownMutate } from '../utils/ui.js';
 import * as preferences from '../preferences/Preferences.js';
+import * as ui from '../ui/ui-wrappers.js';
 
 const UIPreferences = $gmedit['ui.Preferences'];
 
@@ -84,7 +85,7 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
 
     for (const type of preferences.gm_channel_types) {
 
-        const group = UIPreferences.addGroup(prefs_group, type);
+        const group = ui.group(prefs_group, type);
 
         /** @type {HTMLDivElement} */
         let version_dropdown;

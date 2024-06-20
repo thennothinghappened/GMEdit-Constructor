@@ -70,10 +70,10 @@ export class ConstructorControlPanel extends ConstructorEditorView {
         this.problems = ui.group(this.element, 'Problems', [ui.text_button('Dismiss All', ConstructorControlPanel.dismissAllErrors)]);
         this.problems.classList.add('gm-constructor-control-panel-errors');
 
-        this.projectSettings = UIPreferences.addGroup(this.element, 'Project Settings');
+        this.projectSettings = ui.group(this.element, 'Project Settings');
         this.projectSettings.hidden = true;
 
-        this.globalSettings = UIPreferences.addGroup(this.element, 'Global Settings');
+        this.globalSettings = ui.group(this.element, 'Global Settings');
 
         ConstructorControlPanel.messages.forEach(this.#showMessage);
         
@@ -215,7 +215,7 @@ export class ConstructorControlPanel extends ConstructorEditorView {
             error.appendChild(ui.p(err.solution));
         }
         
-        const stacktrace = UIPreferences.addGroup(error, 'Stack trace (click to expand)');
+        const stacktrace = ui.group(error, 'Stack trace (click to expand)');
         stacktrace.appendChild(ui.pre(err.toString()));
         stacktrace.classList.add('collapsed');
 
