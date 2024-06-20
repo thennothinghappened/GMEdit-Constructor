@@ -91,7 +91,7 @@ fieldset.gm-constructor-debug {
 
 .gm-constructor-info {
     flex-grow: 1;
-    flex-shrink: 2;
+    flex-shrink: 1.2;
     overflow: auto;
     min-width: 0;
 }
@@ -113,13 +113,8 @@ fieldset.gm-constructor-debug {
     min-width: 0;
 }
 
-.gm-constructor-errors.hidden {
-    height: 0;
-    visibility: hidden;
-}
-
 .gm-constructor-errors:not(.collapsed) {
-    height: 30%;
+    height: 100%;
     overflow-y: auto;
 }
 

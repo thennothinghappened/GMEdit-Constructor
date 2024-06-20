@@ -101,7 +101,8 @@ export class CompileLogViewer extends ConstructorEditorView {
                     err.displayHTML(this.errors);
                 }
                 
-                this.errors.classList.remove('collapsed', 'hidden');
+                this.errors.hidden = false;
+                this.errors.classList.remove('collapsed');
                 this.goToBottom();
                 
             }
@@ -131,7 +132,8 @@ export class CompileLogViewer extends ConstructorEditorView {
 
         this.errors = UIPreferences.addGroup(this.element, 'Errors');
         this.errors.classList.add('gm-constructor-errors');
-        this.errors.classList.add('collapsed', 'hidden');
+        this.errors.classList.add('collapsed');
+        this.errors.hidden = true;
 
     }
 
