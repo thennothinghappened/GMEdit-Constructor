@@ -1,3 +1,4 @@
+
 declare type PreferencesData = {
 
     /** Globally selected runtime options that may be overriden by projects. */
@@ -263,6 +264,12 @@ declare type JobEvent =
 declare type JobStatus = 
     { status: 'running' } |
     { status: 'stopped', stoppedByUser: boolean, exitCode: number };
+
+interface StdoutEntry {
+	err: JobError;
+	index: number;
+	length: number;
+}
 
 declare type GMPlugin = {
     init: () => void,
