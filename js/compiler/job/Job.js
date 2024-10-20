@@ -51,7 +51,10 @@ export class Job {
      */
     #onStdoutData = (chunk) => {
 
-        const str = chunk.toString();
+        const str = chunk
+            .toString()
+            .replaceAll(/\r/g, '');
+        
         this.#stdout += str;
 
         Job.#notify(this.#listeners.stdout, this.stdout);
