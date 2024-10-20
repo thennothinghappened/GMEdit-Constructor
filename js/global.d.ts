@@ -681,15 +681,6 @@ class EditCode extends Editor {
     override public checkChanges = (): void => {}
 }
 
-declare interface Ace {
-    
-    define: (
-        module: string,
-        deps: string[],
-        payload: (require: (string) => any, exports: any, module: void) => void
-    ) => void
-}
-
 declare type AceCommand = {
     name: string;
     title?: string;
@@ -742,7 +733,6 @@ declare type $GMEdit = {
 };
 
 declare const $gmedit: $GMEdit;
-declare const ace: Ace;
 
 declare const Electron_App: IElectronApp;
 declare const Electron_FS: IElectronFS;

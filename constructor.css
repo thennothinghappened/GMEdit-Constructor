@@ -90,6 +90,8 @@ fieldset.gm-constructor-debug {
     flex-shrink: 1.2;
     overflow: auto;
     min-width: 0;
+
+    display: flex;
 }
 
 .gm-constructor-info > legend {
@@ -101,16 +103,16 @@ fieldset.gm-constructor-debug {
 }
 
 .gm-constructor-info.collapsed .gm-constructor-log {
-    display: block
+    display: block;
 }
 
-.gm-constructor-log {
+.gm-constructor-info > pre {
     margin: 0;
     min-width: 0;
+    flex-grow: 1;
 }
 
 .gm-constructor-errors:not(.collapsed) {
-    height: 100%;
     min-width: 0;
     overflow-y: auto;
 }

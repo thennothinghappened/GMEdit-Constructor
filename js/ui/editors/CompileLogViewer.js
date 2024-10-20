@@ -41,7 +41,7 @@ class KConstructorOutput extends ConstructorViewFileKind {
 export class CompileLogViewer extends ConstructorEditorView {
 
     static fileKind = new KConstructorOutput();
-    static scrollGrabMargin = 32;
+    static scrollGrabLines = 5;
 
     /** @type {Job} */
     job;
@@ -52,7 +52,10 @@ export class CompileLogViewer extends ConstructorEditorView {
     /** @type {HTMLPreElement} */
     logText;
 
-    /** @type {HTMLFieldSetElement} */
+    /** @type {AceAjax.Editor} */
+    logAceEditor;
+
+    /** @type {UIGroup} */
     errorsGroup;
 
     /** The saved X-position of the log to return to on restoring the UI. */
@@ -82,10 +85,12 @@ export class CompileLogViewer extends ConstructorEditorView {
 
         this.job.on('stdout', (/** @type {string} */ content) => {
 
-            const should_scroll =
-                (this.infoGroup.scrollTop + this.infoGroup.clientHeight) >= (this.infoGroup.scrollHeight - CompileLogViewer.scrollGrabMargin);
+            const cursor = this.logAceEditor.getCursorPosition();
+            const end_row = this.logAceEditor.session.doc.getLength();
+            const should_scroll = (cursor.row >= (end_row - CompileLogViewer.scrollGrabLines));
 
-            this.logText.textContent = content;
+            this.logAceEditor.session.setValue(content);
+            this.logAceEditor.moveCursorToPosition(cursor);
 
             if (should_scroll) {
                 this.goToBottom();
@@ -98,7 +103,6 @@ export class CompileLogViewer extends ConstructorEditorView {
             const job_name = KConstructorOutput.getJobName(this.job);
 
             this.infoGroup.legend.childNodes[0].textContent = job_name;
-
             this.file.rename(job_name, '');
 
             if (errors.length > 0) {
@@ -109,6 +113,8 @@ export class CompileLogViewer extends ConstructorEditorView {
                 
                 this.errorsGroup.hidden = false;
                 this.errorsGroup.classList.remove('collapsed');
+
+                this.logAceEditor.resize();
                 this.goToBottom();
                 
             }
@@ -140,10 +146,13 @@ export class CompileLogViewer extends ConstructorEditorView {
         });
 
         this.infoGroup.appendChild(this.logText);
+        this.logAceEditor = ace.edit(this.logText);
+        this.logAceEditor.setReadOnly(true);
 
         this.errorsGroup = ui.group(this.element, 'Errors');
         this.errorsGroup.classList.add('gm-constructor-errors');
         this.errorsGroup.classList.add('collapsed');
+        this.errorsGroup.legend.addEventListener('click', () => this.logAceEditor.resize());
         this.errorsGroup.hidden = true;
 
     }
@@ -196,7 +205,8 @@ export class CompileLogViewer extends ConstructorEditorView {
      * Go the the bottom of the log.
      */
     goToBottom = () => {
-        this.infoGroup.scrollTop = this.infoGroup.scrollHeight;
+        this.logAceEditor.navigateFileEnd();
+        this.logAceEditor.scrollToLine(this.logAceEditor.session.getLength(), false, false, () => {});
     }
 
     stopJob = () => {
@@ -212,5 +222,6 @@ export class CompileLogViewer extends ConstructorEditorView {
      */
     destroy = () => {
         this.stopJob();
+        this.logAceEditor.destroy();
     }
 }
