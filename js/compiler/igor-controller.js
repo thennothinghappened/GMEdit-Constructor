@@ -88,8 +88,8 @@ function job_flags_get(project, runtime_path, user_path, settings) {
         `/v`,
         `/tf=${project.dir}/output/${projectName}${output_exts[igor_platform_cmd_name] ?? ''}`
     ];
-    if (user_path) {
 
+    if (user_path !== null) {
         flags.push(`/uf=${user_path}`);
     }
 
