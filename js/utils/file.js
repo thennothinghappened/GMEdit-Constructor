@@ -61,6 +61,32 @@ export function readdir(path) {
 }
 
 /**
+ * Create the given directory.
+ * 
+ * @param {string} path  Path to the directory to create.
+ * @param {boolean} recursive Whether to recursively create directories if the parent does not exist.
+ * @returns {Promise<Result<void>>}
+ */
+export function mkdir(path, recursive) {
+    return new Promise(res => {
+        Electron_FS.mkdir(path, { recursive }, (err) => {
+
+            console.warn(err)
+            
+            if (err === null) {
+                return res({ ok: true, data: undefined });
+            }
+
+            return res({
+                ok: false,
+                err: new Err(`Failed to create the directory '${path}'`, err)
+            });
+
+        });
+    });
+}
+
+/**
  * Promise version of `Electron_FS.writeFile`.
  * @param {string} path 
  * @param {string} data

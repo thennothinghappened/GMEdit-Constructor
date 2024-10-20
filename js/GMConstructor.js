@@ -10,6 +10,7 @@ import { ConstructorControlPanel } from './ui/editors/ConstructorControlPanel.js
 import { SemVer } from './utils/update-checker/SemVer.js';
 import { plugin_update_check } from './utils/update-checker/UpdateChecker.js';
 import * as constructorEditorView from './ui/editors/ConstructorEditorView.js';
+import { fileExists, mkdir, readdir } from './utils/file.js';
 
 /**
  * Name of the plugin 
@@ -41,16 +42,27 @@ export let spawn;
 export class GMConstructor {
 
     /**
-     * Run a task on a given (or current) project.
-     * @param {IgorSettings} settings
-     * @param {GMLProject} [project] 
+     * Run a task on our current project.
+     * @param {AtLeast<IgorSettings, 'verb'>} partial_settings
      */
-    async #runTask(settings, project = project_current_get()) {
+    async #runTask(partial_settings) {
+
+        const project = project_current_get();
 
         if (project === undefined) {
             return;
         }
 
+        /** @type {IgorSettings} */
+        const settings = {
+            verb: partial_settings.verb,
+            buildPath: partial_settings.buildPath ?? this.#getBuildDir(project),
+            platform: partial_settings.platform ?? igorPaths.igor_user_platform,
+            runner: partial_settings.runner ?? projectProperties.runner_get(),
+            threads: partial_settings.threads ?? 8,
+            configName: partial_settings.configName ?? projectProperties.config_name_get()    
+        };
+        
         const runtime_type = projectProperties.runtime_channel_type_get();
         const runtime_res = projectProperties.runtime_get();
         const user_res = projectProperties.user_get();
@@ -69,7 +81,6 @@ export class GMConstructor {
         }
 
         const runtime = runtime_res.data;
-
         const supported_res = runtime.version.supportedByProject(project);
 
         if (!supported_res.ok) {
@@ -110,7 +121,32 @@ export class GMConstructor {
             open_files_save();
         }
 
-        const res = await compileController.job_run(project, runtime_res.data, user_res.ok ? user_res.data : null, settings);
+        if (!(await readdir(settings.buildPath)).ok) {
+            
+            const res = await mkdir(settings.buildPath, true);
+            
+            if (!res.ok) {
+
+                const err = new Err(
+                    'Failed to create the build directory for project output!',
+                    res.err,
+                    `Ensure the path '${settings.buildPath}' is valid, and that GMEdit would have permission to edit files and directories there.`
+                );
+
+                return ConstructorControlPanel
+                    .view(true)
+                    .showError(res.err.message, err);
+                
+            }
+
+        }
+
+        const res = await compileController.job_run(
+            project,
+            runtime_res.data,
+            (user_res.ok ? user_res.data : null),
+            settings
+        );
 
         if (!res.ok) {
 
@@ -127,39 +163,35 @@ export class GMConstructor {
         compileController.job_open_editor(res.data, preferences.reuse_compiler_tab_get());
     }
 
+    /**
+     * Get the build directory to use for the given project.
+     * @param {GMLProject} project 
+     * @returns {String}
+     */
+    #getBuildDir(project) {
+        
+        if (preferences.use_global_build_get()) {
+            return join_path(preferences.global_build_path_get(), project.displayName);
+        }
+
+        return join_path(project.dir, 'build');
+
+    }
+
     onControlPanel = () => {
         ConstructorControlPanel.view(true);
     }
 
-    // yes this is VERY temporary
     packageCurrent = () => {
-        this.#runTask({
-            platform: igorPaths.igor_user_platform,
-            verb: 'Package',
-            runner: projectProperties.runner_get(),
-            threads: 8,
-            configName: projectProperties.config_name_get()
-        });
+        this.#runTask({ verb: 'Package' });
     }
 
     cleanCurrent = () => {
-        this.#runTask({
-            platform: igorPaths.igor_user_platform,
-            verb: 'Clean',
-            runner: projectProperties.runner_get(),
-            threads: 8,
-            configName: projectProperties.config_name_get()
-        });
+        this.#runTask({ verb: 'Clean' });
     }
 
     runCurrent = () => {
-        this.#runTask({
-            platform: igorPaths.igor_user_platform,
-            verb: 'Run',
-            runner: projectProperties.runner_get(),
-            threads: 8,
-            configName: projectProperties.config_name_get()
-        });
+        this.#runTask({ verb: 'Run' });
     }
 
     /**

@@ -3,7 +3,7 @@
  * and runtime list.
  */
 
-import { def_runtime_paths, def_user_paths, igor_path_segment } from '../compiler/igor-paths.js';
+import { def_global_build_path, def_runtime_paths, def_user_paths, igor_path_segment } from '../compiler/igor-paths.js';
 import { fileExists, readFile, readdir, writeFile } from '../utils/file.js';
 import { Err } from '../utils/Err.js';
 import { deep_assign } from '../utils/object.js';
@@ -51,7 +51,9 @@ const prefs_default = {
 
     save_on_run_task: true,
     reuse_compiler_tab: true,
-    check_for_updates: true
+    check_for_updates: true,
+    use_global_build: false,
+    global_build_path: def_global_build_path
 };
 
 /** @type {PreferencesData} */
@@ -144,6 +146,40 @@ export function update_check_get() {
  */
 export function update_check_set(check_for_updates) {
     prefs.check_for_updates = check_for_updates;
+    return save();
+}
+
+/**
+ * Get whether to use the global build directory.
+ * @returns {Boolean}
+ */
+export function use_global_build_get() {
+    return prefs.use_global_build;
+}
+
+/**
+ * Set whether to use the global build directory.
+ * @param {Boolean} use_global_build 
+ */
+export function use_global_build_set(use_global_build) {
+    prefs.use_global_build = use_global_build;
+    return save();
+}
+
+/**
+ * Get the global build directory path.
+ * @returns {String}
+ */
+export function global_build_path_get() {
+    return prefs.global_build_path;
+}
+
+/**
+ * Set the global build directory path.
+ * @param {String} global_build_path 
+ */
+export function global_build_path_set(global_build_path) {
+    prefs.global_build_path = global_build_path;
     return save();
 }
 

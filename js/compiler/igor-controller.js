@@ -5,7 +5,7 @@
 
 import { CompileLogViewer } from '../ui/editors/CompileLogViewer.js';
 import { Job } from './job/Job.js';
-import { igor_platform_cmd_name, output_exts } from './igor-paths.js';
+import { igor_platform_cmd_name, output_blob_exts, output_package_exts } from './igor-paths.js';
 import { Err } from '../utils/Err.js';
 import { join_path, spawn } from '../GMConstructor.js';
 
@@ -78,7 +78,7 @@ function job_remove(job) {
  */
 function job_flags_get(project, runtime_path, user_path, settings) {
 
-    let projectName = project.displayName;
+    const projectName = project.displayName;
 
     const flags = [
         `/project=${project.path}`,
@@ -86,7 +86,8 @@ function job_flags_get(project, runtime_path, user_path, settings) {
         `/rp=${runtime_path}`,
         `/runtime=${settings.runner}`,
         `/v`,
-        `/tf=${project.dir}/output/${projectName}${output_exts[igor_platform_cmd_name] ?? ''}`
+        `/cache=${join_path(settings.buildPath, 'cache')}`,
+        '/of=' + join_path(settings.buildPath, 'output', projectName + output_blob_exts[settings.platform])
     ];
 
     if (user_path !== null) {
@@ -99,15 +100,20 @@ function job_flags_get(project, runtime_path, user_path, settings) {
     }
 
     switch (settings.verb) {
+
         case 'Package':
+
             if (['Windows', 'Mac'].includes(igor_platform_cmd_name)) {
                 settings.verb = 'PackageZip';
             }
-            break;
+
+        break;
 
         case 'Run':
+        break;
+
         case 'Clean':
-            break;
+        break;
 
         default:
             return {

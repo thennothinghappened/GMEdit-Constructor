@@ -83,6 +83,22 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
         }
     );
 
+    UIPreferences.addInput(
+        prefs_group,
+        'Global Builds Path',
+        preferences.global_build_path_get(),
+        async (path) => {
+            await preferences.global_build_path_set(path);
+        }
+    );
+
+    UIPreferences.addCheckbox(
+        prefs_group,
+        'Use the global builds directory',
+        preferences.use_global_build_get(),
+        preferences.use_global_build_set
+    );
+
     for (const type of preferences.gm_channel_types) {
 
         const group = ui.group(prefs_group, type);

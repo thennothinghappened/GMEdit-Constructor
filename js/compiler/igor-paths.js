@@ -22,6 +22,7 @@ const igor_platform_map = {
             Beta:   windowsAppdata + '\\GameMakerStudio2-Beta',
             LTS:    windowsAppdata + '\\GameMakerStudio2-LTS'
         },
+        default_global_build_path: windowsAppdata + '\\GMEdit-Constructor\\builds'
     },
     'darwin': {
         platform_executable_extension: '',
@@ -36,7 +37,8 @@ const igor_platform_map = {
             Stable: process.env.HOME + '/.config/GameMakerStudio2',
             Beta:   process.env.HOME + '/.config/GameMakerStudio2-Beta',
             LTS:    process.env.HOME + '/.config/GameMakerStudio2-LTS'
-        }
+        },
+        default_global_build_path: process.env.HOME + '/GMEdit-Constructor/builds'
     },
     'linux': {
         platform_executable_extension: '',
@@ -51,7 +53,8 @@ const igor_platform_map = {
             Stable: '/please/specify/your/user/paths',
             Beta:   '/please/specify/your/user/paths',
             LTS:    '/please/specify/your/user/paths'
-        }
+        },
+        default_global_build_path: process.env.HOME + '/GMEdit-Constructor/builds'
     }
 };
 
@@ -59,10 +62,20 @@ const igor_platform_map = {
  * Mappings of Igor targets to output file extensions. TODO: other targets
  * @type {{[K in IgorPlatform]?: string}}
 */
-export const output_exts = {
+export const output_package_exts = {
     Windows: '.zip',
     Mac: '.zip',
     Linux: '.appimage',
+};
+
+/**
+ * Mappings of Igor targets to respective file extensions for output data blobs. TODO: other targets
+ * @type {{[K in IgorPlatform]?: string}}
+*/
+export const output_blob_exts = {
+    Windows: '.win',
+    Mac: '.ios',
+    Linux: '.unx',
 };
 
 /**
@@ -74,6 +87,12 @@ export const def_runtime_paths = igor_platform_map[process.platform].default_run
  * Default paths to the userdata folders for the host OS.
  */
 export const def_user_paths = igor_platform_map[process.platform].default_user_paths;
+
+/**
+ * Default path to the global build directory.
+ */
+export const def_global_build_path = igor_platform_map[process.platform].default_global_build_path;
+
 
 /**
  * {@link IgorPlatform} to native build for the host OS. 

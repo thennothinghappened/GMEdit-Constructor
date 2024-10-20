@@ -19,6 +19,12 @@ declare type PreferencesData = {
 
     /** Whether we should check for updates on startup. */
     check_for_updates: boolean;
+
+    /** Whether to use the global build directory. */
+    use_global_build: boolean;
+
+    /** Global build directory path. */
+    global_build_path: string;
     
 }
 
@@ -188,6 +194,11 @@ declare type IgorSettings = {
     userFolder?: string;
 
     /**
+     * The path to the directory to output build files to.
+     */
+    buildPath: string;
+
+    /**
      * Launch the executable on the target device after building;
      * same as the "Create Executable and Launch" option in the IDE
      */
@@ -248,6 +259,10 @@ declare type IgorPlatformInfo = {
     default_user_paths: {
         [key in GMChannelType]: string
     };
+
+    /** Default path to the global build directory. */
+    default_global_build_path: string;
+
 }
 
 declare type IgorVerb = 
@@ -295,9 +310,10 @@ declare interface IElectronApp {
 }
 
 declare interface IElectronFS {
-    readFile:       (path: string, cb: (err: Error|undefined, data: Buffer|undefined) => void) => void;
-    readdir:        (path: string, cb: (err: Error|undefined, files: string[]|undefined) => void) => void;
-    writeFile:      (path: string, content: string, cb: (err: Error|undefined) => void) => void;
+    readFile:       (path: string, cb: ((err?: Error, data?: Buffer) => void)) => void;
+    readdir:        (path: string, cb: (err?: Error, files?: string[]) => void) => void;
+    mkdir:          (path: string, settings: { recursive: boolean }, cb: (err: Error?) => void) => void;
+    writeFile:      (path: string, content: string, cb: (err?: Error) => void) => void;
     existsSync:     (path: string) => boolean;
     exists:         (path: string, cb: (exists: boolean) => void) => void;
 }
@@ -716,6 +732,12 @@ declare interface ChromeTabs {
 declare interface ChromeTab extends HTMLDivElement {
     gmlFile: GmlFile;
 }
+
+/**
+ * Object containing at least the given key(s), and all else optional.
+ * @see https://stackoverflow.com/a/57390160/7246439
+ */
+type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>;
 
 declare type $GMEdit = {
     'ui.Preferences': GMEditUIPreferences;
