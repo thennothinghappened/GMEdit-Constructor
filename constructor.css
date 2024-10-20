@@ -1,27 +1,4 @@
 
-.gm-constructor-viewer {
-
-    display: flex;
-    flex-direction: column;
-
-    width: 100%;
-    height: 100%;
-
-}
-
-.gm-constructor-viewer fieldset {
-    border-radius: 5px;
-    transition: 0.25s ease;
-}
-
-.gm-constructor-viewer > fieldset > legend {
-    font-size: large;
-}
-
-.gm-constructor-viewer legend {
-    cursor: pointer;
-}
-
 .gm-constructor-control-panel {
 
     overflow-y: scroll;
@@ -34,14 +11,6 @@
 .gm-constructor-control-panel > h1 {
     margin-top: 10px;
     margin-bottom: 0;
-}
-
-.gm-constructor-control-panel-errors {
-    
-}
-
-.gm-constructor-control-panel-errors > fieldset {
-    
 }
 
 .gm-constructor-control-panel-errors > fieldset > p {
@@ -89,6 +58,33 @@ fieldset.gm-constructor-debug {
     margin-right: 5px;
 }
 
+.gm-constructor-viewer {
+
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+    height: 100%;
+
+}
+
+.gm-constructor-viewer fieldset {
+    border-radius: 5px;
+    transition: 0.25s ease;
+}
+
+.gm-constructor-viewer > fieldset > legend {
+    font-size: large;
+}
+
+.gm-constructor-viewer legend {
+    cursor: pointer;
+}
+
+.gm-constructor-page code, .gm-constructor-page pre {
+    font-family: monospace, monospace;
+}
+
 .gm-constructor-info {
     flex-grow: 1;
     flex-shrink: 1.2;
@@ -124,7 +120,7 @@ fieldset.gm-constructor-debug {
 }
 
 .gm-constructor-errors {
-    font-size: medium;
+    font-size: large;
 }
 
 /** I know I shouldn't do this but it just looks nicer... */
