@@ -89,8 +89,10 @@ function job_flags_get(project, runtime_path, user_path, settings) {
         `/tf=${project.dir}/output/${projectName}${output_exts[igor_platform_cmd_name] ?? ''}`
     ];
     if (user_path) {
+
         flags.push(`/uf=${user_path}`);
     }
+
     // ignore cache, this fixes changes not applying in yyc
     if (settings.runner === 'YYC') {
         flags.push('/ic');
