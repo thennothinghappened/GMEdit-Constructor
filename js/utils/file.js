@@ -16,7 +16,7 @@ export function fileExists(path) {
 /**
  * Promise version of `Electron_FS.readFile`.
  * @param {string} path 
- * @returns {Promise<Result<string>>}
+ * @returns {Promise<Result<Buffer>>}
  */
 export function readFile(path) {
     return new Promise(res => {

@@ -531,7 +531,7 @@ export async function __setup__() {
         if (res.ok) {
 
             try {
-                loaded_prefs = JSON.parse(res.data);
+                loaded_prefs = JSON.parse(res.data.toString());
             } catch (err_cause) {
 
                 const err = new Err(

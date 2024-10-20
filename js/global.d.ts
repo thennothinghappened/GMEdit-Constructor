@@ -295,7 +295,7 @@ declare interface IElectronApp {
 }
 
 declare interface IElectronFS {
-    readFile:       (path: string, cb: (err: Error|undefined, data: string|undefined) => void) => void;
+    readFile:       (path: string, cb: (err: Error|undefined, data: Buffer|undefined) => void) => void;
     readdir:        (path: string, cb: (err: Error|undefined, files: string[]|undefined) => void) => void;
     writeFile:      (path: string, content: string, cb: (err: Error|undefined) => void) => void;
     existsSync:     (path: string) => boolean;
