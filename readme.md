@@ -17,7 +17,7 @@ Constructor can currently compile for the current build target (your OS), and ca
    - [x] Centralised error display for build and configuration problems
  - [x] Automatic check for updates
 
-![image](https://github.com/thennothinghappened/GMEdit-Constructor/assets/35243139/6cde8fc7-ed20-4680-88a3-9207c5b0b938)
+![image](https://github.com/user-attachments/assets/a6be1b91-9a94-4f1e-8fdd-2c94c49f5c71)
 
 ## Installation
 Installation is the same here as any other GMEdit plugin - clone it into your `plugins` folder (see below), or download the `.zip` from *Releases*, and extract the contained folder into `plugins`.
