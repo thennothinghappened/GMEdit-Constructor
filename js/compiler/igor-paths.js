@@ -45,9 +45,9 @@ const igor_platform_map = {
         platform_path_name: 'linux',
         user_platform: 'Linux',
         default_runtime_paths: {
-            Stable: '/please/specify/your/runtime/paths',
-            Beta:   '/please/specify/your/runtime/paths',
-            LTS:    '/please/specify/your/runtime/paths'
+            Stable: process.env.HOME + '/.local/share/GameMakerStudio2/Cache/runtimes',
+            Beta:   process.env.HOME + '/.local/share/GameMakerStudio2-Beta/Cache/runtimes',
+            LTS:    process.env.HOME + '/.local/share/GameMakerStudio2-LTS/Cache/runtimes'
         },
         default_user_paths: {
             Stable: '/please/specify/your/user/paths',
