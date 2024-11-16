@@ -539,7 +539,6 @@ async function user_list_load_path(type, users_path) {
         users.map(
             async user => await fileExists(join_path(user.path, 'license.plist'))
                 || await fileExists(join_path(user.path, 'local_settings.json'))
-                || await fileExists(join_path(user.path, 'timestamp'))
         )
     );
 
