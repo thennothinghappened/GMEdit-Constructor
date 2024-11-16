@@ -42,7 +42,7 @@ const igor_platform_map = {
     },
     'linux': {
         platform_executable_extension: '',
-        platform_path_name: 'ubuntu', // TODO: can't check this right now
+        platform_path_name: 'linux',
         user_platform: 'Linux',
         default_runtime_paths: {
             Stable: '/please/specify/your/runtime/paths',
