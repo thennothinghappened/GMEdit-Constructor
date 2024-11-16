@@ -50,9 +50,9 @@ const igor_platform_map = {
             LTS:    process.env.HOME + '/.local/share/GameMakerStudio2-LTS/Cache/runtimes'
         },
         default_user_paths: {
-            Stable: '/please/specify/your/user/paths',
-            Beta:   '/please/specify/your/user/paths',
-            LTS:    '/please/specify/your/user/paths'
+            Stable: process.env.HOME + '/.config/GameMakerStudio2',
+            Beta:   process.env.HOME + '/.config/GameMakerStudio2-Beta',
+            LTS:    process.env.HOME + '/.config/GameMakerStudio2-LTS'
         },
         default_global_build_path: process.env.HOME + '/GMEdit-Constructor/builds'
     }
