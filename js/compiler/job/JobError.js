@@ -183,7 +183,7 @@ export class JobRunnerError extends JobError {
 	 * Some silly regex that captures an error in either the 2024.400<= or 2024.600+ format, since
 	 * they randomly changed it ever-so-slightly.
 	 */
-	static regex = /ERROR!!! :: #+?\nERROR in\saction number 1\sof (?<event>[A-Za-z ]+?)\sfor object (?<object>\S+?):\n+(?<exception>[\s\S]+?)\n#+?\n(?<script>gml_\S+?) \(line (?<line_number>[0-9]+?)\)/;
+	static regex = /ERROR!!! :: #+?\nERROR in\saction number 1\sof (?<event>[A-Za-z0-9 ]+?)\sfor object (?<object>\S+?):\n+(?<exception>[\s\S]+?)\n#+?\n(?<script>gml_\S+?) \(line (?<line_number>[0-9]+?)\)/;
 
     /**
      * @param {String} object 
