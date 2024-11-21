@@ -299,10 +299,32 @@ declare type GMEditEvent =
     'projectOpen'               |
     'projectClose'              ;
 
+declare type AceWrapOptions = {
+	isPrimary?: boolean,
+	statusBar?: boolean,
+	completers?: boolean,
+	linter?: boolean,
+	contextMenu?: boolean,
+	commands?: boolean,
+	inputHelpers?: boolean,
+	tooltips?: boolean,
+	preferences?: boolean,
+	scrollMode?: boolean,
+	dispatchEvent?: boolean,
+};
+	
+declare interface GMEditAceTools {
+	createEditor(element: string|HTMLElement, options?: AceWrapOptions): AceAjax.Editor;
+};
+
 declare class GMEdit {
-    static register = function(name: string, body: GMPlugin) {}
-    static on = function(event: GMEditEvent, callback: (event: Event) => void) {}
-    static off = function(event: GMEditEvent, callback: (event: Event) => void) {}
+    
+	static aceTools: GMEditAceTools;
+
+	static register(name: string, body: GMPlugin);
+    static on(event: GMEditEvent, callback: (event: Event) => void);
+    static off(event: GMEditEvent, callback: (event: Event) => void);
+
 }
 
 declare interface IElectronApp {

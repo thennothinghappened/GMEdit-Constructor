@@ -146,7 +146,9 @@ export class CompileLogViewer extends ConstructorEditorView {
         });
 
         this.infoGroup.appendChild(this.logText);
-        this.logAceEditor = ace.edit(this.logText);
+        this.logAceEditor = GMEdit.aceTools.createEditor(this.logText, {
+			statusBar: false
+		});
         this.logAceEditor.setReadOnly(true);
 
         this.errorsGroup = ui.group(this.element, 'Errors');
