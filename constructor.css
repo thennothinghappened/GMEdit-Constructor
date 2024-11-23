@@ -1,4 +1,24 @@
 
+/************************
+*        General        *
+*************************/
+
+.gm-constructor-page fieldset:not(.gm-constructor-info, .collapsed) {
+    padding: 8px;
+}
+
+.gm-constructor-page fieldset legend {
+    font-weight: bold;
+}
+
+.gm-constructor-page code, .gm-constructor-page pre {
+    font-family: monospace, monospace;
+}
+
+/************************
+*     Control Panel     *
+*************************/
+
 .gm-constructor-control-panel {
 
     overflow-y: scroll;
@@ -38,16 +58,8 @@ fieldset.gm-constructor-debug {
     white-space: pre-wrap;
 }
 
-.gm-constructor-page fieldset {
-    padding: 8px;
-}
-
 .gm-constructor-control-panel fieldset {
     margin: 10px 0;
-}
-
-.gm-constructor-page fieldset legend {
-    font-weight: bold;
 }
 
 .gm-constructor-control-panel div.select {
@@ -57,6 +69,10 @@ fieldset.gm-constructor-debug {
 .gm-constructor-control-panel div.checkbox > label > input {
     margin-right: 5px;
 }
+
+/************************
+*    Compile Window     *
+*************************/
 
 .gm-constructor-viewer {
 
@@ -79,10 +95,6 @@ fieldset.gm-constructor-debug {
 
 .gm-constructor-viewer legend {
     cursor: pointer;
-}
-
-.gm-constructor-page code, .gm-constructor-page pre {
-    font-family: monospace, monospace;
 }
 
 .gm-constructor-info {
@@ -114,17 +126,13 @@ fieldset.gm-constructor-debug {
 }
 
 /** Override GMEdit's rule that messes with our editor instance. */
-.popout-window.gm-constructor-page div:not(:first-child) {
+.popout-window.gm-constructor-viewer div:not(:first-child) {
 	margin-top: auto;
 }
 
 .gm-constructor-errors:not(.collapsed) {
     min-width: 0;
     overflow-y: auto;
-}
-
-.gm-constructor-errors.collapsed > :not(legend) {
-    display: none;
 }
 
 .gm-constructor-errors {
