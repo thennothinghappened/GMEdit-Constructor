@@ -55,7 +55,7 @@ class Wrapper {
 		
 		const result = block(this.value);
 		
-		if (/**  */ result !== undefined) {
+		if (result !== undefined) {
 			return new Wrapper(result);
 		}
 
