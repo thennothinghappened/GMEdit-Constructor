@@ -100,11 +100,22 @@ export class Job {
 
 	/**
 	 * Add an event listener for the given event.
+	 * 
 	 * @param {JobEvent} event
 	 * @param {(data?: any) => void} callback
 	 */
 	on = (event, callback) => {
 		this.listeners[event].add(callback);
+	}
+
+	/**
+	 * Remove an event listener for the given event.
+	 * 
+	 * @param {JobEvent} event
+	 * @param {(data?: any) => void} callback
+	 */
+	off = (event, callback) => {
+		this.listeners[event].delete(callback);
 	}
 
 	/**
