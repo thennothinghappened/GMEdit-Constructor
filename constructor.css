@@ -130,9 +130,3 @@ fieldset.gm-constructor-debug {
 .gm-constructor-errors {
     font-size: large;
 }
-
-/** I know I shouldn't do this but it just looks nicer... */
-.plugin-settings[for='GMEdit-Constructor'] {
-    padding-top: 6px;
-    line-height: 20px;
-}
