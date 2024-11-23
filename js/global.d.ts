@@ -278,7 +278,7 @@ declare type JobEvent =
 
 declare type JobStatus = 
     { status: 'running' } |
-    { status: 'stopped', stoppedByUser: boolean, exitCode: number };
+    { status: 'stopped', stoppedByUser: boolean, exitCode: number? };
 
 interface StdoutEntry {
 	err: JobError;

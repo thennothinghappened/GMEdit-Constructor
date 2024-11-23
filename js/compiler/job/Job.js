@@ -70,13 +70,13 @@ export class Job {
             this.status = {
 				status: 'stopped',
 				stoppedByUser: false,
-				exitCode: this.process.exitCode ?? 0
+				exitCode: this.process.exitCode
 			};
         }
 
         if (this.status.stoppedByUser) {
             this.statusDisplay = 'Stopped';
-        } else if (this.status.exitCode > 0) {
+        } else if (this.status.exitCode ?? 0 > 0) {
             this.statusDisplay = 'Failed';
         } else {
             this.statusDisplay = 'Finished';
