@@ -113,6 +113,11 @@ fieldset.gm-constructor-debug {
     flex-grow: 1;
 }
 
+/** Override GMEdit's rule that messes with our editor instance. */
+.popout-window.gm-constructor-page div:not(:first-child) {
+	margin-top: auto;
+}
+
 .gm-constructor-errors:not(.collapsed) {
     min-width: 0;
     overflow-y: auto;
