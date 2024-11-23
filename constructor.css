@@ -3,15 +3,35 @@
 *        General        *
 *************************/
 
-.gm-constructor-page fieldset:not(.gm-constructor-info, .collapsed) {
+.gm-constructor-tab {
+
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+    height: 100%;
+
+}
+
+.gm-constructor-tab fieldset {
+    border-radius: 5px;
+    transition: 0.25s ease;
+}
+
+.gm-constructor-tab fieldset:not(.collapsed, .gm-constructor-viewer-output) {
     padding: 8px;
 }
 
-.gm-constructor-page fieldset legend {
+.gm-constructor-tab fieldset > legend {
     font-weight: bold;
+	cursor: pointer;
 }
 
-.gm-constructor-page code, .gm-constructor-page pre {
+.gm-constructor-tab > fieldset > legend {
+    font-size: large;
+}
+
+.gm-constructor-tab code, .gm-constructor-tab pre {
     font-family: monospace, monospace;
 }
 
@@ -20,12 +40,8 @@
 *************************/
 
 .gm-constructor-control-panel {
-
-    overflow-y: scroll;
-
-    width: 100%;
     padding: 8px;
-
+    overflow-y: scroll;
 }
 
 .gm-constructor-control-panel > h1 {
@@ -74,30 +90,7 @@ fieldset.gm-constructor-debug {
 *    Compile Window     *
 *************************/
 
-.gm-constructor-viewer {
-
-    display: flex;
-    flex-direction: column;
-
-    width: 100%;
-    height: 100%;
-
-}
-
-.gm-constructor-viewer fieldset {
-    border-radius: 5px;
-    transition: 0.25s ease;
-}
-
-.gm-constructor-viewer > fieldset > legend {
-    font-size: large;
-}
-
-.gm-constructor-viewer legend {
-    cursor: pointer;
-}
-
-.gm-constructor-info {
+.gm-constructor-viewer-output {
     flex-grow: 1;
     flex-shrink: 1.2;
     overflow: auto;
@@ -107,19 +100,19 @@ fieldset.gm-constructor-debug {
 	flex-direction: column;
 }
 
-.gm-constructor-info > legend {
+.gm-constructor-viewer-output > legend {
     padding: 4px;
 }
 
-.gm-constructor-info.collapsed {
+.gm-constructor-viewer-output.collapsed {
     opacity: 1 !important;
 }
 
-.gm-constructor-info.collapsed .gm-constructor-log {
+.gm-constructor-viewer-output.collapsed .gm-constructor-log {
     display: block;
 }
 
-.gm-constructor-info > pre {
+.gm-constructor-viewer-output > pre {
     margin: 0;
     min-width: 0;
     flex-grow: 1;
@@ -130,11 +123,11 @@ fieldset.gm-constructor-debug {
 	margin-top: auto;
 }
 
-.gm-constructor-errors:not(.collapsed) {
+.gm-constructor-viewer-errors:not(.collapsed) {
     min-width: 0;
     overflow-y: auto;
 }
 
-.gm-constructor-errors {
+.gm-constructor-viewer-errors {
     font-size: large;
 }

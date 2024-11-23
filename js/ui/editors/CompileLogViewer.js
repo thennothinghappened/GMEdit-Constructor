@@ -135,7 +135,7 @@ export class CompileLogViewer extends ConstructorEditorView {
             ui.text_button('Stop', this.stopJob),
             ui.text_button('Go to bottom', this.goToBottom)
         ]);
-        this.infoGroup.classList.add('gm-constructor-info');
+        this.infoGroup.classList.add('gm-constructor-viewer-output');
         
         this.logText = document.createElement('pre');
         this.logText.className = 'gm-constructor-log';
@@ -152,7 +152,7 @@ export class CompileLogViewer extends ConstructorEditorView {
         this.logAceEditor.setReadOnly(true);
 
         this.errorsGroup = ui.group(this.element, 'Errors');
-        this.errorsGroup.classList.add('gm-constructor-errors');
+        this.errorsGroup.classList.add('gm-constructor-viewer-errors');
         this.errorsGroup.classList.add('collapsed');
         this.errorsGroup.legend.addEventListener('click', () => this.logAceEditor.resize());
         this.errorsGroup.hidden = true;

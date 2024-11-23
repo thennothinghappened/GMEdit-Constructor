@@ -62,7 +62,7 @@ export class ConstructorControlPanel extends ConstructorEditorView {
         
         super(file);
 
-        this.element.classList.add('gm-constructor-viewer', 'gm-constructor-control-panel', 'popout-window');
+        this.element.classList.add('gm-constructor-control-panel', 'popout-window');
 
         this.element.appendChild(ui.h1(ConstructorControlPanel.tabName));
         this.element.appendChild(ui.p(`Version: ${plugin_version}`));
