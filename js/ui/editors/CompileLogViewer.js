@@ -30,7 +30,7 @@ class KConstructorOutput extends ConstructorViewFileKind {
      */
     static getJobName = (job) => {
         const statusDisplay = job.statusDisplay === '' ? '' : (' - ' + job.statusDisplay);
-        return `${job.projectDisplayName} - ${job.command}${statusDisplay}`;
+        return `${job.project.displayName} - ${job.settings.verb}${statusDisplay}`;
     }
 
 }
