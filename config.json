@@ -1,6 +1,6 @@
 {
-    "name": "GMEdit-Constructor",
-    "description": "Compile projects from GMEdit!",
-    "scripts": ["init.js"],
-    "stylesheets": ["constructor.css"]
+	"name": "GMEdit-Constructor",
+	"description": "Compile projects from GMEdit!",
+	"scripts": ["init.js"],
+	"stylesheets": ["constructor.css"]
 }

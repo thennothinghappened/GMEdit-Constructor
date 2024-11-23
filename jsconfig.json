@@ -1,18 +1,18 @@
 {
-    "compilerOptions": {
-        "target": "ESNext",
-        "module": "ESNext",
-        "strict": true,
-        "checkJs": true,
-        "lib": [
-            "ESNext",
-            "DOM"
-        ],
-        "types": [
-            "@types/node",
-        ],
-        "typeRoots": [
-            "/opt/homebrew/lib/node_modules"
-        ]
-    }
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "ESNext",
+		"strict": true,
+		"checkJs": true,
+		"lib": [
+			"ESNext",
+			"DOM"
+		],
+		"types": [
+			"@types/node",
+		],
+		"typeRoots": [
+			"/opt/homebrew/lib/node_modules"
+		]
+	}
 }

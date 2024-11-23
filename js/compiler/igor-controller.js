@@ -22,32 +22,32 @@ const jobs = [];
  */
 export async function job_run(project, runtime, user, settings) {
 
-    const flags_res = job_flags_get(project, runtime.path, user?.path ?? null, settings);
+	const flags_res = job_flags_get(project, runtime.path, user?.path ?? null, settings);
 
-    if (!flags_res.ok) {
-        return {
-            ok: false,
-            err: new Err('Failed to get Igor flags for this job!', flags_res.err)
-        }
-    }
+	if (!flags_res.ok) {
+		return {
+			ok: false,
+			err: new Err('Failed to get Igor flags for this job!', flags_res.err)
+		}
+	}
 
-    const proc = spawn(
-        runtime.igor_path,
-        flags_res.data,
-        { cwd: project.dir }
-    );
+	const proc = spawn(
+		runtime.igor_path,
+		flags_res.data,
+		{ cwd: project.dir }
+	);
 
-    const job = new Job(settings, proc, project);
-    jobs.push(job);
+	const job = new Job(settings, proc, project);
+	jobs.push(job);
 
-    job.on('stop', () => {
-        job_remove(job);
-    });
+	job.on('stop', () => {
+		job_remove(job);
+	});
 
-    return {
-        ok: true,
-        data: job
-    };
+	return {
+		ok: true,
+		data: job
+	};
 
 }
 
@@ -57,7 +57,7 @@ export async function job_run(project, runtime, user, settings) {
  * @param {Boolean} reuse Whether to reuse an existing tab.
  */
 export function job_open_editor(job, reuse) {
-    CompileLogViewer.view(job, reuse);
+	CompileLogViewer.view(job, reuse);
 }
 
 /**
@@ -65,7 +65,7 @@ export function job_open_editor(job, reuse) {
  * @param {Job} job
  */
 function job_remove(job) {
-    jobs.splice(jobs.indexOf(job), 1);
+	jobs.splice(jobs.indexOf(job), 1);
 }
 
 /**
@@ -78,59 +78,59 @@ function job_remove(job) {
  */
 function job_flags_get(project, runtime_path, user_path, settings) {
 
-    const projectName = project.displayName;
+	const projectName = project.displayName;
 
-    const flags = [
-        `/project=${project.path}`,
-        `/config=${settings.configName}`,
-        `/rp=${runtime_path}`,
-        `/runtime=${settings.runner}`,
-        `/v`,
-        `/cache=${join_path(settings.buildPath, 'cache')}`,
-        '/of=' + join_path(settings.buildPath, 'output', projectName + output_blob_exts[settings.platform])
-    ];
+	const flags = [
+		`/project=${project.path}`,
+		`/config=${settings.configName}`,
+		`/rp=${runtime_path}`,
+		`/runtime=${settings.runner}`,
+		`/v`,
+		`/cache=${join_path(settings.buildPath, 'cache')}`,
+		'/of=' + join_path(settings.buildPath, 'output', projectName + output_blob_exts[settings.platform])
+	];
 
-    if (user_path !== null) {
-        flags.push(`/uf=${user_path}`);
-    }
+	if (user_path !== null) {
+		flags.push(`/uf=${user_path}`);
+	}
 
-    // ignore cache, this fixes changes not applying in yyc
-    if (settings.runner === 'YYC') {
-        flags.push('/ic');
-    }
+	// ignore cache, this fixes changes not applying in yyc
+	if (settings.runner === 'YYC') {
+		flags.push('/ic');
+	}
 
-    switch (settings.verb) {
+	switch (settings.verb) {
 
-        case 'Package':
+		case 'Package':
 
-            if (['Windows', 'Mac'].includes(igor_platform_cmd_name)) {
-                settings.verb = 'PackageZip';
-            }
+			if (['Windows', 'Mac'].includes(igor_platform_cmd_name)) {
+				settings.verb = 'PackageZip';
+			}
 
-        break;
+		break;
 
-        case 'Run':
-        break;
+		case 'Run':
+		break;
 
-        case 'Clean':
-        break;
+		case 'Clean':
+		break;
 
-        default:
-            return {
-                ok: false,
-                err: new Err(`Unhandled command case for flags: ${settings.verb}`)
-            }
-    }
+		default:
+			return {
+				ok: false,
+				err: new Err(`Unhandled command case for flags: ${settings.verb}`)
+			}
+	}
 
-    flags.push('--');
-    flags.push(igor_platform_cmd_name, settings.verb);
+	flags.push('--');
+	flags.push(igor_platform_cmd_name, settings.verb);
 
-    return {
-        ok: true,
-        data: flags
-    };
+	return {
+		ok: true,
+		data: flags
+	};
 }
 
 export function __cleanup__() {
-    jobs.forEach(job => job.stop());
+	jobs.forEach(job => job.stop());
 }

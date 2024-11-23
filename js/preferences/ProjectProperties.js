@@ -15,13 +15,13 @@ let properties = {};
 
 export function __setup__() {
 
-    GMEdit.on('projectOpen', on_project_open);
+	GMEdit.on('projectOpen', on_project_open);
 
 }
 
 export function __cleanup__() {
 
-    GMEdit.off('projectOpen', on_project_open);
+	GMEdit.off('projectOpen', on_project_open);
 
 }
 
@@ -30,7 +30,7 @@ export function __cleanup__() {
  * @returns {string}
  */
 export function config_name_get() {
-    return properties.config_name ?? 'Default';
+	return properties.config_name ?? 'Default';
 }
 
 /**
@@ -38,8 +38,8 @@ export function config_name_get() {
  * @param {string} config_name 
  */
 export function config_name_set(config_name) {
-    properties.config_name = config_name;
-    return save();
+	properties.config_name = config_name;
+	return save();
 }
 
 /**
@@ -47,7 +47,7 @@ export function config_name_set(config_name) {
  * @returns {RunnerType}
  */
 export function runner_get() {
-    return properties.runner ?? preferences.runner_get();
+	return properties.runner ?? preferences.runner_get();
 }
 
 /**
@@ -55,7 +55,7 @@ export function runner_get() {
  * @returns {RunnerType|undefined}
  */
 export function runner_project_get() {
-    return properties.runner;
+	return properties.runner;
 }
 
 /**
@@ -64,8 +64,8 @@ export function runner_project_get() {
  */
 export function runner_set(runner) {
 
-    properties.runner = runner;
-    return save();
+	properties.runner = runner;
+	return save();
 
 }
 
@@ -74,7 +74,7 @@ export function runner_set(runner) {
  * @returns {GMChannelType}
  */
 export function runtime_channel_type_get() {
-    return properties.runtime_type ?? preferences.runtime_channel_type_get();
+	return properties.runtime_type ?? preferences.runtime_channel_type_get();
 }
 
 /**
@@ -82,7 +82,7 @@ export function runtime_channel_type_get() {
  * @returns {GMChannelType|undefined}
  */
 export function runtime_project_channel_type_get() {
-    return properties.runtime_type;
+	return properties.runtime_type;
 }
 
 /**
@@ -91,8 +91,8 @@ export function runtime_project_channel_type_get() {
  */
 export function runtime_channel_type_set(runtime_type) {
 
-    properties.runtime_type = runtime_type;
-    return save();
+	properties.runtime_type = runtime_type;
+	return save();
 
 }
 
@@ -101,7 +101,7 @@ export function runtime_channel_type_set(runtime_type) {
  * @returns {string|null}
  */
 export function runtime_version_get() {
-    return properties.runtime_version ?? preferences.runtime_version_get(runtime_channel_type_get());
+	return properties.runtime_version ?? preferences.runtime_version_get(runtime_channel_type_get());
 }
 
 /**
@@ -109,7 +109,7 @@ export function runtime_version_get() {
  * @returns {string|undefined}
  */
 export function runtime_project_version_get() {
-    return properties.runtime_version;
+	return properties.runtime_version;
 }
 
 /**
@@ -118,8 +118,8 @@ export function runtime_project_version_get() {
  */
 export function runtime_version_set(runtime_type) {
 
-    properties.runtime_version = runtime_type;
-    return save();
+	properties.runtime_version = runtime_type;
+	return save();
 
 }
 
@@ -129,30 +129,30 @@ export function runtime_version_set(runtime_type) {
  */
 export function runtime_get() {
 
-    const type = runtime_channel_type_get();
-    const desired_runtime_list = preferences.runtime_versions_get_for_type(type);
+	const type = runtime_channel_type_get();
+	const desired_runtime_list = preferences.runtime_versions_get_for_type(type);
 
-    if (desired_runtime_list === null) {
-        return {
-            ok: false,
-            err: new Err(`Runtime type ${type} list not loaded!`)
-        };
-    }
+	if (desired_runtime_list === null) {
+		return {
+			ok: false,
+			err: new Err(`Runtime type ${type} list not loaded!`)
+		};
+	}
 
-    const version = runtime_version_get() ?? desired_runtime_list[0]?.version?.toString();
-    const runtime = desired_runtime_list.find(runtime => runtime.version.toString() === version);
+	const version = runtime_version_get() ?? desired_runtime_list[0]?.version?.toString();
+	const runtime = desired_runtime_list.find(runtime => runtime.version.toString() === version);
 
-    if (runtime === undefined) {
-        return {
-            ok: false,
-            err: new Err(`Failed to find any runtimes of type ${type}`)
-        };
-    }
+	if (runtime === undefined) {
+		return {
+			ok: false,
+			err: new Err(`Failed to find any runtimes of type ${type}`)
+		};
+	}
 
-    return {
-        ok: true,
-        data: runtime
-    };
+	return {
+		ok: true,
+		data: runtime
+	};
 }
 /**
 
@@ -161,30 +161,30 @@ export function runtime_get() {
  */
 export function user_get() {
 
-    const type = runtime_channel_type_get();
-    const desired_user_list = preferences.users_get_for_type(type);
+	const type = runtime_channel_type_get();
+	const desired_user_list = preferences.users_get_for_type(type);
 
-    if (desired_user_list === null) {
-        return {
-            ok: false,
-            err: new Err(`Users for runtime ${type} list not loaded!`)
-        };
-    }
+	if (desired_user_list === null) {
+		return {
+			ok: false,
+			err: new Err(`Users for runtime ${type} list not loaded!`)
+		};
+	}
 
-    const name = preferences.user_get(type) ?? desired_user_list[0]?.name?.toString();
-    const user = desired_user_list.find(user => user.name.toString() === name);
+	const name = preferences.user_get(type) ?? desired_user_list[0]?.name?.toString();
+	const user = desired_user_list.find(user => user.name.toString() === name);
 
-    if (user === undefined) {
-        return {
-            ok: false,
-            err: new Err(`Failed to find any users for runtime ${type}`)
-        };
-    }
+	if (user === undefined) {
+		return {
+			ok: false,
+			err: new Err(`Failed to find any users for runtime ${type}`)
+		};
+	}
 
-    return {
-        ok: true,
-        data: user
-    };
+	return {
+		ok: true,
+		data: user
+	};
 }
 
 /**
@@ -192,14 +192,14 @@ export function user_get() {
  */
 function save() {
 
-    const project = project_current_get();
+	const project = project_current_get();
 
-    if (project === undefined) {
-        return;
-    }
+	if (project === undefined) {
+		return;
+	}
 
-    project.properties['GMEdit-Constructor'] = properties;
-    ProjectProperties.save(project, project.properties);
+	project.properties['GMEdit-Constructor'] = properties;
+	ProjectProperties.save(project, project.properties);
 
 }
 
@@ -209,18 +209,18 @@ function save() {
  */
 function on_project_open() {
 
-    const project = project_current_get();
+	const project = project_current_get();
 
-    if (project === undefined) {
-        return;
-    }
+	if (project === undefined) {
+		return;
+	}
 
-    properties = {};
+	properties = {};
 
-    const saved = project.properties['GMEdit-Constructor'];
-    
-    if (saved !== undefined && saved !== null) {
-        Object.assign(properties, saved);
-    }
+	const saved = project.properties['GMEdit-Constructor'];
+	
+	if (saved !== undefined && saved !== null) {
+		Object.assign(properties, saved);
+	}
 
 }

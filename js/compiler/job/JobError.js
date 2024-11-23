@@ -5,7 +5,7 @@ import * as ui from '../../ui/ui-wrappers.js';
  */
 export class JobError {
 
-    constructor() {}
+	constructor() {}
 
 	/**
 	 * Parse an instance of this error type from stdout if any are present.
@@ -20,22 +20,22 @@ export class JobError {
 		return undefined;
 	}
 
-    /**
-     * Get this error nicely formatted as HTML.
-     * @param {HTMLElement} parent The parent element to attach to.
-     */
-    displayHTML(parent) {
-        
-        const group = ui.group(parent, 'Job Error');
-        const body = document.createElement('pre');
+	/**
+	 * Get this error nicely formatted as HTML.
+	 * @param {HTMLElement} parent The parent element to attach to.
+	 */
+	displayHTML(parent) {
+		
+		const group = ui.group(parent, 'Job Error');
+		const body = document.createElement('pre');
 
-        group.appendChild(body);
+		group.appendChild(body);
 
-    }
+	}
 
-    toString() {
-        return 'Job Error!';
-    }
+	toString() {
+		return 'Job Error!';
+	}
 
 }
 
@@ -58,13 +58,13 @@ export class JobPermissionsError extends JobError {
 	 */
 	static regex = /(?<=\n)Permission Error : (?<error>.+)/;
 
-    /**
-     * @param {String} error 
-     */
-    constructor(error) {
-        super();
-        this.error = error;
-    }
+	/**
+	 * @param {String} error 
+	 */
+	constructor(error) {
+		super();
+		this.error = error;
+	}
 
 	/**
 	 * @param {string} string 
@@ -88,24 +88,24 @@ export class JobPermissionsError extends JobError {
 
 	}
 
-    /**
-     * Get this error nicely formatted as HTML.
-     * @param {HTMLElement} parent The parent element to attach to.
-     */
-    displayHTML(parent) {
-        
-        const group = ui.group(parent, 'Igor Permission Error');
+	/**
+	 * Get this error nicely formatted as HTML.
+	 * @param {HTMLElement} parent The parent element to attach to.
+	 */
+	displayHTML(parent) {
+		
+		const group = ui.group(parent, 'Igor Permission Error');
 
-        const body = document.createElement('pre');
-        body.textContent = this.error.toString();
+		const body = document.createElement('pre');
+		body.textContent = this.error.toString();
 
-        group.appendChild(body);
+		group.appendChild(body);
 
-    }
+	}
 
-    toString() {
-        return `Igor Permissions Error: ${this.error}`;
-    }
+	toString() {
+		return `Igor Permissions Error: ${this.error}`;
+	}
 
 }
 
@@ -126,13 +126,13 @@ export class JobCompilationError extends JobError {
 	 */
 	static regex = /(?<=\n)Error : (?<error>.+)/;
 
-    /**
-     * @param {String} error 
-     */
-    constructor(error) {
-        super();
-        this.error = error;
-    }
+	/**
+	 * @param {String} error 
+	 */
+	constructor(error) {
+		super();
+		this.error = error;
+	}
 
 	/**
 	 * @param {string} string 
@@ -156,24 +156,24 @@ export class JobCompilationError extends JobError {
 
 	}
 
-    /**
-     * Get this error nicely formatted as HTML.
-     * @param {HTMLElement} parent The parent element to attach to.
-     */
-    displayHTML(parent) {
-        
-        const group = ui.group(parent, 'Compilation Error');
+	/**
+	 * Get this error nicely formatted as HTML.
+	 * @param {HTMLElement} parent The parent element to attach to.
+	 */
+	displayHTML(parent) {
+		
+		const group = ui.group(parent, 'Compilation Error');
 
-        const body = document.createElement('pre');
-        body.textContent = this.error.toString();
+		const body = document.createElement('pre');
+		body.textContent = this.error.toString();
 
-        group.appendChild(body);
+		group.appendChild(body);
 
-    }
+	}
 
-    toString() {
-        return `Job Compiler Error: ${this.error}`;
-    }
+	toString() {
+		return `Job Compiler Error: ${this.error}`;
+	}
 
 }
 
@@ -185,22 +185,22 @@ export class JobRunnerError extends JobError {
 	 */
 	static regex = /ERROR!!! :: #+?\nERROR in\saction number 1\sof (?<event>[A-Za-z0-9 ]+?)\sfor object (?<object>\S+?):\n+(?<exception>[\s\S]+?)\n#+?\n(?<script>gml_\S+?) \(line (?<line_number>[0-9]+?)\)/;
 
-    /**
-     * @param {String} object 
-     * @param {String} event 
-     * @param {String} script 
-     * @param {String} line_number 
-     * @param {String} exception 
-     */
-    constructor(object, event, script, line_number, exception) {
-        super();
+	/**
+	 * @param {String} object 
+	 * @param {String} event 
+	 * @param {String} script 
+	 * @param {String} line_number 
+	 * @param {String} exception 
+	 */
+	constructor(object, event, script, line_number, exception) {
+		super();
 
-        this.object = object;
-        this.event = event;
-        this.script = script;
-        this.line_number = line_number;
-        this.exception = exception;
-    }
+		this.object = object;
+		this.event = event;
+		this.script = script;
+		this.line_number = line_number;
+		this.exception = exception;
+	}
 
 	/**
 	 * @param {string} string 
@@ -230,29 +230,29 @@ export class JobRunnerError extends JobError {
 		
 	}
 
-    /**
-     * Get this error nicely formatted as HTML.
-     * @param {HTMLElement} parent The parent element to attach to.
-     */
-    displayHTML(parent) {
-        
-        const group = ui.group(parent, 'Runner Error');
+	/**
+	 * Get this error nicely formatted as HTML.
+	 * @param {HTMLElement} parent The parent element to attach to.
+	 */
+	displayHTML(parent) {
+		
+		const group = ui.group(parent, 'Runner Error');
 
-        const blurb = document.createElement('p');
-        blurb.append('In the event ', ui.b(this.event), ' for object ', ui.code(this.object), ',');
-        blurb.appendChild(document.createElement('br'));
-        blurb.append('On line ', ui.b(this.line_number), ' of script ', ui.code(this.script), ':');
+		const blurb = document.createElement('p');
+		blurb.append('In the event ', ui.b(this.event), ' for object ', ui.code(this.object), ',');
+		blurb.appendChild(document.createElement('br'));
+		blurb.append('On line ', ui.b(this.line_number), ' of script ', ui.code(this.script), ':');
 
-        group.appendChild(blurb);
+		group.appendChild(blurb);
 
-        const stacktrace = document.createElement('pre');
-        stacktrace.textContent = this.exception;
+		const stacktrace = document.createElement('pre');
+		stacktrace.textContent = this.exception;
 
-        group.appendChild(stacktrace);
+		group.appendChild(stacktrace);
 
-    }
+	}
 
-    toString() {
+	toString() {
 
 return `Runner Error:
 
@@ -261,6 +261,6 @@ In ${this.event} of object ${this.object}:
 
 ${this.exception}`;
 
-    }
+	}
 
 }

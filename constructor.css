@@ -1,121 +1,121 @@
 
 /************************
-*        General        *
+*		General		*
 *************************/
 
 .gm-constructor-tab {
 
-    display: flex;
-    flex-direction: column;
+	display: flex;
+	flex-direction: column;
 
-    width: 100%;
-    height: 100%;
+	width: 100%;
+	height: 100%;
 
 }
 
 .gm-constructor-tab fieldset {
-    border-radius: 5px;
-    transition: 0.25s ease;
+	border-radius: 5px;
+	transition: 0.25s ease;
 }
 
 .gm-constructor-tab fieldset:not(.collapsed, .gm-constructor-viewer-output) {
-    padding: 8px;
+	padding: 8px;
 }
 
 .gm-constructor-tab fieldset > legend {
-    font-weight: bold;
+	font-weight: bold;
 	cursor: pointer;
 }
 
 .gm-constructor-tab > fieldset > legend {
-    font-size: large;
+	font-size: large;
 }
 
 .gm-constructor-tab code, .gm-constructor-tab pre {
-    font-family: monospace, monospace;
+	font-family: monospace, monospace;
 }
 
 /************************
-*     Control Panel     *
+*	 Control Panel	 *
 *************************/
 
 .gm-constructor-control-panel {
-    padding: 8px;
-    overflow-y: scroll;
+	padding: 8px;
+	overflow-y: scroll;
 }
 
 .gm-constructor-control-panel > h1 {
-    margin-top: 10px;
-    margin-bottom: 0;
+	margin-top: 10px;
+	margin-bottom: 0;
 }
 
 .gm-constructor-control-panel-errors > fieldset > p {
-    white-space: pre-wrap;
+	white-space: pre-wrap;
 }
 
 fieldset.gm-constructor-error {
-    background-color: rgba(189, 98, 98, 0.209);
+	background-color: rgba(189, 98, 98, 0.209);
 }
 
 fieldset.gm-constructor-warning {
-    background-color: rgba(68, 102, 124, 0.18);
+	background-color: rgba(68, 102, 124, 0.18);
 }
 
 fieldset.gm-constructor-debug {
-    background-color: rgba(47, 47, 47, 0.098);
+	background-color: rgba(47, 47, 47, 0.098);
 }
 
 .gm-constructor-control-panel p {
-    margin: 8px 0;
+	margin: 8px 0;
 }
 
 .gm-constructor-control-panel-errors > fieldset > pre {
-    word-break: break-all;
-    white-space: pre-wrap;
+	word-break: break-all;
+	white-space: pre-wrap;
 }
 
 .gm-constructor-control-panel fieldset {
-    margin: 10px 0;
+	margin: 10px 0;
 }
 
 .gm-constructor-control-panel div.select {
-    padding: 5px 0;
+	padding: 5px 0;
 }
 
 .gm-constructor-control-panel div.checkbox > label > input {
-    margin-right: 5px;
+	margin-right: 5px;
 }
 
 /************************
-*    Compile Window     *
+*	Compile Window	 *
 *************************/
 
 .gm-constructor-viewer-output {
-    flex-grow: 1;
-    flex-shrink: 1.2;
-    overflow: auto;
-    min-width: 0;
+	flex-grow: 1;
+	flex-shrink: 1.2;
+	overflow: auto;
+	min-width: 0;
 
-    display: flex;
+	display: flex;
 	flex-direction: column;
 }
 
 .gm-constructor-viewer-output > legend {
-    padding: 4px;
+	padding: 4px;
 }
 
 .gm-constructor-viewer-output.collapsed {
-    opacity: 1 !important;
+	opacity: 1 !important;
 }
 
 .gm-constructor-viewer-output.collapsed .gm-constructor-log {
-    display: block;
+	display: block;
 }
 
 .gm-constructor-viewer-output > pre {
-    margin: 0;
-    min-width: 0;
-    flex-grow: 1;
+	margin: 0;
+	min-width: 0;
+	flex-grow: 1;
 }
 
 /** Override GMEdit's rule that messes with our editor instance. */
@@ -124,10 +124,10 @@ fieldset.gm-constructor-debug {
 }
 
 .gm-constructor-viewer-errors:not(.collapsed) {
-    min-width: 0;
-    overflow-y: auto;
+	min-width: 0;
+	overflow-y: auto;
 }
 
 .gm-constructor-viewer-errors {
-    font-size: large;
+	font-size: large;
 }

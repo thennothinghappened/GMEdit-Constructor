@@ -6,11 +6,11 @@ import { Err } from './Err.js';
  * @returns {Promise<boolean>}
  */
 export function fileExists(path) {
-    return new Promise(res => {
-        Electron_FS.exists(path, exists => {
-            res(exists);
-        })
-    });
+	return new Promise(res => {
+		Electron_FS.exists(path, exists => {
+			res(exists);
+		})
+	});
 }
 
 /**
@@ -19,22 +19,22 @@ export function fileExists(path) {
  * @returns {Promise<Result<Buffer>>}
  */
 export function readFile(path) {
-    return new Promise(res => {
-        Electron_FS.readFile(path, (err, data) => {
+	return new Promise(res => {
+		Electron_FS.readFile(path, (err, data) => {
 
-            if (data === undefined) {
-                return res({ 
-                    ok: false,
-                    err: new Err(`Failed to read the file '${path}'`, err)
-                });
-            }
+			if (data === undefined) {
+				return res({ 
+					ok: false,
+					err: new Err(`Failed to read the file '${path}'`, err)
+				});
+			}
 
-            res({
-                ok: true,
-                data
-            });
-        })
-    });
+			res({
+				ok: true,
+				data
+			});
+		})
+	});
 }
 
 /**
@@ -43,21 +43,21 @@ export function readFile(path) {
  * @returns {Promise<Result<string[]>>}
  */
 export function readdir(path) {
-    return new Promise(res => {
-        Electron_FS.readdir(path, (err, data) => {
-            if (data === undefined) {
-                return res({ 
-                    ok: false,
-                    err: new Err(`Failed to read contents of the directory '${path}'`, err)
-                });
-            }
+	return new Promise(res => {
+		Electron_FS.readdir(path, (err, data) => {
+			if (data === undefined) {
+				return res({ 
+					ok: false,
+					err: new Err(`Failed to read contents of the directory '${path}'`, err)
+				});
+			}
 
-            res({ 
-                ok: true,
-                data
-            });
-        })
-    });
+			res({ 
+				ok: true,
+				data
+			});
+		})
+	});
 }
 
 /**
@@ -68,22 +68,22 @@ export function readdir(path) {
  * @returns {Promise<Result<void>>}
  */
 export function mkdir(path, recursive) {
-    return new Promise(res => {
-        Electron_FS.mkdir(path, { recursive }, (err) => {
+	return new Promise(res => {
+		Electron_FS.mkdir(path, { recursive }, (err) => {
 
-            console.warn(err)
-            
-            if (err === null) {
-                return res({ ok: true, data: undefined });
-            }
+			console.warn(err)
+			
+			if (err === null) {
+				return res({ ok: true, data: undefined });
+			}
 
-            return res({
-                ok: false,
-                err: new Err(`Failed to create the directory '${path}'`, err)
-            });
+			return res({
+				ok: false,
+				err: new Err(`Failed to create the directory '${path}'`, err)
+			});
 
-        });
-    });
+		});
+	});
 }
 
 /**
@@ -93,16 +93,16 @@ export function mkdir(path, recursive) {
  * @returns {Promise<Result<void>>}
  */
 export function writeFile(path, data) {
-    return new Promise(res => {
-        Electron_FS.writeFile(path, data, (err) => {
-            if (err !== undefined) {
-                return res({
-                    ok: false,
-                    err: new Err(`Failed to write the file '${path}'`, err)
-                });
-            }
+	return new Promise(res => {
+		Electron_FS.writeFile(path, data, (err) => {
+			if (err !== undefined) {
+				return res({
+					ok: false,
+					err: new Err(`Failed to write the file '${path}'`, err)
+				});
+			}
 
-            res({ ok: true, data: undefined });
-        })
-    });
+			res({ ok: true, data: undefined });
+		})
+	});
 }

@@ -9,26 +9,26 @@
  */
 export function UIDropdownMutate(root, opts, new_default_value) {
 
-    const sel = UIDropdownGetSelect(root);
-    const old_value = sel.value;
+	const sel = UIDropdownGetSelect(root);
+	const old_value = sel.value;
 
-    for (const el of Array.from(sel.childNodes)) {
-        sel.removeChild(el);
-    }
+	for (const el of Array.from(sel.childNodes)) {
+		sel.removeChild(el);
+	}
 
-    for (const opt of opts) {
-        const el = document.createElement('option');
-        el.value = opt;
-        el.textContent = opt;
+	for (const opt of opts) {
+		const el = document.createElement('option');
+		el.value = opt;
+		el.textContent = opt;
 
-        sel.appendChild(el);
-    }
+		sel.appendChild(el);
+	}
 
-    if (opts.includes(old_value)) {
-        sel.value = old_value;
-    } else {
-        sel.value = new_default_value ?? opts[0] ?? '';
-    }
+	if (opts.includes(old_value)) {
+		sel.value = old_value;
+	} else {
+		sel.value = new_default_value ?? opts[0] ?? '';
+	}
 }
 
 /**
@@ -39,7 +39,7 @@ export function UIDropdownMutate(root, opts, new_default_value) {
  */
 export function UIDropdownGetSelect(root) {
 
-    // @ts-ignore
-    return root.querySelector('select');
+	// @ts-ignore
+	return root.querySelector('select');
 
 }

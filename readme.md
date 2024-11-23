@@ -42,12 +42,12 @@ for more details!
 
 ## Keyboard Shortcuts
 
-| Shortcut                          | Key                |
+| Shortcut						  | Key				|
 | --------------------------------- | ------------------ |
-| View the Control Panel            | <kbd>Ctrl+\`</kbd> |
-| Run the current project           | <kbd>F5</kbd>      |
+| View the Control Panel			| <kbd>Ctrl+\`</kbd> |
+| Run the current project		   | <kbd>F5</kbd>	  |
 | Clean the current project's files | <kbd>Ctrl+F7</kbd> |
-| Package the current project       | <kbd>Ctrl+F5</kbd> |
+| Package the current project	   | <kbd>Ctrl+F5</kbd> |
 
 The above are the defaults provided. You can rebind these through GMEdit's
 **Edit Keyboard Shortcuts** option in Preferences!

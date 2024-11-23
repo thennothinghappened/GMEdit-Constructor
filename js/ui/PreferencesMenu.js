@@ -17,18 +17,18 @@ let ele_css_query;
  */
 export function __setup__() {
 
-    ele_css_query = `.plugin-settings[for^="${plugin_name}"]`;
+	ele_css_query = `.plugin-settings[for^="${plugin_name}"]`;
 
-    on_preferences_built();
+	on_preferences_built();
 
-    GMEdit.on('preferencesBuilt', on_preferences_built);
+	GMEdit.on('preferencesBuilt', on_preferences_built);
 }
 
 /**
  * Deregister callback for setting up menu.
  */
 export function __cleanup__() {
-    GMEdit.off('preferencesBuilt', on_preferences_built);
+	GMEdit.off('preferencesBuilt', on_preferences_built);
 }
 
 /**
@@ -38,142 +38,142 @@ export function __cleanup__() {
  */
 export function menu_create(prefs_group, on_refresh_runtime_settings) {
 
-    UIPreferences.addCheckbox(
-        prefs_group,
-        'Automatically check for updates on startup',
-        preferences.update_check_get(),
-        preferences.update_check_set
-    );
+	UIPreferences.addCheckbox(
+		prefs_group,
+		'Automatically check for updates on startup',
+		preferences.update_check_get(),
+		preferences.update_check_set
+	);
 
-    UIPreferences.addCheckbox(
-        prefs_group,
-        'Save automatically when running a task',
-        preferences.save_on_run_task_get(),
-        preferences.save_on_run_task_set
-    );
+	UIPreferences.addCheckbox(
+		prefs_group,
+		'Save automatically when running a task',
+		preferences.save_on_run_task_get(),
+		preferences.save_on_run_task_set
+	);
 
-    UIPreferences.addCheckbox(
-        prefs_group,
-        'Reuse compiler output tab between runs',
-        preferences.save_on_run_task_get(),
-        preferences.reuse_compiler_tab_set
-    );
+	UIPreferences.addCheckbox(
+		prefs_group,
+		'Reuse compiler output tab between runs',
+		preferences.save_on_run_task_get(),
+		preferences.reuse_compiler_tab_set
+	);
 
-    UIPreferences.addDropdown(
-        prefs_group,
-        'Runner Type',
-        preferences.runner_get(),
-        preferences.valid_runner_types,
-        // @ts-ignore
-        preferences.runner_set
-    );
+	UIPreferences.addDropdown(
+		prefs_group,
+		'Runner Type',
+		preferences.runner_get(),
+		preferences.valid_runner_types,
+		// @ts-ignore
+		preferences.runner_set
+	);
 
-    UIPreferences.addDropdown(
-        prefs_group,
-        'Runtime Channel Type',
-        preferences.runtime_channel_type_get(),
-        preferences.gm_channel_types,
-        (value) => {
-            // @ts-ignore
-            preferences.runtime_channel_type_set(value);
+	UIPreferences.addDropdown(
+		prefs_group,
+		'Runtime Channel Type',
+		preferences.runtime_channel_type_get(),
+		preferences.gm_channel_types,
+		(value) => {
+			// @ts-ignore
+			preferences.runtime_channel_type_set(value);
 
-            if (on_refresh_runtime_settings !== undefined) {
-                on_refresh_runtime_settings();
-            }
-        }
-    );
+			if (on_refresh_runtime_settings !== undefined) {
+				on_refresh_runtime_settings();
+			}
+		}
+	);
 
-    UIPreferences.addInput(
-        prefs_group,
-        'Global Builds Path',
-        preferences.global_build_path_get(),
-        async (path) => {
-            await preferences.global_build_path_set(path);
-        }
-    );
+	UIPreferences.addInput(
+		prefs_group,
+		'Global Builds Path',
+		preferences.global_build_path_get(),
+		async (path) => {
+			await preferences.global_build_path_set(path);
+		}
+	);
 
-    UIPreferences.addCheckbox(
-        prefs_group,
-        'Use the global builds directory',
-        preferences.use_global_build_get(),
-        preferences.use_global_build_set
-    );
+	UIPreferences.addCheckbox(
+		prefs_group,
+		'Use the global builds directory',
+		preferences.use_global_build_get(),
+		preferences.use_global_build_set
+	);
 
-    for (const type of preferences.gm_channel_types) {
+	for (const type of preferences.gm_channel_types) {
 
-        const group = ui.group(prefs_group, type);
+		const group = ui.group(prefs_group, type);
 
-        /** @type {HTMLDivElement} */
-        let version_dropdown;
+		/** @type {HTMLDivElement} */
+		let version_dropdown;
 
-        /** @type {HTMLDivElement} */
-        let user_dropdown;
+		/** @type {HTMLDivElement} */
+		let user_dropdown;
 
-        UIPreferences.addInput(
-            group,
-            'Search Path',
-            preferences.runtime_search_path_get(type),
-            async (path) => {
-                
-                // Workaround for being called twice for some reason?
-                if (path === preferences.runtime_search_path_get(type)) {
-                    return;
-                }
-                
-                await preferences.runtime_search_path_set(type, path);
+		UIPreferences.addInput(
+			group,
+			'Search Path',
+			preferences.runtime_search_path_get(type),
+			async (path) => {
+				
+				// Workaround for being called twice for some reason?
+				if (path === preferences.runtime_search_path_get(type)) {
+					return;
+				}
+				
+				await preferences.runtime_search_path_set(type, path);
 
-                UIDropdownMutate(
-                    version_dropdown,
-                    runtime_version_strings_get_for_type(type)
-                );
+				UIDropdownMutate(
+					version_dropdown,
+					runtime_version_strings_get_for_type(type)
+				);
 
-                if (on_refresh_runtime_settings !== undefined) {
-                    on_refresh_runtime_settings();
-                }
+				if (on_refresh_runtime_settings !== undefined) {
+					on_refresh_runtime_settings();
+				}
 
-            }
-        );
+			}
+		);
 
-        version_dropdown = UIPreferences.addDropdown(
-            group,
-            'Version',
-            preferences.runtime_version_get(type) ?? '',
-            runtime_version_strings_get_for_type(type),
-            (choice) => {
-                preferences.runtime_version_set(type, choice);
-            }
-        );
+		version_dropdown = UIPreferences.addDropdown(
+			group,
+			'Version',
+			preferences.runtime_version_get(type) ?? '',
+			runtime_version_strings_get_for_type(type),
+			(choice) => {
+				preferences.runtime_version_set(type, choice);
+			}
+		);
 
-        UIPreferences.addInput(
-            group,
-            'User Data Path',
-            preferences.users_search_path_get(type),
-            async (path) => {
-                // Workaround for being called twice for some reason?
-                if (path === preferences.users_search_path_get(type)) {
-                    return;
-                }
+		UIPreferences.addInput(
+			group,
+			'User Data Path',
+			preferences.users_search_path_get(type),
+			async (path) => {
+				// Workaround for being called twice for some reason?
+				if (path === preferences.users_search_path_get(type)) {
+					return;
+				}
 
-                await preferences.users_search_path_set(type, path);
+				await preferences.users_search_path_set(type, path);
 
-                UIDropdownMutate(
-                    user_dropdown,
-                    user_strings_get_for_type(type)
-                );
-            }
-        );
+				UIDropdownMutate(
+					user_dropdown,
+					user_strings_get_for_type(type)
+				);
+			}
+		);
 
-        user_dropdown = UIPreferences.addDropdown(
-            group,
-            'User',
-            preferences.user_get(type) ?? '',
-            user_strings_get_for_type(type),
-            (choice) => {
-                preferences.user_set(type, choice);
-            }
-        );
+		user_dropdown = UIPreferences.addDropdown(
+			group,
+			'User',
+			preferences.user_get(type) ?? '',
+			user_strings_get_for_type(type),
+			(choice) => {
+				preferences.user_set(type, choice);
+			}
+		);
 
-    }
+	}
 
 }
 
@@ -183,14 +183,14 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
  * @returns 
  */
 export function runtime_version_strings_get_for_type(type) {
-    
-    const runtimes = preferences.runtime_versions_get_for_type(type);
+	
+	const runtimes = preferences.runtime_versions_get_for_type(type);
 
-    if (runtimes === null) {
-        return [];
-    }
+	if (runtimes === null) {
+		return [];
+	}
 
-    return runtimes.map(runtime => runtime.version.toString());
+	return runtimes.map(runtime => runtime.version.toString());
 
 }
 
@@ -200,14 +200,14 @@ export function runtime_version_strings_get_for_type(type) {
  * @returns 
  */
 function user_strings_get_for_type(type) {
-    
-    const users = preferences.users_get_for_type(type);
+	
+	const users = preferences.users_get_for_type(type);
 
-    if (users === null) {
-        return [];
-    }
+	if (users === null) {
+		return [];
+	}
 
-    return users.map(user => user.name.toString());
+	return users.map(user => user.name.toString());
 
 }
 
@@ -217,20 +217,20 @@ function user_strings_get_for_type(type) {
  */
 function on_preferences_built(ev) {
 
-    let target = document.body;
+	let target = document.body;
 
-    if (ev !== undefined && ev.target instanceof HTMLElement) {
-        target = ev.target;
-    }
+	if (ev !== undefined && ev.target instanceof HTMLElement) {
+		target = ev.target;
+	}
 
-    const prefs_group = target.querySelector(ele_css_query);
+	const prefs_group = target.querySelector(ele_css_query);
 
-    if (prefs_group instanceof HTMLDivElement) {
+	if (prefs_group instanceof HTMLDivElement) {
 
-        menu_create(prefs_group);
-        UIPreferences.addText(prefs_group, `Version: ${plugin_version}`);
-        
-    }
+		menu_create(prefs_group);
+		UIPreferences.addText(prefs_group, `Version: ${plugin_version}`);
+		
+	}
 
 }
 

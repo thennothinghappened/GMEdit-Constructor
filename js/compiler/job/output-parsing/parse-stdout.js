@@ -26,7 +26,7 @@ const error_types = [
 export function job_parse_stdout(stdout) {
 
 	/** @type {JobError[]} */
-    const errors = [];
+	const errors = [];
 
 	let string = stdout;
 
@@ -48,6 +48,6 @@ export function job_parse_stdout(stdout) {
 		}
 	}
 
-    return errors;
+	return errors;
 
 }

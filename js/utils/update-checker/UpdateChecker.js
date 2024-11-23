@@ -44,76 +44,76 @@ const internet_check_url = 'https://example.com/';
  */
 export async function plugin_update_check() {
 
-    const our_version_res = SemVer.parse(plugin_version);
+	const our_version_res = SemVer.parse(plugin_version);
 
-    if (!our_version_res.ok) {
-        return {
-            ok: false,
-            err: new Err(
-                'Our own plugin version failed to parse. This should never happen!!',
-                our_version_res.err
-            )
-        };
-    }
+	if (!our_version_res.ok) {
+		return {
+			ok: false,
+			err: new Err(
+				'Our own plugin version failed to parse. This should never happen!!',
+				our_version_res.err
+			)
+		};
+	}
 
-    const our_version = our_version_res.data;
+	const our_version = our_version_res.data;
 
-    /** @type {Result<GithubLatestVersionResponse>} */
-    // @ts-ignore
-    // Note: TS unfortunately doesn't know how to resolve overloads like this.
-    const res = await (fetch(update_check_url)
-        .then(async response => ({ ok: true, data: await response.json() }))
-        .catch(err => ({ ok: false, err: new Err(err) })));
-    
-    if (!res.ok) {
+	/** @type {Result<GithubLatestVersionResponse>} */
+	// @ts-ignore
+	// Note: TS unfortunately doesn't know how to resolve overloads like this.
+	const res = await (fetch(update_check_url)
+		.then(async response => ({ ok: true, data: await response.json() }))
+		.catch(err => ({ ok: false, err: new Err(err) })));
+	
+	if (!res.ok) {
 
-        try {
-            await fetch(internet_check_url);
-        } catch (err) {
-            // We know we don't have internet access, so stop gracefully.
-            return {
-                ok: true,
-                data: {
-                    update_available: false
-                }
-            };
-        }
+		try {
+			await fetch(internet_check_url);
+		} catch (err) {
+			// We know we don't have internet access, so stop gracefully.
+			return {
+				ok: true,
+				data: {
+					update_available: false
+				}
+			};
+		}
 
-        return {
-            ok: false,
-            err: new Err('Querying latest version request failed.', res.err)
-        };
-    }
+		return {
+			ok: false,
+			err: new Err('Querying latest version request failed.', res.err)
+		};
+	}
 
-    const public_version_res = SemVer.parse(res.data.tag_name);
+	const public_version_res = SemVer.parse(res.data.tag_name);
 
-    if (!public_version_res.ok) {
-        return {
-            ok: false,
-            err: new Err(
-                'Failed to parse the version name of the latest public release',
-                public_version_res.err
-            )
-        };
-    }
+	if (!public_version_res.ok) {
+		return {
+			ok: false,
+			err: new Err(
+				'Failed to parse the version name of the latest public release',
+				public_version_res.err
+			)
+		};
+	}
 
-    const public_version = public_version_res.data;
-    const our_version_newness = our_version.compare(public_version);
+	const public_version = public_version_res.data;
+	const our_version_newness = our_version.compare(public_version);
 
-    if (our_version_newness < 0) {
-        return {
-            ok: true,
-            data: {
-                update_available: true,
-                version: public_version,
-                url: res.data.html_url
-            }
-        };
-    }
+	if (our_version_newness < 0) {
+		return {
+			ok: true,
+			data: {
+				update_available: true,
+				version: public_version,
+				url: res.data.html_url
+			}
+		};
+	}
 
-    return {
-        ok: true,
-        data: { update_available: false }
-    };
+	return {
+		ok: true,
+		data: { update_available: false }
+	};
 
 }
