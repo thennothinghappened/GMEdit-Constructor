@@ -7,7 +7,8 @@ import { def_global_build_path, def_runtime_paths, def_user_paths, igor_path_seg
 import { fileExists, readFile, readdir, writeFile } from '../utils/file.js';
 import { Err } from '../utils/Err.js';
 import { deep_assign } from '../utils/object.js';
-import { join_path, plugin_name } from '../GMConstructor.js';
+import { plugin_name } from '../GMConstructor.js';
+import * as node from '../node-import.js';
 import { runtime_version_parse } from '../compiler/RuntimeVersion.js';
 import { ConstructorControlPanel } from '../ui/editors/ConstructorControlPanel.js';
 import { use } from '../utils/scope-extensions/use.js';
@@ -454,8 +455,8 @@ async function runtime_list_load_path(type, search_path) {
 				return null;
 			}
 
-			const path = join_path(search_path, dirname);
-			const igor_path = join_path(path, igor_path_segment);
+			const path = node.path.join(search_path, dirname);
+			const igor_path = node.path.join(path, igor_path_segment);
 
 			const version_res = runtime_version_parse(type, dirname);
 
@@ -527,7 +528,7 @@ async function user_list_load_path(type, users_path) {
 	const users = dir_res.data
 		.map(dirname => {
 			return {
-				path: join_path(users_path, dirname),
+				path: node.path.join(users_path, dirname),
 				name: dirname
 			};
 		})
@@ -537,8 +538,8 @@ async function user_list_load_path(type, users_path) {
 	// (e.g Cache).
 	const valid = await Promise.all(
 		users.map(
-			async user => await fileExists(join_path(user.path, 'license.plist'))
-				|| await fileExists(join_path(user.path, 'local_settings.json'))
+			async user => await fileExists(node.path.join(user.path, 'license.plist'))
+				|| await fileExists(node.path.join(user.path, 'local_settings.json'))
 		)
 	);
 
@@ -554,7 +555,7 @@ async function user_list_load_path(type, users_path) {
  */
 export async function __setup__() {
 
-	save_path = join_path(Electron_App.getPath('userData'), 'GMEdit', 'config', `${plugin_name}.json`);
+	save_path = node.path.join(Electron_App.getPath('userData'), 'GMEdit', 'config', `${plugin_name}.json`);
 
 	/** @type {Partial<Preferences.Data>|undefined} */
 	let loaded_prefs = undefined;

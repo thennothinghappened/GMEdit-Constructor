@@ -7,7 +7,7 @@ import { CompileLogViewer } from '../ui/editors/CompileLogViewer.js';
 import { Job } from './job/Job.js';
 import { igor_platform_cmd_name, output_blob_exts, output_package_exts } from './igor-paths.js';
 import { Err } from '../utils/Err.js';
-import { join_path, spawn } from '../GMConstructor.js';
+import { child_process, path } from '../node-import.js';
 
 /** @type {Job[]} */
 const jobs = [];
@@ -31,7 +31,7 @@ export async function job_run(project, runtime, user, settings) {
 		}
 	}
 
-	const proc = spawn(
+	const proc = child_process.spawn(
 		runtime.igor_path,
 		flags_res.data,
 		{ cwd: project.dir }
@@ -86,8 +86,8 @@ function job_flags_get(project, runtime_path, user_path, settings) {
 		`/rp=${runtime_path}`,
 		`/runtime=${settings.runner}`,
 		`/v`,
-		`/cache=${join_path(settings.buildPath, 'cache')}`,
-		'/of=' + join_path(settings.buildPath, 'output', projectName + output_blob_exts[settings.platform])
+		`/cache=${path.join(settings.buildPath, 'cache')}`,
+		'/of=' + path.join(settings.buildPath, 'output', projectName + output_blob_exts[settings.platform])
 	];
 
 	if (user_path !== null) {

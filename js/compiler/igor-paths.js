@@ -1,5 +1,5 @@
 
-import { join_path } from '../GMConstructor.js';
+import * as node from '../node-import.js';
 
 const windowsAppdata = process.env?.AppData ?? 'C:\\Users\\PLEASE_SPECIFY_USERNAME\\AppData\\Roaming';
 
@@ -114,5 +114,11 @@ export const igor_platform_cmd_name = igor_platform_map[process.platform].user_p
  * Called when the plugin is loading.
  */
 export function __setup__() {
-	igor_path_segment = join_path('bin', 'igor', igor_platform_map[process.platform].platform_path_name, process.arch, `Igor${igor_platform_map[process.platform].platform_executable_extension}`);
+	igor_path_segment = node.path.join(
+		'bin',
+		'igor',
+		igor_platform_map[process.platform].platform_path_name,
+		process.arch,
+		`Igor${igor_platform_map[process.platform].platform_executable_extension}`
+	);
 }

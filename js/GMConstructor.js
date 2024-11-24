@@ -10,6 +10,7 @@ import { ConstructorControlPanel } from './ui/editors/ConstructorControlPanel.js
 import { plugin_update_check } from './update-checker/UpdateChecker.js';
 import * as constructorEditorView from './ui/editors/ConstructorEditorView.js';
 import { mkdir, readdir } from './utils/file.js';
+import * as node from './node-import.js';
 
 /**
  * Name of the plugin 
@@ -22,18 +23,6 @@ export let plugin_name;
  * @type {String}
  */
 export let plugin_version;
-
-/**
- * Reference to NodeJS path join.
- * @type {import('node:path').join}
- */
-export let join_path;
-
-/** 
- * Reference to NodeJS spawn.
- * @type {import('node:child_process').spawn} 
- */
-export let spawn;
 
 /**
  * Main controller instance for the plugin!
@@ -170,10 +159,10 @@ export class GMConstructor {
 	#getBuildDir(project) {
 		
 		if (preferences.use_global_build_get()) {
-			return join_path(preferences.global_build_path_get(), project.displayName);
+			return node.path.join(preferences.global_build_path_get(), project.displayName);
 		}
 
-		return join_path(project.dir, 'build');
+		return node.path.join(project.dir, 'build');
 
 	}
 
@@ -226,8 +215,7 @@ export class GMConstructor {
 
 		}
 
-		join_path = node_path.join;
-		spawn = node_child_process.spawn;
+		node.__setup__(node_path, node_child_process);
 
 		plugin_name = _plugin_name;
 		plugin_version = _plugin_version;
