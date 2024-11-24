@@ -1,5 +1,7 @@
 
-declare type PreferencesData = {
+declare global {
+
+type PreferencesData = {
 
 	/** Globally selected runtime options that may be overriden by projects. */
 	runtime_opts: {
@@ -31,7 +33,7 @@ declare type PreferencesData = {
 /**
  * Project-specific preferences data!
  */
-declare type ProjectPreferencesData = {
+type ProjectPreferencesData = {
 
 	/** 
 	 * Name of the active config to compile with.
@@ -55,16 +57,16 @@ declare type ProjectPreferencesData = {
 
 };
 
-declare type GMChannelType = 
+type GMChannelType = 
 	'Stable'	|
 	'Beta'		|
 	'LTS'		;
 
-declare type RunnerType =
+type RunnerType =
 	'VM'	|
 	'YYC'	;
 
-declare type RuntimePreference = {
+type RuntimePreference = {
 	/** Where we should search for the list of runtimes. */
 	search_path: string;
 
@@ -81,7 +83,7 @@ declare type RuntimePreference = {
 /**
  * Representation of a version of a GM runtime.
  */
-declare interface IRuntimeVersion {
+interface IRuntimeVersion {
 
 	readonly year: number;
 	readonly month: number;
@@ -121,7 +123,7 @@ declare interface IRuntimeVersion {
 /**
  * Information for a specific found runtime.
  */
-declare type RuntimeInfo = {
+type RuntimeInfo = {
 	version: IRuntimeVersion;
 	path: string;
 	igor_path: string;
@@ -130,7 +132,7 @@ declare type RuntimeInfo = {
 /**
  * Information for a specific found user.
  */
-declare type UserInfo = {
+type UserInfo = {
 	path: string;
 	name: string;
 };
@@ -138,7 +140,7 @@ declare type UserInfo = {
 /**
  * Base error type we use to try and be descriptive to the user :)
  */
-declare interface IErr extends Error {
+interface IErr extends Error {
 
 	readonly title?: string;
 	readonly solution?: string;
@@ -149,19 +151,19 @@ declare interface IErr extends Error {
 
 }
 
-declare type MessageSeverity =
+type MessageSeverity =
 	'error'		|
 	'warning'	|
 	'debug'		;
 
-declare type Result<T> = 
+type Result<T> = 
 	{ ok: true, data: T }		|
 	{ ok: false, err: IErr }	;
 
 /**
  * Settings for running an Igor Job.
  */
-declare type IgorSettings = {
+type IgorSettings = {
 
 	/**
 	 * Which platform the action will run for.
@@ -209,7 +211,7 @@ declare type IgorSettings = {
 /**
  * A supported platform for Igor to target.
  */
-declare type IgorPlatform =
+type IgorPlatform =
 	'OperaGX'			|
 	'Windows'			|
 	'Mac'				|
@@ -227,7 +229,7 @@ declare type IgorPlatform =
 /**
  * Host (OS) platform information for Igor.
  */
-declare type IgorPlatformInfo = {
+type IgorPlatformInfo = {
 
 	/** Extension of the `Igor` executable for the target platform's runtime. */
 	platform_executable_extension: string;
@@ -265,18 +267,18 @@ declare type IgorPlatformInfo = {
 
 }
 
-declare type IgorVerb = 
+type IgorVerb = 
 	'Run'			|
 	'Package'		|
 	'PackageZip'	|
 	'Clean'			;
 
-declare type JobEvent =
+type JobEvent =
 	'stdout'	|
 	'output'	|
 	'stop'		;
 
-declare type JobStatus = 
+type JobStatus = 
 	{ status: 'running' } |
 	{ status: 'stopped', stoppedByUser: boolean, exitCode: number? };
 
@@ -286,20 +288,20 @@ interface StdoutEntry {
 	length: number;
 }
 
-declare type GMPlugin = {
+type GMPlugin = {
 	init: () => void,
 	cleanup: () => void
 }
 
-declare let gmConstructor: GMConstructor;
+let gmConstructor: GMConstructor;
 
-declare type GMEditEvent =
+type GMEditEvent =
 	'preferencesBuilt'			|
 	'projectPropertiesBuilt'	|
 	'projectOpen'				|
 	'projectClose'				;
 
-declare type AceWrapOptions = {
+type AceWrapOptions = {
 	isPrimary?: boolean,
 	statusBar?: boolean,
 	completers?: boolean,
@@ -313,11 +315,11 @@ declare type AceWrapOptions = {
 	dispatchEvent?: boolean,
 };
 	
-declare interface GMEditAceTools {
+interface GMEditAceTools {
 	createEditor(element: string|HTMLElement, options?: AceWrapOptions): AceAjax.Editor;
 };
 
-declare class GMEdit {
+class GMEdit {
 	
 	static aceTools: GMEditAceTools;
 
@@ -327,11 +329,11 @@ declare class GMEdit {
 
 }
 
-declare interface IElectronApp {
+interface IElectronApp {
 	getPath:		(name: string) => string;
 }
 
-declare interface IElectronFS {
+interface IElectronFS {
 	readFile:		(path: string, cb: ((err?: Error, data?: Buffer) => void)) => void;
 	readdir:		(path: string, cb: (err?: Error, files?: string[]) => void) => void;
 	mkdir:			(path: string, settings: { recursive: boolean }, cb: (err: Error?) => void) => void;
@@ -340,11 +342,11 @@ declare interface IElectronFS {
 	exists:			(path: string, cb: (exists: boolean) => void) => void;
 }
 
-declare interface IElectronDialog {
+interface IElectronDialog {
 	showMessageBox: (options: DialogMessageOptions) => number;
 }
 
-declare type DialogMessageType =
+type DialogMessageType =
 	'none'		|
 	/** On Windows, "question" displays the same icon as "info" */
 	'info'		|
@@ -356,7 +358,7 @@ declare type DialogMessageType =
 	'warning'	;
 
 
-declare type DialogMessageOptions = {
+type DialogMessageOptions = {
 	/**
 	 * On Windows, "question" displays the same icon as "info", unless you set an icon using the "icon" option.
 	 * On macOS, both "warning" and "error" display the same warning icon.
@@ -402,7 +404,7 @@ declare type DialogMessageOptions = {
 	noLink?: boolean,
 };
 
-declare type Electron_MenuItemProps = {
+type Electron_MenuItemProps = {
 	id: string,
 	label?: string,
 	type?: 'normal'|'separator',
@@ -415,13 +417,13 @@ declare type Electron_MenuItemProps = {
 	click?: () => void
 }
 
-declare type Electron_Menu = {
+type Electron_Menu = {
 	append: (item: Electron_MenuItem) => void,
 	items: Electron_MenuItem[],
 	clear: () => void
 }
 
-declare class Electron_MenuItem {
+class Electron_MenuItem {
 
 	constructor(props: Electron_MenuItemProps) {}
 
@@ -432,7 +434,7 @@ declare class Electron_MenuItem {
 
 }
 
-declare interface GMEditUIPreferences {
+interface GMEditUIPreferences {
 	addText:		(parent: HTMLElement, label: string) => HTMLElement;
 	addWiki:		(parent: HTMLElement, url: string, label: string) => HTMLElement;
 	addCheckbox:	(parent: HTMLElement, label: string, value: boolean, update: (value: boolean) => void) => HTMLElement;
@@ -443,7 +445,7 @@ declare interface GMEditUIPreferences {
 	addBigButton:	(parent: HTMLElement, text: string, callback: () => void) => HTMLDivElement;
 }
 
-declare interface GMEditProjectProperties {
+interface GMEditProjectProperties {
 
 	load(project: GMLProject): GMLProjectPropertiesData;
 	save(project: GMLProject, data: GMLProjectPropertiesData);
@@ -451,7 +453,7 @@ declare interface GMEditProjectProperties {
 
 }
 
-declare type GMLProjectPropertiesData = {
+type GMLProjectPropertiesData = {
 	
 	/** API override */
 	gmlVersion?: string;
@@ -460,11 +462,11 @@ declare type GMLProjectPropertiesData = {
 	
 }
 
-declare interface GMEditUIMainMenu {
+interface GMEditUIMainMenu {
 	menu: Electron_Menu
 }
 
-declare interface GMLProject {
+interface GMLProject {
 
 	name: string;
 	displayName: string;
@@ -484,16 +486,16 @@ declare interface GMLProject {
 
 }
 
-declare type GMLProjectYY = {
+type GMLProjectYY = {
 	configs: GMLProjectYYConfig;
 } & YYFile;
 
-declare type YYFile = {
+type YYFile = {
 	resourceVersion: string;
 	resourceType: string;
 };
 
-declare type GMLProjectYYConfig = {
+type GMLProjectYYConfig = {
 	children: GMLProjectYYConfig[];
 	name: string;
 }
@@ -501,13 +503,13 @@ declare type GMLProjectYYConfig = {
 /**
  * Project format type for the loaded project.
  */
-declare type YYProjectFormat =
+type YYProjectFormat =
 	'outdated'	|
 	'2023.11'	|
 	'2024.2'	|
 	'2024.4+'	;
 
-declare interface GMEditGMLProject {
+interface GMEditGMLProject {
 	current: GMLProject;
 }
 
@@ -564,7 +566,7 @@ class FileKind {
  * Some editor types (e.g. object editor for GMS2+) may associate multiple files on disk with one tab.
  * @author YellowAfterlife
  */
-declare class GmlFile {
+class GmlFile {
 
 	/** Display name (used for tab title). Usually name.ext */
 	name: string;
@@ -608,7 +610,7 @@ declare class GmlFile {
  * ...
  * @author YellowAfterlife
  */
-declare class Editor {
+class Editor {
 	
 	element: HTMLElement;
 	file: GmlFile;
@@ -700,14 +702,14 @@ class EditCode extends Editor {
 	override checkChanges = (): void => {}
 }
 
-declare type AceCommand = {
+type AceCommand = {
 	name: string;
 	title?: string;
 	bindKey: { win: string, mac: string };
 	exec: () => void;
 };
 
-declare interface AceCommands {
+interface AceCommands {
 
 	add: (command: AceCommand) => void;
 	addToPalette: (command: AceCommand) => void;
@@ -716,23 +718,23 @@ declare interface AceCommands {
 	removeFromPalette: (comamnd: AceCommand) => void;
 }
 
-declare interface AceHashHandler {
+interface AceHashHandler {
 	addCommand: (command: AceCommand) => void;
 	removeCommand: (command: AceCommand, keepCommand: boolean) => void;
 }
 
-declare interface GMEditKeyboardShortcuts {
+interface GMEditKeyboardShortcuts {
 	/**
 	 * Handler for global keyboard shortcuts.
 	 */
 	hashHandler: AceHashHandler;
 }
 
-declare interface ChromeTabs {
+interface ChromeTabs {
 	getTabs: () => NodeListOf<ChromeTab>;
 }
 
-declare interface ChromeTab extends HTMLDivElement {
+interface ChromeTab extends HTMLDivElement {
 	gmlFile: GmlFile;
 }
 
@@ -742,7 +744,7 @@ declare interface ChromeTab extends HTMLDivElement {
  */
 type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>;
 
-declare type $GMEdit = {
+type $GMEdit = {
 	'ui.Preferences': GMEditUIPreferences;
 	'ui.MainMenu': GMEditUIMainMenu;
 	'ui.project.ProjectProperties': GMEditProjectProperties;
@@ -757,21 +759,25 @@ declare type $GMEdit = {
 	'ace.AceCommands': AceCommands;
 };
 
-declare const $gmedit: $GMEdit;
+const $gmedit: $GMEdit;
 
-declare const Electron_App: IElectronApp;
-declare const Electron_FS: IElectronFS;
-declare const Electron_Dialog: IElectronDialog;
+const Electron_App: IElectronApp;
+const Electron_FS: IElectronFS;
+const Electron_Dialog: IElectronDialog;
 
-declare interface Window {
+interface Window {
 	GMConstructor?: GMConstructor;
 }
 
 /**
  * https://stackoverflow.com/a/78673120/7246439
  */
-declare type DeepImmutable<T> =
+type DeepImmutable<T> =
 	T extends Map<infer K, infer V> ? ReadonlyMap<DeepImmutable<K>, DeepImmutable<V>>
 	: T extends Set<infer S> ? ReadonlySet<DeepImmutable<S>>
 	: T extends object ? { readonly [K in keyof T]: DeepImmutable<T[K]> }
 	: T;
+
+};
+
+export {};
