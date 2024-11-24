@@ -199,21 +199,6 @@ export class OutputLogTab extends ConstructorTab {
 	}
 
 	/**
-	 * Restore the log scroll position when tabbing back in.
-	 * @param {GMEdit.Editor} prev The editor that was previously in focus.
-	 */
-	focusGain(prev) {
-		
-		if (prev !== this) {
-			// this.infoGroup.scrollTop = this.savedScrollX;
-			// this.infoGroup.scrollLeft = this.savedScrollY;
-		}
-		
-		return super.focusGain(prev);
-
-	}
-
-	/**
 	 * Set up an editor tab for a Job, and view it.
 	 * 
 	 * @param {Job} job
