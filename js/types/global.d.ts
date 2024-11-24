@@ -521,14 +521,14 @@ type UIGroup = {
  */
 class FileKind {
 
-	public checkSelfForChanges: boolean = true;
+	checkSelfForChanges: boolean = true;
 
 	constructor() {}
 
 	/**
 	 * @returns created file or null
 	 */
-	public create = (name: string, path: string, data: any, nav: GmlFileNav): GmlFile => {
+	create = (name: string, path: string, data: any, nav: GmlFileNav): GmlFile => {
 		const file = new GmlFile(name, path, this, data);
 		GmlFile.openTab(file);
 
@@ -548,12 +548,12 @@ class FileKind {
 	 * Called by a GmlFile upon creation, initialising said file of this type.
 	 * Should assign the file.editor by least.
 	 */
-	public init = (file: GmlFile, data: any): void => {}
+	init = (file: GmlFile, data: any): void => {}
 
 	/** We're asked to bring `nav` into view */
-	public navigate = (editor: Editor, nav: GmlFileNav): boolean => {}
+	navigate = (editor: Editor, nav: GmlFileNav): boolean => {}
 
-	public getTabContext = (file: GmlFile, data: any): string => {
+	getTabContext = (file: GmlFile, data: any): string => {
 		if (file.path != null) return file.path;
 		return file.name;
 	}
@@ -567,24 +567,24 @@ class FileKind {
 declare class GmlFile {
 
 	/** Display name (used for tab title). Usually name.ext */
-	public name: string;
+	name: string;
 	/** Full path to the source file (null if no source file, e.g. search results) */
-	public path: string?;
+	path: string?;
 	/** Loading/saving mode of operation */
-	public kind: FileKind;
+	kind: FileKind;
 	/** Context (used for tagging tabs) */
-	public context: string;
+	context: string;
 	/** The associated editor */
-	public editor: Editor;
+	editor: Editor;
 	/** Shortcut if this is a code editor. Otherwise null */
-	public codeEditor: EditCode;
+	codeEditor: EditCode;
 	/** Whether the file has been modified. */
-	public __changed: boolean;
+	__changed: boolean;
 	/** The tab associated with this file. */
-	public tabEl: ChromeTab;
+	tabEl: ChromeTab;
 
-	public static next: GmlFile?;
-	public static current: GmlFile?;
+	static next: GmlFile?;
+	static current: GmlFile?;
 
 	constructor(name: string, path: string?, kind: FileKind, data?: any) {
 		this.name = name;
@@ -598,23 +598,23 @@ declare class GmlFile {
 		this.editor.ready();
 	}
 
-	public close = (): void => {}
+	close = (): void => {}
 
-	public getAceSession = (): AceSession? => {}
+	getAceSession = (): AceSession? => {}
 
-	public static open = (name: string, path: string, nav?: GmlFileNav): GmlFile? => {}
+	static open = (name: string, path: string, nav?: GmlFileNav): GmlFile? => {}
 
 	/**
 	 * Loads the current code
 	 * @param data If provided, is used instead of reading from FS.
 	 */
-	public load = (data: any?) => {}
+	load = (data: any?) => {}
 
-	public static openTab = (file: GmlFile) => {}
+	static openTab = (file: GmlFile) => {}
 
-	public rename = (newName: string, newPath: string): void => {}
+	rename = (newName: string, newPath: string): void => {}
 
-	public save(): void {}
+	save(): void {}
 }
 
 /**
@@ -623,33 +623,33 @@ declare class GmlFile {
  */
 declare class Editor {
 
-	public static container: HTMLElement;
+	static container: HTMLElement;
 	
-	public element: HTMLElement;
-	public file: GmlFile;
+	element: HTMLElement;
+	file: GmlFile;
 
 	constructor(file: GmlFile) {
 		this.file = file;
 	}
 
-	public load = (data: any?) => {
+	load = (data: any?) => {
 		
 	}
 
-	public stateSave = () => {
+	stateSave = () => {
 		// may save state to LS
 	}
-	public stateLoad = () => {
+	stateLoad = () => {
 		// may load previously saved state
 	}
 	
 	/** new -> load -> ready */
-	public ready = () => {
+	ready = () => {
 		
 	}
 
 	/** [x] clicked -> status checks -> stateSave -> destroy */
-	public destroy = () => {
+	destroy = () => {
 		
 	}
 }
@@ -661,26 +661,26 @@ declare class Editor {
 class KCode extends FileKind {
 	
 	/** language mode path for Ace */
-	public modePath: string = 'ace/mode/text';
+	modePath: string = 'ace/mode/text';
 	
 	/** whether to do a GmlSeeker pass after saving to update definitions */
-	public indexOnSave: boolean = false;
+	indexOnSave: boolean = false;
 	
 	/**
 	 * Whether to set GmlFile.changed when code gets changed
 	 * @see AceStatusBar.update
 	 */
-	public setChangedOnEdits: boolean = true;
+	setChangedOnEdits: boolean = true;
 	
 	constructor() {
 		super();
 	}
 	
-	override public init = (file: GmlFile, data?: any): void => {}
+	override init = (file: GmlFile, data?: any): void => {}
 	
-	public loadCode = (editor: EditCode, data?: any): string => {}
+	loadCode = (editor: EditCode, data?: any): string => {}
 
-	public saveCode = (editor: EditCode, code: string): boolean => {}
+	saveCode = (editor: EditCode, code: string): boolean => {}
 
 }
 
@@ -690,11 +690,11 @@ class KCode extends FileKind {
  */
 class EditCode extends Editor {
 	
-	public static currentNew: EditCode? = null;
-	public static container: Element;
+	static currentNew: EditCode? = null;
+	static container: Element;
 
-	public session: AceSession;
-	public kind: KCode;
+	session: AceSession;
+	kind: KCode;
 	private modePath: string;
 	
 	constructor(file: GmlFile, modePath: string) {
@@ -704,19 +704,19 @@ class EditCode extends Editor {
 		this.element = container;
 	}
 	
-	override public ready = (): void => {}
+	override ready = (): void => {}
 	
-	override public stateLoad = () => {}
+	override stateLoad = () => {}
 
-	override public stateSave = () => {}
+	override stateSave = () => {}
 	
-	override public focusGain = (prev: Editor): void => {}
+	override focusGain = (prev: Editor): void => {}
 
-	override public load = (data: any): void => {}
+	override load = (data: any): void => {}
 
-	override public save = (): boolean => {}
+	override save = (): boolean => {}
 
-	override public checkChanges = (): void => {}
+	override checkChanges = (): void => {}
 }
 
 declare type AceCommand = {
