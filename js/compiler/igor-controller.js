@@ -14,7 +14,7 @@ const jobs = [];
 
 /**
  * Run a new job on a given project.
- * @param {GMLProject} project
+ * @param {GMEdit.Project} project
  * @param {RuntimeInfo} runtime
  * @param {UserInfo?} user
  * @param {IgorSettings} settings
@@ -70,7 +70,7 @@ function job_remove(job) {
 
 /**
  * Select the flags for Igor to run the job.
- * @param {GMLProject} project
+ * @param {GMEdit.Project} project
  * @param {string} runtime_path
  * @param {string?} user_path
  * @param {IgorSettings} settings

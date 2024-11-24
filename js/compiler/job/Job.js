@@ -11,7 +11,7 @@ export class Job {
 	/** @type {import('node:child_process').ChildProcess} */
 	process;
 	
-	/** @type {GMLProject} */
+	/** @type {GMEdit.Project} */
 	project;
 
 	stdout = '';
@@ -34,7 +34,7 @@ export class Job {
 	/**
 	 * @param {IgorSettings} settings
 	 * @param {import('node:child_process').ChildProcess} process
-	 * @param {GMLProject} project
+	 * @param {GMEdit.Project} project
 	 */
 	constructor(settings, process, project) {
 		

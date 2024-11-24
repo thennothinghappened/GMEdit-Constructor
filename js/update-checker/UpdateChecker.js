@@ -15,7 +15,7 @@ const internet_check_url = 'https://example.com/';
 /**
  * Check for updates on this plugin from GitHub.
  * 
- * @returns {Promise<Result<UpdateCheck.Result>>}
+ * @returns {Promise<Result<UpdateChecker.Result>>}
  */
 export async function plugin_update_check() {
 
@@ -33,7 +33,7 @@ export async function plugin_update_check() {
 
 	const our_version = our_version_res.data;
 
-	/** @type {Result<UpdateCheck.GithubLatestVersionResponse>} */
+	/** @type {Result<UpdateChecker.GithubLatestVersionResponse>} */
 	// @ts-ignore
 	// Note: TS unfortunately doesn't know how to resolve overloads like this.
 	const res = await (fetch(update_check_url)

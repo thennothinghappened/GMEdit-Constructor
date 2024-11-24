@@ -3,7 +3,7 @@ import { ConstructorEditorView, ConstructorViewFileKind } from './ConstructorEdi
 import * as ui from '../ui-wrappers.js';
 import { JobError } from '../../compiler/job/JobError.js';
 import { Err } from '../../utils/Err.js';
-import { use } from '../../utils/use.js';
+import { use } from '../../utils/scope-extensions/use.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];
@@ -20,7 +20,7 @@ class KConstructorOutput extends ConstructorViewFileKind {
 	}
 
 	/**
-	 * @param {GmlFile} file
+	 * @param {GMEdit.GmlFile} file
 	 * @param {Job} job
 	 */
 	init = (file, job) => {
@@ -74,7 +74,7 @@ export class CompileLogViewer extends ConstructorEditorView {
 	savedScrollY = 0;
 
 	/**
-	 * @param {GmlFile} file
+	 * @param {GMEdit.GmlFile} file
 	 * @param {Job} job
 	 */
 	constructor(file, job) {
@@ -88,7 +88,7 @@ export class CompileLogViewer extends ConstructorEditorView {
 
 		this.logAceEditor = use(document.createElement('pre'))
 			.also(it => it.classList.add('gm-constructor-log'))
-			.let(it => GMEdit.aceTools.createEditor(it, { statusBar: false }))
+			.let(it => window.GMEdit.aceTools.createEditor(it, { statusBar: false }))
 			.also(it => it.setReadOnly(true))
 			.value;
 

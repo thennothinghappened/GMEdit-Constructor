@@ -5,16 +5,18 @@ const ChromeTabs = $gmedit['ui.ChromeTabs'];
 
 /**
  * Get the currently open project.
- * @returns {GMLProject|undefined}
+ * @returns {GMEdit.Project|undefined}
  */
 export function project_current_get() {
+	
 	const proj = $gmedit['gml.Project'].current;
 	
 	if (proj?.path === '') {
 		return;
 	}
 
-	return proj;
+	return proj ?? undefined;
+
 }
 
 /**
@@ -51,8 +53,9 @@ export function tab_current_get() {
 
 /**
  * Get the config tree for a project.
- * @param {GMLProject} project 
- * @returns {GMLProjectYYConfig}
+ * 
+ * @param {GMEdit.Project} project 
+ * @returns {ProjectYYConfig}
  */
 export function project_config_tree_get(project) {
 	return project_read_yy(project).configs;
@@ -60,7 +63,8 @@ export function project_config_tree_get(project) {
 
 /**
  * Returns the config tree as an array of config names.
- * @param {GMLProjectYYConfig} config 
+ * 
+ * @param {ProjectYYConfig} config 
  * @returns {string[]}
  */
 export function project_config_tree_to_array(config) {
@@ -75,7 +79,7 @@ export function project_config_tree_to_array(config) {
 /**
  * Returns what kind of project YY format we're running.
  * 
- * @param {GMLProject} project 
+ * @param {GMEdit.Project} project 
  * @returns {Result<YYProjectFormat>}
  */
 export function project_format_get(project) {
@@ -128,8 +132,8 @@ export function project_format_get(project) {
  * Read the YY file of a given project.
  * Code is by YAL's suggestion.
  * 
- * @param {GMLProject} project 
- * @returns {GMLProjectYY}
+ * @param {GMEdit.Project} project 
+ * @returns {ProjectYY}
  */
 function project_read_yy(project) {
 	return project.readYyFileSync(project.name);

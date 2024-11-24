@@ -25,20 +25,12 @@
  * SOFTWARE.
  */
 
-/**
- * @template T
- * @typedef {T extends undefined ? never : T} NonUndefined
- */
-
-/**
- * @template R
- * @typedef {R extends undefined ? undefined : Wrapper<R>} WrapperIfNonUndefined
- */
+// @ts-nocheck
 
 /**
  * @template T
  */
-class Wrapper {
+export class Wrapper {
 
 	/**
 	 * @type {T}

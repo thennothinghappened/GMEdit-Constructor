@@ -109,7 +109,7 @@ export class RuntimeVersion {
 	 * Projects on 2023.11 and earlier use a different format to 2024.2 and greater
 	 * as per [Prefabs Phase 1](https://github.com/YoYoGames/GameMaker-Bugs/issues/3218).
 	 * 
-	 * @param {GMLProject} project 
+	 * @param {GMEdit.Project} project 
 	 * @returns {Result<boolean>}
 	 */
 	supportedByProject(project) {

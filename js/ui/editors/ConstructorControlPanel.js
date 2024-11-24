@@ -29,7 +29,7 @@ class KConstructorControlPanel extends ConstructorViewFileKind {
 	}
 
 	/**
-	 * @param {GmlFile} file
+	 * @param {GMEdit.GmlFile} file
 	 */
 	init = (file) => {
 		file.editor = new ConstructorControlPanel(file);
@@ -56,7 +56,7 @@ export class ConstructorControlPanel extends ConstructorEditorView {
 	#runtimeVersionDropdown = null;
 
 	/**
-	 * @param {GmlFile} file
+	 * @param {GMEdit.GmlFile} file
 	 */
 	constructor(file) {
 		
@@ -85,8 +85,8 @@ export class ConstructorControlPanel extends ConstructorEditorView {
 			this.onOpenProject();
 		}
 
-		GMEdit.on('projectOpen', this.onOpenProject);
-		GMEdit.on('projectClose', this.onCloseProject);
+		window.GMEdit.on('projectOpen', this.onOpenProject);
+		window.GMEdit.on('projectClose', this.onCloseProject);
 
 	}
 
@@ -314,7 +314,7 @@ export class ConstructorControlPanel extends ConstructorEditorView {
 
 	/**
 	 * Setup project-specific settings.
-	 * @param {GMLProject} project 
+	 * @param {GMEdit.Project} project 
 	 */
 	projectSettingsSetup(project) {
 
@@ -426,8 +426,8 @@ export class ConstructorControlPanel extends ConstructorEditorView {
 	}
 
 	destroy = () => {
-		GMEdit.off('projectOpen', this.onOpenProject);
-		GMEdit.off('projectClose', this.onCloseProject);
+		window.GMEdit.off('projectOpen', this.onOpenProject);
+		window.GMEdit.off('projectClose', this.onCloseProject);
 	}
 
 }

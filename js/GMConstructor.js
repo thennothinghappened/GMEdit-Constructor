@@ -7,10 +7,9 @@ import * as igorPaths from './compiler/igor-paths.js';
 import * as preferencesMenu from './ui/PreferencesMenu.js';
 import { Err } from './utils/Err.js';
 import { ConstructorControlPanel } from './ui/editors/ConstructorControlPanel.js';
-import { SemVer } from './update-checker/SemVer.js';
 import { plugin_update_check } from './update-checker/UpdateChecker.js';
 import * as constructorEditorView from './ui/editors/ConstructorEditorView.js';
-import { fileExists, mkdir, readdir } from './utils/file.js';
+import { mkdir, readdir } from './utils/file.js';
 
 /**
  * Name of the plugin 
@@ -165,8 +164,8 @@ export class GMConstructor {
 
 	/**
 	 * Get the build directory to use for the given project.
-	 * @param {GMLProject} project 
-	 * @returns {String}
+	 * @param {GMEdit.Project} project 
+	 * @returns {string}
 	 */
 	#getBuildDir(project) {
 		

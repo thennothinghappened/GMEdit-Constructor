@@ -18,10 +18,10 @@ const default_binds = {
 	run: 'F5'
 };
 
-/** @type {Electron_MenuItem} */
+/** @type {Electron.MenuItem} */
 let constructor_menu;
 
-/** @type {Array<AceCommand>} */
+/** @type {GMEdit.AceCommand[]} */
 let commands;
 
 export function __setup__() {
@@ -58,8 +58,8 @@ export function __setup__() {
 
 	menu_items_enable(project_is_open());
 
-	GMEdit.on('projectOpen', on_project_open);
-	GMEdit.on('projectClose', on_project_close);
+	window.GMEdit.on('projectOpen', on_project_open);
+	window.GMEdit.on('projectClose', on_project_close);
 
 }
 
@@ -71,8 +71,8 @@ export function __cleanup__() {
 	// We can't remove existing menu items at the top level, so leave them be.
 	commands_deregister();
 
-	GMEdit.off('projectOpen', on_project_open);
-	GMEdit.off('projectClose', on_project_close);
+	window.GMEdit.off('projectOpen', on_project_open);
+	window.GMEdit.off('projectClose', on_project_close);
 
 }
 

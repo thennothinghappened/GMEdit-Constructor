@@ -15,7 +15,7 @@
 		/** Whether we are reloading from another existing instance. */
 		let reloading = false;
 
-		if ('GMConstructor' in window) {
+		if ('GMConstructor' in window && window.GMConstructor !== undefined) {
 			reloading = true;
 			await window.GMConstructor.cleanup();
 		}
@@ -24,12 +24,12 @@
 
 		const res = await GMConstructor
 			.create(plugin_name, plugin_version, node_path, node_child_process, reloading)
-			.catch(err => ({
+			.catch(err => /** @type {Result<import('js/GMConstructor.js').GMConstructor>} */ ({
 				ok: false,
 				err: err
 			}));
 
-		if (!res.ok) {
+		if (res.ok === false) {
 			
 			alert('Failed to launch Constructor, see the JavaScript console for details.');
 			console.error('Failed to launch Constructor!', res.err);
@@ -37,11 +37,11 @@
 			return;
 		}
 
-		// @ts-ignore
 		window.GMConstructor = res.data;
+
 	});
 
-	GMEdit.register(plugin_name, {
+	window.GMEdit.register(plugin_name, {
 		init: async () => {
 			await load();
 		},

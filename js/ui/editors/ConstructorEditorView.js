@@ -2,17 +2,16 @@ import { Job } from '../../compiler/job/Job.js';
 
 const Editor = $gmedit['editors.Editor'];
 const FileKind = $gmedit['file.FileKind'];
-const GmlFile = $gmedit['gml.file.GmlFile'];
 
 /**
  * # Note to self about how GMEdit does this stuff:
  * (unfortunately it still makes me do a mental backflip tryna understand it properly)
  * 
- * We have a class extending {@link FileKind}, which gets called on opening a 'file' (* doesn't have to be a real file)
+ * We have a class extending {@link GMEdit.FileKind}, which gets called on opening a 'file' (* doesn't have to be a real file)
  * of that file kind.
  * 
- * The 'file kind' class takes in an instance of an {@link GmlFile} and assigns its `editor`
- * property to the given editor class extending {@link Editor}, of which an instance of that class
+ * The 'file kind' class takes in an instance of an {@link GMEdit.GmlFile} and assigns its `editor`
+ * property to the given editor class extending {@link GMEdit.Editor}, of which an instance of that class
  * gets a HTML element corresponding to the tab's body to put whatever it wants in.
  * 
  * So all in all, we've got a file kind class which you pass off to the GmlFile constructor,
@@ -35,7 +34,8 @@ export class ConstructorViewFileKind extends FileKind {
 
 	/**
 	 * Initialise an instance of a file of this type.
-	 * @param {GmlFile} file
+	 * 
+	 * @param {GMEdit.GmlFile} file
 	 * @param {any} [data]
 	 */
 	init = (file, data) => {
@@ -52,7 +52,7 @@ export class ConstructorEditorView extends Editor {
 	static fileKind = new ConstructorViewFileKind();
 
 	/**
-	 * @param {GmlFile} file
+	 * @param {GMEdit.GmlFile} file
 	 */
 	constructor(file) {
 

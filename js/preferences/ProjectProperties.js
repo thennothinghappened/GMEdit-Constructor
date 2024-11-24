@@ -9,19 +9,19 @@ const ProjectProperties = $gmedit['ui.project.ProjectProperties'];
 
 /**
  * The current properties instance.
- * @type {Partial<ProjectPreferencesData>}
+ * @type {Partial<Preferences.ProjectData>}
  */
 let properties = {};
 
 export function __setup__() {
 
-	GMEdit.on('projectOpen', on_project_open);
+	window.GMEdit.on('projectOpen', on_project_open);
 
 }
 
 export function __cleanup__() {
 
-	GMEdit.off('projectOpen', on_project_open);
+	window.GMEdit.off('projectOpen', on_project_open);
 
 }
 

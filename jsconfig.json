@@ -9,10 +9,7 @@
 			"DOM"
 		],
 		"types": [
-			"@types/node",
-		],
-		"typeRoots": [
-			"/opt/homebrew/lib/node_modules"
+			"node",
 		]
 	}
 }

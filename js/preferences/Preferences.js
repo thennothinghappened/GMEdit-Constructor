@@ -10,7 +10,7 @@ import { deep_assign } from '../utils/object.js';
 import { join_path, plugin_name } from '../GMConstructor.js';
 import { runtime_version_parse } from '../compiler/RuntimeVersion.js';
 import { ConstructorControlPanel } from '../ui/editors/ConstructorControlPanel.js';
-import { use } from '../utils/use.js';
+import { use } from '../utils/scope-extensions/use.js';
 
 /**
  * List of recognised GameMaker IDE/Runtime channel types.
@@ -21,7 +21,7 @@ export const gm_channel_types = ['Stable', 'Beta', 'LTS'];
 /** @type {RunnerType[]} */
 export const valid_runner_types = ['VM', 'YYC'];
 
-/** @type {Readonly<PreferencesData>} */
+/** @type {Readonly<Preferences.Data>} */
 const prefs_default = {
 	runtime_opts: {
 		// Default runtime to use is probably going to be stable.
@@ -57,7 +57,7 @@ const prefs_default = {
 	global_build_path: def_global_build_path
 };
 
-/** @type {PreferencesData} */
+/** @type {Preferences.Data} */
 let prefs = Object.create(prefs_default);
 
 /**
@@ -556,7 +556,7 @@ export async function __setup__() {
 
 	save_path = join_path(Electron_App.getPath('userData'), 'GMEdit', 'config', `${plugin_name}.json`);
 
-	/** @type {Partial<PreferencesData>|undefined} */
+	/** @type {Partial<Preferences.Data>|undefined} */
 	let loaded_prefs = undefined;
 
 	if (await fileExists(save_path)) {

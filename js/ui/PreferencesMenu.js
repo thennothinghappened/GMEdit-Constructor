@@ -21,14 +21,14 @@ export function __setup__() {
 
 	on_preferences_built();
 
-	GMEdit.on('preferencesBuilt', on_preferences_built);
+	window.GMEdit.on('preferencesBuilt', on_preferences_built);
 }
 
 /**
  * Deregister callback for setting up menu.
  */
 export function __cleanup__() {
-	GMEdit.off('preferencesBuilt', on_preferences_built);
+	window.GMEdit.off('preferencesBuilt', on_preferences_built);
 }
 
 /**
@@ -213,16 +213,11 @@ function user_strings_get_for_type(type) {
 
 /**
  * Callback for setting up our preferences menu when the user opens prefs.
- * @param {Event} [ev] 
+ * @param {GMEdit.PluginEventMap['preferencesBuilt']} [e] 
  */
-function on_preferences_built(ev) {
+function on_preferences_built(e) {
 
-	let target = document.body;
-
-	if (ev !== undefined && ev.target instanceof HTMLElement) {
-		target = ev.target;
-	}
-
+	const target = e?.target ?? document.body;
 	const prefs_group = target.querySelector(ele_css_query);
 
 	if (prefs_group instanceof HTMLDivElement) {
