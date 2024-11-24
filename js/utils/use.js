@@ -25,7 +25,15 @@
  * SOFTWARE.
  */
 
-// @ts-nocheck
+/**
+ * @template T
+ * @typedef {T extends undefined ? never : T} NonUndefined
+ */
+
+/**
+ * @template R
+ * @typedef {R extends undefined ? undefined : Wrapper<R>} WrapperIfNonUndefined
+ */
 
 /**
  * @template T
@@ -50,7 +58,7 @@ class Wrapper {
 	 * 
 	 * @template R
 	 * @param {(it: T) => R} block The function to be executed with `this` as argument
-	 * @returns {Wrapper<R>} a `Wrapper` that wraps `block`'s result, or undefined.
+	 * @returns {WrapperIfNonUndefined<R>} a `Wrapper` that wraps `block`'s result, or undefined.
 	 */
 	let(block) {
 		
@@ -60,19 +68,8 @@ class Wrapper {
 			return new Wrapper(result);
 		}
 
-	}
+		return undefined;
 
-	/**
-	 * Calls the specified function block with `this` value as its argument and returns a `Wrapper` that wraps its
-	 * result, regardless whether the result is undefined or not.
-	 * 
-	 * @template R
-	 * @param {(it: T) => R} block The function to be executed with `this` as argument
-	 * @returns {Wrapper<R>} a `Wrapper` that wraps `block`'s result
-	 */
-	letW(block) {
-		const result = block(this.value);
-		return new Wrapper(result);
 	}
 
 	/**
@@ -114,10 +111,11 @@ class Wrapper {
  * 
  * @template T
  * @param {T} value
- * @returns {Wrapper<T>}
+ * @returns {WrapperIfNonUndefined<T>}
  */
 export function use(value) {
 	if (value !== undefined) {
 		return new Wrapper(value);
 	}
+	return undefined;
 }
