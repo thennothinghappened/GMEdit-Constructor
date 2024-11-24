@@ -281,6 +281,8 @@ export class GMConstructor {
 		compileController.__cleanup__();
 		projectProperties.__cleanup__();
 		hamburgerOptions.__cleanup__();
+
+		delete window.GMConstructor;
 		
 	}
 
