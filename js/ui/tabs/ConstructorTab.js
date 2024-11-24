@@ -1,4 +1,5 @@
 import { Job } from '../../compiler/job/Job.js';
+import { abstract } from '../../utils/abstract.js';
 
 const Editor = $gmedit['editors.Editor'];
 const FileKind = $gmedit['file.FileKind'];
@@ -24,6 +25,9 @@ const FileKind = $gmedit['file.FileKind'];
 
 /**
  * 'File type' for our general-purpose editor view thingo.
+ * 
+ * @abstract
+ * @class
  */
 export class ConstructorTabFileKind extends FileKind {
 
@@ -31,17 +35,14 @@ export class ConstructorTabFileKind extends FileKind {
 		super();
 		this.checkSelfForChanges = false;
 	}
-
-	/**
-	 * Initialise an instance of a file of this type.
-	 * 
-	 * @param {GMEdit.GmlFile} file
-	 * @param {any} [data]
+	
+	/** 
+	 * @type {GMEdit.FileKind['init']} 
 	 */
-	init = (file, data) => {
-		file.editor = new ConstructorTab(file);
+	init(file, data) {
+		abstract();
 	}
-
+	
 }
 
 /**

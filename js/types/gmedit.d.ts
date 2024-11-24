@@ -199,7 +199,7 @@ export declare global {
 
 			checkSelfForChanges: boolean = true;
 
-			constructor() {}
+			constructor();
 
 			/**
 			 * @returns created file or null
@@ -224,10 +224,10 @@ export declare global {
 			 * Called by a GmlFile upon creation, initialising said file of this type.
 			 * Should assign the file.editor by least.
 			 */
-			init = (file: GmlFile, data: any): void => {}
+			abstract init(file: GmlFile, data: any);
 
 			/** We're asked to bring `nav` into view */
-			navigate = (editor: Editor, nav: GmlFileNav): boolean => {}
+			navigate(editor: Editor, nav: GmlFileNav): boolean;
 
 			getTabContext = (file: GmlFile, data: any): string => {
 				if (file.path != null) return file.path;

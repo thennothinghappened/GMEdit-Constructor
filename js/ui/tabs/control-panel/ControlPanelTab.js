@@ -30,10 +30,10 @@ class ControlPanelFileKind extends ConstructorTabFileKind {
 		this.checkSelfForChanges = false;
 	}
 
-	/**
-	 * @param {GMEdit.GmlFile} file
+	/** 
+	 * @type {GMEdit.FileKind['init']} 
 	 */
-	init = (file) => {
+	init(file) {
 		file.editor = new ControlPanelTab(file);
 	}
 
