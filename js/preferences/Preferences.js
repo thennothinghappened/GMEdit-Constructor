@@ -10,6 +10,7 @@ import { deep_assign } from '../utils/object.js';
 import { join_path, plugin_name } from '../GMConstructor.js';
 import { runtime_version_parse } from '../compiler/RuntimeVersion.js';
 import { ConstructorControlPanel } from '../ui/editors/ConstructorControlPanel.js';
+import { use } from '../utils/use.js';
 
 /**
  * List of recognised GameMaker IDE/Runtime channel types.
@@ -317,26 +318,25 @@ export async function runtime_search_path_set(type, search_path) {
 
 	runtimes[type] = res.data;
 
-	const choice = runtime_version_get(type);
+	use(runtime_version_get(type))
+		.let(it => (it !== null) ? it : undefined)
+		?.takeIf(it => runtimes[type]?.find(info => info.version.toString() === it) === undefined)
+		?.also(it => {
 
-	if (
-		choice !== undefined && 
-		runtimes[type]?.find(runtimeInfo => runtimeInfo.version.toString() === choice) === undefined
-	) {
+			const err = new Err(
+				`Runtime version "${it}" not available in new search path "${search_path}".`,
+				undefined,
+				`Is the path correct? Have you deleted the runtime "${it}"?`,
+				'Chosen Runtime version not available.'
+			);
+	
+			ConstructorControlPanel
+				.view(false)
+				.showDebug(err.title ?? '', err);
+			
+			runtime_version_set(type, runtimes[type]?.at(0)?.version?.toString() ?? null);
 
-		const err = new Err(
-			`Runtime version "${choice}" not available in new search path "${search_path}".`,
-			undefined,
-			`Is the path correct? Have you deleted the runtime "${choice}"?`,
-			'Chosen Runtime version not available.'
-		);
-
-		ConstructorControlPanel
-			.view(false)
-			.showDebug(err.title ?? '', err);
-		
-		runtime_version_set(type, runtimes[type]?.at(0)?.version?.toString() ?? null);
-	}
+		});
 
 }
 
