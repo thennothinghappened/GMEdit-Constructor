@@ -44,7 +44,7 @@ export declare global {
 			/**
 			 * Dispatches whenever the user drags tabs around to change their order.
 			 */
-			tabsReorder: { target: ChromeTabsImpl };
+			tabsReorder: { target: ChromeTabs };
 			
 			/**
 			 * Dispatches prior to showing the tab context menu.
@@ -351,15 +351,10 @@ export declare global {
 			 */
 			setChangedOnEdits: boolean = true;
 			
-			constructor() {
-				super();
-			}
-			
-			override init = (file: GmlFile, data?: any): void => {}
-			
-			loadCode = (editor: EditCode, data?: any): string => {}
-
-			saveCode = (editor: EditCode, code: string): boolean => {}
+			constructor();
+						
+			loadCode(editor: EditCode, data?: any): string;
+			saveCode(editor: EditCode, code: string): boolean;
 
 		}
 
@@ -368,26 +363,12 @@ export declare global {
 			static currentNew: EditCode? = null;
 			static container: Element;
 
-			session: AceSession;
+			session: AceAjax.IEditSession;
 			kind: KCode;
 			private modePath: string;
 			
-			constructor(file: GmlFile, modePath: string) {
-				super(file);
-				this.kind = file.kind;
-				this.modePath = modePath;
-				this.element = container;
-			}
+			constructor(file: GmlFile, modePath: string);
 			
-			override stateLoad = () => {}
-
-			override stateSave = () => {}
-			
-			override focusGain = (prev: Editor): void => {}
-
-			override save = (): boolean => {}
-
-			override checkChanges = (): void => {}
 		}
 
 		type AceCommand = {
@@ -411,7 +392,7 @@ export declare global {
 			removeCommand: (command: AceCommand, keepCommand: boolean) => void;
 		}
 
-		interface GMEditKeyboardShortcuts {
+		interface KeyboardShortcuts {
 			/**
 			 * Handler for global keyboard shortcuts.
 			 */
@@ -431,16 +412,16 @@ export declare global {
 	const $gmedit: {
 		'ui.Preferences': GMEdit.Preferences;
 		'ui.MainMenu': GMEdit.MainMenu;
-		'ui.project.ProjectProperties': ProjectProperties;
+		'ui.project.ProjectProperties': GMEdit.ProjectProperties;
 		'ui.ChromeTabs': GMEdit.ChromeTabs;
-		'ui.KeyboardShortcuts': GMEditKeyboardShortcuts;
+		'ui.KeyboardShortcuts': GMEdit.KeyboardShortcuts;
 		'gml.Project': typeof GMEdit.Project;
 		'editors.Editor': typeof GMEdit.Editor;
 		'file.FileKind': typeof GMEdit.FileKind;
 		'file.kind.KCode': typeof GMEdit.KCode;
 		'gml.file.GmlFile': typeof GMEdit.GmlFile;
 		'editors.EditCode': typeof GMEdit.EditCode;
-		'ace.AceCommands': AceCommands;
+		'ace.AceCommands': GMEdit.AceCommands;
 	};
 
 	interface Window {
