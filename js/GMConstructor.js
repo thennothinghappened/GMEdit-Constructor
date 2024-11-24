@@ -8,7 +8,6 @@ import * as preferencesMenu from './ui/PreferencesMenu.js';
 import { Err } from './utils/Err.js';
 import { ConstructorControlPanel } from './ui/editors/ConstructorControlPanel.js';
 import { plugin_update_check } from './update-checker/UpdateChecker.js';
-import * as constructorEditorView from './ui/editors/ConstructorEditorView.js';
 import { mkdir, readdir } from './utils/file.js';
 import * as node from './node-import.js';
 
@@ -235,7 +234,6 @@ export class GMConstructor {
 		projectProperties.__setup__();
 		preferencesMenu.__setup__();
 		hamburgerOptions.__setup__();
-		constructorEditorView.__setup__();
 
 		// Check for updates //
 		if (preferences.update_check_get()) {
@@ -283,7 +281,6 @@ export class GMConstructor {
 		compileController.__cleanup__();
 		projectProperties.__cleanup__();
 		hamburgerOptions.__cleanup__();
-		constructorEditorView.__cleanup__();
 		
 	}
 

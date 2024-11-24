@@ -63,17 +63,6 @@ export class CompileLogViewer extends ConstructorEditorView {
 	errorsGroup;
 
 	/**
-	 * The saved X-position of the log to return to on restoring the UI.
-	 * @private
-	 */
-	savedScrollX = 0;
-	/**
-	 * The saved Y-position of the log to return to on restoring the UI.
-	 * @private
-	 */
-	savedScrollY = 0;
-
-	/**
 	 * @param {GMEdit.GmlFile} file
 	 * @param {Job} job
 	 */
@@ -98,12 +87,6 @@ export class CompileLogViewer extends ConstructorEditorView {
 		])).also(it => {
 
 			it.classList.add('gm-constructor-viewer-output');
-
-			it.addEventListener('scroll', () => {
-				this.savedScrollX = it.scrollTop;
-				this.savedScrollY = it.scrollLeft;
-			});
-
 			it.appendChild(this.logAceEditor.container);
 
 		}).value;
@@ -217,10 +200,17 @@ export class CompileLogViewer extends ConstructorEditorView {
 
 	/**
 	 * Restore the log scroll position when tabbing back in.
+	 * @param {GMEdit.Editor} prev The editor that was previously in focus.
 	 */
-	onSelectEditor = () => {
-		this.infoGroup.scrollTop = this.savedScrollX;
-		this.infoGroup.scrollLeft = this.savedScrollY;
+	focusGain(prev) {
+		
+		if (prev !== this) {
+			// this.infoGroup.scrollTop = this.savedScrollX;
+			// this.infoGroup.scrollLeft = this.savedScrollY;
+		}
+		
+		return super.focusGain(prev);
+
 	}
 
 	/**

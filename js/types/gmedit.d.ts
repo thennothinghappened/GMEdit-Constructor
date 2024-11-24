@@ -320,8 +320,21 @@ export declare global {
 			 */
 			stateLoad();
 
+			/**
+			 * Called when this editor comes into focus.
+			 * @param prev The editor that was previously in focus.
+			 */
+			focusGain(prev: Editor);
+
+			/**
+			 * Called when this editor loses focus.
+			 * @param next The editor that is now in focus.
+			 */
+			focusLost(next: Editor);
+
 			/** [x] clicked -> status checks -> stateSave -> destroy */
 			destroy();
+
 		}
 
 		class KCode extends FileKind {
