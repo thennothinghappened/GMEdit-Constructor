@@ -1,4 +1,4 @@
-import { Err } from '../Err.js';
+import { Err } from '../utils/Err.js';
 
 /**
  * Representation of a semantic versioning string `major.minor.patch`.

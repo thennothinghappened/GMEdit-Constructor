@@ -7,8 +7,8 @@ import * as igorPaths from './compiler/igor-paths.js';
 import * as preferencesMenu from './ui/PreferencesMenu.js';
 import { Err } from './utils/Err.js';
 import { ConstructorControlPanel } from './ui/editors/ConstructorControlPanel.js';
-import { SemVer } from './utils/update-checker/SemVer.js';
-import { plugin_update_check } from './utils/update-checker/UpdateChecker.js';
+import { SemVer } from './update-checker/SemVer.js';
+import { plugin_update_check } from './update-checker/UpdateChecker.js';
 import * as constructorEditorView from './ui/editors/ConstructorEditorView.js';
 import { fileExists, mkdir, readdir } from './utils/file.js';
 

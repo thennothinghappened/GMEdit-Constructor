@@ -1,31 +1,6 @@
 import { SemVer } from './SemVer.js';
-import { plugin_version } from '../../GMConstructor.js';
-import { Err } from '../Err.js';
-
-// TODO: I'd really like these to be in the `.d.ts` but then TS insists on using imports and it
-// all ends up looking gross >:(
-
-/**
- * @typedef {{ update_available: false }} UpdateCheckResultNoUpdate
- * Update check result when *no* update was found.
- */
-
-/**
- * @typedef {{ update_available: true, version: SemVer, url: string? }} UpdateCheckResultHasUpdate
- * Update check result when an update *was* found.
- */
-
-/**
- * @typedef {UpdateCheckResultNoUpdate|UpdateCheckResultHasUpdate} UpdateCheckResult
- * Result for update check for Constructor.
- */
-
-/**
- * @typedef GithubLatestVersionResponse GitHub API JSON response to querying latest release version.
- * 
- * @prop {string} tag_name
- * @prop {string?} html_url
- */
+import { plugin_version } from '../GMConstructor.js';
+import { Err } from '../utils/Err.js';
 
 /**
  * URL we use to check for updates with.
@@ -40,7 +15,7 @@ const internet_check_url = 'https://example.com/';
 /**
  * Check for updates on this plugin from GitHub.
  * 
- * @returns {Promise<Result<UpdateCheckResult>>}
+ * @returns {Promise<Result<UpdateCheck.Result>>}
  */
 export async function plugin_update_check() {
 
@@ -58,7 +33,7 @@ export async function plugin_update_check() {
 
 	const our_version = our_version_res.data;
 
-	/** @type {Result<GithubLatestVersionResponse>} */
+	/** @type {Result<UpdateCheck.GithubLatestVersionResponse>} */
 	// @ts-ignore
 	// Note: TS unfortunately doesn't know how to resolve overloads like this.
 	const res = await (fetch(update_check_url)
