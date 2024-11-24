@@ -23,6 +23,8 @@ const USE_DEFAULT = 'Use Default';
  */
 class ControlPanelFileKind extends ConstructorTabFileKind {
 
+	static inst = new ControlPanelFileKind();
+
 	constructor() {
 		super();
 		this.checkSelfForChanges = false;
@@ -42,7 +44,6 @@ class ControlPanelFileKind extends ConstructorTabFileKind {
  */
 export class ControlPanelTab extends ConstructorTab {
 
-	static fileKind = new ControlPanelFileKind();
 	static tabName = 'GMEdit-Constructor Control Panel';
 
 	/** @type {ControlPanel.MessageContainer[]} */
@@ -256,7 +257,7 @@ export class ControlPanelTab extends ConstructorTab {
 			return controlPanel;
 		}
 
-		const file = new GmlFile(this.tabName, null, this.fileKind);
+		const file = new GmlFile(this.tabName, null, ControlPanelFileKind.inst);
 		GmlFile.openTab(file);
 
 		// @ts-ignore

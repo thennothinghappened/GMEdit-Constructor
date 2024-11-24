@@ -14,6 +14,8 @@ const UIPreferences = $gmedit['ui.Preferences'];
  */
 class OutputLogFileKind extends ConstructorTabFileKind {
 
+	static inst = new OutputLogFileKind();
+
 	constructor() {
 		super();
 		this.checkSelfForChanges = false;
@@ -33,8 +35,6 @@ class OutputLogFileKind extends ConstructorTabFileKind {
  * 'Editor' for viewing a compile log all fancy.
  */
 export class OutputLogTab extends ConstructorTab {
-
-	static fileKind = new OutputLogFileKind();
 	
 	/**
 	 * @private
@@ -223,7 +223,7 @@ export class OutputLogTab extends ConstructorTab {
 	static view = (job, reuse) => {
 
 		if (!reuse) {
-			const file = new GmlFile(this.getJobName(job), null, this.fileKind, job);
+			const file = new GmlFile(this.getJobName(job), null, OutputLogFileKind.inst, job);
 			return GmlFile.openTab(file);
 		}
 

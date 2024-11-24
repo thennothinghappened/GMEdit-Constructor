@@ -49,8 +49,6 @@ export class ConstructorTabFileKind extends FileKind {
  */
 export class ConstructorTab extends Editor {
 
-	static fileKind = new ConstructorTabFileKind();
-
 	/**
 	 * @param {GMEdit.GmlFile} file
 	 */
