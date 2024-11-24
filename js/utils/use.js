@@ -25,10 +25,11 @@
  * SOFTWARE.
  */
 
+// @ts-nocheck
+
 /**
  * @template T
  */
-// @ts-nocheck
 class Wrapper {
 
 	/**
@@ -116,5 +117,7 @@ class Wrapper {
  * @returns {Wrapper<T>}
  */
 export function use(value) {
-	return new Wrapper(value);
+	if (value !== undefined) {
+		return new Wrapper(value);
+	}
 }
