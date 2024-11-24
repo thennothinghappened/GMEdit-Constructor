@@ -193,7 +193,7 @@ export class GMConstructor {
 	 * @returns {Promise<Result<GMConstructor>>}
 	 */
 	static async create(_plugin_name, _plugin_version, node_path, node_child_process, reloading) {
-
+		
 		// Prevent Constructor loading when running on Rosetta, since it has a bunch of issues there.
 		if (rosetta_check(node_child_process.execSync)) {
 

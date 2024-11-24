@@ -15,13 +15,13 @@ let properties = {};
 
 export function __setup__() {
 
-	window.GMEdit.on('projectOpen', on_project_open);
+	GMEdit.on('projectOpen', on_project_open);
 
 }
 
 export function __cleanup__() {
 
-	window.GMEdit.off('projectOpen', on_project_open);
+	GMEdit.off('projectOpen', on_project_open);
 
 }
 

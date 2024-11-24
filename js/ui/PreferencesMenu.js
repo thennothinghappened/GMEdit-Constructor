@@ -21,14 +21,14 @@ export function __setup__() {
 
 	on_preferences_built();
 
-	window.GMEdit.on('preferencesBuilt', on_preferences_built);
+	GMEdit.on('preferencesBuilt', on_preferences_built);
 }
 
 /**
  * Deregister callback for setting up menu.
  */
 export function __cleanup__() {
-	window.GMEdit.off('preferencesBuilt', on_preferences_built);
+	GMEdit.off('preferencesBuilt', on_preferences_built);
 }
 
 /**

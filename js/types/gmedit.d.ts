@@ -124,19 +124,6 @@ export declare global {
 			
 		};
 
-		/**
-		 * Exposes a globally visible GMEdit object that you can use for some random bits
-		 */
-		interface PluginAPI {
-		
-			aceTools: AceTools;
-		
-			register(pluginName: string, data: PluginData);
-			on<K extends keyof PluginEventMap>(type: K, listener: (e: PluginEventMap[K]) => any);
-			off<K extends keyof PluginEventMap>(type: K, listener: (e: PluginEventMap[K]) => any);
-		
-		}
-
 		interface AceTools {
 			createEditor(element: string|HTMLElement, options?: AceWrapOptions): AceAjax.Editor;
 		};
@@ -407,6 +394,12 @@ export declare global {
 			gmlFile: GmlFile;
 		}
 
+		const aceTools: AceTools;
+	
+		const register: (pluginName: string, data: PluginData) => void;
+		const on: <K extends keyof PluginEventMap>(type: K, listener: (e: PluginEventMap[K]) => any) => void;
+		const off: <K extends keyof PluginEventMap>(type: K, listener: (e: PluginEventMap[K]) => any) => void;
+
 	};
 	
 	const $gmedit: {
@@ -422,10 +415,6 @@ export declare global {
 		'gml.file.GmlFile': typeof GMEdit.GmlFile;
 		'editors.EditCode': typeof GMEdit.EditCode;
 		'ace.AceCommands': GMEdit.AceCommands;
-	};
-
-	interface Window {
-		readonly GMEdit: GMEdit.PluginAPI;
 	};
 	
 };

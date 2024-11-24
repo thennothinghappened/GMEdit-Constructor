@@ -41,7 +41,7 @@
 
 	});
 
-	window.GMEdit.register(plugin_name, {
+	GMEdit.register(plugin_name, {
 		init: async () => {
 			await load();
 		},

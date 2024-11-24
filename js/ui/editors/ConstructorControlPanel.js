@@ -85,8 +85,8 @@ export class ConstructorControlPanel extends ConstructorEditorView {
 			this.onOpenProject();
 		}
 
-		window.GMEdit.on('projectOpen', this.onOpenProject);
-		window.GMEdit.on('projectClose', this.onCloseProject);
+		GMEdit.on('projectOpen', this.onOpenProject);
+		GMEdit.on('projectClose', this.onCloseProject);
 
 	}
 
@@ -426,8 +426,8 @@ export class ConstructorControlPanel extends ConstructorEditorView {
 	}
 
 	destroy = () => {
-		window.GMEdit.off('projectOpen', this.onOpenProject);
-		window.GMEdit.off('projectClose', this.onCloseProject);
+		GMEdit.off('projectOpen', this.onOpenProject);
+		GMEdit.off('projectClose', this.onCloseProject);
 	}
 
 }

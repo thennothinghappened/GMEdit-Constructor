@@ -58,8 +58,8 @@ export function __setup__() {
 
 	menu_items_enable(project_is_open());
 
-	window.GMEdit.on('projectOpen', on_project_open);
-	window.GMEdit.on('projectClose', on_project_close);
+	GMEdit.on('projectOpen', on_project_open);
+	GMEdit.on('projectClose', on_project_close);
 
 }
 
@@ -71,8 +71,8 @@ export function __cleanup__() {
 	// We can't remove existing menu items at the top level, so leave them be.
 	commands_deregister();
 
-	window.GMEdit.off('projectOpen', on_project_open);
-	window.GMEdit.off('projectClose', on_project_close);
+	GMEdit.off('projectOpen', on_project_open);
+	GMEdit.off('projectClose', on_project_close);
 
 }
 

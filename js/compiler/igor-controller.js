@@ -14,6 +14,7 @@ const jobs = [];
 
 /**
  * Run a new job on a given project.
+ * 
  * @param {GMEdit.Project} project
  * @param {RuntimeInfo} runtime
  * @param {UserInfo?} user
