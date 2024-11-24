@@ -77,7 +77,7 @@ export class CompileLogViewer extends ConstructorEditorView {
 
 		this.logAceEditor = use(document.createElement('pre'))
 			.also(it => it.classList.add('gm-constructor-log'))
-			.let(it => GMEdit.aceTools.createEditor(it, { statusBar: false }))
+			.let(it => GMEdit.aceTools.createEditor(it, { statusBar: false, tooltips: false }))
 			.also(it => it.setReadOnly(true))
 			.value;
 
