@@ -2,6 +2,8 @@ import { Job } from '../../compiler/job/Job.js';
 import { ConstructorEditorView, ConstructorViewFileKind } from './ConstructorEditorView.js';
 import * as ui from '../ui-wrappers.js';
 import { JobError } from '../../compiler/job/JobError.js';
+import { Err } from '../../utils/Err.js';
+import { use } from '../../utils/use.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];
@@ -25,14 +27,6 @@ class KConstructorOutput extends ConstructorViewFileKind {
 		file.editor = new CompileLogViewer(file, job);
 	}
 
-	/**
-	 * @param {Job} job
-	 */
-	static getJobName = (job) => {
-		const statusDisplay = job.statusDisplay === '' ? '' : (' - ' + job.statusDisplay);
-		return `${job.project.displayName} - ${job.settings.verb}${statusDisplay}`;
-	}
-
 }
 
 /**
@@ -41,26 +35,42 @@ class KConstructorOutput extends ConstructorViewFileKind {
 export class CompileLogViewer extends ConstructorEditorView {
 
 	static fileKind = new KConstructorOutput();
+	
+	/**
+	 * @private
+	 */
 	static scrollGrabLines = 5;
 
-	/** @type {Job} */
-	job;
+	/** @type {Job?} */
+	job = null;
 
-	/** @type {UIGroup} */
+	/**
+	 * @private
+	 * @type {UIGroup}
+	 */
 	infoGroup;
 
-	/** @type {HTMLPreElement} */
-	logText;
-
-	/** @type {AceAjax.Editor} */
+	/**
+	 * @private
+	 * @type {AceAjax.Editor}
+	 */
 	logAceEditor;
 
-	/** @type {UIGroup} */
+	/**
+	 * @private
+	 * @type {UIGroup}
+	 */
 	errorsGroup;
 
-	/** The saved X-position of the log to return to on restoring the UI. */
+	/**
+	 * The saved X-position of the log to return to on restoring the UI.
+	 * @private
+	 */
 	savedScrollX = 0;
-	/** The saved Y-position of the log to return to on restoring the UI. */
+	/**
+	 * The saved Y-position of the log to return to on restoring the UI.
+	 * @private
+	 */
 	savedScrollY = 0;
 
 	/**
@@ -70,92 +80,138 @@ export class CompileLogViewer extends ConstructorEditorView {
 	constructor(file, job) {
 
 		super(file);
-		
-		this.job = job;
 
-		this.uiCreate();
-		this.startWatchingJob();
-
-	}
-
-	/**
-	 * Start watching the job this viewer is assigned to.
-	 */
-	startWatchingJob = () => {
-
-		this.job.on('stdout', (/** @type {string} */ content) => {
-
-			const cursor = this.logAceEditor.getCursorPosition();
-			const end_row = this.logAceEditor.session.doc.getLength();
-			const should_scroll = (cursor.row >= (end_row - CompileLogViewer.scrollGrabLines));
-
-			this.logAceEditor.session.setValue(content);
-			this.logAceEditor.moveCursorToPosition(cursor);
-
-			if (should_scroll) {
-				this.goToBottom();
-			}
-
+		use(this.element).also(it => {
+			it.innerHTML = '';
+			it.classList.add('gm-constructor-viewer', 'popout-window');
 		});
 
-		this.job.on('stop', (/** @type {Array<JobError>} */ errors) => {
+		this.logAceEditor = use(document.createElement('pre'))
+			.also(it => it.classList.add('gm-constructor-log'))
+			.let(it => GMEdit.aceTools.createEditor(it, { statusBar: false }))
+			.also(it => it.setReadOnly(true))
+			.value;
 
-			const job_name = KConstructorOutput.getJobName(this.job);
-
-			this.infoGroup.legend.childNodes[0].textContent = job_name;
-			this.file.rename(job_name, '');
-
-			if (errors.length > 0) {
-
-				for (const error of errors) {
-					error.displayHTML(this.errorsGroup);
-				}
-				
-				this.errorsGroup.hidden = false;
-				this.errorsGroup.classList.remove('collapsed');
-
-				this.logAceEditor.resize();
-				this.goToBottom();
-				
-			}
-
-		});
-
-	}
-
-	/**
-	 * Setup the page UI.
-	 */
-	uiCreate() {
-
-		this.element.innerHTML = '';
-		this.element.classList.add('gm-constructor-viewer', 'popout-window');
-
-		this.infoGroup = ui.group(this.element, KConstructorOutput.getJobName(this.job), [
+		this.infoGroup = use(ui.group(this.element, this.file.name, [
 			ui.text_button('Stop', this.stopJob),
 			ui.text_button('Go to bottom', this.goToBottom)
-		]);
-		this.infoGroup.classList.add('gm-constructor-viewer-output');
+		])).also(it => {
+
+			it.classList.add('gm-constructor-viewer-output');
+
+			it.addEventListener('scroll', () => {
+				this.savedScrollX = it.scrollTop;
+				this.savedScrollY = it.scrollLeft;
+			});
+
+			it.appendChild(this.logAceEditor.container);
+
+		}).value;
+
+		this.errorsGroup = use(ui.group(this.element, 'Errors'))
+			.also(it => {
+				it.classList.add('gm-constructor-viewer-errors');
+				it.legend.addEventListener('click', () => this.logAceEditor.resize());
+				it.hidden = true;
+			})
+			.value;
+
+		this.attach(job);
+
+	}
+
+	/**
+	 * Start watching the provided job.
+	 * @param {Job} job The job to watch.
+	 */
+	attach = (job) => {
+
+		if (this.job !== null) {
+			this.detach();
+		}
+
+		this.file.rename(CompileLogViewer.getJobName(job), '');
+		this.infoGroup.legend.childNodes[0].textContent = this.file.name;
 		
-		this.logText = document.createElement('pre');
-		this.logText.className = 'gm-constructor-log';
+		this.logAceEditor.session.setValue('');
+		
+		this.errorsGroup
+			.querySelectorAll(':scope > :not(legend)')
+			.forEach(error => error.remove());
 
-		this.infoGroup.addEventListener('scroll', () => {
-			this.savedScrollX = this.infoGroup.scrollTop;
-			this.savedScrollY = this.infoGroup.scrollLeft;
-		});
-
-		this.infoGroup.appendChild(this.logText);
-		this.logAceEditor = GMEdit.aceTools.createEditor(this.logText, {
-			statusBar: false
-		});
-		this.logAceEditor.setReadOnly(true);
-
-		this.errorsGroup = ui.group(this.element, 'Errors');
-		this.errorsGroup.classList.add('gm-constructor-viewer-errors');
-		this.errorsGroup.classList.add('collapsed');
-		this.errorsGroup.legend.addEventListener('click', () => this.logAceEditor.resize());
 		this.errorsGroup.hidden = true;
+
+		job.on('stdout', this.onJobStdout);
+		job.on('stop', this.onJobStop);
+
+		this.job = job;
+
+	}
+
+	/**
+	 * Stop watching the job we're currently watching.
+	 */
+	detach = () => {
+		
+		if (this.job === null) {
+			return;
+		}
+
+		this.job.off('stdout', this.onJobStdout);
+		this.job.off('stop', this.onJobStop);
+
+		this.job = null;
+
+	}
+
+	/**
+	 * Callback on updates to the output of the attached Job.
+	 * 
+	 * @private
+	 * @param {string} content The content of the Job's STDOUT.
+	 */
+	onJobStdout = (content) => {
+
+		const cursor = this.logAceEditor.getCursorPosition();
+		const end_row = this.logAceEditor.session.doc.getLength();
+		const should_scroll = (cursor.row >= (end_row - CompileLogViewer.scrollGrabLines));
+
+		this.logAceEditor.session.setValue(content);
+		this.logAceEditor.moveCursorToPosition(cursor);
+
+		if (should_scroll) {
+			this.goToBottom();
+		}
+
+	}
+
+	/**
+	 * Callback on the completion of the attached Job.
+	 * 
+	 * @private
+	 * @param {Array<JobError>} errors List of errors produced by the Job.
+	 */
+	onJobStop = (errors) => {
+
+		if (this.job === null) {
+			return;
+		}
+
+		this.file.rename(CompileLogViewer.getJobName(this.job), '');
+		this.infoGroup.legend.childNodes[0].textContent = this.file.name;
+
+		if (errors.length > 0) {
+
+			for (const error of errors) {
+				error.displayHTML(this.errorsGroup);
+			}
+			
+			this.errorsGroup.hidden = false;
+
+			this.logAceEditor.resize();
+			this.goToBottom();
+			
+		}
 
 	}
 
@@ -169,6 +225,7 @@ export class CompileLogViewer extends ConstructorEditorView {
 
 	/**
 	 * Set up an editor tab for a Job, and view it.
+	 * 
 	 * @param {Job} job
 	 * @param {Boolean} reuse Whether to reuse an existing tab.
 	 * @returns {void}
@@ -176,10 +233,8 @@ export class CompileLogViewer extends ConstructorEditorView {
 	static view = (job, reuse) => {
 
 		if (!reuse) {
-
-			const file = new GmlFile(KConstructorOutput.getJobName(job), null, this.fileKind, job);
+			const file = new GmlFile(this.getJobName(job), null, this.fileKind, job);
 			return GmlFile.openTab(file);
-
 		}
 
 		const tabs = Array.from(ChromeTabs.getTabs());
@@ -194,17 +249,17 @@ export class CompileLogViewer extends ConstructorEditorView {
 		}
 
 		viewer.stopJob();
-		
-		viewer.job = job;
-		viewer.uiCreate();
-		viewer.startWatchingJob();
-		
+		viewer.detach();
+
+		viewer.attach(job);
+
 		return viewer.focus();
 
 	}
 
 	/**
 	 * Go the the bottom of the log.
+	 * @private
 	 */
 	goToBottom = () => {
 		this.logAceEditor.navigateFileEnd();
@@ -212,9 +267,15 @@ export class CompileLogViewer extends ConstructorEditorView {
 	}
 
 	stopJob = () => {
+		
+		if (this.job === null) {
+			throw new Err('Attempting to stop a job that does not exist!');
+		}
+
 		if (this.job.status.status !== 'stopped') {
 			this.job.stop();
 		}
+
 	}
 
 	/**
@@ -223,7 +284,23 @@ export class CompileLogViewer extends ConstructorEditorView {
 	 * on in the background.
 	 */
 	destroy = () => {
-		this.stopJob();
+
+		if (this.job !== null) {
+			this.stopJob();
+			this.detach();
+		}
+
 		this.logAceEditor.destroy();
+
 	}
+
+	/**
+	 * @private
+	 * @param {Job} job
+	 */
+	static getJobName = (job) => {
+		const statusDisplay = job.statusDisplay === '' ? '' : (': ' + job.statusDisplay);
+		return `${job.project.displayName} - ${job.settings.verb}${statusDisplay}`;
+	}
+
 }
