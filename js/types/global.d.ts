@@ -57,12 +57,12 @@ declare type ProjectPreferencesData = {
 
 declare type GMChannelType = 
 	'Stable'	|
-	'Beta'	  |
-	'LTS'	   ;
+	'Beta'		|
+	'LTS'		;
 
 declare type RunnerType =
-	'VM'  |
-	'YYC' ;
+	'VM'	|
+	'YYC'	;
 
 declare type RuntimePreference = {
 	/** Where we should search for the list of runtimes. */
@@ -150,13 +150,13 @@ declare interface IErr extends Error {
 }
 
 declare type MessageSeverity =
-	'error'	 |
-	'warning'   |
-	'debug'	 ;
+	'error'		|
+	'warning'	|
+	'debug'		;
 
 declare type Result<T> = 
-	{ ok: true, data: T }	   |
-	{ ok: false, err: IErr }	 ;
+	{ ok: true, data: T }		|
+	{ ok: false, err: IErr }	;
 
 /**
  * Settings for running an Igor Job.
@@ -210,18 +210,18 @@ declare type IgorSettings = {
  * A supported platform for Igor to target.
  */
 declare type IgorPlatform =
-	'OperaGX'		   |
-	'Windows'		   |
-	'Mac'			   |
-	'Linux'			 |
-	'HTML5'			 |
-	'ios'			   |
-	'Android'		   |
-	'tvos'			  |
-	'ps4'			   |
-	'ps5'			   |
-	'XBoxOne'		   |
-	'XBoxOneSeriesXS'   |
+	'OperaGX'			|
+	'Windows'			|
+	'Mac'				|
+	'Linux'				|
+	'HTML5'				|
+	'ios'				|
+	'Android'			|
+	'tvos'				|
+	'ps4'				|
+	'ps5'				|
+	'XBoxOne'			|
+	'XBoxOneSeriesXS'	|
 	'Switch'			;
 
 /**
@@ -266,15 +266,15 @@ declare type IgorPlatformInfo = {
 }
 
 declare type IgorVerb = 
-	'Run'		|
-	'Package'	|
-	'PackageZip' |
-	'Clean'	  ;
+	'Run'			|
+	'Package'		|
+	'PackageZip'	|
+	'Clean'			;
 
 declare type JobEvent =
 	'stdout'	|
 	'output'	|
-	'stop'	  ;
+	'stop'		;
 
 declare type JobStatus = 
 	{ status: 'running' } |
@@ -294,10 +294,10 @@ declare type GMPlugin = {
 declare let gmConstructor: GMConstructor;
 
 declare type GMEditEvent =
-	'preferencesBuilt'		  |
+	'preferencesBuilt'			|
 	'projectPropertiesBuilt'	|
-	'projectOpen'			   |
-	'projectClose'			  ;
+	'projectOpen'				|
+	'projectClose'				;
 
 declare type AceWrapOptions = {
 	isPrimary?: boolean,
@@ -332,12 +332,12 @@ declare interface IElectronApp {
 }
 
 declare interface IElectronFS {
-	readFile:	   (path: string, cb: ((err?: Error, data?: Buffer) => void)) => void;
+	readFile:		(path: string, cb: ((err?: Error, data?: Buffer) => void)) => void;
 	readdir:		(path: string, cb: (err?: Error, files?: string[]) => void) => void;
-	mkdir:		  (path: string, settings: { recursive: boolean }, cb: (err: Error?) => void) => void;
-	writeFile:	  (path: string, content: string, cb: (err?: Error) => void) => void;
-	existsSync:	 (path: string) => boolean;
-	exists:		 (path: string, cb: (exists: boolean) => void) => void;
+	mkdir:			(path: string, settings: { recursive: boolean }, cb: (err: Error?) => void) => void;
+	writeFile:		(path: string, content: string, cb: (err?: Error) => void) => void;
+	existsSync:		(path: string) => boolean;
+	exists:			(path: string, cb: (exists: boolean) => void) => void;
 }
 
 declare interface IElectronDialog {
@@ -345,15 +345,15 @@ declare interface IElectronDialog {
 }
 
 declare type DialogMessageType =
-	'none'	  |
+	'none'		|
 	/** On Windows, "question" displays the same icon as "info" */
-	'info'	  |
+	'info'		|
 	/** On macOS, both "warning" and "error" display the same warning icon. */
-	'error'	 |
+	'error'		|
 	/** On Windows, "question" displays the same icon as "info" */
-	'question'  |
+	'question'	|
 	/** On macOS, both "warning" and "error" display the same warning icon. */
-	'warning'   ;
+	'warning'	;
 
 
 declare type DialogMessageOptions = {
@@ -502,10 +502,10 @@ declare type GMLProjectYYConfig = {
  * Project format type for the loaded project.
  */
 declare type YYProjectFormat =
-	'outdated'  |
-	'2023.11'   |
+	'outdated'	|
+	'2023.11'	|
 	'2024.2'	|
-	'2024.4+'   ;
+	'2024.4+'	;
 
 declare interface GMEditGMLProject {
 	current: GMLProject;
@@ -771,10 +771,7 @@ declare interface Window {
  * https://stackoverflow.com/a/78673120/7246439
  */
 declare type DeepImmutable<T> =
-  T extends Map<infer K, infer V>
-    ? ReadonlyMap<DeepImmutable<K>, DeepImmutable<V>>
-    : T extends Set<infer S>
-      ? ReadonlySet<DeepImmutable<S>>
-      : T extends object
-        ? { readonly [K in keyof T]: DeepImmutable<T[K]> }
-        : T;
+	T extends Map<infer K, infer V> ? ReadonlyMap<DeepImmutable<K>, DeepImmutable<V>>
+	: T extends Set<infer S> ? ReadonlySet<DeepImmutable<S>>
+	: T extends object ? { readonly [K in keyof T]: DeepImmutable<T[K]> }
+	: T;

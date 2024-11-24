@@ -277,7 +277,7 @@ export function users_search_path_get(type) {
  * @returns {RuntimeInfo[]?}
  */
 export function runtime_versions_get_for_type(type) {
-   return runtimes[type];
+	return runtimes[type];
 };
 
 /**
@@ -286,7 +286,7 @@ export function runtime_versions_get_for_type(type) {
  * @returns {UserInfo[]?}
  */
 export function users_get_for_type(type) {
-   return users[type];
+	return users[type];
 };
 
 /**
