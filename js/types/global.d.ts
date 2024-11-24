@@ -785,3 +785,15 @@ declare const Electron_Dialog: IElectronDialog;
 declare interface Window {
 	GMConstructor?: GMConstructor;
 }
+
+/**
+ * https://stackoverflow.com/a/78673120/7246439
+ */
+declare type DeepImmutable<T> =
+  T extends Map<infer K, infer V>
+    ? ReadonlyMap<DeepImmutable<K>, DeepImmutable<V>>
+    : T extends Set<infer S>
+      ? ReadonlySet<DeepImmutable<S>>
+      : T extends object
+        ? { readonly [K in keyof T]: DeepImmutable<T[K]> }
+        : T;
