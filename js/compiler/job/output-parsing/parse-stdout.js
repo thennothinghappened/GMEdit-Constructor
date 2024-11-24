@@ -1,4 +1,4 @@
-import { ConstructorControlPanel } from '../../../ui/editors/ConstructorControlPanel.js';
+import { ConstructorControlPanel } from '../../../ui/tabs/ConstructorControlPanel.js';
 import { Err } from '../../../utils/Err.js';
 import { JobCompilationError, JobError, JobPermissionsError, JobRunnerError } from '../JobError.js';
 

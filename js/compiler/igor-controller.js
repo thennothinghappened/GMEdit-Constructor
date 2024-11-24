@@ -3,7 +3,7 @@
  * and starting new ones on projects.
  */
 
-import { CompileLogViewer } from '../ui/editors/CompileLogViewer.js';
+import { CompileLogViewer } from '../ui/tabs/CompileLogViewer.js';
 import { Job } from './job/Job.js';
 import { igor_platform_cmd_name, output_blob_exts, output_package_exts } from './igor-paths.js';
 import { Err } from '../utils/Err.js';

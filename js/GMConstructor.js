@@ -6,7 +6,7 @@ import * as projectProperties from './preferences/ProjectProperties.js';
 import * as igorPaths from './compiler/igor-paths.js';
 import * as preferencesMenu from './ui/PreferencesMenu.js';
 import { Err } from './utils/Err.js';
-import { ConstructorControlPanel } from './ui/editors/ConstructorControlPanel.js';
+import { ConstructorControlPanel } from './ui/tabs/ConstructorControlPanel.js';
 import { plugin_update_check } from './update-checker/UpdateChecker.js';
 import { mkdir, readdir } from './utils/file.js';
 import * as node from './node-import.js';

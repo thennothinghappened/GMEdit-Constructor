@@ -10,7 +10,7 @@ import { deep_assign } from '../utils/object.js';
 import { plugin_name } from '../GMConstructor.js';
 import * as node from '../node-import.js';
 import { runtime_version_parse } from '../compiler/RuntimeVersion.js';
-import { ConstructorControlPanel } from '../ui/editors/ConstructorControlPanel.js';
+import { ConstructorControlPanel } from '../ui/tabs/ConstructorControlPanel.js';
 import { use } from '../utils/scope-extensions/use.js';
 
 /**
