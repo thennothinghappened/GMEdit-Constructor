@@ -436,11 +436,11 @@ declare interface GMEditUIPreferences {
 	addText:		(parent: HTMLElement, label: string) => HTMLElement;
 	addWiki:		(parent: HTMLElement, url: string, label: string) => HTMLElement;
 	addCheckbox:	(parent: HTMLElement, label: string, value: boolean, update: (value: boolean) => void) => HTMLElement;
-	addInput:	   (parent: HTMLElement, label: string, value: string, update: (value: string) => void) => HTMLElement;
+	addInput:		(parent: HTMLElement, label: string, value: string, update: (value: string) => void) => HTMLElement;
 	addDropdown:	(parent: HTMLElement, label: string, value: string, choices: string[], update: (value: string) => void) => HTMLDivElement;
-	addGroup:	   (parent: HTMLElement, label: string) => HTMLFieldSetElement;
-	addButton:	  (parent: HTMLElement, text: string, callback: () => void) => HTMLDivElement;
-	addBigButton:   (parent: HTMLElement, text: string, callback: () => void) => HTMLDivElement;
+	addGroup:		(parent: HTMLElement, label: string) => HTMLFieldSetElement;
+	addButton:		(parent: HTMLElement, text: string, callback: () => void) => HTMLDivElement;
+	addBigButton:	(parent: HTMLElement, text: string, callback: () => void) => HTMLDivElement;
 }
 
 declare interface GMEditProjectProperties {
@@ -576,45 +576,32 @@ declare class GmlFile {
 	context: string;
 	/** The associated editor */
 	editor: Editor;
-	/** Shortcut if this is a code editor. Otherwise null */
-	codeEditor: EditCode;
 	/** Whether the file has been modified. */
 	__changed: boolean;
 	/** The tab associated with this file. */
 	tabEl: ChromeTab;
 
-	static next: GmlFile?;
+	/**
+	 * The current file in focus.
+	 */
 	static current: GmlFile?;
 
-	constructor(name: string, path: string?, kind: FileKind, data?: any) {
-		this.name = name;
-		this.path = path;
-		this.kind = kind;
-		this.context = kind.getTabContext(this, data);
+	constructor(name: string, path: string?, kind: FileKind, data?: any);
 
-		kind.init(this, data);
-
-		this.load(data);
-		this.editor.ready();
-	}
-
-	close = (): void => {}
-
-	getAceSession = (): AceSession? => {}
-
-	static open = (name: string, path: string, nav?: GmlFileNav): GmlFile? => {}
-
+	static openTab(file: GmlFile);
+	static open(name: string, path: string, nav?: GmlFileNav): GmlFile?;
+	
+	save();
+	
 	/**
 	 * Loads the current code
 	 * @param data If provided, is used instead of reading from FS.
 	 */
-	load = (data: any?) => {}
-
-	static openTab = (file: GmlFile) => {}
-
-	rename = (newName: string, newPath: string): void => {}
-
-	save(): void {}
+	load(data: any?);
+	
+	rename(newName: string, newPath: string);
+	
+	close();
 }
 
 /**
@@ -622,30 +609,28 @@ declare class GmlFile {
  * @author YellowAfterlife
  */
 declare class Editor {
-
-	static container: HTMLElement;
 	
 	element: HTMLElement;
 	file: GmlFile;
 
-	constructor(file: GmlFile) {
-		this.file = file;
-	}
+	constructor(file: GmlFile);
 
-	load = (data: any?) => {
-		
-	}
+	/**
+	 * Load the given `data` into the editor.
+	 * @param data The provided data that was loaded for this file.
+	 */
+	abstract load(data: any?);
+
+	/**
+	 * Called to finalise editor setup after loading.
+	 */
+	abstract ready();
 
 	stateSave = () => {
 		// may save state to LS
 	}
 	stateLoad = () => {
 		// may load previously saved state
-	}
-	
-	/** new -> load -> ready */
-	ready = () => {
-		
 	}
 
 	/** [x] clicked -> status checks -> stateSave -> destroy */
@@ -704,15 +689,11 @@ class EditCode extends Editor {
 		this.element = container;
 	}
 	
-	override ready = (): void => {}
-	
 	override stateLoad = () => {}
 
 	override stateSave = () => {}
 	
 	override focusGain = (prev: Editor): void => {}
-
-	override load = (data: any): void => {}
 
 	override save = (): boolean => {}
 
