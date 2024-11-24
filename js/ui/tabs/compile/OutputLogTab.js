@@ -1,9 +1,9 @@
-import { Job } from '../../compiler/job/Job.js';
-import { ConstructorEditorView, ConstructorViewFileKind } from './ConstructorEditorView.js';
-import * as ui from '../ui-wrappers.js';
-import { JobError } from '../../compiler/job/JobError.js';
-import { Err } from '../../utils/Err.js';
-import { use } from '../../utils/scope-extensions/use.js';
+import { Job } from '../../../compiler/job/Job.js';
+import { ConstructorTab, ConstructorTabFileKind } from '../ConstructorTab.js';
+import * as ui from '../../ui-wrappers.js';
+import { JobError } from '../../../compiler/job/JobError.js';
+import { Err } from '../../../utils/Err.js';
+import { use } from '../../../utils/scope-extensions/use.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];
@@ -12,7 +12,7 @@ const UIPreferences = $gmedit['ui.Preferences'];
 /**
  * File type for a compile job.
  */
-class KConstructorOutput extends ConstructorViewFileKind {
+class OutputLogFileKind extends ConstructorTabFileKind {
 
 	constructor() {
 		super();
@@ -24,7 +24,7 @@ class KConstructorOutput extends ConstructorViewFileKind {
 	 * @param {Job} job
 	 */
 	init = (file, job) => {
-		file.editor = new CompileLogViewer(file, job);
+		file.editor = new OutputLogTab(file, job);
 	}
 
 }
@@ -32,9 +32,9 @@ class KConstructorOutput extends ConstructorViewFileKind {
 /**
  * 'Editor' for viewing a compile log all fancy.
  */
-export class CompileLogViewer extends ConstructorEditorView {
+export class OutputLogTab extends ConstructorTab {
 
-	static fileKind = new KConstructorOutput();
+	static fileKind = new OutputLogFileKind();
 	
 	/**
 	 * @private
@@ -113,7 +113,7 @@ export class CompileLogViewer extends ConstructorEditorView {
 			this.detach();
 		}
 
-		this.file.rename(CompileLogViewer.getJobName(job), '');
+		this.file.rename(OutputLogTab.getJobName(job), '');
 		this.infoGroup.legend.childNodes[0].textContent = this.file.name;
 		
 		this.logAceEditor.session.setValue('');
@@ -157,7 +157,7 @@ export class CompileLogViewer extends ConstructorEditorView {
 
 		const cursor = this.logAceEditor.getCursorPosition();
 		const end_row = this.logAceEditor.session.doc.getLength();
-		const should_scroll = (cursor.row >= (end_row - CompileLogViewer.scrollGrabLines));
+		const should_scroll = (cursor.row >= (end_row - OutputLogTab.scrollGrabLines));
 
 		this.logAceEditor.session.setValue(content);
 		this.logAceEditor.moveCursorToPosition(cursor);
@@ -180,7 +180,7 @@ export class CompileLogViewer extends ConstructorEditorView {
 			return;
 		}
 
-		this.file.rename(CompileLogViewer.getJobName(this.job), '');
+		this.file.rename(OutputLogTab.getJobName(this.job), '');
 		this.infoGroup.legend.childNodes[0].textContent = this.file.name;
 
 		if (errors.length > 0) {
@@ -230,9 +230,9 @@ export class CompileLogViewer extends ConstructorEditorView {
 		const tabs = Array.from(ChromeTabs.getTabs());
 		const editors = tabs.map(tab => tab.gmlFile.editor);
 
-		/** @type {CompileLogViewer|undefined} */
+		/** @type {OutputLogTab|undefined} */
 		// @ts-ignore
-		const viewer = editors.find(editor => editor instanceof CompileLogViewer);
+		const viewer = editors.find(editor => editor instanceof OutputLogTab);
 
 		if (viewer === undefined) {
 			return this.view(job, false);

@@ -3,7 +3,7 @@
  * and starting new ones on projects.
  */
 
-import { CompileLogViewer } from '../ui/tabs/CompileLogViewer.js';
+import { OutputLogTab } from '../ui/tabs/compile/OutputLogTab.js';
 import { Job } from './job/Job.js';
 import { igor_platform_cmd_name, output_blob_exts, output_package_exts } from './igor-paths.js';
 import { Err } from '../utils/Err.js';
@@ -58,7 +58,7 @@ export async function job_run(project, runtime, user, settings) {
  * @param {Boolean} reuse Whether to reuse an existing tab.
  */
 export function job_open_editor(job, reuse) {
-	CompileLogViewer.view(job, reuse);
+	OutputLogTab.view(job, reuse);
 }
 
 /**

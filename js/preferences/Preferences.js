@@ -10,7 +10,7 @@ import { deep_assign } from '../utils/object.js';
 import { plugin_name } from '../GMConstructor.js';
 import * as node from '../node-import.js';
 import { runtime_version_parse } from '../compiler/RuntimeVersion.js';
-import { ConstructorControlPanel } from '../ui/tabs/ConstructorControlPanel.js';
+import { ControlPanelTab } from '../ui/tabs/control-panel/ControlPanelTab.js';
 import { use } from '../utils/scope-extensions/use.js';
 
 /**
@@ -312,7 +312,7 @@ export async function runtime_search_path_set(type, search_path) {
 			'Make sure the search path is valid!'
 		);
 
-		return ConstructorControlPanel
+		return ControlPanelTab
 			.view(true)
 			.showError(err.message, err);
 	}
@@ -331,7 +331,7 @@ export async function runtime_search_path_set(type, search_path) {
 				'Chosen Runtime version not available.'
 			);
 	
-			ConstructorControlPanel
+			ControlPanelTab
 				.view(false)
 				.showDebug(err.title ?? '', err);
 			
@@ -363,7 +363,7 @@ export async function users_search_path_set(type, users_path) {
 			'Make sure the users path is valid!'
 		);
 
-		return ConstructorControlPanel
+		return ControlPanelTab
 			.view(true)
 			.showError(err.message, err);
 	}
@@ -379,7 +379,7 @@ export async function users_search_path_set(type, users_path) {
 
 		const err = new Err(`User "${choice}" not available in new users path "${users_path}".`);
 
-		ConstructorControlPanel
+		ControlPanelTab
 			.view(false)
 			.showWarning(err.message, err);
 		
@@ -463,7 +463,7 @@ async function runtime_list_load_path(type, search_path) {
 			if (!version_res.ok) {
 
 				const err = new Err(`Failed to parse runtime version name for runtime at '${path}'`, version_res.err);
-				ConstructorControlPanel.showWarning(err.message, err);
+				ControlPanelTab.showWarning(err.message, err);
 
 				return null;
 			}
@@ -480,7 +480,7 @@ async function runtime_list_load_path(type, search_path) {
 					`${plugin_name} only supports runtimes >2022.x, and below 2024.2[xx] currently. See stack trace for more details.`
 				);
 				
-				ConstructorControlPanel.showDebug(err.message, err);
+				ControlPanelTab.showDebug(err.message, err);
 				
 				return null;
 			}
@@ -576,7 +576,7 @@ export async function __setup__() {
 					`Please check your preferences file (${save_path}) for syntax errors as you must have edited it manually - see stacktrace below.`
 				);
 
-				ConstructorControlPanel
+				ControlPanelTab
 					.view(true)
 					.showError(err.message, err);
 			}
@@ -589,7 +589,7 @@ export async function __setup__() {
 				`Please check your preferences file (${save_path}) for errors and ensure GMEdit has read permissions - see stacktrace below.`
 			);
 
-			ConstructorControlPanel
+			ControlPanelTab
 				.view(true)
 				.showError(err.message, err);
 		}
@@ -598,7 +598,7 @@ export async function __setup__() {
 	if (loaded_prefs?.runtime_opts?.type !== undefined) {
 		if (!gm_channel_types.includes(loaded_prefs.runtime_opts.type)) {
 
-			ConstructorControlPanel.showWarning(
+			ControlPanelTab.showWarning(
 				`Invalid preferred runtime type`,
 				new Err(`'${loaded_prefs.runtime_opts.type}' is invalid, changed to ${prefs.runtime_opts.type}`)
 			);
@@ -616,7 +616,7 @@ export async function __setup__() {
 
 			if (!(type in type_opts)) {
 
-				ConstructorControlPanel.showWarning(
+				ControlPanelTab.showWarning(
 					'Missing runtime type preference data',
 					new Err(`Missing runtime type preference data for type '${type}', replacing with default.`)
 				);
@@ -650,7 +650,7 @@ export async function __setup__() {
 
 					options.choice = null;
 
-					ConstructorControlPanel
+					ControlPanelTab
 						.showDebug(`Failed to load ${type} runtimes list`, result.err);
 
 					return;
@@ -673,7 +673,7 @@ export async function __setup__() {
 
 					options.user = null;
 
-					ConstructorControlPanel
+					ControlPanelTab
 						.showDebug(`Failed to load ${type} users list`, result.err);
 
 					return;

@@ -25,7 +25,7 @@ const FileKind = $gmedit['file.FileKind'];
 /**
  * 'File type' for our general-purpose editor view thingo.
  */
-export class ConstructorViewFileKind extends FileKind {
+export class ConstructorTabFileKind extends FileKind {
 
 	constructor() {
 		super();
@@ -39,7 +39,7 @@ export class ConstructorViewFileKind extends FileKind {
 	 * @param {any} [data]
 	 */
 	init = (file, data) => {
-		file.editor = new ConstructorEditorView(file);
+		file.editor = new ConstructorTab(file);
 	}
 
 }
@@ -47,9 +47,9 @@ export class ConstructorViewFileKind extends FileKind {
 /**
  * 'Editor' for viewing a compile log all fancy.
  */
-export class ConstructorEditorView extends Editor {
+export class ConstructorTab extends Editor {
 
-	static fileKind = new ConstructorViewFileKind();
+	static fileKind = new ConstructorTabFileKind();
 
 	/**
 	 * @param {GMEdit.GmlFile} file

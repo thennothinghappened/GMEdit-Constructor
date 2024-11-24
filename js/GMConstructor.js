@@ -6,7 +6,7 @@ import * as projectProperties from './preferences/ProjectProperties.js';
 import * as igorPaths from './compiler/igor-paths.js';
 import * as preferencesMenu from './ui/PreferencesMenu.js';
 import { Err } from './utils/Err.js';
-import { ConstructorControlPanel } from './ui/tabs/ConstructorControlPanel.js';
+import { ControlPanelTab } from './ui/tabs/control-panel/ControlPanelTab.js';
 import { plugin_update_check } from './update-checker/UpdateChecker.js';
 import { mkdir, readdir } from './utils/file.js';
 import * as node from './node-import.js';
@@ -62,7 +62,7 @@ export class GMConstructor {
 				`Try specifying a different runtime channel type below, or check the runtime search path for ${runtime_type} runtimes.`
 			);
 
-			return ConstructorControlPanel
+			return ControlPanelTab
 				.view(true)
 				.showError(err.message, err);
 		}
@@ -77,7 +77,7 @@ export class GMConstructor {
 				supported_res.err
 			);
 
-			return ConstructorControlPanel
+			return ControlPanelTab
 				.view(true)
 				.showError(err.message, err);
 		}
@@ -99,7 +99,7 @@ export class GMConstructor {
 				`This project is in the YY ${format} format, where the chosen runtime (${runtime.version}) expects the ${runtime.version.format} format.\n\nPlease pick a matching runtime, or you can convert your project to the desired format using ProjectTool in the IDE.`
 			);
 
-			return ConstructorControlPanel
+			return ControlPanelTab
 				.view(true)
 				.showError(err.message, err);
 		}
@@ -120,7 +120,7 @@ export class GMConstructor {
 					`Ensure the path '${settings.buildPath}' is valid, and that GMEdit would have permission to edit files and directories there.`
 				);
 
-				return ConstructorControlPanel
+				return ControlPanelTab
 					.view(true)
 					.showError(res.err.message, err);
 				
@@ -142,7 +142,7 @@ export class GMConstructor {
 				res.err
 			);
 
-			return ConstructorControlPanel
+			return ControlPanelTab
 				.view(true)
 				.showError(err.message, err)
 		}
@@ -166,7 +166,7 @@ export class GMConstructor {
 	}
 
 	onControlPanel = () => {
-		ConstructorControlPanel.view(true);
+		ControlPanelTab.view(true);
 	}
 
 	packageCurrent = () => {
@@ -242,7 +242,7 @@ export class GMConstructor {
 				.then(res => {
 					
 					if (!res.ok) {
-						return ConstructorControlPanel.showWarning(
+						return ControlPanelTab.showWarning(
 							'Failed to check for plugin updates.',
 							res.err
 						);
@@ -253,7 +253,7 @@ export class GMConstructor {
 					}
 
 					// Bit silly to use an error message for this but it works :P
-					ConstructorControlPanel.showWarning(
+					ControlPanelTab.showWarning(
 						'An update is available for Constructor!',
 						new Err(
 							'There is an update available.',

@@ -1,12 +1,12 @@
-import { Job } from '../../compiler/job/Job.js';
-import { project_config_tree_get, project_config_tree_to_array, project_current_get, project_is_open } from '../../utils/project.js';
-import { UIDropdownGetSelect, UIDropdownMutate } from '../../utils/ui.js';
-import { ConstructorEditorView, ConstructorViewFileKind } from './ConstructorEditorView.js';
-import * as projectProperties from '../../preferences/ProjectProperties.js';
-import * as preferences from '../../preferences/Preferences.js';
-import * as ui from '../ui-wrappers.js';
-import * as preferencesMenu from '../PreferencesMenu.js';
-import { plugin_name, plugin_version } from '../../GMConstructor.js';
+import { Job } from '../../../compiler/job/Job.js';
+import { project_config_tree_get, project_config_tree_to_array, project_current_get, project_is_open } from '../../../utils/project.js';
+import { UIDropdownGetSelect, UIDropdownMutate } from '../../../utils/ui.js';
+import { ConstructorTab, ConstructorTabFileKind } from '../ConstructorTab.js';
+import * as projectProperties from '../../../preferences/ProjectProperties.js';
+import * as preferences from '../../../preferences/Preferences.js';
+import * as ui from '../../ui-wrappers.js';
+import * as preferencesMenu from '../../PreferencesMenu.js';
+import { plugin_name, plugin_version } from '../../../GMConstructor.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];
@@ -21,7 +21,7 @@ const USE_DEFAULT = 'Use Default';
 /**
  * File type for the control panel.
  */
-class KConstructorControlPanel extends ConstructorViewFileKind {
+class ControlPanelFileKind extends ConstructorTabFileKind {
 
 	constructor() {
 		super();
@@ -32,24 +32,20 @@ class KConstructorControlPanel extends ConstructorViewFileKind {
 	 * @param {GMEdit.GmlFile} file
 	 */
 	init = (file) => {
-		file.editor = new ConstructorControlPanel(file);
+		file.editor = new ControlPanelTab(file);
 	}
 
 }
 
 /**
- * @typedef {{ severity: MessageSeverity, title: string, err: IErr }} MessageContainer
- */
-
-/**
  * Main 'control panel' for Constructor to make it a nicer experience to work with!
  */
-export class ConstructorControlPanel extends ConstructorEditorView {
+export class ControlPanelTab extends ConstructorTab {
 
-	static fileKind = new KConstructorControlPanel();
+	static fileKind = new ControlPanelFileKind();
 	static tabName = 'GMEdit-Constructor Control Panel';
 
-	/** @type {MessageContainer[]} */
+	/** @type {ControlPanel.MessageContainer[]} */
 	static messages = [];
 
 	/** @type {HTMLDivElement?} */
@@ -64,10 +60,10 @@ export class ConstructorControlPanel extends ConstructorEditorView {
 
 		this.element.classList.add('gm-constructor-control-panel', 'popout-window');
 
-		this.element.appendChild(ui.h1(ConstructorControlPanel.tabName));
+		this.element.appendChild(ui.h1(ControlPanelTab.tabName));
 		this.element.appendChild(ui.p(`Version: ${plugin_version}`));
 
-		this.problems = ui.group(this.element, 'Problems', [ui.text_button('Dismiss All', ConstructorControlPanel.dismissAllErrors)]);
+		this.problems = ui.group(this.element, 'Problems', [ui.text_button('Dismiss All', ControlPanelTab.dismissAllErrors)]);
 		this.problems.classList.add('gm-constructor-control-panel-errors');
 
 		this.projectSettings = ui.group(this.element, 'Project Settings');
@@ -75,7 +71,7 @@ export class ConstructorControlPanel extends ConstructorEditorView {
 
 		this.globalSettings = ui.group(this.element, 'Global Settings');
 
-		ConstructorControlPanel.messages.forEach(this.#showMessage);
+		ControlPanelTab.messages.forEach(this.#showMessage);
 		
 		if (preferences.ready()) {
 			this.globalSettingsSetup();
@@ -123,7 +119,7 @@ export class ConstructorControlPanel extends ConstructorEditorView {
 	 * @param {IErr} err
 	 */
 	showError = (title, err) => {
-		return ConstructorControlPanel.showError(title, err);
+		return ControlPanelTab.showError(title, err);
 	}
 
 	/**
@@ -132,7 +128,7 @@ export class ConstructorControlPanel extends ConstructorEditorView {
 	 * @param {IErr} err
 	 */
 	showWarning = (title, err) => {
-		return ConstructorControlPanel.showWarning(title, err);
+		return ControlPanelTab.showWarning(title, err);
 	}
 
 	/**
@@ -141,17 +137,17 @@ export class ConstructorControlPanel extends ConstructorEditorView {
 	 * @param {IErr} err
 	 */
 	showDebug = (title, err) => {
-		return ConstructorControlPanel.showDebug(title, err);
+		return ControlPanelTab.showDebug(title, err);
 	}
 
 	/**
 	 * Show the user a message in the UI.
-	 * @param {MessageContainer} message
+	 * @param {ControlPanel.MessageContainer} message
 	 */
 	static #appendMessage = (message) => {
 
 		/** 
-		 * @type { {[key in MessageSeverity]: (message?: any) => void} }
+		 * @type { {[key in ControlPanel.MessageSeverity]: (message?: any) => void} }
 		 */
 		const severity_logs = {
 			error: console.error,
@@ -178,12 +174,12 @@ export class ConstructorControlPanel extends ConstructorEditorView {
 
 	/**
 	 * Show the user a message in the UI.
-	 * @param {MessageContainer} message
+	 * @param {ControlPanel.MessageContainer} message
 	 */
 	#showMessage = (message) => {
 
 		/** 
-		 * @type { {[key in MessageSeverity]: string[]} }
+		 * @type { {[key in ControlPanel.MessageSeverity]: string[]} }
 		 */
 		const severity_classes = {
 			error: ['gm-constructor-error'],
@@ -199,13 +195,13 @@ export class ConstructorControlPanel extends ConstructorEditorView {
 			ui.text_button('Dismiss', () => {
 				error.remove();
 
-				const index = ConstructorControlPanel.messages.indexOf(message);
+				const index = ControlPanelTab.messages.indexOf(message);
 
 				if (index === -1) {
 					return;
 				}
 
-				ConstructorControlPanel.messages.splice(index, 1);
+				ControlPanelTab.messages.splice(index, 1);
 			})
 		]);
 
@@ -245,7 +241,7 @@ export class ConstructorControlPanel extends ConstructorEditorView {
 	/**
 	 * View the control panel.
 	 * @param {boolean} [focus] Whether to bring the panel into focus.
-	 * @returns {ConstructorControlPanel}
+	 * @returns {ControlPanelTab}
 	 */
 	static view = (focus = true) => {
 
@@ -270,7 +266,7 @@ export class ConstructorControlPanel extends ConstructorEditorView {
 
 	/**
 	 * Find the existing open control panel, if it is open.
-	 * @returns {ConstructorControlPanel|undefined}
+	 * @returns {ControlPanelTab|undefined}
 	 */
 	static find = () => {
 
@@ -278,8 +274,8 @@ export class ConstructorControlPanel extends ConstructorEditorView {
 		const editors = tabs.map(tab => tab.gmlFile.editor);
 
 		return editors.find(
-			/** @returns {editor is ConstructorControlPanel} */ 
-			(editor) => editor instanceof ConstructorControlPanel
+			/** @returns {editor is ControlPanelTab} */ 
+			(editor) => editor instanceof ControlPanelTab
 		);
 	}
 

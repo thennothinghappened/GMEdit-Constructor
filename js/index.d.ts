@@ -6,11 +6,6 @@ export declare global {
 		{ ok: true, data: T }		|
 		{ ok: false, err: IErr }	;
 
-	type MessageSeverity =
-		'error'		|
-		'warning'	|
-		'debug'		;
-
 	/**
 	 * Project format type for the loaded project.
 	 */
