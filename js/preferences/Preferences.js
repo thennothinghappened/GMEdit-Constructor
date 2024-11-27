@@ -4,11 +4,11 @@
  */
 
 import { def_global_build_path, def_runtime_paths, def_user_paths, igor_path_segment } from '../compiler/igor-paths.js';
-import { fileExists, readFile, readdir, writeFile } from '../utils/file.js';
+import { fileExists, readFile, readdir, writeFile } from '../utils/node/file.js';
 import { Err } from '../utils/Err.js';
 import { deep_assign } from '../utils/object.js';
 import { plugin_name } from '../GMConstructor.js';
-import * as node from '../node-import.js';
+import * as node from '../utils/node/node-import.js';
 import { runtime_version_parse } from '../compiler/RuntimeVersion.js';
 import { ControlPanelTab } from '../ui/tabs/control-panel/ControlPanelTab.js';
 import { use } from '../utils/scope-extensions/use.js';

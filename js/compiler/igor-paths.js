@@ -1,5 +1,5 @@
 
-import * as node from '../node-import.js';
+import * as node from '../utils/node/node-import.js';
 
 const windowsAppdata = process.env?.AppData ?? 'C:\\Users\\PLEASE_SPECIFY_USERNAME\\AppData\\Roaming';
 

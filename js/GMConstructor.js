@@ -8,8 +8,8 @@ import * as preferencesMenu from './ui/PreferencesMenu.js';
 import { Err } from './utils/Err.js';
 import { ControlPanelTab } from './ui/tabs/control-panel/ControlPanelTab.js';
 import { plugin_update_check } from './update-checker/UpdateChecker.js';
-import { mkdir, readdir } from './utils/file.js';
-import * as node from './node-import.js';
+import { mkdir, readdir } from './utils/node/file.js';
+import * as node from './utils/node/node-import.js';
 
 /**
  * Name of the plugin 

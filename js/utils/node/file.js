@@ -1,4 +1,4 @@
-import { Err } from './Err.js';
+import { Err } from '../Err.js';
 
 /**
  * Promise version of `Electron_FS.exists`.

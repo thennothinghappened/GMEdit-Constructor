@@ -7,7 +7,7 @@ import { OutputLogTab } from '../ui/tabs/compile/OutputLogTab.js';
 import { Job } from './job/Job.js';
 import { igor_platform_cmd_name, output_blob_exts, output_package_exts } from './igor-paths.js';
 import { Err } from '../utils/Err.js';
-import { child_process, path } from '../node-import.js';
+import { child_process, path } from '../utils/node/node-import.js';
 
 /** @type {Job[]} */
 const jobs = [];
