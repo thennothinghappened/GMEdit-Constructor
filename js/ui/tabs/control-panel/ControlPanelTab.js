@@ -260,8 +260,7 @@ export class ControlPanelTab extends ConstructorTab {
 		const file = new GmlFile(this.tabName, null, ControlPanelFileKind.inst);
 		GmlFile.openTab(file);
 
-		// @ts-ignore
-		return file.editor;
+		return /** @type {ControlPanelTab} */ (file.editor);
 
 	}
 
