@@ -147,7 +147,7 @@ export class GMConstructor {
 				.showError(err.message, err)
 		}
 
-		compileController.job_open_editor(res.data, preferences.reuse_compiler_tab_get());
+		compileController.job_open_editor(res.data, projectProperties.reuse_compiler_tab_get());
 	}
 
 	/**

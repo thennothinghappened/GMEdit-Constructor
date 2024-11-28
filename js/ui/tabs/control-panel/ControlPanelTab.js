@@ -363,6 +363,20 @@ export class ControlPanelTab extends ConstructorTab {
 			}
 		);
 
+		UIPreferences.addDropdown(
+			this.projectSettings,
+			'Reuse compiler output tab between runs',
+			projectProperties.reuse_compiler_tab_project_get()?.toString() ?? USE_DEFAULT,
+			['true', 'false', USE_DEFAULT],
+			value => {
+				switch (value) {
+					case 'true': projectProperties.reuse_compiler_tab_set(true);
+					case 'false': projectProperties.reuse_compiler_tab_set(true);
+					case USE_DEFAULT: projectProperties.reuse_compiler_tab_set(undefined);
+				}
+			}
+		);
+
 		this.#runtimeVersionDropdown = UIPreferences.addDropdown(
 			this.projectSettings,
 			'Runtime Version',

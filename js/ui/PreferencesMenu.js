@@ -33,6 +33,7 @@ export function __cleanup__() {
 
 /**
  * Create the preferences menu within the given group.
+ * 
  * @param {HTMLElement} prefs_group Root Group element to add the preferences to.
  * @param {() => void} [on_refresh_runtime_settings] Callback to run on modifying runtime settings.
  */

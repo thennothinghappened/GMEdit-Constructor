@@ -47,7 +47,7 @@ export function config_name_set(config_name) {
  * @returns {RunnerType}
  */
 export function runner_get() {
-	return properties.runner ?? preferences.runner_get();
+	return runner_project_get() ?? preferences.runner_get();
 }
 
 /**
@@ -56,6 +56,31 @@ export function runner_get() {
  */
 export function runner_project_get() {
 	return properties.runner;
+}
+
+/**
+ * Get whether to reuse a compiler tab.
+ * @returns {Boolean}
+ */
+export function reuse_compiler_tab_get() {
+	return reuse_compiler_tab_project_get() ?? preferences.reuse_compiler_tab_get();
+}
+
+/**
+ * Get whether to reuse a compiler tab.
+ * @returns {Boolean|undefined}
+ */
+export function reuse_compiler_tab_project_get() {
+	return properties.reuse_compiler_tab;
+}
+
+/**
+ * Set whether to reuse a compiler tab.
+ * @param {Boolean|undefined} reuse_compiler_tab 
+ */
+export function reuse_compiler_tab_set(reuse_compiler_tab) {
+	properties.reuse_compiler_tab = reuse_compiler_tab;
+	return save();
 }
 
 /**

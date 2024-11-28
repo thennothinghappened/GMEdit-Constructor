@@ -56,6 +56,11 @@ export declare global {
 			 * Chosen runner type to use.
 			 */
 			runner: RunnerType;
+
+			/** 
+			 * Whether to reuse the compile viewer tab between runs. 
+			 */
+			reuse_compiler_tab: boolean;
 	
 		};
 
