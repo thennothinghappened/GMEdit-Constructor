@@ -1,4 +1,6 @@
 
+import * as fs from 'node:fs';
+
 declare global {
 
 	module Electron {
@@ -57,15 +59,6 @@ declare global {
 
 		interface App {
 			getPath:		(name: string) => string;
-		}
-		
-		interface FS {
-			readFile:		(path: string, cb: ((err?: Error, data?: Buffer) => void)) => void;
-			readdir:		(path: string, cb: (err?: Error, files?: string[]) => void) => void;
-			mkdir:			(path: string, settings: { recursive: boolean }, cb: (err: Error?) => void) => void;
-			writeFile:		(path: string, content: string, cb: (err?: Error) => void) => void;
-			existsSync:		(path: string) => boolean;
-			exists:			(path: string, cb: (exists: boolean) => void) => void;
 		}
 		
 		interface Dialog {
@@ -136,7 +129,7 @@ declare global {
 	const Electron_Menu: Electron.Menu;
 	const Electron_MenuItem: typeof Electron.MenuItem;
 	const Electron_App: Electron.App;
-	const Electron_FS: Electron.FS;
+	const Electron_FS: typeof fs;
 	const Electron_Dialog: Electron.Dialog;
 
 };
