@@ -7,7 +7,7 @@ import { child_process } from './node-import.js';
  * 
  * @author [Almenon](https://gist.github.com/Almenon/e32f9b418057ea738687c176816070d6) for core method.
  * 
- * @param {number} pid The Process ID of the process we want to end.
+ * @param {number} pid The PID of the root process in the tree we want to end.
  * @param {string|number} [signal] The signal sent to the processes. (*NIX-only)
  * @returns {Result<void>}
  */
@@ -15,12 +15,38 @@ export function killRecursive(pid, signal = 'SIGTERM'){
 
 	try {
 
-		if (process.platform === 'win32') {
-			child_process.execSync(`taskkill /PID ${pid} /T /F`);
-		} else {
-			// See: https://nodejs.org/api/child_process.html#child_process_options_detached
-			// If `pid` is less than -1, then the signal is sent to every process in the process group with ID `-pid`.
-			process.kill(-pid, signal);
+		switch (process.platform) {
+			
+			case 'win32':
+				child_process.execSync(`taskkill /PID ${pid} /T /F`);
+			break;
+
+			case 'darwin':
+
+				// For whatever reason the trick for the `default` case doesn't work on MacOS.
+				// There weren't really any nice sources (that I found) on how to do this, so what
+				// I've come up with is effectively:
+				//     1. Grab all processes which have the `PPID` of `proc.pid`.
+				//     2. Recurse to them, and execute the same.
+				//     2. Kill each process up the chain.
+
+				child_process.execSync(`pgrep -P ${pid}`)
+					.toString('utf-8')
+					.split('\n')
+					.map(Number)
+					.filter(it => !isNaN(it))
+					.forEach(it => killRecursive(it, signal));
+
+				process.kill(pid, signal);
+
+			break;
+
+			default:
+				// See: https://nodejs.org/api/child_process.html#child_process_options_detached
+				// If `pid` is less than -1, then the signal is sent to every process in the process group with ID `-pid`.
+				process.kill(-pid, signal);
+			break;
+
 		}
 
 	} catch (err) {
