@@ -128,10 +128,10 @@ export class GMConstructor {
 
 		}
 
-		const res = await compileController.job_run(
+		const res = compileController.job_run(
 			project,
 			runtime_res.data,
-			(user_res.ok ? user_res.data : null),
+			(user_res.ok ? user_res.data : undefined),
 			settings
 		);
 

@@ -73,9 +73,9 @@ export const output_package_exts = {
  * @type {{[K in IgorPlatform]?: string}}
 */
 export const output_blob_exts = {
-	Windows: '.win',
-	Mac: '.ios',
-	Linux: '.unx',
+	Windows: 'win',
+	Mac: 'ios',
+	Linux: 'unx',
 };
 
 /**

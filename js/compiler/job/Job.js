@@ -9,6 +9,14 @@ import { job_parse_stdout } from './output-parsing/parse-stdout.js';
  */
 export class Job {
 
+	/** 
+	 * Identifier number of this job. This value is incremented from `0` and is the lowest available
+	 * integer at the time the job was begun.
+	 * 
+	 * @type {number} 
+	 */
+	id;
+
 	/** @type {IgorSettings} */
 	settings;
 
@@ -36,12 +44,14 @@ export class Job {
 	};
 	
 	/**
+	 * @param {number} id
 	 * @param {IgorSettings} settings
 	 * @param {import('node:child_process').ChildProcess} process
 	 * @param {GMEdit.Project} project
 	 */
-	constructor(settings, process, project) {
+	constructor(id, settings, process, project) {
 		
+		this.id = id;
 		this.settings = settings;
 		this.process = process;
 		this.project = project;
