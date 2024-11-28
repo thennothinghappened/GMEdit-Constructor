@@ -32,13 +32,15 @@ export async function job_run(project, runtime, user, settings) {
 		}
 	}
 
-	const proc = child_process.spawn(
-		runtime.igor_path,
-		flags_res.data,
-		{ cwd: project.dir }
-	);
+	/** @type {import('node:child_process').SpawnOptionsWithoutStdio} */
+	const spawn_opts = {
+		cwd: project.dir,
+		detached: (process.platform !== 'win32')
+	};
 
+	const proc = child_process.spawn(runtime.igor_path, flags_res.data, spawn_opts);
 	const job = new Job(settings, proc, project);
+	
 	jobs.push(job);
 
 	job.on('stop', () => {

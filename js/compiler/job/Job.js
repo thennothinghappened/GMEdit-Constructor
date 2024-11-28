@@ -1,3 +1,5 @@
+import { ControlPanelTab } from '../../ui/tabs/control-panel/ControlPanelTab.js';
+import { killRecursive } from '../../utils/node/process-handling.js';
 import { job_parse_stdout } from './output-parsing/parse-stdout.js';
 
 /**
@@ -129,7 +131,18 @@ export class Job {
 			exitCode: 0
 		};
 
-		this.process.kill();
+		if (this.process.pid !== undefined) {
+			
+			const res = killRecursive(this.process.pid);
+
+			if (!res.ok) {
+				ControlPanelTab.showError(
+					`Failed to stop the job ${this.settings.verb}!`,
+					res.err
+				);
+			}
+
+		}
 
 	}
 
