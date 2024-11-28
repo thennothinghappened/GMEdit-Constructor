@@ -1,3 +1,4 @@
+// @ts-ignore
 import { Job } from '../../../compiler/job/Job.js';
 import { project_config_tree_get, project_config_tree_to_array, project_current_get, project_is_open } from '../../../utils/project.js';
 import { UIDropdownGetSelect, UIDropdownMutate } from '../../../utils/ui.js';
@@ -7,6 +8,7 @@ import * as preferences from '../../../preferences/Preferences.js';
 import * as ui from '../../ui-wrappers.js';
 import * as preferencesMenu from '../../PreferencesMenu.js';
 import { plugin_name, plugin_version } from '../../../GMConstructor.js';
+import { use } from '../../../utils/scope-extensions/use.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];
@@ -254,6 +256,7 @@ export class ControlPanelTab extends ConstructorTab {
 
 	/**
 	 * View the control panel.
+	 * 
 	 * @param {boolean} [focus] Whether to bring the panel into focus.
 	 * @returns {ControlPanelTab}
 	 */
@@ -362,12 +365,14 @@ export class ControlPanelTab extends ConstructorTab {
 		UIPreferences.addDropdown(
 			this.projectSettings,
 			'Reuse compiler output tab between runs',
-			projectProperties.reuse_compiler_tab_project_get()?.toString() ?? USE_DEFAULT,
-			['true', 'false', USE_DEFAULT],
+			use(projectProperties.reuse_compiler_tab_project_get())
+				?.let(it => it ? 'True' : 'False')
+				.value ?? USE_DEFAULT,
+			['True', 'False', USE_DEFAULT],
 			(value) => {
 				switch (value) {
-					case 'true': projectProperties.reuse_compiler_tab_set(true);
-					case 'false': projectProperties.reuse_compiler_tab_set(false);
+					case 'True': projectProperties.reuse_compiler_tab_set(true);
+					case 'False': projectProperties.reuse_compiler_tab_set(false);
 					case USE_DEFAULT: projectProperties.reuse_compiler_tab_set(undefined);
 				}
 			}
