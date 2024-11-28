@@ -172,11 +172,7 @@ export class Job {
 				.stdout
 				.toString('utf-8')
 				.split('\n')
-				.map(it => {
-					console.log(`attempt kill pid ${it}`);
-					return it;
-				})
-				.map(Number)
+				.map(parseInt)
 				.filter(it => !isNaN(it))
 				.forEach(killRecursive);
 

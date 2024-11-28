@@ -30,10 +30,11 @@ export function killRecursive(pid, signal = 'SIGTERM'){
 				//     2. Recurse to them, and execute the same.
 				//     2. Kill each process up the chain.
 
-				child_process.execSync(`pgrep -P ${pid}`)
+				child_process.spawnSync('pgrep', ['-P', pid.toString()])
+					.stdout
 					.toString('utf-8')
 					.split('\n')
-					.map(Number)
+					.map(parseInt)
 					.filter(it => !isNaN(it))
 					.forEach(it => killRecursive(it, signal));
 
