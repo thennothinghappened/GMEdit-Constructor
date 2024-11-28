@@ -143,14 +143,14 @@ export declare global {
 		}>;
 
 		interface Preferences {
-			addText:		(parent: HTMLElement, label: string) => HTMLElement;
-			addWiki:		(parent: HTMLElement, url: string, label: string) => HTMLElement;
-			addCheckbox:	(parent: HTMLElement, label: string, value: boolean, update: (value: boolean) => void) => HTMLElement;
-			addInput:		(parent: HTMLElement, label: string, value: string, update: (value: string) => void) => HTMLElement;
-			addDropdown:	(parent: HTMLElement, label: string, value: string, choices: string[], update: (value: string) => void) => HTMLDivElement;
-			addGroup:		(parent: HTMLElement, label: string) => HTMLFieldSetElement;
-			addButton:		(parent: HTMLElement, text: string, callback: () => void) => HTMLDivElement;
-			addBigButton:	(parent: HTMLElement, text: string, callback: () => void) => HTMLDivElement;
+			addText(parent: HTMLElement, label: string): HTMLElement;
+			addWiki(parent: HTMLElement, url: string, label: string): HTMLElement;
+			addCheckbox(parent: HTMLElement, label: string, value: boolean, update: (value: boolean) => void): HTMLElement;
+			addInput(parent: HTMLElement, label: string, value: string, update: (value: string) => void): HTMLElement;
+			addDropdown<T extends string>(parent: HTMLElement, label: string, value: T, choices: T[], update: (value: T) => void): HTMLDivElement;
+			addGroup(parent: HTMLElement, label: string): HTMLFieldSetElement;
+			addButton(parent: HTMLElement, text: string, callback: () => void): HTMLDivElement;
+			addBigButton(parent: HTMLElement, text: string, callback: () => void): HTMLDivElement;
 		}
 	
 		interface ProjectProperties {
