@@ -45,6 +45,7 @@ export function readFile(path) {
 export function readdir(path) {
 	return new Promise(res => {
 		Electron_FS.readdir(path, (err, data) => {
+			
 			if (data === undefined) {
 				return res({ 
 					ok: false,
