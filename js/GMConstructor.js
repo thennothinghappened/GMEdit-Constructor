@@ -136,15 +136,9 @@ export class GMConstructor {
 		);
 
 		if (!res.ok) {
-
-			const err = new Err(
-				`Failed to run Igor job!`,
-				res.err
-			);
-
 			return ControlPanelTab
 				.view(true)
-				.showError(err.message, err)
+				.showError('Failed to run Igor job!', res.err);
 		}
 
 		compileController.job_open_editor(res.data, projectProperties.reuse_compiler_tab_get());
