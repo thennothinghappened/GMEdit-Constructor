@@ -2,8 +2,9 @@ import { GMConstructor } from './GMConstructor';
 
 export declare global {
 
-	type Result<T> = 
-		{ ok: true, data: T }		|
+	type Result<T> = (T extends void
+		? { ok: true }
+		: { ok: true, data: T })	|
 		{ ok: false, err: IErr }	;
 
 	/**
