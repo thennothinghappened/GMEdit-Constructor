@@ -251,10 +251,11 @@ export class ControlPanelTab extends ConstructorTab {
 		if (controlPanel !== undefined) {
 			
 			if (focus) {
-				controlPanel.file.tabEl.click();
+				controlPanel.focus();
 			}
 
 			return controlPanel;
+
 		}
 
 		const file = new GmlFile(this.tabName, null, ControlPanelFileKind.inst);
