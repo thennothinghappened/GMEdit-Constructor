@@ -1,6 +1,6 @@
 import * as compileController from './compiler/igor-controller.js';
 import * as hamburgerOptions from './ui/HamburgerOptions.js';
-import { project_current_get, open_files_save, project_format_get } from './utils/project.js';
+import { project_current_get, open_files_save, project_format_get, tab_current_get } from './utils/project.js';
 import * as preferences from './preferences/Preferences.js';
 import * as projectProperties from './preferences/ProjectProperties.js';
 import * as igorPaths from './compiler/igor-paths.js';
@@ -10,6 +10,7 @@ import { ControlPanelTab } from './ui/tabs/control-panel/ControlPanelTab.js';
 import { plugin_update_check } from './update-checker/UpdateChecker.js';
 import { mkdir, readdir } from './utils/node/file.js';
 import * as node from './utils/node/node-import.js';
+import { OutputLogTab } from './ui/tabs/compile/OutputLogTab.js';
 
 /**
  * Name of the plugin 
@@ -165,6 +166,26 @@ export class GMConstructor {
 
 	packageCurrent = () => {
 		this.#runTask({ verb: 'Package' });
+	}
+
+	stopCurrent = () => {
+		
+		const tab = tab_current_get();
+
+		if (tab === undefined) {
+			return;
+		}
+
+		const editor = tab.gmlFile.editor;
+
+		if (!(editor instanceof OutputLogTab)) {
+			return;
+		}
+
+		if (editor.job?.status.status === 'running') {
+			editor.stopJob();
+		}
+
 	}
 
 	cleanCurrent = () => {

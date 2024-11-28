@@ -14,6 +14,7 @@ const Menu = $gmedit['ui.MainMenu'].menu;
 const default_binds = {
 	control_panel: 'Ctrl+`',
 	package: 'Ctrl+F5',
+	stop: 'F6',
 	clean: 'Ctrl+F7',
 	run: 'F5'
 };
@@ -44,6 +45,12 @@ export function __setup__() {
 			title: 'Constructor - Clean',
 			bindKey: { win: default_binds.clean, mac: default_binds.clean },
 			exec: on_clean
+		},
+		{
+			name: 'constructor-stop',
+			title: 'Constructor - Stop',
+			bindKey: { win: default_binds.stop, mac: default_binds.stop },
+			exec: on_stop
 		},
 		{
 			name: 'constructor-run',
@@ -85,6 +92,12 @@ function on_control_panel() {
 function on_package() {
 	if (window.GMConstructor instanceof GMConstructor) {
 		window.GMConstructor.packageCurrent();
+	}
+}
+
+function on_stop() {
+	if (window.GMConstructor instanceof GMConstructor) {
+		window.GMConstructor.stopCurrent();
 	}
 }
 
@@ -143,6 +156,13 @@ function menu_register() {
 				label: 'Clean',
 				accelerator: default_binds.clean,
 				click: on_clean,
+				enabled: false
+			}),
+			new Electron_MenuItem({
+				id: 'constructor-project-stop',
+				label: 'Stop',
+				accelerator: default_binds.stop,
+				click: on_stop,
 				enabled: false
 			}),
 			new Electron_MenuItem({

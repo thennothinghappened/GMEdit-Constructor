@@ -41,14 +41,10 @@ export function open_files_save() {
 
 /**
  * Get the currently chosen open tab.
+ * @returns {GMEdit.ChromeTab|undefined}
  */
 export function tab_current_get() {
-	
-	const tabs = ChromeTabs.getTabs();
-	const current_file = GmlFile.current;
-
-	
-
+	return GmlFile.current?.tabEl;
 }
 
 /**
