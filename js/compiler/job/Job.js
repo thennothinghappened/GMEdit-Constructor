@@ -174,7 +174,7 @@ export class Job {
 				.split('\n')
 				.map(parseInt)
 				.filter(it => !isNaN(it))
-				.forEach(killRecursive);
+				.forEach(it => killRecursive(it));
 
 		} catch (err) {
 			ControlPanelTab.showError(
