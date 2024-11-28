@@ -19,6 +19,19 @@ const UIPreferences = $gmedit['ui.Preferences'];
 const USE_DEFAULT = 'Use Default';
 
 /**
+ * Return the given `value`, but `USE_DEFAULT` gives `undefined`.
+ * 
+ * @template {string} T
+ * @param {T|USE_DEFAULT} value 
+ * @returns {T|undefined}
+ */
+function default_undefined(value) {
+	return (value === USE_DEFAULT)
+		? undefined
+		: value;
+}
+
+/**
  * File type for the control panel.
  */
 class ControlPanelFileKind extends ConstructorTabFileKind {
@@ -332,16 +345,7 @@ export class ControlPanelTab extends ConstructorTab {
 			'Runner Type',
 			projectProperties.runner_project_get() ?? USE_DEFAULT,
 			[...preferences.valid_runner_types, USE_DEFAULT],
-			(value) => {
-
-				if (value === USE_DEFAULT) {
-					projectProperties.runner_set(undefined);
-					return;
-				}
-
-				// @ts-ignore
-				projectProperties.runner_set(value);
-			}
+			(value) => projectProperties.runner_set(default_undefined(value))
 		);
 
 		UIPreferences.addDropdown(
@@ -349,17 +353,9 @@ export class ControlPanelTab extends ConstructorTab {
 			'Runtime Channel Type',
 			projectProperties.runtime_project_channel_type_get() ?? USE_DEFAULT,
 			[...preferences.gm_channel_types, USE_DEFAULT],
-			// @ts-ignore
-			(/** @type {GMChannelType|USE_DEFAULT} */ value) => {
-
-				if (value === USE_DEFAULT) {
-					projectProperties.runtime_channel_type_set(undefined);
-				} else {
-					projectProperties.runtime_channel_type_set(value);
-				}
-				
+			(value) => {
+				projectProperties.runtime_channel_type_set(default_undefined(value));
 				this.updateRuntimeVersionDropdown();
-
 			}
 		);
 
@@ -368,10 +364,10 @@ export class ControlPanelTab extends ConstructorTab {
 			'Reuse compiler output tab between runs',
 			projectProperties.reuse_compiler_tab_project_get()?.toString() ?? USE_DEFAULT,
 			['true', 'false', USE_DEFAULT],
-			value => {
+			(value) => {
 				switch (value) {
 					case 'true': projectProperties.reuse_compiler_tab_set(true);
-					case 'false': projectProperties.reuse_compiler_tab_set(true);
+					case 'false': projectProperties.reuse_compiler_tab_set(false);
 					case USE_DEFAULT: projectProperties.reuse_compiler_tab_set(undefined);
 				}
 			}
