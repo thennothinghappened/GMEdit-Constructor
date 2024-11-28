@@ -95,12 +95,7 @@ export class RuntimeVersion {
 	 * @returns {Result<void>}
 	 */
 	supported() {
-
-		return {
-			ok: true,
-			data: undefined
-		};
-
+		return { ok: true };
 	}
 
 	/**

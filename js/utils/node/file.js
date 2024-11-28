@@ -74,7 +74,7 @@ export function mkdir(path, recursive) {
 			console.warn(err)
 			
 			if (err === null) {
-				return res({ ok: true, data: undefined });
+				return res({ ok: true });
 			}
 
 			return res({
@@ -102,7 +102,7 @@ export function writeFile(path, data) {
 				});
 			}
 
-			res({ ok: true, data: undefined });
+			res({ ok: true });
 		})
 	});
 }

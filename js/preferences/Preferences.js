@@ -696,10 +696,7 @@ export async function __setup__() {
 
 	__ready__ = true;
 
-	return {
-		ok: true,
-		data: undefined
-	};
+	return { ok: true };
 }
 
 /**
