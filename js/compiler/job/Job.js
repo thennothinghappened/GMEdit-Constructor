@@ -1,4 +1,6 @@
 import { ControlPanelTab } from '../../ui/tabs/control-panel/ControlPanelTab.js';
+import { Err } from '../../utils/Err.js';
+import { child_process, path } from '../../utils/node/node-import.js';
 import { killRecursive } from '../../utils/node/process-handling.js';
 import { job_parse_stdout } from './output-parsing/parse-stdout.js';
 
@@ -124,6 +126,10 @@ export class Job {
 	 * Stop the job.
 	 */
 	stop = () => {
+
+		if (this.process.pid === undefined) {
+			return;
+		}
 		
 		this.status = {
 			status: 'stopped',
@@ -131,17 +137,50 @@ export class Job {
 			exitCode: 0
 		};
 
-		if (this.process.pid !== undefined) {
-			
-			const res = killRecursive(this.process.pid);
+		const res = killRecursive(this.process.pid);
+		
+		if (!res.ok) {
+			ControlPanelTab.showError(
+				`Failed to stop the job ${this.settings.verb}!`,
+				res.err
+			);
+		}
 
-			if (!res.ok) {
-				ControlPanelTab.showError(
-					`Failed to stop the job ${this.settings.verb}!`,
-					res.err
-				);
-			}
+		if (process.platform !== 'darwin') {
+			return;
+		}
 
+		// Time for some MacOS-induced fuckery!
+		// 
+		// The game runner, on MacOS, detaches itself in every possible manner from Igor, and thus,
+		// from us in GMEdit.
+		// 
+		// Due to this, there is no sound way to track down this process to kill it as well.
+		// Hell, the IDE threw in the towel, and if you try and run two games at once from different
+		// IDEs, you'll notice that hitting "Stop" on one kills the other.
+		// 
+		// We're taking a *slightly* more elegant and less annoying approach, by taking a guess that
+		// the only programs whose command lines contain a specific debug output log that Igor tells
+		// the runner to write STDOUT to, is going to be the runner, or anything else affiliated
+		// with this compile, and kill these processes.
+
+		const debug_log_path = path.join(this.settings.buildPath, 'output', 'debug.log');
+
+		try {
+
+			child_process.spawnSync('pgrep', ['-f', debug_log_path])
+				.stdout
+				.toString('utf-8')
+				.split('\n')
+				.map(Number)
+				.filter(it => !isNaN(it))
+				.forEach(killRecursive);
+
+		} catch (err) {
+			ControlPanelTab.showError(
+				`Failed to stop the job ${this.settings.verb}!`,
+				new Err('Failed stopping MacOS-specific residual processes', err)
+			);
 		}
 
 	}
