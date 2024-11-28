@@ -174,7 +174,24 @@ export class GMConstructor {
 	}
 
 	cleanCurrent = () => {
-		this.#runTask({ verb: 'Clean' });
+		
+		const project = project_current_get();
+
+		if (project === undefined) {
+			return;
+		}
+
+		// Stop existing running jobs, as they wouldn't be too happy about their directories being cleared!
+		compileController.jobs
+			.filter(it => it.project === project)
+			.forEach(it => it.stop());
+
+		const build_dir = this.#getBuildDir(project);
+
+		if (Electron_FS.existsSync(build_dir)) {
+			Electron_FS.rmSync(build_dir, { recursive: true });
+		}
+
 	}
 
 	runCurrent = () => {

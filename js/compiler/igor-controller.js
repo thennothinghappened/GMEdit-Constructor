@@ -10,7 +10,7 @@ import { Err } from '../utils/Err.js';
 import { child_process, path } from '../utils/node/node-import.js';
 
 /** @type {Job[]} */
-const jobs = [];
+export const jobs = [];
 
 /**
  * Run a new job on a given project.
