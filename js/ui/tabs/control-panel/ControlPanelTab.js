@@ -371,9 +371,9 @@ export class ControlPanelTab extends ConstructorTab {
 			['True', 'False', USE_DEFAULT],
 			(value) => {
 				switch (value) {
-					case 'True': projectProperties.reuse_compiler_tab_set(true);
-					case 'False': projectProperties.reuse_compiler_tab_set(false);
-					case USE_DEFAULT: projectProperties.reuse_compiler_tab_set(undefined);
+					case 'True': return projectProperties.reuse_compiler_tab_set(true);
+					case 'False': return projectProperties.reuse_compiler_tab_set(false);
+					case USE_DEFAULT: return projectProperties.reuse_compiler_tab_set(undefined);
 				}
 			}
 		);
