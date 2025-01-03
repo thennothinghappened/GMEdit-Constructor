@@ -429,11 +429,6 @@ async function user_list_load_type(type = runtime_channel_type_get()) {
  */
 async function runtime_list_load_path(type, search_path) {
 
-	/**
-	 * List of filenames we'll just skip as obviously invalid.
-	 */
-	const IGNORED_NAMES = ['.DS_Store'];
-
 	const dir_res = await readdir(search_path);
 
 	if (!dir_res.ok) {
@@ -445,15 +440,11 @@ async function runtime_list_load_path(type, search_path) {
 
 	/** @type {RuntimeInfo[]} */
 	const runtimes = dir_res.data
-		.map(dirname => {
+		.map(dirname => ({ dirname, path: node.path.join(search_path, dirname) }))
+		.filter(({ path }) => Electron_FS.lstatSync(path).isDirectory())
+		.map(({ dirname, path }) => {
 
-			if (IGNORED_NAMES.includes(dirname)) {
-				return null;
-			}
-
-			const path = node.path.join(search_path, dirname);
 			const igor_path = node.path.join(path, igor_path_segment);
-
 			const version_res = runtime_version_parse(type, dirname);
 
 			if (!version_res.ok) {
