@@ -194,7 +194,7 @@ export declare global {
 			load(project: Project): ProjectData;
 			save(project: Project, data: ProjectData);
 			open();
-	
+
 		}
 
 		type ProjectData = Partial<{
@@ -301,7 +301,7 @@ export declare global {
 			constructor(name: string, path: string?, kind: FileKind, data?: any);
 
 			static openTab(file: GmlFile);
-			static open(name: string, path: string, nav?: GmlFileNav): GmlFile?;
+			static open(name: string, path: string, nav: GmlFileNav?): GmlFile?;
 			
 			save();
 			
@@ -309,7 +309,7 @@ export declare global {
 			 * Loads the current code
 			 * @param data If provided, is used instead of reading from FS.
 			 */
-			load(data: any?);
+			load(data?: any);
 			
 			rename(newName: string, newPath: string);
 			
@@ -385,7 +385,7 @@ export declare global {
 		class EditCode extends Editor {
 			
 			static currentNew: EditCode? = null;
-			static container: Element;
+			static container: HTMLElement;
 
 			session: AceAjax.IEditSession;
 			kind: KCode;
