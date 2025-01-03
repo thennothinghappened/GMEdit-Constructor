@@ -458,8 +458,10 @@ async function runtime_list_load_path(type, search_path) {
 
 			if (!version_res.ok) {
 
-				const err = new Err(`Failed to parse runtime version name for runtime at '${path}'`, version_res.err);
-				ControlPanelTab.showDebug('Invalid runtime found in search path', err);
+				ControlPanelTab.showDebug('Invalid runtime found in search path', new Err(
+					`Failed to parse runtime version name for runtime at '${path}'`, 
+					version_res.err
+				));
 
 				return null;
 			}
@@ -469,13 +471,9 @@ async function runtime_list_load_path(type, search_path) {
 
 			if (!supported_res.ok) {
 
-				const err = new Err(
-					`Ignoring unsupported runtime ${runtime}`, 
-					supported_res.err,
-					`${plugin_name} only supports runtimes >2022.x, and below 2024.2[xx] currently. See stack trace for more details.`
-				);
-				
-				ControlPanelTab.showDebug('Ignoring unsupported runtime', err);
+				ControlPanelTab.showDebug('Excluding unsupported runtime', new Err(
+					`Excluding unsupported runtime ${runtime}`, supported_res.err
+				));
 				
 				return null;
 			}
