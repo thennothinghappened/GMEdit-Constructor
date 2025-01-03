@@ -330,8 +330,7 @@ export async function runtime_search_path_set(type, search_path) {
 				`Is the path correct? Have you deleted the runtime "${it}"?`
 			);
 	
-			ControlPanelTab.showDebug('Chosen Runtime version not available.', err);
-			
+			ControlPanelTab.showDebug('Chosen Runtime version not available', err);
 			runtime_version_set(type, runtimes[type]?.at(0)?.version?.toString() ?? null);
 
 		});
@@ -466,7 +465,6 @@ async function runtime_list_load_path(type, search_path) {
 			}
 
 			const runtime = version_res.data;
-
 			const supported_res = runtime.supported();
 
 			if (!supported_res.ok) {
@@ -610,13 +608,12 @@ export async function __setup__() {
 		const type_opts = loaded_prefs?.runtime_opts?.type_opts;
 
 		for (const type of gm_channel_types) {
-
 			if (!(type in type_opts)) {
 
-				ControlPanelTab.showWarning(
-					'Missing runtime type preference data',
-					new Err(`Missing runtime type preference data for type '${type}', replacing with default.`)
-				);
+				ControlPanelTab.showWarning('Missing runtime type preference data', new Err(
+					`Missing runtime type preference data for type '${type}', replacing with default.`
+				));
+
 				loaded_prefs.runtime_opts.type_opts[type] = prefs.runtime_opts.type_opts[type];
 
 			}
