@@ -204,11 +204,11 @@ export class ControlPanelTab extends ConstructorTab {
 		};
 
 		const { severity, title, err } = message;
-
 		const css_classes = severity_classes[severity];
 
 		const error = ui.group(this.problems, title, [
 			ui.text_button('Dismiss', () => {
+
 				error.remove();
 
 				const index = ControlPanelTab.messages.indexOf(message);
@@ -218,20 +218,21 @@ export class ControlPanelTab extends ConstructorTab {
 				}
 
 				ControlPanelTab.messages.splice(index, 1);
+
 			})
 		]);
 
 		error.classList.add(...css_classes);
+		error.appendChild(ui.p(err.message));
 
 		if (err.solution !== undefined) {
+			error.appendChild(ui.h4('Suggested solution'));
 			error.appendChild(ui.p(err.solution));
 		}
 		
 		const stacktrace = ui.group(error, 'Stack trace (click to expand)');
 		stacktrace.appendChild(ui.pre(err.toString()));
 		stacktrace.classList.add('collapsed');
-
-		return this;
 
 	}
 
