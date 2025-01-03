@@ -65,7 +65,7 @@ export class GMConstructor {
 
 			return ControlPanelTab
 				.view(true)
-				.showError(err.message, err);
+				.showError('No installed runtimes available of this type', err);
 		}
 
 		const runtime = runtime_res.data;
@@ -80,7 +80,7 @@ export class GMConstructor {
 
 			return ControlPanelTab
 				.view(true)
-				.showError(err.message, err);
+				.showError('Runtime compatibility check for this project failed', err);
 		}
 
 		const supported = supported_res.data;
@@ -102,7 +102,7 @@ export class GMConstructor {
 
 			return ControlPanelTab
 				.view(true)
-				.showError(err.message, err);
+				.showError('Incompatible runtime selected', err);
 		}
 
 		if (preferences.save_on_run_task_get()) {

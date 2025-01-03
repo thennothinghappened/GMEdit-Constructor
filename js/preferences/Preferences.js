@@ -307,14 +307,14 @@ export async function runtime_search_path_set(type, search_path) {
 	if (!res.ok) {
 
 		const err = new Err(
-			`Failed to load ${type} runtime list`,
+			`An error occurred while loading the runtime list for ${type} channel runtimes.`,
 			res.err,
 			'Make sure the search path is valid!'
 		);
 
 		return ControlPanelTab
 			.view(true)
-			.showError(err.message, err);
+			.showError(`Failed to load ${type} runtime list`, err);
 	}
 
 	runtimes[type] = res.data;
@@ -355,14 +355,14 @@ export async function users_search_path_set(type, users_path) {
 	if (!res.ok) {
 
 		const err = new Err(
-			`Failed to load ${type} user list`,
+			`An error occured while loading the list of users for ${type} from "${users_path}".`,
 			res.err,
 			'Make sure the users path is valid!'
 		);
 
 		return ControlPanelTab
 			.view(true)
-			.showError(err.message, err);
+			.showError(`Failed to load ${type} user list`, err);
 	}
 
 	users[type] = res.data;
@@ -378,7 +378,7 @@ export async function users_search_path_set(type, users_path) {
 
 		ControlPanelTab
 			.view(false)
-			.showWarning(err.message, err);
+			.showWarning('Selected user is no longer valid', err);
 		
 		user_set(type, users[type]?.at(0)?.name?.toString() ?? null);
 	}
@@ -460,7 +460,7 @@ async function runtime_list_load_path(type, search_path) {
 			if (!version_res.ok) {
 
 				const err = new Err(`Failed to parse runtime version name for runtime at '${path}'`, version_res.err);
-				ControlPanelTab.showDebug(err.message, err);
+				ControlPanelTab.showDebug('Invalid runtime found in search path', err);
 
 				return null;
 			}
@@ -477,7 +477,7 @@ async function runtime_list_load_path(type, search_path) {
 					`${plugin_name} only supports runtimes >2022.x, and below 2024.2[xx] currently. See stack trace for more details.`
 				);
 				
-				ControlPanelTab.showDebug(err.message, err);
+				ControlPanelTab.showDebug('Ignoring unsupported runtime', err);
 				
 				return null;
 			}
