@@ -8,33 +8,26 @@ export class Err extends Error {
 	/**
 	 * @param {string} message 
 	 * @param {any?} [cause] 
-	 * @param {string} [solution] 
-	 * @param {string} [title]
+	 * @param {string} [solution]
 	 */
-	constructor(message, cause = null, solution, title) {
+	constructor(message, cause = null, solution) {
 		super(message, { cause });
-		this.title = title;
 		this.solution = solution;
 	}
 
-	stackFormat() {
-
-		if (this.cause === null || this.cause === undefined) {
-			return `Stack trace:\n${this.stack}`;
-		}
-
-		const cause_str = this.cause
-			.toString()
-			.split('\n')
-			.join('\n	');
-
-		const caused_by_str = `Caused by ${cause_str}\n`;
-
-		return `${caused_by_str}\nStack trace:\n${this.stack}`;
-	}
-
+	/**
+	 * @returns {string}
+	 */
 	toString() {
-		return `${this.title ?? 'Error'}: \n${this.message}\n${this.stackFormat()}`;
+
+		let string = this.stack ?? JSON.stringify(this);
+
+		if (this.cause !== null && this.cause !== undefined) {
+			string += `\n\nCaused by ${this.cause}`;
+		}
+		
+		return string;
+
 	}
 
 }
