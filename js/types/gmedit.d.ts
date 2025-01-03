@@ -142,6 +142,43 @@ export declare global {
 			dispatchEvent: boolean,
 		}>;
 
+		interface TreeView {
+			
+			element: HTMLDivElement;
+			openPaths: string[];
+
+			clear();
+			find(item: boolean, query: TreeViewQuery): HTMLElement;
+			
+			hasThumb(itemPath: string): boolean;
+			addThumbRule(itemPath: string, thumbPath: string);
+			setThumb(itemPath: string, thumbPath: string, item: HTMLElement?);
+			setThumbSprite(itemPath: string, spriteName: string, item: HTMLElement?);
+			resetThumb(itemPath: string, item: HTMLElement?);
+			
+			handleDirClick(e: MouseEvent);
+			handleDirCtxMenu(e: MouseEvent);
+			handleItemCtxMenu(e: MouseEvent);
+			
+			makeDir(name: string): TreeViewDir;
+			makeAssetDir(name: string, rel: string, filter: string?): TreeViewDir;
+			
+			makeItem(name: string): TreeViewItem;
+			handleItemClick(e: MouseEvent, element: HTMLElement?, nav: GmlFileNav?): GmlFile;
+			
+			makeAssetItem(name: string, rel: string, path: string, kind: string): TreeViewItem;
+			
+			insertSorted(dir: TreeViewDir, item: HTMLElement);
+			
+			openProject(el: HTMLElement);
+			makeProject(name: string, path: string);
+			
+			showElement(item: HTMLElement, flash: boolean);
+			
+			saveOpen();
+			restoreOpen(paths: string[]?);
+		}
+
 		interface Preferences {
 			addText(parent: HTMLElement, label: string): HTMLElement;
 			addWiki(parent: HTMLElement, url: string, label: string): HTMLElement;
@@ -408,6 +445,7 @@ export declare global {
 		'ui.project.ProjectProperties': GMEdit.ProjectProperties;
 		'ui.ChromeTabs': GMEdit.ChromeTabs;
 		'ui.KeyboardShortcuts': GMEdit.KeyboardShortcuts;
+		'ui.treeview.TreeView': GMEdit.TreeView;
 		'gml.Project': typeof GMEdit.Project;
 		'editors.Editor': typeof GMEdit.Editor;
 		'file.FileKind': typeof GMEdit.FileKind;
