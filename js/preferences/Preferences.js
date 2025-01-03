@@ -327,13 +327,10 @@ export async function runtime_search_path_set(type, search_path) {
 			const err = new Err(
 				`Runtime version "${it}" not available in new search path "${search_path}".`,
 				undefined,
-				`Is the path correct? Have you deleted the runtime "${it}"?`,
-				'Chosen Runtime version not available.'
+				`Is the path correct? Have you deleted the runtime "${it}"?`
 			);
 	
-			ControlPanelTab
-				.view(false)
-				.showDebug(err.title ?? '', err);
+			ControlPanelTab.showDebug('Chosen Runtime version not available.', err);
 			
 			runtime_version_set(type, runtimes[type]?.at(0)?.version?.toString() ?? null);
 
