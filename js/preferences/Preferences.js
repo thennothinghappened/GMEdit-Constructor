@@ -641,19 +641,16 @@ export async function __setup__() {
 		const options = prefs.runtime_opts.type_opts[type];
 
 		reqs.push(runtime_list_load_type(type)
-			.then((result) => {
+			.then((res) => {
 
-				if (!result.ok) {
-
+				if (!res.ok) {
+					// Silently drop. Users don't care if a GM version they don't use couldn't be
+					// found!
 					options.choice = null;
-
-					ControlPanelTab
-						.showDebug(`Failed to load ${type} runtimes list`, result.err);
-
 					return;
 				}
 
-				const runtimes_found = result.data;
+				const runtimes_found = res.data;
 
 				if (options.choice === null && runtimes_found.length > 0) {
 					options.choice = runtimes_found[0].version.toString();
@@ -667,14 +664,8 @@ export async function __setup__() {
 			.then((result) => {
 
 				if (!result.ok) {
-
 					options.user = null;
-
-					ControlPanelTab
-						.showDebug(`Failed to load ${type} users list`, result.err);
-
 					return;
-
 				}
 
 				const users_found = result.data;
