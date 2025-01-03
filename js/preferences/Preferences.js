@@ -298,7 +298,7 @@ export function users_get_for_type(type) {
 export async function runtime_search_path_set(type, search_path) {
 
 	prefs.runtime_opts.type_opts[type].search_path = search_path;
-	await save();
+	save();
 
 	runtimes[type] = null;
 
@@ -345,7 +345,7 @@ export async function runtime_search_path_set(type, search_path) {
 export async function users_search_path_set(type, users_path) {
 
 	prefs.runtime_opts.type_opts[type].users_path = users_path;
-	await save();
+	save();
 
 	users[type] = null;
 
@@ -388,7 +388,7 @@ export async function users_search_path_set(type, users_path) {
  * Save preferences back to the file.
  */
 export function save() {
-	return writeFile(save_path, JSON.stringify(prefs));
+	return Electron_FS.writeFileSync(save_path, JSON.stringify(prefs));
 }
 
 /**

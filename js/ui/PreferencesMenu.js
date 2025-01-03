@@ -88,9 +88,7 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
 		prefs_group,
 		'Global Builds Path',
 		preferences.global_build_path_get(),
-		async (path) => {
-			await preferences.global_build_path_set(path);
-		}
+		preferences.global_build_path_set
 	);
 
 	UIPreferences.addCheckbox(
@@ -114,14 +112,14 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
 			group,
 			'Search Path',
 			preferences.runtime_search_path_get(type),
-			async (path) => {
+			(path) => {
 				
 				// Workaround for being called twice for some reason?
 				if (path === preferences.runtime_search_path_get(type)) {
 					return;
 				}
 				
-				await preferences.runtime_search_path_set(type, path);
+				preferences.runtime_search_path_set(type, path);
 
 				UIDropdownMutate(
 					version_dropdown,
@@ -149,13 +147,13 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
 			group,
 			'User Data Path',
 			preferences.users_search_path_get(type),
-			async (path) => {
+			(path) => {
 				// Workaround for being called twice for some reason?
 				if (path === preferences.users_search_path_get(type)) {
 					return;
 				}
 
-				await preferences.users_search_path_set(type, path);
+				preferences.users_search_path_set(type, path);
 
 				UIDropdownMutate(
 					user_dropdown,
