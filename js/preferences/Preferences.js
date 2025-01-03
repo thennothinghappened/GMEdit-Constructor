@@ -460,7 +460,7 @@ async function runtime_list_load_path(type, search_path) {
 			if (!version_res.ok) {
 
 				const err = new Err(`Failed to parse runtime version name for runtime at '${path}'`, version_res.err);
-				ControlPanelTab.showWarning(err.message, err);
+				ControlPanelTab.showDebug(err.message, err);
 
 				return null;
 			}
