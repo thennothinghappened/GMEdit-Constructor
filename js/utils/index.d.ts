@@ -14,6 +14,7 @@ export declare global {
 
 	interface EventEmitter<EventMap> {
 		on<K extends keyof EventMap>(type: K, listener: Listener<EventMap[K]>): void;
+		once<K extends keyof EventMap>(type: K, listener: Listener<EventMap[K]>): void;
 		off<K extends keyof EventMap>(type: K, listener: Listener<EventMap[K]>): void;
 	}
 

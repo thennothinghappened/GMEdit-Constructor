@@ -12,6 +12,12 @@ export class EventEmitterImpl {
 	 * @type {ListenerMap<EventType>}
 	 */
 	listeners;
+
+	/**
+	 * @private
+	 * @type {ListenerMap<EventType>}
+	 */
+	onceListeners;
 	
 	/**
 	 * Subscribe to the given event.
@@ -23,12 +29,23 @@ export class EventEmitterImpl {
 	}
 
 	/**
+	 * Subscribe to the given event.
+	 * 
+	 * @type {EventEmitter<EventType>['on']}
+	 */
+	once(type, listener) {
+		this.on(type, listener);
+		this.onceListeners[type].add(listener);
+	}
+
+	/**
 	 * Unsubscribe from the given event.
 	 * 
 	 * @type {EventEmitter<EventType>['off']}
 	 */
 	off(type, listener) {
 		this.listeners[type].delete(listener);
+		this.onceListeners[type].delete(listener);
 	}
 
 	/**
@@ -39,7 +56,19 @@ export class EventEmitterImpl {
 	 * @param {EventType[T]} event 
 	 */
 	emit(type, event) {
-		this.listeners[type].forEach(listener => listener(event));
+
+		const onceListeners = this.onceListeners[type];
+
+		this.listeners[type].forEach(listener => {
+
+			listener(event);
+
+			if (onceListeners.has(listener)) {
+				this.off(type, listener);
+			}
+
+		});
+		
 	}
 
 	/**
@@ -50,9 +79,12 @@ export class EventEmitterImpl {
 
 		// @ts-ignore We're getting to it!
 		this.listeners = {};
+		// @ts-ignore We're getting to it!
+		this.onceListeners = {};
 
 		for (const eventName of eventNames) {
 			this.listeners[eventName] = new Set();
+			this.onceListeners[eventName] = new Set();
 		}
 
 	}
