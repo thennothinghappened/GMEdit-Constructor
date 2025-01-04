@@ -46,12 +46,12 @@ export class GMConstructor {
 			verb: partial_settings.verb,
 			buildPath: partial_settings.buildPath ?? this.#getBuildDir(project),
 			platform: partial_settings.platform ?? igorPaths.igor_user_platform,
-			runner: partial_settings.runner ?? ProjectProperties.runner,
+			runner: partial_settings.runner ?? ProjectProperties.runtimeBuildTypeOrDef,
 			threads: partial_settings.threads ?? 8,
-			configName: partial_settings.configName ?? ProjectProperties.config_name
+			configName: partial_settings.configName ?? ProjectProperties.buildConfig
 		};
 		
-		const runtime_type = ProjectProperties.runtime_channel_type;
+		const runtime_type = ProjectProperties.runtimeChannelTypeOrDef;
 		const runtime_res = ProjectProperties.runtime;
 		const user_res = ProjectProperties.user;
 
@@ -105,7 +105,7 @@ export class GMConstructor {
 				.showError('Incompatible runtime selected', err);
 		}
 
-		if (Preferences.save_on_run_task) {
+		if (Preferences.saveOnRun) {
 			open_files_save();
 		}
 
@@ -142,7 +142,7 @@ export class GMConstructor {
 				.showError('Failed to run Igor job!', res.err);
 		}
 
-		compileController.job_open_editor(res.data, ProjectProperties.reuse_compiler_tab);
+		compileController.job_open_editor(res.data, ProjectProperties.reuseCompilerTabOrDef);
 	}
 
 	/**
@@ -152,8 +152,8 @@ export class GMConstructor {
 	 */
 	#getBuildDir(project) {
 		
-		if (Preferences.use_global_build) {
-			return node.path.join(Preferences.global_build_path, project.displayName);
+		if (Preferences.useGlobalBuildPath) {
+			return node.path.join(Preferences.globalBuildPath, project.displayName);
 		}
 
 		return node.path.join(project.dir, 'build');
@@ -268,7 +268,7 @@ export class GMConstructor {
 		hamburgerOptions.__setup__();
 
 		// Check for updates //
-		if (Preferences.check_for_updates) {
+		if (Preferences.checkForUpdates) {
 
 			plugin_update_check()
 				.then(res => {

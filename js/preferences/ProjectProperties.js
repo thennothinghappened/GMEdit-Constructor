@@ -31,7 +31,7 @@ export class ProjectProperties {
 	 * Get the active compile config name.
 	 * @returns {string}
 	 */
-	static get config_name() {
+	static get buildConfig() {
 		return properties.config_name ?? 'Default';
 	}
 
@@ -39,9 +39,9 @@ export class ProjectProperties {
 	 * Set the active compile config name.
 	 * @param {string} config_name 
 	 */
-	static set config_name(config_name) {
+	static set buildConfig(config_name) {
 
-		this.updateConfigTree(this.config_name, config_name);
+		this.updateConfigTree(this.buildConfig, config_name);
 		properties.config_name = config_name;
 
 		this.save();
@@ -50,17 +50,17 @@ export class ProjectProperties {
 
 	/**
 	 * Get the desired runner type.
-	 * @returns {RunnerType}
+	 * @returns {RuntimeBuildType}
 	 */
-	static get runner() {
-		return this.runner_project ?? Preferences.runner;
+	static get runtimeBuildTypeOrDef() {
+		return this.runtimeBuildType ?? Preferences.runtimeBuildType;
 	}
 
 	/**
 	 * Get the desired runner type for this project (without falling back to the global option).
-	 * @returns {RunnerType|undefined}
+	 * @returns {RuntimeBuildType|undefined}
 	 */
-	static get runner_project() {
+	static get runtimeBuildType() {
 		return properties.runner;
 	}
 
@@ -68,15 +68,15 @@ export class ProjectProperties {
 	 * Get whether to reuse a compiler tab.
 	 * @returns {Boolean}
 	 */
-	static get reuse_compiler_tab() {
-		return this.reuse_compiler_tab_project ?? Preferences.reuse_compiler_tab;
+	static get reuseCompilerTabOrDef() {
+		return this.reuseCompilerTab ?? Preferences.reuseCompilerTab;
 	}
 
 	/**
 	 * Get whether to reuse a compiler tab.
 	 * @returns {Boolean|undefined}
 	 */
-	static get reuse_compiler_tab_project() {
+	static get reuseCompilerTab() {
 		return properties.reuse_compiler_tab;
 	}
 
@@ -84,16 +84,16 @@ export class ProjectProperties {
 	 * Set whether to reuse a compiler tab.
 	 * @param {Boolean|undefined} reuse_compiler_tab 
 	 */
-	static set reuse_compiler_tab(reuse_compiler_tab) {
+	static set reuseCompilerTab(reuse_compiler_tab) {
 		properties.reuse_compiler_tab = reuse_compiler_tab;
 		this.save();
 	}
 
 	/**
 	 * Set the desired runtime channel type.
-	 * @param {RunnerType|undefined} runner 
+	 * @param {RuntimeBuildType|undefined} runner 
 	 */
-	static set runner(runner) {
+	static set runtimeBuildType(runner) {
 
 		properties.runner = runner;
 		this.save();
@@ -104,15 +104,15 @@ export class ProjectProperties {
 	 * Get the desired runtime channel type.
 	 * @returns {GMChannelType}
 	 */
-	static get runtime_channel_type() {
-		return properties.runtime_type ?? Preferences.runtime_channel_type;
+	static get runtimeChannelTypeOrDef() {
+		return properties.runtime_type ?? Preferences.defaultRuntimeChannel;
 	}
 
 	/**
 	 * Get the desired runtime channel type for this project (without falling back to the global option).
 	 * @returns {GMChannelType|undefined}
 	 */
-	static get runtime_project_channel_type() {
+	static get runtimeChannelType() {
 		return properties.runtime_type;
 	}
 
@@ -120,7 +120,7 @@ export class ProjectProperties {
 	 * Set the desired runtime channel type.
 	 * @param {GMChannelType|undefined} runtime_type 
 	 */
-	static set runtime_channel_type(runtime_type) {
+	static set runtimeChannelType(runtime_type) {
 
 		properties.runtime_type = runtime_type;
 		this.save();
@@ -131,15 +131,15 @@ export class ProjectProperties {
 	 * Get the desired runtime version for this project.
 	 * @returns {string|null}
 	 */
-	static get runtime_version() {
-		return properties.runtime_version ?? Preferences.runtime_version_get(this.runtime_channel_type);
+	static get runtimeVersionOrDef() {
+		return properties.runtime_version ?? Preferences.getRuntimeVersion(this.runtimeChannelTypeOrDef);
 	}
 
 	/**
 	 * Get the desired runtime channel type for this project (without falling back to the global option).
 	 * @returns {string|undefined}
 	 */
-	static get runtime_project_version() {
+	static get runtimeVersion() {
 		return properties.runtime_version;
 	}
 
@@ -147,7 +147,7 @@ export class ProjectProperties {
 	 * Set the desired runtime channel type.
 	 * @param {string|undefined} runtime_type 
 	 */
-	static set runtime_version(runtime_type) {
+	static set runtimeVersion(runtime_type) {
 
 		properties.runtime_version = runtime_type;
 		this.save();
@@ -160,8 +160,8 @@ export class ProjectProperties {
 	 */
 	static get runtime() {
 
-		const type = this.runtime_channel_type;
-		const desired_runtime_list = Preferences.runtime_versions_get_for_type(type);
+		const type = this.runtimeChannelTypeOrDef;
+		const desired_runtime_list = Preferences.getRuntimes(type);
 
 		if (desired_runtime_list === null) {
 			return {
@@ -170,7 +170,7 @@ export class ProjectProperties {
 			};
 		}
 
-		const version = this.runtime_version ?? desired_runtime_list[0]?.version?.toString();
+		const version = this.runtimeVersionOrDef ?? desired_runtime_list[0]?.version?.toString();
 		const runtime = desired_runtime_list.find(runtime => runtime.version.toString() === version);
 
 		if (runtime === undefined) {
@@ -192,8 +192,8 @@ export class ProjectProperties {
 	 */
 	static get user() {
 
-		const type = this.runtime_channel_type;
-		const desired_user_list = Preferences.users_get_for_type(type);
+		const type = this.runtimeChannelTypeOrDef;
+		const desired_user_list = Preferences.getUsers(type);
 
 		if (desired_user_list === null) {
 			return {
@@ -202,7 +202,7 @@ export class ProjectProperties {
 			};
 		}
 
-		const name = Preferences.user_get(type) ?? desired_user_list[0]?.name?.toString();
+		const name = Preferences.getUser(type) ?? desired_user_list[0]?.name?.toString();
 		const user = desired_user_list.find(user => user.name.toString() === name);
 
 		if (user === undefined) {
@@ -239,8 +239,10 @@ export class ProjectProperties {
 	/**
 	 * Make sure the project's properties contain Constructor's
 	 * data, and set up tree view build configs.
+	 * 
+	 * @private
 	 */
-	static on_project_open = () => {
+	static onProjectOpen = () => {
 
 		const project = project_current_get();
 
@@ -260,7 +262,7 @@ export class ProjectProperties {
 		configsTreeDir = TreeView.makeAssetDir('Build Configs', '', null);
 		
 		this.addConfigInTree(configsTreeDir.treeItems, rootConfig);
-		this.updateConfigTree('', this.config_name);
+		this.updateConfigTree('', this.buildConfig);
 
 		TreeView.element.appendChild(configsTreeDir);
 
@@ -268,8 +270,10 @@ export class ProjectProperties {
 
 	/**
 	 * Clean up the build configs in the tree view.
+	 * 
+	 * @private
 	 */
-	static on_project_close = () => {
+	static onProjectClose = () => {
 		configsTreeDir.remove();
 		configTreeItems = {};
 	}
@@ -277,6 +281,7 @@ export class ProjectProperties {
 	/**
 	 * Add this config recursively to the parent in the tree view.
 	 * 
+	 * @private
 	 * @param {HTMLDivElement} parentElement 
 	 * @param {ProjectYYConfig} config 
 	 */
@@ -285,7 +290,7 @@ export class ProjectProperties {
 		
 		const dir = TreeView.makeDir(config.name);
 
-		dir.treeHeader.addEventListener('contextmenu', () => { this.config_name = config.name; });
+		dir.treeHeader.addEventListener('contextmenu', () => { this.buildConfig = config.name; });
 		dir.treeHeader.addEventListener('click', TreeView.handleDirClick);
 		dir.treeHeader.title = 'Right-click to select.';
 
@@ -301,6 +306,7 @@ export class ProjectProperties {
 	/**
 	 * Update the config tree with the new selected config.
 	 * 
+	 * @private
 	 * @param {string} oldConfigName 
 	 * @param {string} newConfigName 
 	 */
@@ -333,13 +339,13 @@ export class ProjectProperties {
 	}
 
 	static __setup__() {
-		GMEdit.on('projectOpen', this.on_project_open);
-		GMEdit.on('projectClose', this.on_project_close);
+		GMEdit.on('projectOpen', this.onProjectOpen);
+		GMEdit.on('projectClose', this.onProjectClose);
 	}
 
 	static __cleanup__() {
-		GMEdit.off('projectOpen', this.on_project_open);
-		GMEdit.off('projectClose', this.on_project_close);
+		GMEdit.off('projectOpen', this.onProjectOpen);
+		GMEdit.off('projectClose', this.onProjectClose);
 	}
 
 }

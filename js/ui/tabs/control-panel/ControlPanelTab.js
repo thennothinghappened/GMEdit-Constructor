@@ -349,26 +349,26 @@ export class ControlPanelTab extends ConstructorTab {
 		UIPreferences.addDropdown(
 			this.projectSettings,
 			'Build Configuration',
-			ProjectProperties.config_name,
+			ProjectProperties.buildConfig,
 			project_config_tree_to_array(configs),
-			(config_name) => ProjectProperties.config_name = config_name
+			(config_name) => ProjectProperties.buildConfig = config_name
 		);
 
 		UIPreferences.addDropdown(
 			this.projectSettings,
 			'Runner Type',
-			ProjectProperties.runner_project ?? USE_DEFAULT,
+			ProjectProperties.runtimeBuildType ?? USE_DEFAULT,
 			[...VALID_RUNNER_TYPES, USE_DEFAULT],
-			(value) => ProjectProperties.runner = default_undefined(value)
+			(value) => ProjectProperties.runtimeBuildType = default_undefined(value)
 		);
 
 		UIPreferences.addDropdown(
 			this.projectSettings,
 			'Runtime Channel Type',
-			ProjectProperties.runtime_project_channel_type ?? USE_DEFAULT,
+			ProjectProperties.runtimeChannelType ?? USE_DEFAULT,
 			[...GM_CHANNEL_TYPES, USE_DEFAULT],
 			(value) => {
-				ProjectProperties.runtime_channel_type = default_undefined(value);
+				ProjectProperties.runtimeChannelType = default_undefined(value);
 				this.updateRuntimeVersionDropdown();
 			}
 		);
@@ -376,15 +376,15 @@ export class ControlPanelTab extends ConstructorTab {
 		UIPreferences.addDropdown(
 			this.projectSettings,
 			'Reuse compiler output tab between runs',
-			use(ProjectProperties.reuse_compiler_tab_project)
+			use(ProjectProperties.reuseCompilerTab)
 				?.let(it => it ? 'True' : 'False')
 				.value ?? USE_DEFAULT,
 			['True', 'False', USE_DEFAULT],
 			(value) => {
 				switch (value) {
-					case 'True': return ProjectProperties.reuse_compiler_tab = true;
-					case 'False': return ProjectProperties.reuse_compiler_tab = false;
-					case USE_DEFAULT: return ProjectProperties.reuse_compiler_tab = undefined;
+					case 'True': return ProjectProperties.reuseCompilerTab = true;
+					case 'False': return ProjectProperties.reuseCompilerTab = false;
+					case USE_DEFAULT: return ProjectProperties.reuseCompilerTab = undefined;
 				}
 			}
 		);
@@ -392,18 +392,9 @@ export class ControlPanelTab extends ConstructorTab {
 		this.#runtimeVersionDropdown = UIPreferences.addDropdown(
 			this.projectSettings,
 			'Runtime Version',
-			ProjectProperties.runtime_project_version ?? USE_DEFAULT,
-			[...preferencesMenu.runtime_version_strings_get_for_type(ProjectProperties.runtime_channel_type), USE_DEFAULT],
-			(value) => {
-
-				if (value === USE_DEFAULT) {
-					ProjectProperties.runtime_version = undefined;
-					return;
-				}
-
-				ProjectProperties.runtime_version = value;
-
-			}
+			ProjectProperties.runtimeVersion ?? USE_DEFAULT,
+			[...preferencesMenu.runtime_version_strings_get_for_type(ProjectProperties.runtimeChannelTypeOrDef), USE_DEFAULT],
+			(value) => ProjectProperties.runtimeVersion = default_undefined(value)
 		);
 
 	}
@@ -430,7 +421,7 @@ export class ControlPanelTab extends ConstructorTab {
 			return;
 		}
 
-		const type = ProjectProperties.runtime_channel_type;
+		const type = ProjectProperties.runtimeChannelTypeOrDef;
 
 		UIDropdownMutate(
 			this.#runtimeVersionDropdown,
@@ -439,12 +430,7 @@ export class ControlPanelTab extends ConstructorTab {
 		);
 
 		const select = UIDropdownGetSelect(this.#runtimeVersionDropdown);
-
-		if (select.value === USE_DEFAULT) {
-			ProjectProperties.runtime_version = undefined;
-		} else {
-			ProjectProperties.runtime_version = select.value;
-		}
+		ProjectProperties.runtimeVersion = default_undefined(select.value);
 
 	}
 

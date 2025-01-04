@@ -63,7 +63,7 @@ export declare global {
 		'Beta'		|
 		'LTS'		;
 
-	type RunnerType =
+	type RuntimeBuildType =
 		'VM'	|
 		'YYC'	;
 
@@ -85,7 +85,7 @@ export declare global {
 		/**
 		 * Which runner to use - default is VM.
 		 */
-		runner: RunnerType;
+		runner: RuntimeBuildType;
 
 		/**
 		 * How many threads to use for this compilation.

@@ -42,39 +42,39 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
 	UIPreferences.addCheckbox(
 		prefs_group,
 		'Automatically check for updates on startup',
-		Preferences.check_for_updates,
-		(update_check) => { Preferences.check_for_updates = update_check; }
+		Preferences.checkForUpdates,
+		(update_check) => { Preferences.checkForUpdates = update_check; }
 	);
 
 	UIPreferences.addCheckbox(
 		prefs_group,
 		'Save automatically when running a task',
-		Preferences.save_on_run_task,
-		(save_on_run_task) => { Preferences.save_on_run_task = save_on_run_task; }
+		Preferences.saveOnRun,
+		(save_on_run_task) => { Preferences.saveOnRun = save_on_run_task; }
 	);
 
 	UIPreferences.addCheckbox(
 		prefs_group,
 		'Reuse compiler output tab between runs',
-		Preferences.save_on_run_task,
-		(reuse_compiler_tab) => { Preferences.reuse_compiler_tab = reuse_compiler_tab; }
+		Preferences.saveOnRun,
+		(reuse_compiler_tab) => { Preferences.reuseCompilerTab = reuse_compiler_tab; }
 	);
 
 	UIPreferences.addDropdown(
 		prefs_group,
 		'Runner Type',
-		Preferences.runner,
+		Preferences.runtimeBuildType,
 		VALID_RUNNER_TYPES,
-		(runner) => { Preferences.runner = runner; }
+		(runner) => { Preferences.runtimeBuildType = runner; }
 	);
 
 	UIPreferences.addDropdown(
 		prefs_group,
 		'Runtime Channel Type',
-		Preferences.runtime_channel_type,
+		Preferences.defaultRuntimeChannel,
 		GM_CHANNEL_TYPES,
 		(runtime_channel_type) => {
-			Preferences.runtime_channel_type = runtime_channel_type;
+			Preferences.defaultRuntimeChannel = runtime_channel_type;
 
 			if (on_refresh_runtime_settings !== undefined) {
 				on_refresh_runtime_settings();
@@ -85,15 +85,15 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
 	UIPreferences.addInput(
 		prefs_group,
 		'Global Builds Path',
-		Preferences.global_build_path,
-		(global_build_path) => { Preferences.global_build_path = global_build_path; }
+		Preferences.globalBuildPath,
+		(global_build_path) => { Preferences.globalBuildPath = global_build_path; }
 	);
 
 	UIPreferences.addCheckbox(
 		prefs_group,
 		'Use the global builds directory',
-		Preferences.use_global_build,
-		(use_global_build) => { Preferences.use_global_build = use_global_build; }
+		Preferences.useGlobalBuildPath,
+		(use_global_build) => { Preferences.useGlobalBuildPath = use_global_build; }
 	);
 
 	for (const type of GM_CHANNEL_TYPES) {
@@ -109,15 +109,15 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
 		UIPreferences.addInput(
 			group,
 			'Search Path',
-			Preferences.runtime_search_path_get(type),
+			Preferences.getRuntimeSearchPath(type),
 			async (path) => {
 				
 				// Workaround for being called twice for some reason?
-				if (path === Preferences.runtime_search_path_get(type)) {
+				if (path === Preferences.getRuntimeSearchPath(type)) {
 					return;
 				}
 				
-				await Preferences.runtime_search_path_set(type, path);
+				await Preferences.setRuntimeSearchPath(type, path);
 
 				UIDropdownMutate(
 					version_dropdown,
@@ -134,24 +134,24 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
 		version_dropdown = UIPreferences.addDropdown(
 			group,
 			'Version',
-			Preferences.runtime_version_get(type) ?? '',
+			Preferences.getRuntimeVersion(type) ?? '',
 			runtime_version_strings_get_for_type(type),
 			(choice) => {
-				Preferences.runtime_version_set(type, choice);
+				Preferences.setRuntimeVersion(type, choice);
 			}
 		);
 
 		UIPreferences.addInput(
 			group,
 			'User Data Path',
-			Preferences.users_search_path_get(type),
+			Preferences.getUserSearchPath(type),
 			async (path) => {
 				// Workaround for being called twice for some reason?
-				if (path === Preferences.users_search_path_get(type)) {
+				if (path === Preferences.getUserSearchPath(type)) {
 					return;
 				}
 
-				await Preferences.users_search_path_set(type, path);
+				await Preferences.setUserSearchPath(type, path);
 
 				UIDropdownMutate(
 					user_dropdown,
@@ -163,10 +163,10 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
 		user_dropdown = UIPreferences.addDropdown(
 			group,
 			'User',
-			Preferences.user_get(type) ?? '',
+			Preferences.getUser(type) ?? '',
 			user_strings_get_for_type(type),
 			(choice) => {
-				Preferences.user_set(type, choice);
+				Preferences.setUser(type, choice);
 			}
 		);
 
@@ -181,7 +181,7 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
  */
 export function runtime_version_strings_get_for_type(type) {
 	
-	const runtimes = Preferences.runtime_versions_get_for_type(type);
+	const runtimes = Preferences.getRuntimes(type);
 
 	if (runtimes === null) {
 		return [];
@@ -198,7 +198,7 @@ export function runtime_version_strings_get_for_type(type) {
  */
 function user_strings_get_for_type(type) {
 	
-	const users = Preferences.users_get_for_type(type);
+	const users = Preferences.getUsers(type);
 
 	if (users === null) {
 		return [];

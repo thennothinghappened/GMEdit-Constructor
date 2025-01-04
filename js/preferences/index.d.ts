@@ -8,7 +8,7 @@ export declare global {
 			/** Globally selected runtime options that may be overriden by projects. */
 			runtime_opts: {
 				type: GMChannelType;
-				runner: RunnerType;
+				runner: RuntimeBuildType;
 	
 				type_opts: {
 					[key in GMChannelType]: RuntimePreference;
@@ -55,7 +55,7 @@ export declare global {
 			/**
 			 * Chosen runner type to use.
 			 */
-			runner: RunnerType;
+			runner: RuntimeBuildType;
 
 			/** 
 			 * Whether to reuse the compile viewer tab between runs. 

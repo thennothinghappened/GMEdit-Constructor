@@ -19,7 +19,7 @@ import { use } from '../utils/scope-extensions/use.js';
  */
 export const GM_CHANNEL_TYPES = ['Stable', 'Beta', 'LTS'];
 
-/** @type {Readonly<RunnerType[]>} */
+/** @type {Readonly<RuntimeBuildType[]>} */
 export const VALID_RUNNER_TYPES = ['VM', 'YYC'];
 
 /** @type {Readonly<TPreferences.Data>} */
@@ -88,11 +88,11 @@ export class Preferences {
 	 * Whether to reuse a compiler tab.
 	 * @returns {Boolean}
 	 */
-	static get reuse_compiler_tab() {
+	static get reuseCompilerTab() {
 		return this.prefs.reuse_compiler_tab;
 	}
 
-	static set reuse_compiler_tab(reuse_compiler_tab) {
+	static set reuseCompilerTab(reuse_compiler_tab) {
 		this.prefs.reuse_compiler_tab = reuse_compiler_tab;
 		this.save();
 	}
@@ -101,11 +101,11 @@ export class Preferences {
 	 * Whether to save all files on running a task.
 	 * @returns {Boolean}
 	 */
-	static get save_on_run_task() {
+	static get saveOnRun() {
 		return this.prefs.save_on_run_task;
 	}
 
-	static set save_on_run_task(save_on_run_task) {
+	static set saveOnRun(save_on_run_task) {
 		this.prefs.save_on_run_task = save_on_run_task;
 		this.save();
 	}
@@ -114,11 +114,11 @@ export class Preferences {
 	 * Whether we should automatically check for updates on startup.
 	 * @returns {Boolean}
 	 */
-	static get check_for_updates() {
+	static get checkForUpdates() {
 		return this.prefs.check_for_updates;
 	}
 
-	static set check_for_updates(check_for_updates) {
+	static set checkForUpdates(check_for_updates) {
 		this.prefs.check_for_updates = check_for_updates;
 		this.save();
 	}
@@ -126,11 +126,11 @@ export class Preferences {
 	/**
 	 * Whether to use the global build directory.
 	 */
-	static get use_global_build() {
+	static get useGlobalBuildPath() {
 		return this.prefs.use_global_build;
 	}
 
-	static set use_global_build(use_global_build) {
+	static set useGlobalBuildPath(use_global_build) {
 		this.prefs.use_global_build = use_global_build;
 		this.save();
 	}
@@ -139,24 +139,24 @@ export class Preferences {
 	 * The global build directory path.
 	 * @returns {String}
 	 */
-	static get global_build_path() {
+	static get globalBuildPath() {
 		return this.prefs.global_build_path;
 	}
 
-	static set global_build_path(global_build_path) {
+	static set globalBuildPath(global_build_path) {
 		this.prefs.global_build_path = global_build_path;
 		this.save();
 	}
 
 	/**
 	 * The desired runner type.
-	 * @returns {RunnerType}
+	 * @returns {RuntimeBuildType}
 	 */
-	static get runner() {
+	static get runtimeBuildType() {
 		return this.prefs.runtime_opts.runner;
 	}
 
-	static set runner(runner) {
+	static set runtimeBuildType(runner) {
 		this.prefs.runtime_opts.runner = runner;
 		this.save();
 	}
@@ -164,20 +164,20 @@ export class Preferences {
 	/**
 	 * The default runtime type used globally.
 	 */
-	static get runtime_channel_type() {
+	static get defaultRuntimeChannel() {
 		return this.prefs.runtime_opts.type;
 	}
 
-	static set runtime_channel_type(type) {
+	static set defaultRuntimeChannel(type) {
 		this.prefs.runtime_opts.type = type;
 		this.save();
 	}
 
 	/**
 	 * Get the global choice for default runtime for a given type.
-	 * @param {GMChannelType} [type] 
+	 * @param {GMChannelType} type 
 	 */
-	static runtime_version_get(type = this.runtime_channel_type) {
+	static getRuntimeVersion(type) {
 		return this.prefs.runtime_opts.type_opts[type].choice;
 	}
 
@@ -187,7 +187,7 @@ export class Preferences {
 	 * @param {GMChannelType} type 
 	 * @param {string?} choice 
 	 */
-	static runtime_version_set(type, choice) {
+	static setRuntimeVersion(type, choice) {
 		this.prefs.runtime_opts.type_opts[type].choice = choice;
 		this.save();
 	}
@@ -197,7 +197,7 @@ export class Preferences {
 	 * 
 	 * @param {GMChannelType} [type] 
 	 */
-	static user_get(type = this.runtime_channel_type) {
+	static getUser(type = this.defaultRuntimeChannel) {
 		return this.prefs.runtime_opts.type_opts[type].user;
 	}
 
@@ -207,7 +207,7 @@ export class Preferences {
 	 * @param {GMChannelType} type 
 	 * @param {string?} user 
 	 */
-	static user_set(type, user) {
+	static setUser(type, user) {
 		this.prefs.runtime_opts.type_opts[type].user = user;
 		this.save();
 	}
@@ -217,7 +217,7 @@ export class Preferences {
 	 * 
 	 *  @param {GMChannelType} type 
 	 */
-	static runtime_search_path_get(type) {
+	static getRuntimeSearchPath(type) {
 		return this.prefs.runtime_opts.type_opts[type].search_path;
 	}
 
@@ -226,7 +226,7 @@ export class Preferences {
 	 * 
 	 *  @param {GMChannelType} type 
 	 */
-	static users_search_path_get(type) {
+	static getUserSearchPath(type) {
 		return this.prefs.runtime_opts.type_opts[type].users_path;
 	}
 
@@ -236,7 +236,7 @@ export class Preferences {
 	 * @param {GMChannelType} type
 	 * @returns {RuntimeInfo[]?}
 	 */
-	static runtime_versions_get_for_type(type) {
+	static getRuntimes(type) {
 		return runtimes[type];
 	};
 
@@ -246,7 +246,7 @@ export class Preferences {
 	 * @param {GMChannelType} type
 	 * @returns {UserInfo[]?}
 	 */
-	static users_get_for_type(type) {
+	static getUsers(type) {
 		return users[type];
 	};
 
@@ -256,14 +256,14 @@ export class Preferences {
 	 * @param {GMChannelType} type 
 	 * @param {string} search_path 
 	 */
-	static async runtime_search_path_set(type, search_path) {
+	static async setRuntimeSearchPath(type, search_path) {
 
 		this.prefs.runtime_opts.type_opts[type].search_path = search_path;
 		this.save();
 
 		runtimes[type] = null;
 
-		const res = await this.runtime_list_load_type(type);
+		const res = await this.loadRuntimeList(type);
 
 		if (!res.ok) {
 
@@ -280,7 +280,7 @@ export class Preferences {
 
 		runtimes[type] = res.data;
 
-		use(this.runtime_version_get(type))
+		use(this.getRuntimeVersion(type))
 			.let(it => (it !== null) ? it : undefined)
 			?.takeIf(it => runtimes[type]?.find(info => info.version.toString() === it) === undefined)
 			?.also(it => {
@@ -292,7 +292,7 @@ export class Preferences {
 				);
 		
 				ControlPanelTab.showDebug('Chosen Runtime version not available', err);
-				this.runtime_version_set(type, runtimes[type]?.at(0)?.version?.toString() ?? null);
+				this.setRuntimeVersion(type, runtimes[type]?.at(0)?.version?.toString() ?? null);
 
 			});
 
@@ -304,14 +304,14 @@ export class Preferences {
 	 * @param {GMChannelType} type 
 	 * @param {string} users_path 
 	 */
-	static async users_search_path_set(type, users_path) {
+	static async setUserSearchPath(type, users_path) {
 
 		this.prefs.runtime_opts.type_opts[type].users_path = users_path;
 		this.save();
 
 		users[type] = null;
 
-		const res = await this.user_list_load_type(type);
+		const res = await this.loadUserList(type);
 
 		if (!res.ok) {
 
@@ -328,7 +328,7 @@ export class Preferences {
 
 		users[type] = res.data;
 
-		const choice = this.user_get(type);
+		const choice = this.getUser(type);
 
 		if (
 			choice !== undefined && 
@@ -341,7 +341,7 @@ export class Preferences {
 				.view(false)
 				.showWarning('Selected user is no longer valid', err);
 			
-			this.user_set(type, users[type]?.at(0)?.name?.toString() ?? null);
+			this.setUser(type, users[type]?.at(0)?.name?.toString() ?? null);
 
 		}
 
@@ -350,34 +350,35 @@ export class Preferences {
 	/**
 	 * Get the global runtime options for a given runtime type.
 	 * 
+	 * @private
 	 * @param {GMChannelType} type 
 	 */
-	static global_runtime_opts_get(type = this.runtime_channel_type) {
+	static getRuntimeOptions(type) {
 		return this.prefs.runtime_opts.type_opts[type];
 	}
 
 	/**
 	 * Load the list of runtimes for the provided search path for a type.
 	 * 
-	 * @param {GMChannelType} [type] 
+	 * @param {GMChannelType} type
 	 * @returns {Promise<Result<RuntimeInfo[]>>}
 	 */
-	static async runtime_list_load_type(type = this.runtime_channel_type) {
+	static async loadRuntimeList(type) {
 
-		const { search_path } = this.global_runtime_opts_get(type);
-		return this.runtime_list_load_path(type, search_path);
+		const { search_path } = this.getRuntimeOptions(type);
+		return this.loadRuntimeListFrom(type, search_path);
 	}
 
 	/**
 	 * Load the list of users for the provided users path for a type.
 	 * 
-	 * @param {GMChannelType} [type] 
+	 * @param {GMChannelType} type
 	 * @returns {Promise<Result<UserInfo[]>>}
 	 */
-	static async user_list_load_type(type = this.runtime_channel_type) {
+	static async loadUserList(type) {
 
-		const { users_path } = this.global_runtime_opts_get(type);
-		return this.user_list_load_path(type, users_path);
+		const { users_path } = this.getRuntimeOptions(type);
+		return this.loadUserListFrom(type, users_path);
 	}
 
 	/**
@@ -387,7 +388,7 @@ export class Preferences {
 	 * @param {String} search_path 
 	 * @returns {Promise<Result<RuntimeInfo[]>>}
 	 */
-	static async runtime_list_load_path(type, search_path) {
+	static async loadRuntimeListFrom(type, search_path) {
 
 		const dir_res = await readdir(search_path);
 
@@ -452,7 +453,7 @@ export class Preferences {
 	 * @param {String} users_path 
 	 * @returns {Promise<Result<UserInfo[]>>}
 	 */
-	static async user_list_load_path(type, users_path) {
+	static async loadUserListFrom(type, users_path) {
 
 		const dir_res = await readdir(users_path);
 		
@@ -597,7 +598,7 @@ export class Preferences {
 
 			const options = this.prefs.runtime_opts.type_opts[type];
 
-			reqs.push(this.runtime_list_load_type(type)
+			reqs.push(this.loadRuntimeList(type)
 				.then((res) => {
 
 					if (!res.ok) {
@@ -617,7 +618,7 @@ export class Preferences {
 
 				}));
 				
-			reqs.push(this.user_list_load_type(type)
+			reqs.push(this.loadUserList(type)
 				.then((result) => {
 
 					if (!result.ok) {
