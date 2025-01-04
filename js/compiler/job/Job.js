@@ -1,5 +1,6 @@
 import { ControlPanelTab } from '../../ui/tabs/control-panel/ControlPanelTab.js';
 import { Err } from '../../utils/Err.js';
+import { EventEmitterImpl } from '../../utils/EventEmitterImpl.js';
 import { child_process, path } from '../../utils/node/node-import.js';
 import { killRecursive } from '../../utils/node/process-handling.js';
 import { job_parse_stdout } from './output-parsing/parse-stdout.js';
@@ -7,9 +8,9 @@ import { job_parse_stdout } from './output-parsing/parse-stdout.js';
 /**
  * Wrapper for an Igor job.
  * 
- * @implements {EventEmitter<JobEventMap>}
+ * @extends {EventEmitterImpl<JobEventMap>}
  */
-export class Job {
+export class Job extends EventEmitterImpl {
 
 	/** 
 	 * Identifier number of this job. This value is incremented from `0` and is the lowest available
@@ -34,16 +35,6 @@ export class Job {
 	status = { status: 'running' };
 
 	statusDisplay = '';
-
-	/**
-	 * @private
-	 * @type {{[key in keyof JobEventMap]: Set<(data: any?) => void>}} 
-	 */
-	listeners = {
-		stdout: new Set(),
-		output: new Set(),
-		stop: new Set()
-	};
 	
 	/**
 	 * @param {number} id
@@ -52,6 +43,8 @@ export class Job {
 	 * @param {GMEdit.Project} project
 	 */
 	constructor(id, settings, process, project) {
+
+		super(['stdout', 'output', 'stop']);
 		
 		this.id = id;
 		this.settings = settings;
@@ -75,8 +68,7 @@ export class Job {
 			.replaceAll(/\r/g, '');
 		
 		this.stdout += str;
-
-		Job.notify(this.listeners.stdout, this.stdout);
+		this.emit('stdout', this.stdout);
 
 	}
 
@@ -98,34 +90,9 @@ export class Job {
 			this.statusDisplay = 'Finished';
 		}
 		
-		Job.notify(this.listeners.stop, job_parse_stdout(this.stdout));
+		this.emit('stop', job_parse_stdout(this.stdout));
 		this.process.removeAllListeners();
 		
-	}
-
-	/**
-	 * @private
-	 * @param {Set<(data?: any) => void>} listeners
-	 * @param {any} [data]
-	 */
-	static notify = (listeners, data) => {
-		for (const cb of listeners) {
-			cb(data);
-		}
-	}
-
-	/**
-	 * @type {EventEmitter<JobEventMap>['on']}
-	 */
-	on(event, callback) {
-		this.listeners[event].add(callback);
-	}
-
-	/**
-	 * @type {EventEmitter<JobEventMap>['off']}
-	 */
-	off = (event, callback) => {
-		this.listeners[event].delete(callback);
 	}
 
 	/**
