@@ -112,14 +112,14 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
 			group,
 			'Search Path',
 			preferences.runtime_search_path_get(type),
-			(path) => {
+			async (path) => {
 				
 				// Workaround for being called twice for some reason?
 				if (path === preferences.runtime_search_path_get(type)) {
 					return;
 				}
 				
-				preferences.runtime_search_path_set(type, path);
+				await preferences.runtime_search_path_set(type, path);
 
 				UIDropdownMutate(
 					version_dropdown,
@@ -147,13 +147,13 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
 			group,
 			'User Data Path',
 			preferences.users_search_path_get(type),
-			(path) => {
+			async (path) => {
 				// Workaround for being called twice for some reason?
 				if (path === preferences.users_search_path_get(type)) {
 					return;
 				}
 
-				preferences.users_search_path_set(type, path);
+				await preferences.users_search_path_set(type, path);
 
 				UIDropdownMutate(
 					user_dropdown,
