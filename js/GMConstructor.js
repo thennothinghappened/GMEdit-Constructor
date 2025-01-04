@@ -46,14 +46,14 @@ export class GMConstructor {
 			verb: partial_settings.verb,
 			buildPath: partial_settings.buildPath ?? this.#getBuildDir(project),
 			platform: partial_settings.platform ?? igorPaths.igor_user_platform,
-			runner: partial_settings.runner ?? ProjectProperties.runner_get(),
+			runner: partial_settings.runner ?? ProjectProperties.runner,
 			threads: partial_settings.threads ?? 8,
-			configName: partial_settings.configName ?? ProjectProperties.config_name_get()	
+			configName: partial_settings.configName ?? ProjectProperties.config_name
 		};
 		
-		const runtime_type = ProjectProperties.runtime_channel_type_get();
-		const runtime_res = ProjectProperties.runtime_get();
-		const user_res = ProjectProperties.user_get();
+		const runtime_type = ProjectProperties.runtime_channel_type;
+		const runtime_res = ProjectProperties.runtime;
+		const user_res = ProjectProperties.user;
 
 		if (!runtime_res.ok) {
 
@@ -142,7 +142,7 @@ export class GMConstructor {
 				.showError('Failed to run Igor job!', res.err);
 		}
 
-		compileController.job_open_editor(res.data, ProjectProperties.reuse_compiler_tab_get());
+		compileController.job_open_editor(res.data, ProjectProperties.reuse_compiler_tab);
 	}
 
 	/**
