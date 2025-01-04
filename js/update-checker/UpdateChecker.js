@@ -34,8 +34,7 @@ export async function plugin_update_check() {
 	const our_version = our_version_res.data;
 
 	/** @type {Result<UpdateChecker.GithubLatestVersionResponse>} */
-	// @ts-ignore
-	// Note: TS unfortunately doesn't know how to resolve overloads like this.
+	// @ts-expect-error TS unfortunately doesn't know how to resolve overloads like this.
 	const res = await (fetch(update_check_url)
 		.then(async response => ({ ok: true, data: await response.json() }))
 		.catch(err => ({ ok: false, err: new Err(err) })));

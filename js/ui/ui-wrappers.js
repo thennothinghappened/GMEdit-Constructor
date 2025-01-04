@@ -15,9 +15,10 @@ const UIPreferences = $gmedit['ui.Preferences'];
 export function group(parent, label, buttons = undefined) {
 
 	/** @type {UIGroup} */
-	// @ts-ignore
+	// @ts-expect-error Not yet valid, but soon.
 	const group = UIPreferences.addGroup(parent, label);
-	// @ts-ignore
+
+	// @ts-expect-error We're in the middle of building it!
 	group.legend = group.querySelector('legend');
 
 	if (buttons !== undefined) {
@@ -172,7 +173,7 @@ function heading(size, text) {
 	const heading = document.createElement(`h${size}`);
 	heading.textContent = text;
 
-	// @ts-ignore
+	// @ts-expect-error We're programmatically defining which heading.
 	return heading;
 
 }

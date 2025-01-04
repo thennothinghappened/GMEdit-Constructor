@@ -157,7 +157,7 @@ export function runtime_version_parse(type, str) {
 	}
 
 	/** @type {[number, number, number, number]} */
-	// @ts-ignore
+	// @ts-expect-error We check this right below...
 	const numbers = split[1]
 		.split('.')
 		.map(number => Number(number));

@@ -62,7 +62,7 @@ export function UIDropdownSetValue(dropdown, value) {
  */
 export function UIDropdownGetSelect(root) {
 
-	// @ts-ignore A dropdown always has a select element.
+	// @ts-expect-error A dropdown always has a select element.
 	return root.querySelector('select');
 
 }

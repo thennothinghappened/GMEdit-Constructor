@@ -8,7 +8,7 @@ const windowsLocalAppData = process.env?.LocalAppData ?? 'C:\\Users\\PLEASE_SPEC
  * Mappings of NodeJS platforms to various Igor information.
  * @type {{[key in NodeJS.Platform]: IgorPlatformInfo}}
  */
-// @ts-ignore We don't care that unsupported platforms are missing, GMEdit doesn't even run there.
+// @ts-expect-error We don't care that unsupported platforms are missing, GMEdit doesn't even run there.
 const igor_platform_map = {
 	'win32': {
 		platform_executable_extension: '.exe',

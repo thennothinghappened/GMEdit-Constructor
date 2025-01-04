@@ -77,9 +77,10 @@ export class EventEmitterImpl {
 	 */
 	constructor(eventNames) {
 
-		// @ts-ignore We're getting to it!
+		// @ts-expect-error We're getting to it!
 		this.listeners = {};
-		// @ts-ignore We're getting to it!
+		
+		// @ts-expect-error We're getting to it!
 		this.onceListeners = {};
 
 		for (const eventName of eventNames) {

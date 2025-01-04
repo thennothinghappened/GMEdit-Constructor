@@ -216,7 +216,6 @@ export class OutputLogTab extends ConstructorTab {
 		const editors = tabs.map(tab => tab.gmlFile.editor);
 
 		/** @type {OutputLogTab|undefined} */
-		// @ts-ignore
 		const viewer = editors.find(editor => editor instanceof OutputLogTab);
 
 		if (viewer === undefined) {
