@@ -295,18 +295,18 @@ export declare global {
 			/**
 			 * @returns created file or null
 			 */
-			create(name: string, path: string, data: any, nav: GmlFileNav): GmlFile;
+			create(name: string, path: string, data: unknown, nav: GmlFileNav): GmlFile;
 
 			/**
 			 * Called by a GmlFile upon creation, initialising said file of this type.
 			 * Should assign the file.editor by least.
 			 */
-			abstract init(file: GmlFile, data: any);
+			abstract init(file: GmlFile, data: unknown);
 
 			/** We're asked to bring `nav` into view */
 			navigate(editor: Editor, nav: GmlFileNav): boolean;
 
-			getTabContext(file: GmlFile, data: any): string;
+			getTabContext(file: GmlFile, data: unknown): string;
 		}
 
 		/**
@@ -335,7 +335,7 @@ export declare global {
 			 */
 			static current: GmlFile?;
 
-			constructor(name: string, path: string?, kind: FileKind, data?: any);
+			constructor(name: string, path: string?, kind: FileKind, data?: unknown);
 
 			static openTab(file: GmlFile);
 			static open(name: string, path: string, nav: GmlFileNav?): GmlFile?;
@@ -346,7 +346,7 @@ export declare global {
 			 * Loads the current code
 			 * @param data If provided, is used instead of reading from FS.
 			 */
-			load(data?: any);
+			load(data?: unknown);
 			
 			rename(newName: string, newPath: string);
 			
@@ -364,7 +364,7 @@ export declare global {
 			 * Load the given `data` into the editor.
 			 * @param data The provided data that was loaded for this file.
 			 */
-			load(data: any?);
+			load(data: unknown?);
 
 			/**
 			 * Called to finalise editor setup after loading.
@@ -414,7 +414,7 @@ export declare global {
 			
 			constructor();
 						
-			loadCode(editor: EditCode, data?: any): string;
+			loadCode(editor: EditCode, data?: unknown): string;
 			saveCode(editor: EditCode, code: string): boolean;
 
 		}
@@ -471,8 +471,8 @@ export declare global {
 		const aceTools: AceTools;
 	
 		const register: (pluginName: string, data: PluginData) => void;
-		const on: <K extends keyof PluginEventMap>(type: K, listener: (e: PluginEventMap[K]) => any) => void;
-		const off: <K extends keyof PluginEventMap>(type: K, listener: (e: PluginEventMap[K]) => any) => void;
+		const on: <K extends keyof PluginEventMap>(type: K, listener: (e: PluginEventMap[K]) => void) => void;
+		const off: <K extends keyof PluginEventMap>(type: K, listener: (e: PluginEventMap[K]) => void) => void;
 
 	};
 	

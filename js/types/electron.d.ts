@@ -35,12 +35,13 @@ declare global {
 		}
 
 		type MenuItemOptions = Partial<{
-			click: () => any,
+			click(),
 			role: string,
 			type: MenuItemType,
 			label: string,
 			sublabel: string,
-			icon: any,
+			accelerator: unknown,
+			icon: unknown,
 			enabled: boolean,
 			visible: boolean,
 			checked: boolean,

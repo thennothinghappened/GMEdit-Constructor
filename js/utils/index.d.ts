@@ -9,7 +9,7 @@ export declare global {
 		toString(): string;
 	}
 
-	type Listener<Event> = (e: Event) => any;
+	type Listener<Event> = (e: Event) => void;
 	type ListenerMap<EventMap> = { [key in keyof EventMap]: Set<Listener<EventMap[key]>> };
 
 	interface EventEmitter<EventMap> {
