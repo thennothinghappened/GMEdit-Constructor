@@ -3,6 +3,7 @@
  */
 
 import { Err } from '../utils/Err.js';
+import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
 import { project_current_get, project_config_tree_get } from '../utils/project.js';
 import { Preferences } from './Preferences.js';
 
@@ -28,6 +29,20 @@ let configsTreeDir;
 export class ProjectProperties {
 
 	/**
+	 * @readonly
+	 * @private
+	 * @type {EventEmitterImpl<TPreferences.ProjectPropertiesEventMap>}
+	 */
+	static eventEmitter = new EventEmitterImpl(['changeBuildConfig']);
+
+	/**
+	 * @returns {EventEmitter<TPreferences.ProjectPropertiesEventMap}
+	 */
+	static get events() {
+		return this.eventEmitter;
+	}
+
+	/**
 	 * Get the active compile config name.
 	 * @returns {string}
 	 */
@@ -41,10 +56,12 @@ export class ProjectProperties {
 	 */
 	static set buildConfig(config_name) {
 
-		this.updateConfigTree(this.buildConfig, config_name);
-		properties.config_name = config_name;
+		const previous = properties.config_name;
 
+		properties.config_name = config_name;
 		this.save();
+
+		this.eventEmitter.emit('changeBuildConfig', { previous, current: config_name });
 
 	}
 
@@ -262,11 +279,20 @@ export class ProjectProperties {
 		configsTreeDir = TreeView.makeAssetDir('Build Configs', '', null);
 		
 		this.addConfigInTree(configsTreeDir.treeItems, rootConfig);
-		this.updateConfigTree('', this.buildConfig);
+		this.updateConfigTree(this.buildConfig);
+
+		this.events.on('changeBuildConfig', this.onChangeBuildConfig);
 
 		TreeView.element.appendChild(configsTreeDir);
 
 	}
+
+	/**
+	 * @private
+	 * @param {{ previous?: string, current: string }} event
+	 */
+	static onChangeBuildConfig = ({ previous, current }) =>
+		this.updateConfigTree(current, previous);
 
 	/**
 	 * Clean up the build configs in the tree view.
@@ -274,8 +300,12 @@ export class ProjectProperties {
 	 * @private
 	 */
 	static onProjectClose = () => {
+
+		this.events.off('changeBuildConfig', this.onChangeBuildConfig);
+
 		configsTreeDir.remove();
 		configTreeItems = {};
+		
 	}
 
 	/**
@@ -307,21 +337,24 @@ export class ProjectProperties {
 	 * Update the config tree with the new selected config.
 	 * 
 	 * @private
-	 * @param {string} oldConfigName 
 	 * @param {string} newConfigName 
+	 * @param {string} [oldConfigName] 
 	 */
-	static updateConfigTree(oldConfigName, newConfigName) {
+	static updateConfigTree(newConfigName, oldConfigName) {
 
-		const prevTreeItem = configTreeItems[oldConfigName];
+		if (oldConfigName !== undefined) {
 
-		if (prevTreeItem !== undefined) {
+			const prevTreeItem = configTreeItems[oldConfigName];
 
-			const headerSpan = prevTreeItem.treeHeader.querySelector('span');
+			if (prevTreeItem !== undefined) {
 
-			if (headerSpan !== null) {
-				headerSpan.textContent = oldConfigName;
+				const headerSpan = prevTreeItem.treeHeader.querySelector('span');
+
+				if (headerSpan !== null) {
+					headerSpan.textContent = oldConfigName;
+				}
+
 			}
-
 		}
 
 		const treeItem = configTreeItems[newConfigName];

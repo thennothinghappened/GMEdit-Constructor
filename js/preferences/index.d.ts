@@ -78,6 +78,10 @@ export declare global {
 			user: string?;
 		};
 
+		interface ProjectPropertiesEventMap {
+			changeBuildConfig: { previous?: string, current: string };
+		}
+
 	};
 
 };

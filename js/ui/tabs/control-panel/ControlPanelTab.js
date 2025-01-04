@@ -63,8 +63,14 @@ export class ControlPanelTab extends ConstructorTab {
 	/** @type {ControlPanel.MessageContainer[]} */
 	static messages = [];
 
-	/** @type {HTMLDivElement?} */
-	#runtimeVersionDropdown = null;
+	/** @type {HTMLDivElement|undefined} */
+	#runtimeVersionDropdown = undefined;
+
+	/**
+	 * @private
+	 * @type {(UIGroup & { buildConfigDropdown?: HTMLDivElement })}
+	 */
+	projectSettings;
 
 	/**
 	 * @param {GMEdit.GmlFile} file
@@ -307,6 +313,9 @@ export class ControlPanelTab extends ConstructorTab {
 		);
 	}
 
+	/**
+	 * @private
+	 */
 	onOpenProject = () => {
 
 		const project = project_current_get();
@@ -315,24 +324,46 @@ export class ControlPanelTab extends ConstructorTab {
 			return;
 		}
 
-		// Just makes sure we aren't repeating ourselves.
-		this.onCloseProject();
-
 		this.projectSettingsSetup(project);
 		this.projectSettings.hidden = false;
+		
+		ProjectProperties.events.on('changeBuildConfig', this.onBuildConfigChange);
 
 	}
 
+	/**
+	 * @private
+	 */
 	onCloseProject = () => {
 		
 		this.projectSettings.hidden = true;
-		this.#runtimeVersionDropdown = null;
+		this.#runtimeVersionDropdown = undefined;
 		
 		for (const element of Array.from(this.projectSettings.children)) {
 			if (!(element instanceof HTMLLegendElement)) {
 				element.remove();
 			}
 		}
+
+		ProjectProperties.events.off('changeBuildConfig', this.onBuildConfigChange);
+
+	}
+
+	/**
+	 * Update the build config dropdown state if the user chose a different config in the tree.
+	 * 
+	 * @private
+	 * @param {{ previous?: string, current: string }} event
+	 */
+	onBuildConfigChange = ({ previous, current }) => {
+		
+		const dropdown = this.projectSettings.buildConfigDropdown;
+
+		if (dropdown === undefined) {
+			return;
+		}
+
+		UIDropdownGetSelect(dropdown).value = current;
 
 	}
 
@@ -346,7 +377,7 @@ export class ControlPanelTab extends ConstructorTab {
 
 		const configs = project_config_tree_get(project);
 
-		UIPreferences.addDropdown(
+		this.projectSettings.buildConfigDropdown = UIPreferences.addDropdown(
 			this.projectSettings,
 			'Build Configuration',
 			ProjectProperties.buildConfig,
@@ -417,7 +448,7 @@ export class ControlPanelTab extends ConstructorTab {
 	 */
 	updateRuntimeVersionDropdown() {
 
-		if (this.#runtimeVersionDropdown === null) {
+		if (this.#runtimeVersionDropdown === undefined) {
 			return;
 		}
 
