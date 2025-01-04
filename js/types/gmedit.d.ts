@@ -94,7 +94,7 @@ export declare global {
 			 * Dispatches after a file is saved.
 			 * `code` will contain a copy of file's new contents, if appropriate
 			 */
-			fileSave: { file: GmlFile, code: String? };
+			fileSave: { file: GmlFile, code: string? };
 			
 			/**
 			 * Dispatches after a file tab was reloaded due to changes on disk

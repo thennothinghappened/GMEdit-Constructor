@@ -17,12 +17,12 @@ declare global {
 
 		class MenuItem {
 
-			id:String;
-			enabled:Bool;
-			visible:Bool;
-			checked:Bool;
-			label:String;
-			click:Function;
+			id: string;
+			enabled: boolean;
+			visible: boolean;
+			checked: boolean;
+			label: string;
+			click();
 			submenu:Menu;
 			
 			constructor(props: MenuItemOptions);
@@ -40,7 +40,6 @@ declare global {
 			type: MenuItemType,
 			label: string,
 			sublabel: string,
-			accelerator: any,
 			icon: any,
 			enabled: boolean,
 			visible: boolean,
