@@ -78,8 +78,9 @@ export class ControlPanelTab extends ConstructorTab {
 		this.element.appendChild(ui.h1(ControlPanelTab.tabName));
 		this.element.appendChild(ui.p(`Version: ${plugin_version}`));
 
-		this.problems = ui.group(this.element, 'Problems', [ui.text_button('Dismiss All', ControlPanelTab.dismissAllErrors)]);
+		this.problems = ui.group(this.element, 'Problems', [ui.text_button('Dismiss All', ControlPanelTab.dismissAll)]);
 		this.problems.classList.add('gm-constructor-control-panel-errors');
+		this.problems.hidden = true;
 
 		this.projectSettings = ui.group(this.element, 'Project Settings');
 		this.projectSettings.hidden = true;
@@ -218,6 +219,10 @@ export class ControlPanelTab extends ConstructorTab {
 
 				ControlPanelTab.messages.splice(index, 1);
 
+				if (ControlPanelTab.messages.length === 0) {
+					this.problems.hidden = true;
+				}
+
 			})
 		]);
 
@@ -233,12 +238,14 @@ export class ControlPanelTab extends ConstructorTab {
 		stacktrace.appendChild(ui.pre(err.toString()));
 		stacktrace.classList.add('collapsed');
 
+		this.problems.hidden = false;
+
 	}
 
 	/**
 	 * Dismiss all errors in the panel.
 	 */
-	static dismissAllErrors = () => {
+	static dismissAll = () => {
 
 		const controlPanel = this.find();
 
@@ -249,9 +256,13 @@ export class ControlPanelTab extends ConstructorTab {
 					element.remove();
 				}
 			}
+
+			controlPanel.problems.hidden = true;
+
 		}
 
 		this.messages = [];
+
 	}
 
 	/**
