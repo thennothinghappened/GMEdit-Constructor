@@ -168,22 +168,4 @@ export class Job {
 
 	}
 
-	/**
-	 * Returns a promise that resolves when this job is complete.
-	 * @returns {Promise<void>}
-	 */
-	finished() {
-
-		if (this.status.status === 'stopped') {
-			return Promise.resolve();
-		}
-
-		return new Promise((res) => {
-			this.events.once('stop', () => {
-				res(undefined);
-			});
-		});
-
-	}
-
 }
