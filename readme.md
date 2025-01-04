@@ -11,7 +11,7 @@ Constructor can currently compile for the current build target (your OS), and ca
   - **Build and Runtime error parsing** (view them nice and neat rather than scrolling the log!)
   - **Close a build tab to stop it** (or use the hotkey.)
 - **Switch between VM or YYC**. (Building for other systems is planned, eventually.)
-- **Switch build configurations** (`#macro SOMETHING:Config ...`) via the Control Panel, or by right-clicking a config in the project sidebar.
+- **Switch build configurations** (`#macro Config:SOMETHING ...`) via the Control Panel, or by right-clicking a config in the project sidebar.
 - **Support for Beta, Monthly, and LTS runtimes**, with a per-project switch, and warnings for project-incompatible selections.
 - **Automatic update-checking**. (This calls the GitHub API to check the latest release and can be toggled off.)
 - **Readable, central error messages** - the Control Panel shows any configuration issues, or internal errors. All errors display context, and most try to provide tips to resolve the issue where possible.
