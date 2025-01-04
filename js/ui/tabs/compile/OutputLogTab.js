@@ -275,8 +275,12 @@ export class OutputLogTab extends ConstructorTab {
 	 * @param {Job} job
 	 */
 	static getJobName = (job) => {
-		const statusDisplay = job.statusDisplay === '' ? '' : (': ' + job.statusDisplay);
-		return `${job.project.displayName} - ${job.settings.verb}${statusDisplay}`;
+
+		if (job.statusDisplay === '') {
+			return job.settings.verb;
+		}
+
+		return `${job.settings.verb}: ${job.statusDisplay}`;
 	}
 
 }
