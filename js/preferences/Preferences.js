@@ -4,7 +4,7 @@
  */
 
 import { def_global_build_path, def_runtime_paths, def_user_paths, igor_path_segment } from '../compiler/igor-paths.js';
-import { readFile, readFileSync, readdir, writeFile } from '../utils/node/file.js';
+import { readFileSync, readdir } from '../utils/node/file.js';
 import { Err } from '../utils/Err.js';
 import { deep_assign } from '../utils/object.js';
 import { plugin_name } from '../GMConstructor.js';
