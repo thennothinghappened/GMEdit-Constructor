@@ -5,7 +5,9 @@
 import { Err } from '../utils/Err.js';
 import { project_current_get, project_config_tree_get } from '../utils/project.js';
 import { Preferences } from './Preferences.js';
+
 const ProjectProperties = $gmedit['ui.project.ProjectProperties'];
+const TreeView = $gmedit['ui.treeview.TreeView'];
 
 /**
  * The current properties instance.
@@ -13,16 +15,24 @@ const ProjectProperties = $gmedit['ui.project.ProjectProperties'];
  */
 let properties = {};
 
+/**
+ * @type {Record<string, GMEdit.TreeViewDir>}
+ */
+let configTreeItems = {};
+
+/**
+ * @type {GMEdit.TreeViewDir}
+ */
+let configsTreeDir;
+
 export function __setup__() {
-
 	GMEdit.on('projectOpen', on_project_open);
-
+	GMEdit.on('projectClose', on_project_close);
 }
 
 export function __cleanup__() {
-
 	GMEdit.off('projectOpen', on_project_open);
-
+	GMEdit.off('projectClose', on_project_close);
 }
 
 /**
@@ -38,8 +48,12 @@ export function config_name_get() {
  * @param {string} config_name 
  */
 export function config_name_set(config_name) {
+
+	updateConfigTree(config_name_get(), config_name);
 	properties.config_name = config_name;
+
 	return save();
+
 }
 
 /**
@@ -230,7 +244,7 @@ function save() {
 
 /**
  * Make sure the project's properties contain Constructor's
- * data.
+ * data, and set up tree view build configs.
  */
 function on_project_open() {
 
@@ -246,6 +260,80 @@ function on_project_open() {
 	
 	if (saved !== undefined && saved !== null) {
 		Object.assign(properties, saved);
+	}
+	
+	const rootConfig = project_config_tree_get(project);
+	configsTreeDir = TreeView.makeAssetDir('Build Configs', '', null);
+	
+	addConfigInTree(configsTreeDir.treeItems, rootConfig);
+	updateConfigTree('', config_name_get());
+
+	TreeView.element.appendChild(configsTreeDir);
+
+}
+
+/**
+ * Clean up the build configs in the tree view.
+ */
+function on_project_close() {
+	configsTreeDir.remove();
+	configTreeItems = {};
+}
+
+/**
+ * Add this config recursively to the parent in the tree view.
+ * 
+ * @param {HTMLDivElement} parentElement 
+ * @param {ProjectYYConfig} config 
+ */
+function addConfigInTree(parentElement, config) {
+
+	
+	const dir = TreeView.makeDir(config.name);
+
+	dir.treeHeader.addEventListener('contextmenu', () => { config_name_set(config.name); });
+	dir.treeHeader.addEventListener('click', TreeView.handleDirClick);
+	dir.treeHeader.title = 'Right-click to select.';
+
+	for (const childConfig of config.children) {
+		addConfigInTree(dir.treeItems, childConfig);
+	}
+
+	configTreeItems[config.name] = dir;
+	parentElement.appendChild(dir);
+
+}
+
+/**
+ * Update the config tree with the new selected config.
+ * 
+ * @param {string} oldConfigName 
+ * @param {string} newConfigName 
+ */
+function updateConfigTree(oldConfigName, newConfigName) {
+
+	const prevTreeItem = configTreeItems[oldConfigName];
+
+	if (prevTreeItem !== undefined) {
+
+		const headerSpan = prevTreeItem.treeHeader.querySelector('span');
+
+		if (headerSpan !== null) {
+			headerSpan.textContent = oldConfigName;
+		}
+
+	}
+
+	const treeItem = configTreeItems[newConfigName];
+
+	if (treeItem !== undefined) {
+		
+		const headerSpan = treeItem.treeHeader.querySelector('span');
+
+		if (headerSpan !== null) {
+			headerSpan.textContent = `${newConfigName} (Selected)`;
+		}
+
 	}
 
 }
