@@ -229,14 +229,16 @@ export declare global {
 			/** Gets you the path used in .yyp/.resource_order */
 			readonly treeYyPath23: string;
 		
-		}		
+		}
+
+		type UIDropdown<T extends string> = HTMLDivElement;
 
 		interface Preferences {
 			addText(parent: HTMLElement, label: string): HTMLElement;
 			addWiki(parent: HTMLElement, url: string, label: string): HTMLElement;
 			addCheckbox(parent: HTMLElement, label: string, value: boolean, update: (value: boolean) => void): HTMLElement;
 			addInput(parent: HTMLElement, label: string, value: string, update: (value: string) => void): HTMLElement;
-			addDropdown<T extends string>(parent: HTMLElement, label: string, value: T, choices: readonly T[], update: (value: T) => void): HTMLDivElement;
+			addDropdown<T extends string>(parent: HTMLElement, label: string, value: T, choices: readonly T[], update: (value: T) => void): UIDropdown<T>;
 			addGroup(parent: HTMLElement, label: string): HTMLFieldSetElement;
 			addButton(parent: HTMLElement, text: string, callback: () => void): HTMLDivElement;
 			addBigButton(parent: HTMLElement, text: string, callback: () => void): HTMLDivElement;
