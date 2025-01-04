@@ -6,16 +6,15 @@ Currently, Constructor about matches the capabilities of [builder](<https://gith
 Constructor can currently compile for the current build target (your OS), and can switch between build configs.
 
 ## Features
- - [x] **Run compile, run and clean jobs** (technically can be in parallel!)
-   - [x] Stop jobs by closing their tab
-   - [x] YYC Support
- - [x] **View compile output** (duh)
- - [x] **Compile and runner error parsing** (view them nice and neat rather than scrolling the log!)
- - [x] **Runtime selection & project-specific properties**
-   - [x] Project build configuration select (`#macro SOMETHING:Config ...` support)
- - [x] **Control Panel** (*see screenshot below*)
-   - [x] Centralised error display for build and configuration problems
- - [x] Automatic check for updates
+- **Easily run, package releases, or clean projects from GMEdit!**
+  - **Execute multiple builds side-by-side** in managed separate directories (disable reusing tabs for this.)
+  - **Build and Runtime error parsing** (view them nice and neat rather than scrolling the log!)
+  - **Close a build tab to stop it** (or use the hotkey.)
+- **Switch between VM or YYC**. (Building for other systems is planned, eventually.)
+- **Switch build configurations** (`#macro SOMETHING:Config ...`) via the Control Panel, or by right-clicking a config in the project sidebar.
+- **Support for Beta, Monthly, and LTS runtimes**, with a per-project switch, and warnings for project-incompatible selections.
+- **Automatic update-checking**. (This calls the GitHub API to check the latest release and can be toggled off.)
+- **Readable, central error messages** - the Control Panel shows any configuration issues, or internal errors. All errors display context, and most try to provide tips to resolve the issue where possible.
 
 ![image](https://github.com/user-attachments/assets/a6be1b91-9a94-4f1e-8fdd-2c94c49f5c71)
 
