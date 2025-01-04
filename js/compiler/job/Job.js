@@ -6,6 +6,8 @@ import { job_parse_stdout } from './output-parsing/parse-stdout.js';
 
 /**
  * Wrapper for an Igor job.
+ * 
+ * @implements {EventEmitter<JobEventMap>}
  */
 export class Job {
 
@@ -35,7 +37,7 @@ export class Job {
 
 	/**
 	 * @private
-	 * @type {{[key in JobEvent]: Set<(data: any?) => void>}} 
+	 * @type {{[key in keyof JobEventMap]: Set<(data: any?) => void>}} 
 	 */
 	listeners = {
 		stdout: new Set(),
@@ -113,20 +115,14 @@ export class Job {
 	}
 
 	/**
-	 * Add an event listener for the given event.
-	 * 
-	 * @param {JobEvent} event
-	 * @param {(data?: any) => void} callback
+	 * @type {EventEmitter<JobEventMap>['on']}
 	 */
-	on = (event, callback) => {
+	on(event, callback) {
 		this.listeners[event].add(callback);
 	}
 
 	/**
-	 * Remove an event listener for the given event.
-	 * 
-	 * @param {JobEvent} event
-	 * @param {(data?: any) => void} callback
+	 * @type {EventEmitter<JobEventMap>['off']}
 	 */
 	off = (event, callback) => {
 		this.listeners[event].delete(callback);

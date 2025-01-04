@@ -179,11 +179,12 @@ export declare global {
 		'Package'		|
 		'PackageZip'	|
 		'Clean'			;
-
-	type JobEvent =
-		'stdout'	|
-		'output'	|
-		'stop'		;
+	
+	interface JobEventMap {
+		stdout: string;
+		output: string;
+		stop: Array<JobError>;
+	};
 
 	type JobStatus = 
 		{ status: 'running' } |
