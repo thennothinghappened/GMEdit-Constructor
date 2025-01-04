@@ -221,11 +221,9 @@ export class GMConstructor {
 	 * @param {string} _plugin_version Current version of the plugin
 	 * @param {import('node:path')} node_path 
 	 * @param {import('node:child_process')} node_child_process
-	 * @param {boolean} reloading Whether we are reloading from an existing previous Constructor instance.
-	 * 
 	 * @returns {Promise<Result<GMConstructor>>}
 	 */
-	static async create(_plugin_name, _plugin_version, node_path, node_child_process, reloading) {
+	static async create(_plugin_name, _plugin_version, node_path, node_child_process) {
 		
 		// Prevent Constructor loading when running on Rosetta, since it has a bunch of issues there.
 		if (rosetta_check(node_child_process.execSync)) {
