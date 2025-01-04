@@ -8,7 +8,7 @@ import { job_parse_stdout } from './output-parsing/parse-stdout.js';
 /**
  * Wrapper for an Igor job.
  */
-export class Job {
+export class IgorJob {
 
 	/** 
 	 * Identifier number of this job. This value is incremented from `0` and is the lowest available

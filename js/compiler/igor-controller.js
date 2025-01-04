@@ -4,12 +4,12 @@
  */
 
 import { OutputLogTab } from '../ui/tabs/compile/OutputLogTab.js';
-import { Job } from './job/Job.js';
+import { IgorJob } from './job/IgorJob.js';
 import { igor_platform_cmd_name, output_blob_exts, output_package_exts } from './igor-paths.js';
 import { Err } from '../utils/Err.js';
 import { child_process, path } from '../utils/node/node-import.js';
 
-/** @type {Job[]} */
+/** @type {IgorJob[]} */
 export const jobs = [];
 
 /**
@@ -19,7 +19,7 @@ export const jobs = [];
  * @param {RuntimeInfo} runtime
  * @param {UserInfo|undefined} user
  * @param {IgorSettings} settings
- * @returns {Result<Job>}
+ * @returns {Result<IgorJob>}
  */
 export function job_run(project, runtime, user, settings) {
 
@@ -44,7 +44,7 @@ export function job_run(project, runtime, user, settings) {
 	};
 
 	const proc = child_process.spawn(runtime.igor_path, flags_res.data, spawn_opts);
-	const job = new Job(id, settings, proc, project);
+	const job = new IgorJob(id, settings, proc, project);
 	
 	jobs.push(job);
 	job.events.once('stop', () => job_remove(job));
@@ -55,7 +55,7 @@ export function job_run(project, runtime, user, settings) {
 
 /**
  * Create a new editor instance for a given job.
- * @param {Job} job
+ * @param {IgorJob} job
  * @param {Boolean} reuse Whether to reuse an existing tab.
  */
 export function job_open_editor(job, reuse) {
@@ -64,7 +64,7 @@ export function job_open_editor(job, reuse) {
 
 /**
  * Remove a job from our tracked list.
- * @param {Job} job
+ * @param {IgorJob} job
  */
 function job_remove(job) {
 	jobs.splice(jobs.indexOf(job), 1);

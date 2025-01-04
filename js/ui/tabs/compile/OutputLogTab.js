@@ -1,4 +1,4 @@
-import { Job } from '../../../compiler/job/Job.js';
+import { IgorJob } from '../../../compiler/job/IgorJob.js';
 import { ConstructorTab, ConstructorTabFileKind } from '../ConstructorTab.js';
 import * as ui from '../../ui-wrappers.js';
 import { JobError } from '../../../compiler/job/JobError.js';
@@ -23,7 +23,7 @@ class OutputLogFileKind extends ConstructorTabFileKind {
 
 	/**
 	 * @param {GMEdit.GmlFile} file
-	 * @param {Job} job
+	 * @param {IgorJob} job
 	 */
 	init = (file, job) => {
 		file.editor = new OutputLogTab(file, job);
@@ -41,7 +41,7 @@ export class OutputLogTab extends ConstructorTab {
 	 */
 	static scrollGrabLines = 1;
 
-	/** @type {Job?} */
+	/** @type {IgorJob?} */
 	job = null;
 
 	/**
@@ -64,7 +64,7 @@ export class OutputLogTab extends ConstructorTab {
 
 	/**
 	 * @param {GMEdit.GmlFile} file
-	 * @param {Job} job
+	 * @param {IgorJob} job
 	 */
 	constructor(file, job) {
 
@@ -106,7 +106,7 @@ export class OutputLogTab extends ConstructorTab {
 
 	/**
 	 * Start watching the provided job.
-	 * @param {Job} job The job to watch.
+	 * @param {IgorJob} job The job to watch.
 	 */
 	attach = (job) => {
 
@@ -202,7 +202,7 @@ export class OutputLogTab extends ConstructorTab {
 	/**
 	 * Set up an editor tab for a Job, and view it.
 	 * 
-	 * @param {Job} job
+	 * @param {IgorJob} job
 	 * @param {Boolean} reuse Whether to reuse an existing tab.
 	 * @returns {void}
 	 */
@@ -272,7 +272,7 @@ export class OutputLogTab extends ConstructorTab {
 
 	/**
 	 * @private
-	 * @param {Job} job
+	 * @param {IgorJob} job
 	 */
 	static getJobName = (job) => {
 
