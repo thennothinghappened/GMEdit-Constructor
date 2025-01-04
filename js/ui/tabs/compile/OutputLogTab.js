@@ -39,7 +39,7 @@ export class OutputLogTab extends ConstructorTab {
 	/**
 	 * @private
 	 */
-	static scrollGrabLines = 5;
+	static scrollGrabLines = 1;
 
 	/** @type {Job?} */
 	job = null;
@@ -158,8 +158,8 @@ export class OutputLogTab extends ConstructorTab {
 
 		const cursor = this.logAceEditor.getCursorPosition();
 		const end_row = this.logAceEditor.session.doc.getLength();
-		const should_scroll = (cursor.row >= (end_row - OutputLogTab.scrollGrabLines));
-
+		const should_scroll = (this.logAceEditor.renderer.getScrollBottomRow() >= (end_row - OutputLogTab.scrollGrabLines));
+		
 		this.logAceEditor.session.setValue(content);
 		this.logAceEditor.moveCursorToPosition(cursor);
 
