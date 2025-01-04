@@ -1,4 +1,3 @@
-import { IgorJob } from '../../compiler/job/IgorJob.js';
 import { abstract } from '../../utils/abstract.js';
 
 const Editor = $gmedit['editors.Editor'];

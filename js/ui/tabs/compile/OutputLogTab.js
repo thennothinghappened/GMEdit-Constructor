@@ -7,7 +7,6 @@ import { use } from '../../../utils/scope-extensions/use.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];
-const UIPreferences = $gmedit['ui.Preferences'];
 
 /**
  * File type for a compile job.

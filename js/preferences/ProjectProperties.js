@@ -4,7 +4,7 @@
 
 import { Err } from '../utils/Err.js';
 import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
-import { project_current_get, project_config_tree_get } from '../utils/project.js';
+import { project_current_get } from '../utils/project.js';
 import { Preferences } from './Preferences.js';
 
 const GMEditProjectProperties = $gmedit['ui.project.ProjectProperties'];

@@ -5,7 +5,7 @@
 
 import { OutputLogTab } from '../ui/tabs/compile/OutputLogTab.js';
 import { IgorJob } from './job/IgorJob.js';
-import { igor_platform_cmd_name, output_blob_exts, output_package_exts } from './igor-paths.js';
+import { igor_platform_cmd_name, output_blob_exts } from './igor-paths.js';
 import { Err } from '../utils/Err.js';
 import { child_process, path } from '../utils/node/node-import.js';
 

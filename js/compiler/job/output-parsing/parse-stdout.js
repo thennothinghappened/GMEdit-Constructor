@@ -1,5 +1,4 @@
-import { ControlPanelTab } from '../../../ui/tabs/control-panel/ControlPanelTab.js';
-import { Err } from '../../../utils/Err.js';
+
 import { JobCompilationError, JobError, JobPermissionsError, JobRunnerError } from '../JobError.js';
 
 /**

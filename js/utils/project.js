@@ -1,7 +1,6 @@
 import { Err } from './Err.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
-const ChromeTabs = $gmedit['ui.ChromeTabs'];
 
 /**
  * Get the currently open project.
