@@ -1,19 +1,6 @@
 import { Err } from '../Err.js';
 
 /**
- * Promise version of `Electron_FS.exists`.
- * @param {string} path 
- * @returns {Promise<boolean>}
- */
-export function fileExists(path) {
-	return new Promise(res => {
-		Electron_FS.exists(path, exists => {
-			res(exists);
-		})
-	});
-}
-
-/**
  * Promise version of `Electron_FS.readFile`.
  * @param {string} path 
  * @returns {Promise<Result<Buffer>>}
@@ -35,6 +22,26 @@ export function readFile(path) {
 			});
 		})
 	});
+}
+
+/**
+ * Synchronously read a file from the given path. Returns a result for errors.
+ * 
+ * @param {string} path
+ * @returns {Result<Buffer>}
+ */
+export function readFileSync(path) {
+	try {
+		return {
+			ok: true,
+			data: Electron_FS.readFileSync(path)
+		};
+	} catch (err) {
+		return {
+			ok: false,
+			err: new Err(`Failed to read the file at "${path}"`, err)
+		};
+	}
 }
 
 /**

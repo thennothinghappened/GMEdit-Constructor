@@ -4,7 +4,7 @@
  */
 
 import { def_global_build_path, def_runtime_paths, def_user_paths, igor_path_segment } from '../compiler/igor-paths.js';
-import { fileExists, readFile, readdir, writeFile } from '../utils/node/file.js';
+import { readFile, readFileSync, readdir, writeFile } from '../utils/node/file.js';
 import { Err } from '../utils/Err.js';
 import { deep_assign } from '../utils/object.js';
 import { plugin_name } from '../GMConstructor.js';
@@ -479,15 +479,9 @@ async function runtime_list_load_path(type, search_path) {
 		.filter(/** @returns {runtime is RuntimeInfo} */ (runtime) => runtime !== null)
 		.sort((a, b) => b.version.compare(a.version));
 
-	// Search each result to check if its a valid runtime.
-	// This 99% isn't required, but I wanted to do it anyway :)
-	const valid = await Promise.all(
-		runtimes.map(runtime => fileExists(runtime.igor_path))
-	);
-
 	return {
 		ok: true,
-		data: runtimes.filter((_, i) => valid[i])
+		data: runtimes.filter(runtime => Electron_FS.existsSync(runtime.igor_path))
 	};
 }
 
@@ -518,18 +512,12 @@ async function user_list_load_path(type, users_path) {
 		})
 		.sort((a, b) => +(a.name > b.name));
 
-	// Search each result to check if it's actually a valid user, or just a folder in the users folder
-	// (e.g Cache).
-	const valid = await Promise.all(
-		users.map(
-			async user => await fileExists(node.path.join(user.path, 'license.plist'))
-				|| await fileExists(node.path.join(user.path, 'local_settings.json'))
-		)
-	);
-
 	return {
 		ok: true,
-		data: users.filter((_, i) => valid[i])
+		data: users.filter(user => 
+			Electron_FS.existsSync(node.path.join(user.path, 'license.plist')) ||
+			Electron_FS.existsSync(node.path.join(user.path, 'local_settings.json'))
+		)
 	};
 }
 
@@ -544,39 +532,26 @@ export async function __setup__() {
 	/** @type {Partial<Preferences.Data>|undefined} */
 	let loaded_prefs = undefined;
 
-	if (await fileExists(save_path)) {
+	const prefsLoadRes = readFileSync(save_path);
 
-		const res = await readFile(save_path);
-
-		if (res.ok) {
-
-			try {
-				loaded_prefs = JSON.parse(res.data.toString());
-			} catch (err_cause) {
-
-				const err = new Err(
-					'Failed to read preferences', 
-					err_cause,
-					`Please check your preferences file (${save_path}) for syntax errors as you must have edited it manually - see stacktrace below.`
-				);
-
-				ControlPanelTab
-					.view(true)
-					.showError(err.message, err);
-			}
-
-		} else {
+	if (prefsLoadRes.ok) {
+		
+		try {
+			loaded_prefs = JSON.parse(prefsLoadRes.data.toString());
+		} catch (err_cause) {
 
 			const err = new Err(
-				'Failed to read preferences', 
-				res.err,
-				`Please check your preferences file (${save_path}) for errors and ensure GMEdit has read permissions - see stacktrace below.`
+				'JSON parse error while reading the preferences file!', 
+				err_cause,
+				`Please check your preferences file (${save_path}) for syntax errors as you must have edited it manually - see stacktrace below.`
 			);
 
 			ControlPanelTab
 				.view(true)
-				.showError(err.message, err);
+				.showError('Failed to load preferences', err);
+
 		}
+
 	}
 
 	if (loaded_prefs?.runtime_opts?.type !== undefined) {
