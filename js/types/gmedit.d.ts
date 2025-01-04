@@ -179,6 +179,58 @@ export declare global {
 			restoreOpen(paths: string[]?);
 		}
 
+		class TreeViewDir extends TreeViewElement {
+			treeHeader: HTMLDivElement;
+			treeItems: HTMLDivElement;
+
+			treeIsOpen: boolean;
+			
+			readonly treeItemEls: NodeList<TreeViewElement>;
+			
+			/** like "folders/Scripts/Tools.yy" for "Scripts/Tools" - used in .yyp/.resource_order */
+			readonly treeFolderPath23: string;
+		}
+
+		class TreeViewItem extends TreeViewElement {
+			/** If not null, overrides the FileKind that will be used for this element. */
+			yyOpenAs: FileKind;
+			
+			/** like "Scripts/Tools/trace.yy" for "Scripts/Tools/trace" - used in .yyp/.resource_order */
+			readonly treeResourcePath23: string;
+		}
+		
+		class TreeViewElement extends HTMLDivElement {
+
+			/** 2.3 sort order */
+			yyOrder: number;
+			
+			/** Indicates whether this is a root element - no parent folders */
+			readonly treeIsRoot: boolean;
+			
+			readonly treeIsDir: boolean;
+			
+			readonly treeIsItem: boolean;
+			
+			treeRelPath: string;
+			
+			treeFullPath: string;
+			
+			treeLabel: string;
+			
+			treeKind: string;
+			
+			treeIdent: string;
+			
+			readonly treeParentDir: TreeViewDir;
+			
+			/** As seen on the page */
+			treeText: string;
+			
+			/** Gets you the path used in .yyp/.resource_order */
+			readonly treeYyPath23: string;
+		
+		}		
+
 		interface Preferences {
 			addText(parent: HTMLElement, label: string): HTMLElement;
 			addWiki(parent: HTMLElement, url: string, label: string): HTMLElement;
