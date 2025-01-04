@@ -63,12 +63,9 @@ export class ControlPanelTab extends ConstructorTab {
 	/** @type {ControlPanel.MessageContainer[]} */
 	static messages = [];
 
-	/** @type {HTMLDivElement|undefined} */
-	#runtimeVersionDropdown = undefined;
-
 	/**
 	 * @private
-	 * @type {(UIGroup & { buildConfigDropdown?: HTMLDivElement })}
+	 * @type {(UIGroup & { buildConfigDropdown?: HTMLDivElement, runtimeVersionDropdown?: HTMLDivElement })}
 	 */
 	projectSettings;
 
@@ -337,7 +334,6 @@ export class ControlPanelTab extends ConstructorTab {
 	onCloseProject = () => {
 		
 		this.projectSettings.hidden = true;
-		this.#runtimeVersionDropdown = undefined;
 		
 		for (const element of Array.from(this.projectSettings.children)) {
 			if (!(element instanceof HTMLLegendElement)) {
@@ -420,7 +416,7 @@ export class ControlPanelTab extends ConstructorTab {
 			}
 		);
 
-		this.#runtimeVersionDropdown = UIPreferences.addDropdown(
+		this.projectSettings.runtimeVersionDropdown = UIPreferences.addDropdown(
 			this.projectSettings,
 			'Runtime Version',
 			ProjectProperties.runtimeVersion ?? USE_DEFAULT,
@@ -448,19 +444,19 @@ export class ControlPanelTab extends ConstructorTab {
 	 */
 	updateRuntimeVersionDropdown() {
 
-		if (this.#runtimeVersionDropdown === undefined) {
+		if (this.projectSettings.runtimeVersionDropdown === undefined) {
 			return;
 		}
 
 		const type = ProjectProperties.runtimeChannelTypeOrDef;
 
 		UIDropdownMutate(
-			this.#runtimeVersionDropdown,
+			this.projectSettings.runtimeVersionDropdown,
 			[...preferencesMenu.runtime_version_strings_get_for_type(type), USE_DEFAULT],
 			USE_DEFAULT
 		);
 
-		const select = UIDropdownGetSelect(this.#runtimeVersionDropdown);
+		const select = UIDropdownGetSelect(this.projectSettings.runtimeVersionDropdown);
 		ProjectProperties.runtimeVersion = default_undefined(select.value);
 
 	}
