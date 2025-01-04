@@ -13,6 +13,10 @@ let configTreeItems = {};
  */
 let configsTreeDir;
 
+/**
+ * Sidebar folder that visually shows the project build configs to select from more easily than via
+ * the control panel.
+ */
 export class ConfigTreeUi {
 
 	static __setup__() {
