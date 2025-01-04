@@ -353,9 +353,9 @@ export class ControlPanelTab extends ConstructorTab {
 	 * Update the build config dropdown state if the user chose a different config in the tree.
 	 * 
 	 * @private
-	 * @param {{ previous?: string, current: string }} event
+	 * @param {{ current: string }} event
 	 */
-	onBuildConfigChange = ({ previous, current }) => {
+	onBuildConfigChange = ({ current }) => {
 		
 		const dropdown = this.projectSettings.buildConfigDropdown;
 
