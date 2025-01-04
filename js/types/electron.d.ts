@@ -3,7 +3,7 @@ import * as fs from 'node:fs';
 
 declare global {
 
-	module Electron {
+	namespace Electron {
 
 		interface Menu {
 

@@ -1,7 +1,7 @@
 
 export declare global {
 
-	module GMEdit {
+	namespace GMEdit {
 
 		class PluginState {
 

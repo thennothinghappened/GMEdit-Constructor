@@ -1,6 +1,6 @@
 
 export declare global {
-	module ControlPanel {
+	namespace ControlPanel {
 		
 		type MessageContainer = { severity: MessageSeverity; title: string; err: IErr; };
 

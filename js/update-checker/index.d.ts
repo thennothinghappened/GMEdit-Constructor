@@ -1,7 +1,7 @@
 
 export declare global {
 
-	module UpdateChecker {
+	namespace UpdateChecker {
 	
 		type Result =
 			{ update_available: false; }								|
