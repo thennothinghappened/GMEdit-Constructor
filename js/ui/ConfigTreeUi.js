@@ -135,5 +135,4 @@ export class ConfigTreeUi {
 
 	}
 
-
 }
