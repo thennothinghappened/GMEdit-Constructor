@@ -53,9 +53,4 @@ export declare global {
 		: T extends object ? { readonly [K in keyof T]: DeepImmutable<T[K]> }
 		: T;
 
-	interface EventEmitter<EventMap> {
-		on<K extends keyof EventMap>(type: K, listener: (e: EventMap[K]) => any): void;
-		off<K extends keyof EventMap>(type: K, listener: (e: EventMap[K]) => any): void;	
-	}
-
 };

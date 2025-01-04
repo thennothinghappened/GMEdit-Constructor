@@ -9,4 +9,9 @@ export declare global {
 		toString(): string;
 	}
 
+	interface EventEmitter<EventMap> {
+		on<K extends keyof EventMap>(type: K, listener: (e: EventMap[K]) => any): void;
+		off<K extends keyof EventMap>(type: K, listener: (e: EventMap[K]) => any): void;	
+	}
+
 };
