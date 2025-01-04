@@ -22,7 +22,11 @@ export class ProjectProperties {
 	 * @private
 	 * @type {EventEmitterImpl<TPreferences.ProjectPropertiesEventMap>}
 	 */
-	static eventEmitter = new EventEmitterImpl(['changeBuildConfig']);
+	static eventEmitter = new EventEmitterImpl([
+		'changeBuildConfig',
+		'changeRuntimeChannel',
+		'changeRuntimeVersion'
+	]);
 
 	/**
 	 * @returns {EventEmitter<TPreferences.ProjectPropertiesEventMap>}
@@ -131,6 +135,8 @@ export class ProjectProperties {
 		properties.runtime_type = runtime_type;
 		this.save();
 
+		this.eventEmitter.emit('changeRuntimeChannel', runtime_type);
+
 	}
 
 	/**
@@ -150,13 +156,15 @@ export class ProjectProperties {
 	}
 
 	/**
-	 * Set the desired runtime channel type.
-	 * @param {string|undefined} runtime_type 
+	 * Set the desired runtime version.
+	 * @param {string|undefined} runtime_version 
 	 */
-	static set runtimeVersion(runtime_type) {
+	static set runtimeVersion(runtime_version) {
 
-		properties.runtime_version = runtime_type;
+		properties.runtime_version = runtime_version;
+
 		this.save();
+		this.eventEmitter.emit('changeRuntimeVersion', runtime_version);
 
 	}
 
@@ -264,23 +272,55 @@ export class ProjectProperties {
 			Object.assign(properties, saved);
 		}
 
+		Preferences.events.on('setDefaultRuntimeChannel', this.onPrefsGlobalChannelSet);
+
 	}
 
 	/**
 	 * @private
 	 */
 	static onProjectClose = () => {
-		
+		Preferences.events.off('setDefaultRuntimeChannel', this.onPrefsGlobalChannelSet);
 	}
 
+	/**
+	 * @private
+	 * @param {GMChannelType} type
+	 */
+	static onPrefsGlobalChannelSet = (type) => {
+
+		if (this.runtimeChannelType !== undefined) {
+			return;
+		}
+
+		this.eventEmitter.emit('changeRuntimeChannel', type);
+
+	};
+
+	/**
+	 * Deselect the current runtime version when changing runtime channel.
+	 * @private
+	 */
+	static onChangeRuntimeChannel = () => {
+		this.runtimeVersion = undefined;
+	};
+
 	static __setup__() {
+
 		GMEdit.on('projectOpen', this.onProjectOpen);
 		GMEdit.on('projectClose', this.onProjectClose);
+
+		this.events.on('changeRuntimeChannel', this.onChangeRuntimeChannel);
+
 	}
 
 	static __cleanup__() {
+		
 		GMEdit.off('projectOpen', this.onProjectOpen);
 		GMEdit.off('projectClose', this.onProjectClose);
+
+		this.events.off('changeRuntimeChannel', this.onChangeRuntimeChannel);
+
 	}
 
 }

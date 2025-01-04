@@ -12,6 +12,7 @@ import * as node from '../utils/node/node-import.js';
 import { runtime_version_parse } from '../compiler/RuntimeVersion.js';
 import { ControlPanelTab } from '../ui/tabs/control-panel/ControlPanelTab.js';
 import { use } from '../utils/scope-extensions/use.js';
+import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
 
 /**
  * List of recognised GameMaker IDE/Runtime channel types.
@@ -87,6 +88,23 @@ const users = {
  * per-project basis.
  */
 export class Preferences {
+
+	/**
+	 * @private
+	 * @type {EventEmitterImpl<TPreferences.PreferencesEventMap>}
+	 */
+	static eventEmitter = new EventEmitterImpl([
+		'setDefaultRuntimeChannel',
+		'runtimeListChanged'
+	]);
+
+	/**
+	 * Events for changing preferences!
+	 * @returns {EventEmitter<TPreferences.PreferencesEventMap>}
+	 */
+	static get events() {
+		return this.eventEmitter;
+	}
 
 	/**
 	 * Whether to reuse a compiler tab.
@@ -173,8 +191,12 @@ export class Preferences {
 	}
 
 	static set defaultRuntimeChannel(type) {
+		
 		this.prefs.runtime_opts.type = type;
 		this.save();
+
+		this.eventEmitter.emit('setDefaultRuntimeChannel', type);
+
 	}
 
 	/**
@@ -299,6 +321,8 @@ export class Preferences {
 				this.setRuntimeVersion(type, runtimes[type]?.at(0)?.version?.toString() ?? null);
 
 			});
+
+		this.eventEmitter.emit('runtimeListChanged', type);
 
 	}
 

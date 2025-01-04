@@ -1,6 +1,6 @@
 
 import { project_config_tree_get, project_config_tree_to_array, project_current_get, project_is_open } from '../../../utils/project.js';
-import { UIDropdownGetSelect, UIDropdownMutate } from '../../../utils/ui.js';
+import { UIDropdownGetSelect, UIDropdownGetValue, UIDropdownMutate } from '../../../utils/ui.js';
 import { ConstructorTab, ConstructorTabFileKind } from '../ConstructorTab.js';
 import { ProjectProperties } from '../../../preferences/ProjectProperties.js';
 import * as ui from '../../ui-wrappers.js';
@@ -65,7 +65,7 @@ export class ControlPanelTab extends ConstructorTab {
 
 	/**
 	 * @private
-	 * @type {(UIGroup & { buildConfigDropdown?: HTMLDivElement, runtimeVersionDropdown?: HTMLDivElement })}
+	 * @type {(UIGroup & { buildConfigDropdown?: GMEdit.UIDropdown<string>, runtimeVersionDropdown?: GMEdit.UIDropdown<string> })}
 	 */
 	projectSettings;
 
@@ -325,6 +325,8 @@ export class ControlPanelTab extends ConstructorTab {
 		this.projectSettings.hidden = false;
 		
 		ProjectProperties.events.on('changeBuildConfig', this.onBuildConfigChange);
+		ProjectProperties.events.on('changeRuntimeChannel', this.onRuntimeListChanged);
+		Preferences.events.on('runtimeListChanged', this.onRuntimeListChanged);
 
 	}
 
@@ -342,6 +344,8 @@ export class ControlPanelTab extends ConstructorTab {
 		}
 
 		ProjectProperties.events.off('changeBuildConfig', this.onBuildConfigChange);
+		ProjectProperties.events.off('changeRuntimeChannel', this.onRuntimeListChanged);
+		Preferences.events.off('runtimeListChanged', this.onRuntimeListChanged);
 
 	}
 
@@ -364,7 +368,33 @@ export class ControlPanelTab extends ConstructorTab {
 	}
 
 	/**
+	 * Update the runtime versions dropdown after a change to the channel type changes the list.
+	 * 
+	 * @private
+	 * @param {GMChannelType|undefined} channelType The channel type for which the runtime list has changed.
+	 */
+	onRuntimeListChanged = (channelType) => {
+
+		if (this.projectSettings.runtimeVersionDropdown === undefined) {
+			return;
+		}
+
+		if (channelType !== ProjectProperties.runtimeChannelTypeOrDef) {
+			return;
+		}
+
+		UIDropdownMutate(
+			this.projectSettings.runtimeVersionDropdown,
+			[...preferencesMenu.runtime_version_strings_get_for_type(channelType), USE_DEFAULT],
+			USE_DEFAULT
+		);
+
+	}
+
+	/**
 	 * Setup project-specific settings.
+	 * 
+	 * @private
 	 * @param {GMEdit.Project} project 
 	 */
 	projectSettingsSetup(project) {
@@ -394,10 +424,7 @@ export class ControlPanelTab extends ConstructorTab {
 			'Runtime Channel Type',
 			ProjectProperties.runtimeChannelType ?? USE_DEFAULT,
 			[...GM_CHANNEL_TYPES, USE_DEFAULT],
-			(value) => {
-				ProjectProperties.runtimeChannelType = default_undefined(value);
-				this.updateRuntimeVersionDropdown();
-			}
+			(value) => ProjectProperties.runtimeChannelType = default_undefined(value)
 		);
 
 		UIPreferences.addDropdown(
@@ -428,36 +455,12 @@ export class ControlPanelTab extends ConstructorTab {
 
 	/**
 	 * Setup the global preferences.
+	 * @private
 	 */
 	globalSettingsSetup() {
 
 		this.globalSettings.appendChild(ui.em(`Configure the default behaviour of ${plugin_name}.`));
-
-		preferencesMenu.menu_create(this.globalSettings, () => {
-			this.updateRuntimeVersionDropdown();
-		});
-
-	}
-
-	/**
-	 * Mutate the list of runtime versions for the project in-place.
-	 */
-	updateRuntimeVersionDropdown() {
-
-		if (this.projectSettings.runtimeVersionDropdown === undefined) {
-			return;
-		}
-
-		const type = ProjectProperties.runtimeChannelTypeOrDef;
-
-		UIDropdownMutate(
-			this.projectSettings.runtimeVersionDropdown,
-			[...preferencesMenu.runtime_version_strings_get_for_type(type), USE_DEFAULT],
-			USE_DEFAULT
-		);
-
-		const select = UIDropdownGetSelect(this.projectSettings.runtimeVersionDropdown);
-		ProjectProperties.runtimeVersion = default_undefined(select.value);
+		preferencesMenu.menu_create(this.globalSettings);
 
 	}
 

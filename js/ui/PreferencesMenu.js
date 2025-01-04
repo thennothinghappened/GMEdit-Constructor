@@ -35,9 +35,8 @@ export function __cleanup__() {
  * Create the preferences menu within the given group.
  * 
  * @param {HTMLElement} prefs_group Root Group element to add the preferences to.
- * @param {() => void} [on_refresh_runtime_settings] Callback to run on modifying runtime settings.
  */
-export function menu_create(prefs_group, on_refresh_runtime_settings) {
+export function menu_create(prefs_group) {
 
 	UIPreferences.addCheckbox(
 		prefs_group,
@@ -57,7 +56,7 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
 		prefs_group,
 		'Reuse compiler output tab between runs',
 		Preferences.saveOnRun,
-		(reuse_compiler_tab) => { Preferences.reuseCompilerTab = reuse_compiler_tab; }
+		(reuse_compiler_tab) => Preferences.reuseCompilerTab = reuse_compiler_tab
 	);
 
 	UIPreferences.addDropdown(
@@ -65,7 +64,7 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
 		'Runner Type',
 		Preferences.runtimeBuildType,
 		VALID_RUNNER_TYPES,
-		(runner) => { Preferences.runtimeBuildType = runner; }
+		(runner) => Preferences.runtimeBuildType = runner
 	);
 
 	UIPreferences.addDropdown(
@@ -73,13 +72,7 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
 		'Runtime Channel Type',
 		Preferences.defaultRuntimeChannel,
 		GM_CHANNEL_TYPES,
-		(runtime_channel_type) => {
-			Preferences.defaultRuntimeChannel = runtime_channel_type;
-
-			if (on_refresh_runtime_settings !== undefined) {
-				on_refresh_runtime_settings();
-			}
-		}
+		(runtime_channel_type) => Preferences.defaultRuntimeChannel = runtime_channel_type
 	);
 
 	UIPreferences.addInput(
@@ -123,10 +116,6 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
 					version_dropdown,
 					runtime_version_strings_get_for_type(type)
 				);
-
-				if (on_refresh_runtime_settings !== undefined) {
-					on_refresh_runtime_settings();
-				}
 
 			}
 		);
@@ -180,15 +169,10 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
  * @returns 
  */
 export function runtime_version_strings_get_for_type(type) {
-	
-	const runtimes = Preferences.getRuntimes(type);
-
-	if (runtimes === null) {
-		return [];
-	}
-
-	return runtimes.map(runtime => runtime.version.toString());
-
+	return Preferences
+		.getRuntimes(type)
+		?.map(runtime => runtime.version.toString())
+		?? [];
 }
 
 /**

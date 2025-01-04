@@ -78,8 +78,15 @@ export declare global {
 			user: string?;
 		};
 
+		interface PreferencesEventMap {
+			setDefaultRuntimeChannel: GMChannelType;
+			runtimeListChanged: GMChannelType;
+		}
+		
 		interface ProjectPropertiesEventMap {
 			changeBuildConfig: { previous?: string, current: string };
+			changeRuntimeChannel: GMChannelType | undefined;
+			changeRuntimeVersion: string | undefined;
 		}
 
 	};
