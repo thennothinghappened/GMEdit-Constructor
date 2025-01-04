@@ -268,7 +268,7 @@ export class GMConstructor {
 		hamburgerOptions.__setup__();
 
 		// Check for updates //
-		if (Preferences.update_check) {
+		if (Preferences.check_for_updates) {
 
 			plugin_update_check()
 				.then(res => {

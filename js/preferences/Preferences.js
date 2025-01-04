@@ -15,15 +15,15 @@ import { use } from '../utils/scope-extensions/use.js';
 
 /**
  * List of recognised GameMaker IDE/Runtime channel types.
- * @type {GMChannelType[]} 
+ * @type {Readonly<GMChannelType[]>} 
  */
-export const gm_channel_types = ['Stable', 'Beta', 'LTS'];
+export const GM_CHANNEL_TYPES = ['Stable', 'Beta', 'LTS'];
 
-/** @type {RunnerType[]} */
-export const valid_runner_types = ['VM', 'YYC'];
+/** @type {Readonly<RunnerType[]>} */
+export const VALID_RUNNER_TYPES = ['VM', 'YYC'];
 
 /** @type {Readonly<TPreferences.Data>} */
-const prefs_default = {
+const PREFS_DEFAULT = {
 	runtime_opts: {
 		// Default runtime to use is probably going to be stable.
 		type: 'Stable',
@@ -62,7 +62,7 @@ const prefs_default = {
  * List of runtimes for each type.
  * Populated after loading the list.
  * 
- * @type { { [key in GMChannelType]: RuntimeInfo[]? } }
+ * @type {{ [key in GMChannelType]: RuntimeInfo[]? }}
  */
 const runtimes = {
 	Stable: null,
@@ -74,7 +74,7 @@ const runtimes = {
  * List of users for each type.
  * Populated after loading the list.
  * 
- * @type { { [key in GMChannelType]: UserInfo[]? } }
+ * @type {{ [key in GMChannelType]: UserInfo[]? }}
  */
 const users = {
 	Stable: null,
@@ -114,11 +114,11 @@ export class Preferences {
 	 * Whether we should automatically check for updates on startup.
 	 * @returns {Boolean}
 	 */
-	static get update_check() {
+	static get check_for_updates() {
 		return this.prefs.check_for_updates;
 	}
 
-	static set update_check(check_for_updates) {
+	static set check_for_updates(check_for_updates) {
 		this.prefs.check_for_updates = check_for_updates;
 		this.save();
 	}
@@ -494,7 +494,7 @@ export class Preferences {
 	 * @type {TPreferences.Data} 
 	 * @private
 	 */
-	static prefs = Object.create(prefs_default);
+	static prefs = Object.create(PREFS_DEFAULT);
 
 	/**
 	 * Path preferences are saved to.
@@ -551,7 +551,7 @@ export class Preferences {
 		}
 
 		if (loaded_prefs?.runtime_opts?.type !== undefined) {
-			if (!gm_channel_types.includes(loaded_prefs.runtime_opts.type)) {
+			if (!GM_CHANNEL_TYPES.includes(loaded_prefs.runtime_opts.type)) {
 
 				ControlPanelTab.showWarning(
 					`Invalid preferred runtime type`,
@@ -567,7 +567,7 @@ export class Preferences {
 
 			const type_opts = loaded_prefs?.runtime_opts?.type_opts;
 
-			for (const type of gm_channel_types) {
+			for (const type of GM_CHANNEL_TYPES) {
 				if (!(type in type_opts)) {
 
 					ControlPanelTab.showWarning('Missing runtime type preference data', new Err(
@@ -584,7 +584,7 @@ export class Preferences {
 		// prefs_default has to be cloned (instead of using Object.create),
 		// otherwise properties inside other objects won't be saved into the config file,
 		// as JSON.stringify doesn't stringify properties in object prototypes
-		this.prefs = structuredClone(prefs_default);
+		this.prefs = structuredClone(PREFS_DEFAULT);
 
 		if (loaded_prefs !== undefined) {
 			deep_assign(this.prefs, loaded_prefs);
@@ -593,7 +593,7 @@ export class Preferences {
 		/** @type {Promise<any>[]} */
 		const reqs = [];
 
-		for (const type of gm_channel_types) {
+		for (const type of GM_CHANNEL_TYPES) {
 
 			const options = this.prefs.runtime_opts.type_opts[type];
 

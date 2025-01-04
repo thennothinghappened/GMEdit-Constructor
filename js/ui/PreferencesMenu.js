@@ -5,7 +5,7 @@
 import { plugin_name, plugin_version } from '../GMConstructor.js';
 import { UIDropdownMutate } from '../utils/ui.js';
 import * as ui from '../ui/ui-wrappers.js';
-import { gm_channel_types, Preferences, valid_runner_types } from '../preferences/Preferences.js';
+import { GM_CHANNEL_TYPES, Preferences, VALID_RUNNER_TYPES } from '../preferences/Preferences.js';
 
 const UIPreferences = $gmedit['ui.Preferences'];
 
@@ -42,8 +42,8 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
 	UIPreferences.addCheckbox(
 		prefs_group,
 		'Automatically check for updates on startup',
-		Preferences.update_check,
-		(update_check) => { Preferences.update_check = update_check; }
+		Preferences.check_for_updates,
+		(update_check) => { Preferences.check_for_updates = update_check; }
 	);
 
 	UIPreferences.addCheckbox(
@@ -64,7 +64,7 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
 		prefs_group,
 		'Runner Type',
 		Preferences.runner,
-		valid_runner_types,
+		VALID_RUNNER_TYPES,
 		(runner) => { Preferences.runner = runner; }
 	);
 
@@ -72,7 +72,7 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
 		prefs_group,
 		'Runtime Channel Type',
 		Preferences.runtime_channel_type,
-		gm_channel_types,
+		GM_CHANNEL_TYPES,
 		(runtime_channel_type) => {
 			Preferences.runtime_channel_type = runtime_channel_type;
 
@@ -96,7 +96,7 @@ export function menu_create(prefs_group, on_refresh_runtime_settings) {
 		(use_global_build) => { Preferences.use_global_build = use_global_build; }
 	);
 
-	for (const type of gm_channel_types) {
+	for (const type of GM_CHANNEL_TYPES) {
 
 		const group = ui.group(prefs_group, type);
 

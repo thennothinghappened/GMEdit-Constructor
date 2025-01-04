@@ -7,7 +7,7 @@ import * as ui from '../../ui-wrappers.js';
 import * as preferencesMenu from '../../PreferencesMenu.js';
 import { plugin_name, plugin_version } from '../../../GMConstructor.js';
 import { use } from '../../../utils/scope-extensions/use.js';
-import { gm_channel_types, Preferences, valid_runner_types } from '../../../preferences/Preferences.js';
+import { GM_CHANNEL_TYPES, Preferences, VALID_RUNNER_TYPES } from '../../../preferences/Preferences.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];
@@ -347,7 +347,7 @@ export class ControlPanelTab extends ConstructorTab {
 			this.projectSettings,
 			'Runner Type',
 			projectProperties.runner_project_get() ?? USE_DEFAULT,
-			[...valid_runner_types, USE_DEFAULT],
+			[...VALID_RUNNER_TYPES, USE_DEFAULT],
 			(value) => projectProperties.runner_set(default_undefined(value))
 		);
 
@@ -355,7 +355,7 @@ export class ControlPanelTab extends ConstructorTab {
 			this.projectSettings,
 			'Runtime Channel Type',
 			projectProperties.runtime_project_channel_type_get() ?? USE_DEFAULT,
-			[...gm_channel_types, USE_DEFAULT],
+			[...GM_CHANNEL_TYPES, USE_DEFAULT],
 			(value) => {
 				projectProperties.runtime_channel_type_set(default_undefined(value));
 				this.updateRuntimeVersionDropdown();
