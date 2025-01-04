@@ -11,6 +11,7 @@ import { mkdir, readdir } from './utils/node/file.js';
 import * as node from './utils/node/node-import.js';
 import { OutputLogTab } from './ui/tabs/compile/OutputLogTab.js';
 import { Preferences } from './preferences/Preferences.js';
+import { ConfigTreeUi } from './ui/ConfigTreeUi.js';
 
 /**
  * Name of the plugin 
@@ -266,6 +267,7 @@ export class GMConstructor {
 		ProjectProperties.__setup__();
 		preferencesMenu.__setup__();
 		hamburgerOptions.__setup__();
+		ConfigTreeUi.__setup__();
 
 		// Check for updates //
 		if (Preferences.checkForUpdates) {
@@ -313,6 +315,7 @@ export class GMConstructor {
 		ProjectProperties.__cleanup__();
 		compileController.__cleanup__();
 		hamburgerOptions.__cleanup__();
+		ConfigTreeUi.__cleanup__();
 
 		delete window.GMConstructor;
 		
