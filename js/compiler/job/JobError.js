@@ -1,4 +1,5 @@
 import * as ui from '../../ui/ui-wrappers.js';
+import { abstract } from '../../utils/abstract.js';
 
 /**
  * An error that occurred during a Job running.
@@ -17,7 +18,7 @@ export class JobError {
 	 * @returns {StdoutEntry|undefined}
 	 */
 	static fromStdout(string) {
-		return undefined;
+		abstract(string);
 	}
 
 	/**

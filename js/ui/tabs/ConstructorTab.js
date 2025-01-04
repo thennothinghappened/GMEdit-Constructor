@@ -39,7 +39,7 @@ export class ConstructorTabFileKind extends FileKind {
 	 * @type {GMEdit.FileKind['init']} 
 	 */
 	init(file, data) {
-		abstract();
+		abstract(file, data);
 	}
 	
 }
