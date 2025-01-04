@@ -82,6 +82,10 @@ const users = {
 	LTS: null
 };
 
+/**
+ * Global preferences for Constructor's behaviour. Much of this behaviour can be over-ridden on a
+ * per-project basis.
+ */
 export class Preferences {
 
 	/**
