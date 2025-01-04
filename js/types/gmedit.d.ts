@@ -293,21 +293,7 @@ export declare global {
 			/**
 			 * @returns created file or null
 			 */
-			create = (name: string, path: string, data: any, nav: GmlFileNav): GmlFile => {
-				const file = new GmlFile(name, path, this, data);
-				GmlFile.openTab(file);
-
-				if (file.codeEditor !== null) {
-					Main.window.setTimeout(() => {
-						Main.aceEditor.focus();
-						if (nav !== null) {
-							file.navigate(nav);
-						}
-					});
-				}
-
-				return file;
-			}
+			create(name: string, path: string, data: any, nav: GmlFileNav): GmlFile;
 
 			/**
 			 * Called by a GmlFile upon creation, initialising said file of this type.
@@ -318,10 +304,7 @@ export declare global {
 			/** We're asked to bring `nav` into view */
 			navigate(editor: Editor, nav: GmlFileNav): boolean;
 
-			getTabContext = (file: GmlFile, data: any): string => {
-				if (file.path != null) return file.path;
-				return file.name;
-			}
+			getTabContext(file: GmlFile, data: any): string;
 		}
 
 		/**
