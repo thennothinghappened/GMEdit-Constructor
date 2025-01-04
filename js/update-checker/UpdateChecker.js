@@ -43,7 +43,7 @@ export async function plugin_update_check() {
 
 		try {
 			await fetch(internet_check_url);
-		} catch (err) {
+		} catch (_) {
 			// We know we don't have internet access, so stop gracefully.
 			return {
 				ok: true,
