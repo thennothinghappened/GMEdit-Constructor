@@ -5,7 +5,7 @@ const windowsAppdata = process.env?.AppData ?? 'C:\\Users\\PLEASE_SPECIFY_USERNA
 
 /**
  * Mappings of NodeJS platforms to various Igor information.
- * @type {{[key in NodeJS.Platform]: IgorPlatformInfo}}
+ * @type {Partial<{[key in NodeJS.Platform]: IgorPlatformInfo}>}
  */
 const igor_platform_map = {
 	'win32': {
