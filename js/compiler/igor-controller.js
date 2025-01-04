@@ -47,7 +47,7 @@ export function job_run(project, runtime, user, settings) {
 	const job = new Job(id, settings, proc, project);
 	
 	jobs.push(job);
-	job.on('stop', () => job_remove(job));
+	job.events.once('stop', () => job_remove(job));
 
 	return { ok: true, data: job };
 

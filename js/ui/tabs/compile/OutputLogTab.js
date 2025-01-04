@@ -124,8 +124,8 @@ export class OutputLogTab extends ConstructorTab {
 
 		this.errorsGroup.hidden = true;
 
-		job.on('stdout', this.onJobStdout);
-		job.on('stop', this.onJobStop);
+		job.events.on('stdout', this.onJobStdout);
+		job.events.on('stop', this.onJobStop);
 
 		this.job = job;
 
@@ -140,8 +140,8 @@ export class OutputLogTab extends ConstructorTab {
 			return;
 		}
 
-		this.job.off('stdout', this.onJobStdout);
-		this.job.off('stop', this.onJobStop);
+		this.job.events.off('stdout', this.onJobStdout);
+		this.job.events.off('stop', this.onJobStop);
 
 		this.job = null;
 

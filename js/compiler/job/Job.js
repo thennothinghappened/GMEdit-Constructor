@@ -7,10 +7,8 @@ import { job_parse_stdout } from './output-parsing/parse-stdout.js';
 
 /**
  * Wrapper for an Igor job.
- * 
- * @extends {EventEmitterImpl<JobEventMap>}
  */
-export class Job extends EventEmitterImpl {
+export class Job {
 
 	/** 
 	 * Identifier number of this job. This value is incremented from `0` and is the lowest available
@@ -35,6 +33,19 @@ export class Job extends EventEmitterImpl {
 	status = { status: 'running' };
 
 	statusDisplay = '';
+
+	/**
+	 * @private
+	 * @type {EventEmitterImpl<JobEventMap>}
+	 */
+	eventEmitter = new EventEmitterImpl(['stdout', 'output', 'stop']);
+
+	/**
+	 * @returns {EventEmitter<JobEventMap>}
+	 */
+	get events() {
+		return this.eventEmitter;
+	}
 	
 	/**
 	 * @param {number} id
@@ -43,8 +54,6 @@ export class Job extends EventEmitterImpl {
 	 * @param {GMEdit.Project} project
 	 */
 	constructor(id, settings, process, project) {
-
-		super(['stdout', 'output', 'stop']);
 		
 		this.id = id;
 		this.settings = settings;
@@ -56,6 +65,7 @@ export class Job extends EventEmitterImpl {
 		this.process.on('exit', this.#onExit);
 		this.process.stdout?.on('data', this.#onStdoutData);
 		this.process.stderr?.on('data', this.#onStdoutData);
+
 	}
 
 	/**
@@ -68,7 +78,7 @@ export class Job extends EventEmitterImpl {
 			.replaceAll(/\r/g, '');
 		
 		this.stdout += str;
-		this.emit('stdout', this.stdout);
+		this.eventEmitter.emit('stdout', this.stdout);
 
 	}
 
@@ -90,7 +100,7 @@ export class Job extends EventEmitterImpl {
 			this.statusDisplay = 'Finished';
 		}
 		
-		this.emit('stop', job_parse_stdout(this.stdout));
+		this.eventEmitter.emit('stop', job_parse_stdout(this.stdout));
 		this.process.removeAllListeners();
 		
 	}
@@ -169,7 +179,7 @@ export class Job extends EventEmitterImpl {
 		}
 
 		return new Promise((res) => {
-			this.on('stop', () => {
+			this.events.once('stop', () => {
 				res(undefined);
 			});
 		});
