@@ -1,7 +1,7 @@
 import * as compileController from './compiler/igor-controller.js';
 import * as hamburgerOptions from './ui/HamburgerOptions.js';
 import { project_current_get, open_files_save, project_format_get, tab_current_get } from './utils/project.js';
-import * as projectProperties from './preferences/ProjectProperties.js';
+import { ProjectProperties } from './preferences/ProjectProperties.js';
 import * as igorPaths from './compiler/igor-paths.js';
 import * as preferencesMenu from './ui/PreferencesMenu.js';
 import { Err } from './utils/Err.js';
@@ -46,14 +46,14 @@ export class GMConstructor {
 			verb: partial_settings.verb,
 			buildPath: partial_settings.buildPath ?? this.#getBuildDir(project),
 			platform: partial_settings.platform ?? igorPaths.igor_user_platform,
-			runner: partial_settings.runner ?? projectProperties.runner_get(),
+			runner: partial_settings.runner ?? ProjectProperties.runner_get(),
 			threads: partial_settings.threads ?? 8,
-			configName: partial_settings.configName ?? projectProperties.config_name_get()	
+			configName: partial_settings.configName ?? ProjectProperties.config_name_get()	
 		};
 		
-		const runtime_type = projectProperties.runtime_channel_type_get();
-		const runtime_res = projectProperties.runtime_get();
-		const user_res = projectProperties.user_get();
+		const runtime_type = ProjectProperties.runtime_channel_type_get();
+		const runtime_res = ProjectProperties.runtime_get();
+		const user_res = ProjectProperties.user_get();
 
 		if (!runtime_res.ok) {
 
@@ -142,7 +142,7 @@ export class GMConstructor {
 				.showError('Failed to run Igor job!', res.err);
 		}
 
-		compileController.job_open_editor(res.data, projectProperties.reuse_compiler_tab_get());
+		compileController.job_open_editor(res.data, ProjectProperties.reuse_compiler_tab_get());
 	}
 
 	/**
@@ -263,7 +263,7 @@ export class GMConstructor {
 			};
 		}
 
-		projectProperties.__setup__();
+		ProjectProperties.__setup__();
 		preferencesMenu.__setup__();
 		hamburgerOptions.__setup__();
 
@@ -310,8 +310,8 @@ export class GMConstructor {
 	async cleanup() {
 
 		Preferences.__cleanup__();
+		ProjectProperties.__cleanup__();
 		compileController.__cleanup__();
-		projectProperties.__cleanup__();
 		hamburgerOptions.__cleanup__();
 
 		delete window.GMConstructor;
