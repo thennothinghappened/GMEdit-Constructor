@@ -22,7 +22,7 @@ export const gm_channel_types = ['Stable', 'Beta', 'LTS'];
 /** @type {RunnerType[]} */
 export const valid_runner_types = ['VM', 'YYC'];
 
-/** @type {Readonly<Preferences.Data>} */
+/** @type {Readonly<TPreferences.Data>} */
 const prefs_default = {
 	runtime_opts: {
 		// Default runtime to use is probably going to be stable.
@@ -58,9 +58,6 @@ const prefs_default = {
 	global_build_path: def_global_build_path
 };
 
-/** @type {Preferences.Data} */
-let prefs = Object.create(prefs_default);
-
 /**
  * List of runtimes for each type.
  * Populated after loading the list.
@@ -85,572 +82,572 @@ const users = {
 	LTS: null
 };
 
-/**
- * Path preferences are saved to.
- * @type {string}
- */
-let save_path;
+export class Preferences {
 
-let __ready__ = false;
-
-/**
- * Returns whether the preferences are loaded.
- */
-export function ready() {
-	return __ready__;
-}
-
-/**
- * Get whether to reuse a compiler tab.
- * @returns {Boolean}
- */
-export function reuse_compiler_tab_get() {
-	return prefs.reuse_compiler_tab;
-}
-
-/**
- * Set whether to reuse a compiler tab.
- * @param {Boolean} reuse_compiler_tab 
- */
-export function reuse_compiler_tab_set(reuse_compiler_tab) {
-	prefs.reuse_compiler_tab = reuse_compiler_tab;
-	return save();
-}
-
-/**
- * Get whether to save all files on running a task.
- * @returns {Boolean}
- */
-export function save_on_run_task_get() {
-	return prefs.save_on_run_task;
-}
-
-/**
- * Set whether to save all files on running a task.
- * @param {Boolean} save_on_run_task 
- */
-export function save_on_run_task_set(save_on_run_task) {
-	prefs.save_on_run_task = save_on_run_task;
-	return save();
-}
-
-/**
- * Get whether we should automatically check for updates on startup.
- * @returns {Boolean}
- */
-export function update_check_get() {
-	return prefs.check_for_updates;
-}
-
-/**
- * Set whether we should automatically check for updates on startup.
- * @param {Boolean} check_for_updates 
- */
-export function update_check_set(check_for_updates) {
-	prefs.check_for_updates = check_for_updates;
-	return save();
-}
-
-/**
- * Get whether to use the global build directory.
- * @returns {Boolean}
- */
-export function use_global_build_get() {
-	return prefs.use_global_build;
-}
-
-/**
- * Set whether to use the global build directory.
- * @param {Boolean} use_global_build 
- */
-export function use_global_build_set(use_global_build) {
-	prefs.use_global_build = use_global_build;
-	return save();
-}
-
-/**
- * Get the global build directory path.
- * @returns {String}
- */
-export function global_build_path_get() {
-	return prefs.global_build_path;
-}
-
-/**
- * Set the global build directory path.
- * @param {String} global_build_path 
- */
-export function global_build_path_set(global_build_path) {
-	prefs.global_build_path = global_build_path;
-	return save();
-}
-
-/**
- * Get the desired runner type.
- * @returns {RunnerType}
- */
-export function runner_get() {
-	return prefs.runtime_opts.runner;
-}
-
-/**
- * The default runner type used globally.
- * @param {RunnerType} runner 
- */
-export function runner_set(runner) {
-
-	prefs.runtime_opts.runner = runner;
-	return save();
-
-}
-
-/**
- * The default runtime type used globally.
- */
-export function runtime_channel_type_get() {
-	return prefs.runtime_opts.type;
-}
-
-/**
- * The default runtime type used globally.
- * @param {GMChannelType} type 
- */
-export function runtime_channel_type_set(type) {
-	prefs.runtime_opts.type = type;
-	return save();
-}
-
-/**
- * Get the global choice for default runtime for a given type.
- * @param {GMChannelType} [type] 
- */
-export function runtime_version_get(type = runtime_channel_type_get()) {
-	return prefs.runtime_opts.type_opts[type].choice;
-}
-
-/**
- * Set the global choice for default runtime for a given type.
- * @param {GMChannelType} type 
- * @param {string?} choice 
- */
-export function runtime_version_set(type, choice) {
-	prefs.runtime_opts.type_opts[type].choice = choice;
-	return save();
-}
-
-/**
- * Get the global choice for default user for a given type.
- * @param {GMChannelType} [type] 
- */
-export function user_get(type = runtime_channel_type_get()) {
-	return prefs.runtime_opts.type_opts[type].user;
-}
-
-/**
- * Set the global choice for default runtime for a given type.
- * @param {GMChannelType} type 
- * @param {string?} user 
- */
-export function user_set(type, user) {
-	prefs.runtime_opts.type_opts[type].user = user;
-	return save();
-}
-
-/**
- * Get the search path for runtime of a given type.
- *  @param {GMChannelType} type 
- */
-export function runtime_search_path_get(type) {
-	return prefs.runtime_opts.type_opts[type].search_path;
-}
-
-/**
- * Get the users path for runtime of a given type.
- *  @param {GMChannelType} type 
- */
-export function users_search_path_get(type) {
-	return prefs.runtime_opts.type_opts[type].users_path;
-}
-
-/**
- * Function to get a list of runtime version names for a given runtime type.
- * @param {GMChannelType} type
- * @returns {RuntimeInfo[]?}
- */
-export function runtime_versions_get_for_type(type) {
-	return runtimes[type];
-};
-
-/**
- * Function to get a list of user names for a given runtime type.
- * @param {GMChannelType} type
- * @returns {UserInfo[]?}
- */
-export function users_get_for_type(type) {
-	return users[type];
-};
-
-/**
- * Set the search path for runtime of a given type.
- * @param {GMChannelType} type 
- * @param {string} search_path 
- */
-export async function runtime_search_path_set(type, search_path) {
-
-	prefs.runtime_opts.type_opts[type].search_path = search_path;
-	save();
-
-	runtimes[type] = null;
-
-	const res = await runtime_list_load_type(type);
-
-	if (!res.ok) {
-
-		const err = new Err(
-			`An error occurred while loading the runtime list for ${type} channel runtimes.`,
-			res.err,
-			'Make sure the search path is valid!'
-		);
-
-		return ControlPanelTab
-			.view(true)
-			.showError(`Failed to load ${type} runtime list`, err);
+	/**
+	 * Whether to reuse a compiler tab.
+	 * @returns {Boolean}
+	 */
+	static get reuse_compiler_tab() {
+		return this.prefs.reuse_compiler_tab;
 	}
 
-	runtimes[type] = res.data;
+	static set reuse_compiler_tab(reuse_compiler_tab) {
+		this.prefs.reuse_compiler_tab = reuse_compiler_tab;
+		this.save();
+	}
 
-	use(runtime_version_get(type))
-		.let(it => (it !== null) ? it : undefined)
-		?.takeIf(it => runtimes[type]?.find(info => info.version.toString() === it) === undefined)
-		?.also(it => {
+	/**
+	 * Whether to save all files on running a task.
+	 * @returns {Boolean}
+	 */
+	static get save_on_run_task() {
+		return this.prefs.save_on_run_task;
+	}
+
+	static set save_on_run_task(save_on_run_task) {
+		this.prefs.save_on_run_task = save_on_run_task;
+		this.save();
+	}
+
+	/**
+	 * Whether we should automatically check for updates on startup.
+	 * @returns {Boolean}
+	 */
+	static get update_check() {
+		return this.prefs.check_for_updates;
+	}
+
+	static set update_check(check_for_updates) {
+		this.prefs.check_for_updates = check_for_updates;
+		this.save();
+	}
+
+	/**
+	 * Whether to use the global build directory.
+	 */
+	static get use_global_build() {
+		return this.prefs.use_global_build;
+	}
+
+	static set use_global_build(use_global_build) {
+		this.prefs.use_global_build = use_global_build;
+		this.save();
+	}
+
+	/**
+	 * The global build directory path.
+	 * @returns {String}
+	 */
+	static get global_build_path() {
+		return this.prefs.global_build_path;
+	}
+
+	static set global_build_path(global_build_path) {
+		this.prefs.global_build_path = global_build_path;
+		this.save();
+	}
+
+	/**
+	 * The desired runner type.
+	 * @returns {RunnerType}
+	 */
+	static get runner() {
+		return this.prefs.runtime_opts.runner;
+	}
+
+	static set runner(runner) {
+		this.prefs.runtime_opts.runner = runner;
+		this.save();
+	}
+
+	/**
+	 * The default runtime type used globally.
+	 */
+	static get runtime_channel_type() {
+		return this.prefs.runtime_opts.type;
+	}
+
+	static set runtime_channel_type(type) {
+		this.prefs.runtime_opts.type = type;
+		this.save();
+	}
+
+	/**
+	 * Get the global choice for default runtime for a given type.
+	 * @param {GMChannelType} [type] 
+	 */
+	static runtime_version_get(type = this.runtime_channel_type) {
+		return this.prefs.runtime_opts.type_opts[type].choice;
+	}
+
+	/**
+	 * Set the global choice for default runtime for a given type.
+	 * 
+	 * @param {GMChannelType} type 
+	 * @param {string?} choice 
+	 */
+	static runtime_version_set(type, choice) {
+		this.prefs.runtime_opts.type_opts[type].choice = choice;
+		this.save();
+	}
+
+	/**
+	 * Get the global choice for default user for a given type.
+	 * 
+	 * @param {GMChannelType} [type] 
+	 */
+	static user_get(type = this.runtime_channel_type) {
+		return this.prefs.runtime_opts.type_opts[type].user;
+	}
+
+	/**
+	 * Set the global choice for default runtime for a given type.
+	 * 
+	 * @param {GMChannelType} type 
+	 * @param {string?} user 
+	 */
+	static user_set(type, user) {
+		this.prefs.runtime_opts.type_opts[type].user = user;
+		this.save();
+	}
+
+	/**
+	 * Get the search path for runtime of a given type.
+	 * 
+	 *  @param {GMChannelType} type 
+	 */
+	static runtime_search_path_get(type) {
+		return this.prefs.runtime_opts.type_opts[type].search_path;
+	}
+
+	/**
+	 * Get the users path for runtime of a given type.
+	 * 
+	 *  @param {GMChannelType} type 
+	 */
+	static users_search_path_get(type) {
+		return this.prefs.runtime_opts.type_opts[type].users_path;
+	}
+
+	/**
+	 * Function to get a list of runtime version names for a given runtime type.
+	 * 
+	 * @param {GMChannelType} type
+	 * @returns {RuntimeInfo[]?}
+	 */
+	static runtime_versions_get_for_type(type) {
+		return runtimes[type];
+	};
+
+	/**
+	 * Function to get a list of user names for a given runtime type.
+	 * 
+	 * @param {GMChannelType} type
+	 * @returns {UserInfo[]?}
+	 */
+	static users_get_for_type(type) {
+		return users[type];
+	};
+
+	/**
+	 * Set the search path for runtime of a given type.
+	 * 
+	 * @param {GMChannelType} type 
+	 * @param {string} search_path 
+	 */
+	static async runtime_search_path_set(type, search_path) {
+
+		this.prefs.runtime_opts.type_opts[type].search_path = search_path;
+		this.save();
+
+		runtimes[type] = null;
+
+		const res = await this.runtime_list_load_type(type);
+
+		if (!res.ok) {
 
 			const err = new Err(
-				`Runtime version "${it}" not available in new search path "${search_path}".`,
-				undefined,
-				`Is the path correct? Have you deleted the runtime "${it}"?`
+				`An error occurred while loading the runtime list for ${type} channel runtimes.`,
+				res.err,
+				'Make sure the search path is valid!'
 			);
-	
-			ControlPanelTab.showDebug('Chosen Runtime version not available', err);
-			runtime_version_set(type, runtimes[type]?.at(0)?.version?.toString() ?? null);
 
-		});
+			return ControlPanelTab
+				.view(true)
+				.showError(`Failed to load ${type} runtime list`, err);
+		}
 
-}
+		runtimes[type] = res.data;
 
-/**
- * Set the users path for runtime of a given type.
- * @param {GMChannelType} type 
- * @param {string} users_path 
- */
-export async function users_search_path_set(type, users_path) {
+		use(this.runtime_version_get(type))
+			.let(it => (it !== null) ? it : undefined)
+			?.takeIf(it => runtimes[type]?.find(info => info.version.toString() === it) === undefined)
+			?.also(it => {
 
-	prefs.runtime_opts.type_opts[type].users_path = users_path;
-	save();
-
-	users[type] = null;
-
-	const res = await user_list_load_type(type);
-
-	if (!res.ok) {
-
-		const err = new Err(
-			`An error occured while loading the list of users for ${type} from "${users_path}".`,
-			res.err,
-			'Make sure the users path is valid!'
-		);
-
-		return ControlPanelTab
-			.view(true)
-			.showError(`Failed to load ${type} user list`, err);
-	}
-
-	users[type] = res.data;
-
-	const choice = user_get(type);
-
-	if (
-		choice !== undefined && 
-		users[type]?.find(user => user.name === choice) === undefined
-	) {
-
-		const err = new Err(`User "${choice}" not available in new users path "${users_path}".`);
-
-		ControlPanelTab
-			.view(false)
-			.showWarning('Selected user is no longer valid', err);
+				const err = new Err(
+					`Runtime version "${it}" not available in new search path "${search_path}".`,
+					undefined,
+					`Is the path correct? Have you deleted the runtime "${it}"?`
+				);
 		
-		user_set(type, users[type]?.at(0)?.name?.toString() ?? null);
+				ControlPanelTab.showDebug('Chosen Runtime version not available', err);
+				this.runtime_version_set(type, runtimes[type]?.at(0)?.version?.toString() ?? null);
+
+			});
+
 	}
 
-}
+	/**
+	 * Set the users path for runtime of a given type.
+	 * 
+	 * @param {GMChannelType} type 
+	 * @param {string} users_path 
+	 */
+	static async users_search_path_set(type, users_path) {
 
-/**
- * Save preferences back to the file.
- */
-export function save() {
-	return Electron_FS.writeFileSync(save_path, JSON.stringify(prefs));
-}
+		this.prefs.runtime_opts.type_opts[type].users_path = users_path;
+		this.save();
 
-/**
- * Get the global runtime options for a given runtime type.
- * @param {GMChannelType} type 
- */
-function global_runtime_opts_get(type = runtime_channel_type_get()) {
-	return prefs.runtime_opts.type_opts[type];
-}
+		users[type] = null;
 
-/**
- * Load the list of runtimes for the provided search path for a type.
- * @param {GMChannelType} [type] 
- * @returns {Promise<Result<RuntimeInfo[]>>}
- */
-async function runtime_list_load_type(type = runtime_channel_type_get()) {
+		const res = await this.user_list_load_type(type);
 
-	const { search_path } = global_runtime_opts_get(type);
-	return runtime_list_load_path(type, search_path);
-}
+		if (!res.ok) {
 
-/**
- * Load the list of users for the provided users path for a type.
- * @param {GMChannelType} [type] 
- * @returns {Promise<Result<UserInfo[]>>}
- */
-async function user_list_load_type(type = runtime_channel_type_get()) {
+			const err = new Err(
+				`An error occured while loading the list of users for ${type} from "${users_path}".`,
+				res.err,
+				'Make sure the users path is valid!'
+			);
 
-	const { users_path } = global_runtime_opts_get(type);
-	return user_list_load_path(type, users_path);
-}
+			return ControlPanelTab
+				.view(true)
+				.showError(`Failed to load ${type} user list`, err);
+		}
 
-/**
- * Load the list of runtimes for the provided search path.
- * @param {GMChannelType} type 
- * @param {String} search_path 
- * @returns {Promise<Result<RuntimeInfo[]>>}
- */
-async function runtime_list_load_path(type, search_path) {
+		users[type] = res.data;
 
-	const dir_res = await readdir(search_path);
+		const choice = this.user_get(type);
 
-	if (!dir_res.ok) {
+		if (
+			choice !== undefined && 
+			users[type]?.find(user => user.name === choice) === undefined
+		) {
+
+			const err = new Err(`User "${choice}" not available in new users path "${users_path}".`);
+
+			ControlPanelTab
+				.view(false)
+				.showWarning('Selected user is no longer valid', err);
+			
+			this.user_set(type, users[type]?.at(0)?.name?.toString() ?? null);
+
+		}
+
+	}
+
+	/**
+	 * Get the global runtime options for a given runtime type.
+	 * 
+	 * @param {GMChannelType} type 
+	 */
+	static global_runtime_opts_get(type = this.runtime_channel_type) {
+		return this.prefs.runtime_opts.type_opts[type];
+	}
+
+	/**
+	 * Load the list of runtimes for the provided search path for a type.
+	 * 
+	 * @param {GMChannelType} [type] 
+	 * @returns {Promise<Result<RuntimeInfo[]>>}
+	 */
+	static async runtime_list_load_type(type = this.runtime_channel_type) {
+
+		const { search_path } = this.global_runtime_opts_get(type);
+		return this.runtime_list_load_path(type, search_path);
+	}
+
+	/**
+	 * Load the list of users for the provided users path for a type.
+	 * 
+	 * @param {GMChannelType} [type] 
+	 * @returns {Promise<Result<UserInfo[]>>}
+	 */
+	static async user_list_load_type(type = this.runtime_channel_type) {
+
+		const { users_path } = this.global_runtime_opts_get(type);
+		return this.user_list_load_path(type, users_path);
+	}
+
+	/**
+	 * Load the list of runtimes for the provided search path.
+	 * 
+	 * @param {GMChannelType} type 
+	 * @param {String} search_path 
+	 * @returns {Promise<Result<RuntimeInfo[]>>}
+	 */
+	static async runtime_list_load_path(type, search_path) {
+
+		const dir_res = await readdir(search_path);
+
+		if (!dir_res.ok) {
+			return {
+				ok: false,
+				err: new Err(`Failed to read search path '${search_path}': ${dir_res.err}`),
+			};
+		}
+
+		/** @type {RuntimeInfo[]} */
+		const runtimes = dir_res.data
+			.map(dirname => ({ dirname, path: node.path.join(search_path, dirname) }))
+			.filter(({ path }) => Electron_FS.lstatSync(path).isDirectory())
+			.map(({ dirname, path }) => {
+
+				const igor_path = node.path.join(path, igor_path_segment);
+				const version_res = runtime_version_parse(type, dirname);
+
+				if (!version_res.ok) {
+
+					ControlPanelTab.showDebug('Invalid runtime found in search path', new Err(
+						`Failed to parse runtime version name for runtime at '${path}'`, 
+						version_res.err
+					));
+
+					return null;
+				}
+
+				const runtime = version_res.data;
+				const supported_res = runtime.supported();
+
+				if (!supported_res.ok) {
+
+					ControlPanelTab.showDebug('Excluding unsupported runtime', new Err(
+						`Excluding unsupported runtime ${runtime}`, supported_res.err
+					));
+					
+					return null;
+				}
+
+				return {
+					path,
+					igor_path,
+					version: runtime
+				};
+
+			})
+			.filter(/** @returns {runtime is RuntimeInfo} */ (runtime) => runtime !== null)
+			.sort((a, b) => b.version.compare(a.version));
+
 		return {
-			ok: false,
-			err: new Err(`Failed to read search path '${search_path}': ${dir_res.err}`),
+			ok: true,
+			data: runtimes.filter(runtime => Electron_FS.existsSync(runtime.igor_path))
 		};
 	}
 
-	/** @type {RuntimeInfo[]} */
-	const runtimes = dir_res.data
-		.map(dirname => ({ dirname, path: node.path.join(search_path, dirname) }))
-		.filter(({ path }) => Electron_FS.lstatSync(path).isDirectory())
-		.map(({ dirname, path }) => {
+	/**
+	 * Load the list of users for the provided search path.
+	 * 
+	 * @param {GMChannelType} type 
+	 * @param {String} users_path 
+	 * @returns {Promise<Result<UserInfo[]>>}
+	 */
+	static async user_list_load_path(type, users_path) {
 
-			const igor_path = node.path.join(path, igor_path_segment);
-			const version_res = runtime_version_parse(type, dirname);
-
-			if (!version_res.ok) {
-
-				ControlPanelTab.showDebug('Invalid runtime found in search path', new Err(
-					`Failed to parse runtime version name for runtime at '${path}'`, 
-					version_res.err
-				));
-
-				return null;
-			}
-
-			const runtime = version_res.data;
-			const supported_res = runtime.supported();
-
-			if (!supported_res.ok) {
-
-				ControlPanelTab.showDebug('Excluding unsupported runtime', new Err(
-					`Excluding unsupported runtime ${runtime}`, supported_res.err
-				));
-				
-				return null;
-			}
-
+		const dir_res = await readdir(users_path);
+		
+		if (!dir_res.ok) {
 			return {
-				path,
-				igor_path,
-				version: runtime
+				ok: false,
+				err: new Err(`Failed to read users path '${users_path}': ${dir_res.err}`),
 			};
+		}
 
-		})
-		.filter(/** @returns {runtime is RuntimeInfo} */ (runtime) => runtime !== null)
-		.sort((a, b) => b.version.compare(a.version));
-
-	return {
-		ok: true,
-		data: runtimes.filter(runtime => Electron_FS.existsSync(runtime.igor_path))
-	};
-}
-
-/**
- * Load the list of users for the provided search path.
- * @param {GMChannelType} type 
- * @param {String} users_path 
- * @returns {Promise<Result<UserInfo[]>>}
- */
-async function user_list_load_path(type, users_path) {
-
-	const dir_res = await readdir(users_path);
-	
-	if (!dir_res.ok) {
-		return {
-			ok: false,
-			err: new Err(`Failed to read users path '${users_path}': ${dir_res.err}`),
-		};
-	}
-
-	/** @type {UserInfo[]} */
-	const users = dir_res.data
-		.map(dirname => {
-			return {
-				path: node.path.join(users_path, dirname),
-				name: dirname
-			};
+		/** @type {UserInfo[]} */
+		const users = dir_res.data
+			.map(dirname => {
+				return {
+					path: node.path.join(users_path, dirname),
+					name: dirname
+				};
 		})
 		.sort((a, b) => +(a.name > b.name));
 
-	return {
-		ok: true,
-		data: users.filter(user => 
-			Electron_FS.existsSync(node.path.join(user.path, 'license.plist')) ||
-			Electron_FS.existsSync(node.path.join(user.path, 'local_settings.json'))
-		)
-	};
-}
-
-/**
- * Init a new instance of Preferences asynchronously (requires loading file.)
- * @returns {Promise<Result<void>>}
- */
-export async function __setup__() {
-
-	save_path = node.path.join(Electron_App.getPath('userData'), 'GMEdit', 'config', `${plugin_name}.json`);
-
-	/** @type {Partial<Preferences.Data>|undefined} */
-	let loaded_prefs = undefined;
-
-	const prefsLoadRes = readFileSync(save_path);
-
-	if (prefsLoadRes.ok) {
-		
-		try {
-			loaded_prefs = JSON.parse(prefsLoadRes.data.toString());
-		} catch (err_cause) {
-
-			const err = new Err(
-				'JSON parse error while reading the preferences file!', 
-				err_cause,
-				`Please check your preferences file (${save_path}) for syntax errors as you must have edited it manually - see stacktrace below.`
-			);
-
-			ControlPanelTab
-				.view(true)
-				.showError('Failed to load preferences', err);
-
-		}
-
+		return {
+			ok: true,
+			data: users.filter(user => 
+				Electron_FS.existsSync(node.path.join(user.path, 'license.plist')) ||
+				Electron_FS.existsSync(node.path.join(user.path, 'local_settings.json'))
+			)
+		};
 	}
 
-	if (loaded_prefs?.runtime_opts?.type !== undefined) {
-		if (!gm_channel_types.includes(loaded_prefs.runtime_opts.type)) {
+	/**
+	 * Save preferences back to the file.
+	 * @private
+	 */
+	static save() {
+		return Electron_FS.writeFileSync(this.save_path, JSON.stringify(this.prefs));
+	}
 
-			ControlPanelTab.showWarning(
-				`Invalid preferred runtime type`,
-				new Err(`'${loaded_prefs.runtime_opts.type}' is invalid, changed to ${prefs.runtime_opts.type}`)
-			);
+	/**
+	 * @type {TPreferences.Data} 
+	 * @private
+	 */
+	static prefs = Object.create(prefs_default);
+
+	/**
+	 * Path preferences are saved to.
+	 * 
+	 * @type {string}
+	 * @private
+	 */
+	static save_path;
+
+	/**
+	 * @private
+	 */
+	static __ready__ = false;
+
+	/**
+	 * Returns whether the preferences are loaded.
+	 */
+	static get ready() {
+		return this.__ready__;
+	}
+
+	/**
+	 * Init a new instance of Preferences asynchronously (requires loading file.)
+	 * 
+	 * @returns {Promise<Result<void>>}
+	 */
+	static async __setup__() {
+
+		this.save_path = node.path.join(Electron_App.getPath('userData'), 'GMEdit', 'config', `${plugin_name}.json`);
+
+		/** @type {Partial<TPreferences.Data>|undefined} */
+		let loaded_prefs = undefined;
+
+		const prefsLoadRes = readFileSync(this.save_path);
+
+		if (prefsLoadRes.ok) {
 			
-			loaded_prefs.runtime_opts.type = prefs.runtime_opts.type;
+			try {
+				loaded_prefs = JSON.parse(prefsLoadRes.data.toString());
+			} catch (err_cause) {
+
+				const err = new Err(
+					'JSON parse error while reading the preferences file!', 
+					err_cause,
+					`Please check your preferences file (${this.save_path}) for syntax errors as you must have edited it manually - see stacktrace below.`
+				);
+
+				ControlPanelTab
+					.view(true)
+					.showError('Failed to load preferences', err);
+
+			}
 
 		}
-	}
 
-	if (loaded_prefs?.runtime_opts?.type_opts !== undefined) {
+		if (loaded_prefs?.runtime_opts?.type !== undefined) {
+			if (!gm_channel_types.includes(loaded_prefs.runtime_opts.type)) {
 
-		const type_opts = loaded_prefs?.runtime_opts?.type_opts;
-
-		for (const type of gm_channel_types) {
-			if (!(type in type_opts)) {
-
-				ControlPanelTab.showWarning('Missing runtime type preference data', new Err(
-					`Missing runtime type preference data for type '${type}', replacing with default.`
-				));
-
-				loaded_prefs.runtime_opts.type_opts[type] = prefs.runtime_opts.type_opts[type];
+				ControlPanelTab.showWarning(
+					`Invalid preferred runtime type`,
+					new Err(`'${loaded_prefs.runtime_opts.type}' is invalid, changed to ${this.prefs.runtime_opts.type}`)
+				);
+				
+				loaded_prefs.runtime_opts.type = this.prefs.runtime_opts.type;
 
 			}
 		}
 
-	}
-	
-	// prefs_default has to be cloned (instead of using Object.create),
-	// otherwise properties inside other objects won't be saved into the config file,
-	// as JSON.stringify doesn't stringify properties in object prototypes
-	prefs = structuredClone(prefs_default);
+		if (loaded_prefs?.runtime_opts?.type_opts !== undefined) {
 
-	if (loaded_prefs !== undefined) {
-		deep_assign(prefs, loaded_prefs);
-	}
+			const type_opts = loaded_prefs?.runtime_opts?.type_opts;
 
-	/** @type {Promise<any>[]} */
-	const reqs = [];
+			for (const type of gm_channel_types) {
+				if (!(type in type_opts)) {
 
-	for (const type of gm_channel_types) {
+					ControlPanelTab.showWarning('Missing runtime type preference data', new Err(
+						`Missing runtime type preference data for type '${type}', replacing with default.`
+					));
 
-		const options = prefs.runtime_opts.type_opts[type];
+					loaded_prefs.runtime_opts.type_opts[type] = this.prefs.runtime_opts.type_opts[type];
 
-		reqs.push(runtime_list_load_type(type)
-			.then((res) => {
-
-				if (!res.ok) {
-					// Silently drop. Users don't care if a GM version they don't use couldn't be
-					// found!
-					options.choice = null;
-					return;
 				}
+			}
 
-				const runtimes_found = res.data;
-
-				if (options.choice === null && runtimes_found.length > 0) {
-					options.choice = runtimes_found[0].version.toString();
-				}
-
-				runtimes[type] = runtimes_found;
-
-			}));
-			
-		reqs.push(user_list_load_type(type)
-			.then((result) => {
-
-				if (!result.ok) {
-					options.user = null;
-					return;
-				}
-
-				const users_found = result.data;
-
-				if (options.user === null && users_found.length > 0) {
-					options.user = users_found[0].name.toString();
-				}
-				
-				users[type] = users_found;
-
-			}));
+		}
 		
+		// prefs_default has to be cloned (instead of using Object.create),
+		// otherwise properties inside other objects won't be saved into the config file,
+		// as JSON.stringify doesn't stringify properties in object prototypes
+		this.prefs = structuredClone(prefs_default);
+
+		if (loaded_prefs !== undefined) {
+			deep_assign(this.prefs, loaded_prefs);
+		}
+
+		/** @type {Promise<any>[]} */
+		const reqs = [];
+
+		for (const type of gm_channel_types) {
+
+			const options = this.prefs.runtime_opts.type_opts[type];
+
+			reqs.push(this.runtime_list_load_type(type)
+				.then((res) => {
+
+					if (!res.ok) {
+						// Silently drop. Users don't care if a GM version they don't use couldn't be
+						// found!
+						options.choice = null;
+						return;
+					}
+
+					const runtimes_found = res.data;
+
+					if (options.choice === null && runtimes_found.length > 0) {
+						options.choice = runtimes_found[0].version.toString();
+					}
+
+					runtimes[type] = runtimes_found;
+
+				}));
+				
+			reqs.push(this.user_list_load_type(type)
+				.then((result) => {
+
+					if (!result.ok) {
+						options.user = null;
+						return;
+					}
+
+					const users_found = result.data;
+
+					if (options.user === null && users_found.length > 0) {
+						options.user = users_found[0].name.toString();
+					}
+					
+					users[type] = users_found;
+
+				}));
+			
+		}
+
+		await Promise.all(reqs);
+		this.__ready__ = true;
+
+		return { ok: true };
 	}
 
-	await Promise.all(reqs);
+	/**
+	 * Called on deregistering the plugin.
+	 */
+	static __cleanup__() {
+		return;
+	}
 
-	__ready__ = true;
-
-	return { ok: true };
-}
-
-/**
- * Called on deregistering the plugin.
- */
-export function __cleanup__() {
-	return;
 }

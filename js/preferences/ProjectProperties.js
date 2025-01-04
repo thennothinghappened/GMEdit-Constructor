@@ -4,12 +4,12 @@
 
 import { Err } from '../utils/Err.js';
 import { project_current_get, project_config_tree_get } from '../utils/project.js';
-import * as preferences from './Preferences.js';
+import { Preferences } from './Preferences.js';
 const ProjectProperties = $gmedit['ui.project.ProjectProperties'];
 
 /**
  * The current properties instance.
- * @type {Partial<Preferences.ProjectData>}
+ * @type {Partial<TPreferences.ProjectData>}
  */
 let properties = {};
 
@@ -47,7 +47,7 @@ export function config_name_set(config_name) {
  * @returns {RunnerType}
  */
 export function runner_get() {
-	return runner_project_get() ?? preferences.runner_get();
+	return runner_project_get() ?? Preferences.runner;
 }
 
 /**
@@ -63,7 +63,7 @@ export function runner_project_get() {
  * @returns {Boolean}
  */
 export function reuse_compiler_tab_get() {
-	return reuse_compiler_tab_project_get() ?? preferences.reuse_compiler_tab_get();
+	return reuse_compiler_tab_project_get() ?? Preferences.reuse_compiler_tab;
 }
 
 /**
@@ -99,7 +99,7 @@ export function runner_set(runner) {
  * @returns {GMChannelType}
  */
 export function runtime_channel_type_get() {
-	return properties.runtime_type ?? preferences.runtime_channel_type_get();
+	return properties.runtime_type ?? Preferences.runtime_channel_type;
 }
 
 /**
@@ -126,7 +126,7 @@ export function runtime_channel_type_set(runtime_type) {
  * @returns {string|null}
  */
 export function runtime_version_get() {
-	return properties.runtime_version ?? preferences.runtime_version_get(runtime_channel_type_get());
+	return properties.runtime_version ?? Preferences.runtime_version_get(runtime_channel_type_get());
 }
 
 /**
@@ -155,7 +155,7 @@ export function runtime_version_set(runtime_type) {
 export function runtime_get() {
 
 	const type = runtime_channel_type_get();
-	const desired_runtime_list = preferences.runtime_versions_get_for_type(type);
+	const desired_runtime_list = Preferences.runtime_versions_get_for_type(type);
 
 	if (desired_runtime_list === null) {
 		return {
@@ -187,7 +187,7 @@ export function runtime_get() {
 export function user_get() {
 
 	const type = runtime_channel_type_get();
-	const desired_user_list = preferences.users_get_for_type(type);
+	const desired_user_list = Preferences.users_get_for_type(type);
 
 	if (desired_user_list === null) {
 		return {
@@ -196,7 +196,7 @@ export function user_get() {
 		};
 	}
 
-	const name = preferences.user_get(type) ?? desired_user_list[0]?.name?.toString();
+	const name = Preferences.user_get(type) ?? desired_user_list[0]?.name?.toString();
 	const user = desired_user_list.find(user => user.name.toString() === name);
 
 	if (user === undefined) {

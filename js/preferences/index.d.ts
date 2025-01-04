@@ -1,7 +1,7 @@
 
 export declare global {
 
-	module Preferences {
+	module TPreferences {
 
 		type Data = {
 

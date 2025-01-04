@@ -1,14 +1,13 @@
-// @ts-ignore
-import { Job } from '../../../compiler/job/Job.js';
+
 import { project_config_tree_get, project_config_tree_to_array, project_current_get, project_is_open } from '../../../utils/project.js';
 import { UIDropdownGetSelect, UIDropdownMutate } from '../../../utils/ui.js';
 import { ConstructorTab, ConstructorTabFileKind } from '../ConstructorTab.js';
 import * as projectProperties from '../../../preferences/ProjectProperties.js';
-import * as preferences from '../../../preferences/Preferences.js';
 import * as ui from '../../ui-wrappers.js';
 import * as preferencesMenu from '../../PreferencesMenu.js';
 import { plugin_name, plugin_version } from '../../../GMConstructor.js';
 import { use } from '../../../utils/scope-extensions/use.js';
+import { gm_channel_types, Preferences, valid_runner_types } from '../../../preferences/Preferences.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];
@@ -89,7 +88,7 @@ export class ControlPanelTab extends ConstructorTab {
 
 		ControlPanelTab.messages.forEach(this.#showMessage);
 		
-		if (preferences.ready()) {
+		if (Preferences.ready) {
 			this.globalSettingsSetup();
 		}
 
@@ -348,7 +347,7 @@ export class ControlPanelTab extends ConstructorTab {
 			this.projectSettings,
 			'Runner Type',
 			projectProperties.runner_project_get() ?? USE_DEFAULT,
-			[...preferences.valid_runner_types, USE_DEFAULT],
+			[...valid_runner_types, USE_DEFAULT],
 			(value) => projectProperties.runner_set(default_undefined(value))
 		);
 
@@ -356,7 +355,7 @@ export class ControlPanelTab extends ConstructorTab {
 			this.projectSettings,
 			'Runtime Channel Type',
 			projectProperties.runtime_project_channel_type_get() ?? USE_DEFAULT,
-			[...preferences.gm_channel_types, USE_DEFAULT],
+			[...gm_channel_types, USE_DEFAULT],
 			(value) => {
 				projectProperties.runtime_channel_type_set(default_undefined(value));
 				this.updateRuntimeVersionDropdown();

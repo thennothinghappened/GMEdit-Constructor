@@ -1,7 +1,6 @@
 import * as compileController from './compiler/igor-controller.js';
 import * as hamburgerOptions from './ui/HamburgerOptions.js';
 import { project_current_get, open_files_save, project_format_get, tab_current_get } from './utils/project.js';
-import * as preferences from './preferences/Preferences.js';
 import * as projectProperties from './preferences/ProjectProperties.js';
 import * as igorPaths from './compiler/igor-paths.js';
 import * as preferencesMenu from './ui/PreferencesMenu.js';
@@ -11,6 +10,7 @@ import { plugin_update_check } from './update-checker/UpdateChecker.js';
 import { mkdir, readdir } from './utils/node/file.js';
 import * as node from './utils/node/node-import.js';
 import { OutputLogTab } from './ui/tabs/compile/OutputLogTab.js';
+import { Preferences } from './preferences/Preferences.js';
 
 /**
  * Name of the plugin 
@@ -105,7 +105,7 @@ export class GMConstructor {
 				.showError('Incompatible runtime selected', err);
 		}
 
-		if (preferences.save_on_run_task_get()) {
+		if (Preferences.save_on_run_task) {
 			open_files_save();
 		}
 
@@ -152,8 +152,8 @@ export class GMConstructor {
 	 */
 	#getBuildDir(project) {
 		
-		if (preferences.use_global_build_get()) {
-			return node.path.join(preferences.global_build_path_get(), project.displayName);
+		if (Preferences.use_global_build) {
+			return node.path.join(Preferences.global_build_path, project.displayName);
 		}
 
 		return node.path.join(project.dir, 'build');
@@ -254,7 +254,7 @@ export class GMConstructor {
 		igorPaths.__setup__();
 
 		// Setting up preferences //
-		const preferences_res = await preferences.__setup__();
+		const preferences_res = await Preferences.__setup__();
 
 		if (!preferences_res.ok) {
 			return {
@@ -268,7 +268,7 @@ export class GMConstructor {
 		hamburgerOptions.__setup__();
 
 		// Check for updates //
-		if (preferences.update_check_get()) {
+		if (Preferences.update_check) {
 
 			plugin_update_check()
 				.then(res => {
@@ -309,7 +309,7 @@ export class GMConstructor {
 	 */
 	async cleanup() {
 
-		preferences.__cleanup__();
+		Preferences.__cleanup__();
 		compileController.__cleanup__();
 		projectProperties.__cleanup__();
 		hamburgerOptions.__cleanup__();
