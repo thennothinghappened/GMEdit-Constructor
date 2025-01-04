@@ -1,7 +1,7 @@
 
 import * as node from '../utils/node/node-import.js';
 
-const windowsAppdata = process.env?.AppData ?? 'C:\\Users\\PLEASE_SPECIFY_USERNAME\\AppData\\Roaming';
+const windowsAppData = process.env?.AppData ?? 'C:\\Users\\PLEASE_SPECIFY_USERNAME\\AppData\\Roaming';
 
 /**
  * Mappings of NodeJS platforms to various Igor information.
@@ -18,11 +18,11 @@ const igor_platform_map = {
 			LTS:	'C:\\ProgramData\\GameMakerStudio2-LTS\\Cache\\runtimes'
 		},
 		default_user_paths: {
-			Stable:	windowsAppdata + '\\GameMakerStudio2',
-			Beta:	windowsAppdata + '\\GameMakerStudio2-Beta',
-			LTS:	windowsAppdata + '\\GameMakerStudio2-LTS'
+			Stable:	windowsAppData + '\\GameMakerStudio2',
+			Beta:	windowsAppData + '\\GameMakerStudio2-Beta',
+			LTS:	windowsAppData + '\\GameMakerStudio2-LTS'
 		},
-		default_global_build_path: windowsAppdata + '\\GMEdit-Constructor\\builds'
+		default_global_build_path: windowsAppData + '\\GMEdit-Constructor\\builds'
 	},
 	'darwin': {
 		platform_executable_extension: '',
