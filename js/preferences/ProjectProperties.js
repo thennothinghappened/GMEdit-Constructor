@@ -25,7 +25,7 @@ export class ProjectProperties {
 	static eventEmitter = new EventEmitterImpl(['changeBuildConfig']);
 
 	/**
-	 * @returns {EventEmitter<TPreferences.ProjectPropertiesEventMap}
+	 * @returns {EventEmitter<TPreferences.ProjectPropertiesEventMap>}
 	 */
 	static get events() {
 		return this.eventEmitter;
