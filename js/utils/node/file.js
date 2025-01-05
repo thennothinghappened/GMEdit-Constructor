@@ -78,8 +78,6 @@ export function readdir(path) {
 export function mkdir(path, recursive) {
 	return new Promise(res => {
 		Electron_FS.mkdir(path, { recursive }, (err) => {
-
-			console.warn(err)
 			
 			if (err === null) {
 				return res({ ok: true });
