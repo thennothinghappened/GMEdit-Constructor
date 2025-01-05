@@ -4,6 +4,7 @@ import * as ui from '../../ui-wrappers.js';
 import { JobError } from '../../../compiler/job/JobError.js';
 import { Err } from '../../../utils/Err.js';
 import { use } from '../../../utils/scope-extensions/use.js';
+import { GmlFileUtils } from '../../../utils/gmedit/GmlFileUtils.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];
@@ -22,10 +23,9 @@ class OutputLogFileKind extends ConstructorTabFileKind {
 
 	/**
 	 * @param {GMEdit.GmlFile} file
-	 * @param {IgorJob} job
 	 */
-	init = (file, job) => {
-		file.editor = new OutputLogTab(file, job);
+	init = (file) => {
+		file.editor = new OutputLogTab(file);
 	}
 
 }
@@ -63,9 +63,8 @@ export class OutputLogTab extends ConstructorTab {
 
 	/**
 	 * @param {GMEdit.GmlFile} file
-	 * @param {IgorJob} job
 	 */
-	constructor(file, job) {
+	constructor(file) {
 
 		super(file);
 
@@ -100,8 +99,6 @@ export class OutputLogTab extends ConstructorTab {
 			})
 			.value;
 
-		this.attach(job);
-
 	}
 
 	/**
@@ -114,7 +111,7 @@ export class OutputLogTab extends ConstructorTab {
 			this.detach();
 		}
 
-		this.file.rename(OutputLogTab.getJobName(job), '');
+		GmlFileUtils.rename(this.file, OutputLogTab.getJobName(job));
 		this.infoGroup.legend.childNodes[0].textContent = this.file.name;
 		
 		this.logAceEditor.session.setValue('');
@@ -181,7 +178,7 @@ export class OutputLogTab extends ConstructorTab {
 			return;
 		}
 
-		this.file.rename(OutputLogTab.getJobName(this.job), '');
+		GmlFileUtils.rename(this.file, OutputLogTab.getJobName(this.job));
 		this.infoGroup.legend.childNodes[0].textContent = this.file.name;
 
 		if (errors.length > 0) {
@@ -209,8 +206,15 @@ export class OutputLogTab extends ConstructorTab {
 	static view = (job, reuse) => {
 
 		if (!reuse) {
-			const file = new GmlFile(this.getJobName(job), null, OutputLogFileKind.inst, job);
-			return GmlFile.openTab(file);
+			
+			const file = new GmlFile('Constructor Job', null, OutputLogFileKind.inst);
+			GmlFile.openTab(file);
+
+			const tab = /** @type {OutputLogTab} */ (file.editor);
+			tab.attach(job);
+
+			return;
+
 		}
 
 		const tabs = Array.from(ChromeTabs.getTabs());
@@ -244,7 +248,7 @@ export class OutputLogTab extends ConstructorTab {
 	stopJob = () => {
 		
 		if (this.job === null) {
-			throw new Err('Invalid state: Attempting to stop a job that does not exist!');
+			return;
 		}
 
 		if (this.job.status.status !== 'stopped') {
@@ -259,7 +263,7 @@ export class OutputLogTab extends ConstructorTab {
 	showDirectory = () => {
 
 		if (this.job === null) {
-			throw new Err('Invalid state: no job is attached with which to visit its directory.');
+			return;
 		}
 
 		Electron_Shell.showItemInFolder(this.job.settings.buildPath);
