@@ -2,9 +2,9 @@
 export declare global {
 	namespace ControlPanel {
 		
-		type MessageContainer = { severity: MessageSeverity; title: string; err: IErr; };
+		type ProblemContainer = { severity: ProblemSeverity; title: string; err: IErr; };
 
-		type MessageSeverity =
+		type ProblemSeverity =
 			'error'		|
 			'warning'	|
 			'debug'		;

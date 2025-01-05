@@ -66,8 +66,8 @@ export class GMConstructor {
 			);
 
 			return ControlPanelTab
-				.view(true)
-				.showError('No installed runtimes available of this type', err);
+				.error('No installed runtimes available of this type', err)
+				.view(true);
 		}
 
 		const runtime = runtime_res.data;
@@ -81,8 +81,8 @@ export class GMConstructor {
 			);
 
 			return ControlPanelTab
-				.view(true)
-				.showError('Runtime compatibility check for this project failed', err);
+				.error('Runtime compatibility check for this project failed', err)
+				.view(true);
 
 		}
 
@@ -99,8 +99,8 @@ export class GMConstructor {
 			);
 
 			return ControlPanelTab
-				.view(true)
-				.showError('Incompatible runtime selected', err);
+				.error('Incompatible runtime selected', err)
+				.view(true);
 		}
 
 		if (Preferences.saveOnRun) {
@@ -120,8 +120,8 @@ export class GMConstructor {
 				);
 
 				return ControlPanelTab
-					.view(true)
-					.showError(res.err.message, err);
+					.error(res.err.message, err)
+					.view(true);
 				
 			}
 
@@ -136,8 +136,8 @@ export class GMConstructor {
 
 		if (!res.ok) {
 			return ControlPanelTab
-				.view(true)
-				.showError('Failed to run Igor job!', res.err);
+				.error('Failed to run Igor job!', res.err)
+				.view(true);
 		}
 
 		compileController.job_open_editor(res.data, ProjectProperties.reuseCompilerTabOrDef);
@@ -271,7 +271,7 @@ export class GMConstructor {
 				.then(res => {
 					
 					if (!res.ok) {
-						return ControlPanelTab.showWarning(
+						return ControlPanelTab.warn(
 							'Failed to check for plugin updates.',
 							res.err
 						);
@@ -282,7 +282,7 @@ export class GMConstructor {
 					}
 
 					// Bit silly to use an error message for this but it works :P
-					ControlPanelTab.showWarning(
+					ControlPanelTab.warn(
 						'An update is available for Constructor!',
 						new Err(
 							'There is an update available.',

@@ -300,8 +300,8 @@ export class Preferences {
 			);
 
 			return ControlPanelTab
-				.view(true)
-				.showError(`Failed to load ${type} runtime list`, err);
+				.error(`Failed to load ${type} runtime list`, err)
+				.view(true);
 		}
 
 		runtimes[type] = res.data;
@@ -317,7 +317,7 @@ export class Preferences {
 					`Is the path correct? Have you deleted the runtime "${it}"?`
 				);
 		
-				ControlPanelTab.showDebug('Chosen Runtime version not available', err);
+				ControlPanelTab.debug('Chosen Runtime version not available', err);
 				this.setRuntimeVersion(type, runtimes[type]?.at(0)?.version?.toString() ?? null);
 
 			});
@@ -350,8 +350,8 @@ export class Preferences {
 			);
 
 			return ControlPanelTab
-				.view(true)
-				.showError(`Failed to load ${type} user list`, err);
+				.error(`Failed to load ${type} user list`, err)
+				.view(true);
 		}
 
 		users[type] = res.data;
@@ -366,8 +366,8 @@ export class Preferences {
 			const err = new Err(`User "${choice}" not available in new users path "${users_path}".`);
 
 			ControlPanelTab
-				.view(false)
-				.showWarning('Selected user is no longer valid', err);
+				.warn('Selected user is no longer valid', err)
+				.view(false);
 			
 			this.setUser(type, users[type]?.at(0)?.name?.toString() ?? null);
 
@@ -437,7 +437,7 @@ export class Preferences {
 
 				if (!version_res.ok) {
 
-					ControlPanelTab.showDebug('Invalid runtime found in search path', new Err(
+					ControlPanelTab.debug('Invalid runtime found in search path', new Err(
 						`Failed to parse runtime version name for runtime at '${path}'`, 
 						version_res.err
 					));
@@ -450,7 +450,7 @@ export class Preferences {
 
 				if (!supported_res.ok) {
 
-					ControlPanelTab.showDebug('Excluding unsupported runtime', new Err(
+					ControlPanelTab.debug('Excluding unsupported runtime', new Err(
 						`Excluding unsupported runtime ${runtime}`, supported_res.err
 					));
 					
@@ -492,13 +492,11 @@ export class Preferences {
 		}
 
 		const users = dir_res.data
-			.map(dirname => {
-				return {
-					path: node.path.join(users_path, dirname),
-					name: dirname
-				};
-		})
-		.sort((a, b) => +(a.name > b.name));
+			.map(dirname => ({
+				path: node.path.join(users_path, dirname),
+				name: dirname
+			}))
+			.sort((a, b) => +(a.name > b.name));
 
 		return {
 			ok: true,
@@ -570,8 +568,8 @@ export class Preferences {
 				);
 
 				ControlPanelTab
-					.view(true)
-					.showError('Failed to load preferences', err);
+					.error('Failed to load preferences', err)
+					.view(true);
 
 			}
 
@@ -580,7 +578,7 @@ export class Preferences {
 		if (loaded_prefs?.runtime_opts?.type !== undefined) {
 			if (!GM_CHANNEL_TYPES.includes(loaded_prefs.runtime_opts.type)) {
 
-				ControlPanelTab.showWarning(
+				ControlPanelTab.warn(
 					`Invalid preferred runtime type`,
 					new Err(`'${loaded_prefs.runtime_opts.type}' is invalid, changed to ${this.prefs.runtime_opts.type}`)
 				);
@@ -597,7 +595,7 @@ export class Preferences {
 			for (const type of GM_CHANNEL_TYPES) {
 				if (!(type in type_opts)) {
 
-					ControlPanelTab.showWarning('Missing runtime type preference data', new Err(
+					ControlPanelTab.warn('Missing runtime type preference data', new Err(
 						`Missing runtime type preference data for type '${type}', replacing with default.`
 					));
 

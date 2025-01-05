@@ -60,8 +60,8 @@ export class ControlPanelTab extends ConstructorTab {
 
 	static tabName = 'GMEdit-Constructor Control Panel';
 
-	/** @type {ControlPanel.MessageContainer[]} */
-	static messages = [];
+	/** @type {ControlPanel.ProblemContainer[]} */
+	static problems = [];
 
 	/**
 	 * @private
@@ -81,7 +81,9 @@ export class ControlPanelTab extends ConstructorTab {
 		this.element.appendChild(ui.h1(ControlPanelTab.tabName));
 		this.element.appendChild(ui.p(`Version: ${plugin_version}`));
 
-		this.problems = ui.group(this.element, 'Problems', [ui.text_button('Dismiss All', ControlPanelTab.dismissAll)]);
+		this.problems = ui.group(this.element, 'Problems', [
+			ui.text_button('Dismiss All', ControlPanelTab.dismissAll)
+		]);
 		this.problems.classList.add('gm-constructor-control-panel-errors');
 		this.problems.hidden = true;
 
@@ -90,7 +92,7 @@ export class ControlPanelTab extends ConstructorTab {
 
 		this.globalSettings = ui.group(this.element, 'Global Settings');
 
-		ControlPanelTab.messages.forEach(this.#showMessage);
+		ControlPanelTab.problems.forEach(this.showProblem);
 		
 		if (Preferences.ready) {
 			this.globalSettingsSetup();
@@ -107,66 +109,38 @@ export class ControlPanelTab extends ConstructorTab {
 
 	/**
 	 * Show the user an error in the UI.
+	 * 
 	 * @param {string} title
 	 * @param {IErr} err
 	 */
-	static showError = (title, err) => {
-		return this.#appendMessage({ severity: 'error', title, err });
-	}
+	static error = (title, err) => this.addProblem({ severity: 'error', title, err });
 
 	/**
 	 * Show the user a warning in the UI.
+	 * 
 	 * @param {string} title
 	 * @param {IErr} err
 	 */
-	static showWarning = (title, err) => {
-		return this.#appendMessage({ severity: 'warning', title, err });
-	}
+	static warn = (title, err) => this.addProblem({ severity: 'warning', title, err });
 
 	/**
 	 * Show the user a debug message in the UI.
+	 * 
 	 * @param {string} title
 	 * @param {IErr} err
 	 */
-	static showDebug = (title, err) => {
-		return this.#appendMessage({ severity: 'debug', title, err });
-	}
-
-	/**
-	 * Show the user an error in the UI.
-	 * @param {string} title
-	 * @param {IErr} err
-	 */
-	showError = (title, err) => {
-		return ControlPanelTab.showError(title, err);
-	}
-
-	/**
-	 * Show the user a warning in the UI.
-	 * @param {string} title
-	 * @param {IErr} err
-	 */
-	showWarning = (title, err) => {
-		return ControlPanelTab.showWarning(title, err);
-	}
-
-	/**
-	 * Show the user a debug message in the UI.
-	 * @param {string} title
-	 * @param {IErr} err
-	 */
-	showDebug = (title, err) => {
-		return ControlPanelTab.showDebug(title, err);
-	}
+	static debug = (title, err) => this.addProblem({ severity: 'debug', title, err });
 
 	/**
 	 * Show the user a message in the UI.
-	 * @param {ControlPanel.MessageContainer} message
+	 * 
+	 * @private
+	 * @param {ControlPanel.ProblemContainer} message
 	 */
-	static #appendMessage = (message) => {
+	static addProblem = (message) => {
 
 		/** 
-		 * @type { {[key in ControlPanel.MessageSeverity]: (message?: any) => void} }
+		 * @type { {[key in ControlPanel.ProblemSeverity]: (message?: any) => void} }
 		 */
 		const severity_logs = {
 			error: console.error,
@@ -176,7 +150,7 @@ export class ControlPanelTab extends ConstructorTab {
 
 		const { severity, title, err } = message;
 
-		this.messages.push(message);
+		this.problems.push(message);
 
 		const log = severity_logs[severity];
 		log(`${title} - ${err}`);
@@ -184,7 +158,7 @@ export class ControlPanelTab extends ConstructorTab {
 		const controlPanel = this.find();
 
 		if (controlPanel !== undefined) {
-			controlPanel.#showMessage(message);
+			controlPanel.showProblem(message);
 		}
 
 		return this;
@@ -193,12 +167,14 @@ export class ControlPanelTab extends ConstructorTab {
 
 	/**
 	 * Show the user a message in the UI.
-	 * @param {ControlPanel.MessageContainer} message
+	 * 
+	 * @private
+	 * @param {ControlPanel.ProblemContainer} message
 	 */
-	#showMessage = (message) => {
+	showProblem = (message) => {
 
 		/** 
-		 * @type { {[key in ControlPanel.MessageSeverity]: string[]} }
+		 * @type { {[key in ControlPanel.ProblemSeverity]: string[]} }
 		 */
 		const severity_classes = {
 			error: ['gm-constructor-error'],
@@ -214,15 +190,15 @@ export class ControlPanelTab extends ConstructorTab {
 
 				error.remove();
 
-				const index = ControlPanelTab.messages.indexOf(message);
+				const index = ControlPanelTab.problems.indexOf(message);
 
 				if (index === -1) {
 					return;
 				}
 
-				ControlPanelTab.messages.splice(index, 1);
+				ControlPanelTab.problems.splice(index, 1);
 
-				if (ControlPanelTab.messages.length === 0) {
+				if (ControlPanelTab.problems.length === 0) {
 					this.problems.hidden = true;
 				}
 
@@ -247,6 +223,7 @@ export class ControlPanelTab extends ConstructorTab {
 
 	/**
 	 * Dismiss all errors in the panel.
+	 * @private
 	 */
 	static dismissAll = () => {
 
@@ -264,7 +241,7 @@ export class ControlPanelTab extends ConstructorTab {
 
 		}
 
-		this.messages = [];
+		this.problems = [];
 
 	}
 
@@ -274,7 +251,7 @@ export class ControlPanelTab extends ConstructorTab {
 	 * @param {boolean} [focus] Whether to bring the panel into focus.
 	 * @returns {ControlPanelTab}
 	 */
-	static view = (focus = true) => {
+	static view(focus = true) {
 
 		const controlPanel = this.find();
 
@@ -299,7 +276,7 @@ export class ControlPanelTab extends ConstructorTab {
 	 * Find the existing open control panel, if it is open.
 	 * @returns {ControlPanelTab|undefined}
 	 */
-	static find = () => {
+	static find() {
 
 		const tabs = Array.from(ChromeTabs.getTabs());
 		const editors = tabs.map(tab => tab.gmlFile.editor);

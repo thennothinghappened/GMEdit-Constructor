@@ -123,7 +123,7 @@ export class IgorJob {
 		const res = killRecursive(this.process.pid);
 		
 		if (!res.ok) {
-			ControlPanelTab.showError(
+			ControlPanelTab.error(
 				`Failed to stop the job ${this.settings.verb}!`,
 				res.err
 			);
@@ -160,7 +160,7 @@ export class IgorJob {
 				.forEach(it => killRecursive(it));
 
 		} catch (err) {
-			ControlPanelTab.showError(
+			ControlPanelTab.error(
 				`Failed to stop the job ${this.settings.verb}!`,
 				new Err('Failed stopping MacOS-specific residual processes', err)
 			);
