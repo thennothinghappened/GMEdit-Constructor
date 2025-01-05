@@ -186,7 +186,7 @@ export class GMConstructor {
 
 	}
 
-	cleanCurrent = () => {
+	cleanCurrent = async () => {
 		
 		const project = project_current_get();
 
@@ -195,14 +195,26 @@ export class GMConstructor {
 		}
 
 		// Stop existing running jobs, as they wouldn't be too happy about their directories being cleared!
-		compileController.jobs
+		const promises = compileController.jobs
 			.filter(it => it.project === project)
-			.forEach(it => it.stop());
+			.map(it => it.stop());
+
+		await Promise.all(promises);
 
 		const build_dir = this.#getBuildDir(project);
 
 		if (Electron_FS.existsSync(build_dir)) {
-			Electron_FS.rmSync(build_dir, { recursive: true });
+			try {
+				Electron_FS.rmSync(build_dir, { recursive: true });
+			} catch (err) {
+				return ControlPanelTab
+					.error('Failed to clean project!', new Err(
+						`An unexpected error occurred while removing the build directory '${build_dir}'.`,
+						err,
+						'Do you have this directory open somewhere?'
+					))
+					.view();
+			}
 		}
 
 		Electron_Dialog.showMessageBox({
