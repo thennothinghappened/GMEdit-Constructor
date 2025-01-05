@@ -333,7 +333,7 @@ export declare global {
 			/** Whether the file has been modified. */
 			__changed: boolean;
 			/** The tab associated with this file. */
-			tabEl: ChromeTab;
+			tabEl: ChromeTab?;
 
 			/**
 			 * The current file in focus.
@@ -353,7 +353,7 @@ export declare global {
 			 */
 			load(data?: unknown);
 			
-			rename(newName: string, newPath: string);
+			rename(newName: string, newPath: string?);
 			
 			close();
 		}
