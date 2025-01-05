@@ -136,7 +136,7 @@ declare global {
 	const Electron_App: Electron.App;
 	const Electron_FS: typeof fs;
 	const Electron_Dialog: Electron.Dialog;
-	const Electron_Shell: Electron.Shell;
+	const Electron_Shell: typeof Electron.Shell;
 
 };
 
