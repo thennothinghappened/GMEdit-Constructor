@@ -148,7 +148,8 @@ export declare global {
 	};
 
 	type JobStatus = 
-		{ status: 'running' } |
+		{ status: 'running' }	|
+		{ status: 'stopping' }	|
 		{ status: 'stopped', stoppedByUser: boolean, exitCode: number? };
 	
 	interface StdoutEntry {

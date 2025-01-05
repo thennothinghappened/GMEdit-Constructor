@@ -87,20 +87,36 @@ export class IgorJob {
 	 */
 	onProcessExit = () => {
 
-		if (this.status.status === 'running') {
-			this.status = {
-				status: 'stopped',
-				stoppedByUser: false,
-				exitCode: this.process.exitCode
-			};
-		}
+		switch (this.status.status) {
 
-		if (this.status.stoppedByUser) {
-			this.statusDisplay = 'Stopped';
-		} else if (this.status.exitCode ?? 0 > 0) {
-			this.statusDisplay = 'Failed';
-		} else {
-			this.statusDisplay = 'Finished';
+			case 'running':
+
+				this.status = {
+					status: 'stopped',
+					stoppedByUser: false,
+					exitCode: this.process.exitCode
+				};
+
+				if (this.process.exitCode ?? 0 > 0) {
+					this.statusDisplay = 'Failed';
+				} else {
+					this.statusDisplay = 'Finished';
+				}
+
+			break;
+
+			case 'stopping':
+
+				this.status = {
+					status: 'stopped',
+					stoppedByUser: true,
+					exitCode: 0
+				};
+
+				this.statusDisplay = 'Stopped';
+
+			break;
+			
 		}
 		
 		this.eventEmitter.emit('stop', job_parse_stdout(this.stdout));
@@ -109,19 +125,22 @@ export class IgorJob {
 	}
 
 	/**
-	 * Stop the job.
+	 * Stop the job. Returns a promise that resolves when the job has stopped.
+	 * 
+	 * @returns {Promise<void>}
 	 */
 	stop = () => {
 
-		if (this.process.pid === undefined) {
-			return;
+		if (this.status.status !== 'running' || this.process.pid === undefined) {
+			return Promise.resolve();
 		}
-		
-		this.status = {
-			status: 'stopped',
-			stoppedByUser: true,
-			exitCode: 0
-		};
+
+		this.status = { status: 'stopping' };
+
+		/** @type {Promise<void>} */
+		const onStopPromise = new Promise(resolve => {
+			this.events.once('stop', () => resolve());
+		});
 
 		const res = killRecursive(this.process.pid);
 		
@@ -133,7 +152,7 @@ export class IgorJob {
 		}
 
 		if (process.platform !== 'darwin') {
-			return;
+			return onStopPromise;
 		}
 
 		// Time for some MacOS-induced fuckery!
@@ -168,6 +187,8 @@ export class IgorJob {
 				new Err('Failed stopping MacOS-specific residual processes', err)
 			);
 		}
+
+		return onStopPromise;
 
 	}
 
