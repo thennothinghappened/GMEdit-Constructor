@@ -125,7 +125,6 @@ declare global {
 			'warning'	;
 
 		class Shell {
-			static openItem(path: string): void;
 			static showItemInFolder(path: string): void;
 		}
 
