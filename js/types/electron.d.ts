@@ -124,6 +124,11 @@ declare global {
 			/** On macOS, both "warning" and "error" display the same warning icon. */
 			'warning'	;
 
+		class Shell {
+			static openItem(path: string): void;
+			static showItemInFolder(path: string): void;
+		}
+
 	};
 	
 	const Electron_Menu: Electron.Menu;
@@ -131,6 +136,7 @@ declare global {
 	const Electron_App: Electron.App;
 	const Electron_FS: typeof fs;
 	const Electron_Dialog: Electron.Dialog;
+	const Electron_Shell: Electron.Shell;
 
 };
 
