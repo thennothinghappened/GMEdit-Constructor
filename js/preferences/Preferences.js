@@ -427,7 +427,6 @@ export class Preferences {
 			};
 		}
 
-		/** @type {RuntimeInfo[]} */
 		const runtimes = dir_res.data
 			.map(dirname => ({ dirname, path: node.path.join(search_path, dirname) }))
 			.filter(({ path }) => Electron_FS.lstatSync(path).isDirectory())
