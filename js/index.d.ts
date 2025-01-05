@@ -2,10 +2,13 @@ import { GMConstructor } from './GMConstructor';
 
 export declare global {
 
-	type Result<T, E = IErr> = (T extends void
+	type Ok<T> = (T extends void
 		? { ok: true }
-		: { ok: true, data: T })	|
-		{ ok: false, err: E }		;
+		: { ok: true, data: T });
+
+	type Err<E = IErr> = { ok: false, err: E };
+	
+	type Result<T, E = IErr> = Ok<T> | Err<E>;
 
 	/**
 	 * Project format type for the loaded project.
