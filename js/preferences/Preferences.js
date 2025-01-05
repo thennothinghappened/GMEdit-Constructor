@@ -491,7 +491,6 @@ export class Preferences {
 			};
 		}
 
-		/** @type {UserInfo[]} */
 		const users = dir_res.data
 			.map(dirname => {
 				return {
