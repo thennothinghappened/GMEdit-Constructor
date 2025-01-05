@@ -205,6 +205,11 @@ export class GMConstructor {
 			Electron_FS.rmSync(build_dir, { recursive: true });
 		}
 
+		Electron_Dialog.showMessageBox({
+			message: `The build directory '${build_dir}' has been cleared.`,
+			buttons: ['Ok']
+		});
+
 	}
 
 	runCurrent = () => {
