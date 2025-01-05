@@ -12,6 +12,7 @@ import * as node from './utils/node/node-import.js';
 import { OutputLogTab } from './ui/tabs/compile/OutputLogTab.js';
 import { Preferences } from './preferences/Preferences.js';
 import { ConfigTreeUi } from './ui/ConfigTreeUi.js';
+import { unwrap } from './utils/Result.js';
 
 /**
  * Name of the plugin 
@@ -70,30 +71,26 @@ export class GMConstructor {
 		}
 
 		const runtime = runtime_res.data;
-		const supported_res = runtime.version.supportedByProject(project);
+		const supportedRes = runtime.version.supportedByProject(project);
 
-		if (!supported_res.ok) {
+		if (!supportedRes.ok) {
 
 			const err = new Err(
 				`Failed to check runtime version '${runtime.version}' is compatible with the project!`,
-				supported_res.err
+				supportedRes.err
 			);
 
 			return ControlPanelTab
 				.view(true)
 				.showError('Runtime compatibility check for this project failed', err);
+
 		}
 
-		const supported = supported_res.data;
+		const supported = supportedRes.data;
 
 		if (!supported) {
 
-			const format_res = project_format_get(project);
-			let format = '[Unknown Format]';
-
-			if (format_res.ok) {
-				format = format_res.data;
-			}
+			const format = unwrap(project_format_get(project));
 
 			const err = new Err(
 				`Runtime version '${runtime.version}' is not compatible with this project format!`,

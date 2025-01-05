@@ -274,7 +274,12 @@ export declare global {
 			dir: string;
 			path: string;
 			properties: ProjectData;
+
 			isGMS23: boolean;
+			isGM2022: boolean;
+			isGM2023: boolean;
+			isGM2024: boolean;
+			isGM2024_8: boolean;
 	
 			/**
 			 * Synchronously read a YY file to JSON.

@@ -1,51 +1,12 @@
+import { GMRuntimeVersion } from './GMVersion';
 
 export declare global {
-
-	/**
-	 * Representation of a version of a GM runtime.
-	 */
-	interface IRuntimeVersion {
-
-		readonly year: number;
-		readonly month: number;
-		readonly major: number;
-		readonly build: number;
-
-		/**
-		 * The expected YY format this runtime requires.
-		 */
-		readonly format: YYProjectFormat;
-
-		/**
-		 * What type of runtime this is.
-		 */
-		readonly type: GMChannelType;
-
-		/**
-		 * Returns a negative number if this runtime is older than `other`, 0 for same, or postive for newer.
-		 */
-		compare(other: IRuntimeVersion): number;
-
-		/**
-		 * Returns whether this runtime version is supported by Constructor.
-		 */
-		supported(): Result<void>;
-
-		/**
-		 * Returns whether this runtime version is supported by a given project.
-		 * 
-		 * Projects on 2023.11 and earlier use a different format to 2024.2 and greater
-		 * as per [Prefabs Phase 1](https://github.com/YoYoGames/GameMaker-Bugs/issues/3218).
-		 */
-		supportedByProject(project: GMEdit.Project): Result<boolean>;
-
-	}
 
 	/**
 	 * Information for a specific found runtime.
 	 */
 	type RuntimeInfo = {
-		version: IRuntimeVersion;
+		version: GMRuntimeVersion;
 		path: string;
 		igor_path: string;
 	};

@@ -17,14 +17,23 @@ export declare global {
 		'outdated'	|
 		'2023.11'	|
 		'2024.2'	|
-		'2024.4+'	;
+		'2024.4'	|
+		'2024.6'	|
+		'2024.8'	|
+		'2024.11+'	;
 
 	type ProjectYY = {
+
 		configs: ProjectYYConfig;
+
+		MetaData: {
+			IDEVersion: string
+		};
+
 	} & YYFile;
 
 	type YYFile = {
-		resourceVersion: string;
+		resourceVersion?: string;
 		resourceType: string;
 	};
 

@@ -9,7 +9,7 @@ import { Err } from '../utils/Err.js';
 import { deep_assign } from '../utils/object.js';
 import { plugin_name } from '../GMConstructor.js';
 import * as node from '../utils/node/node-import.js';
-import { runtime_version_parse } from '../compiler/RuntimeVersion.js';
+import { GMRuntimeVersion } from '../compiler/GMVersion.js';
 import { ControlPanelTab } from '../ui/tabs/control-panel/ControlPanelTab.js';
 import { use } from '../utils/scope-extensions/use.js';
 import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
@@ -434,7 +434,7 @@ export class Preferences {
 			.map(({ dirname, path }) => {
 
 				const igor_path = node.path.join(path, igor_path_segment);
-				const version_res = runtime_version_parse(type, dirname);
+				const version_res = GMRuntimeVersion.parse(type, dirname);
 
 				if (!version_res.ok) {
 
