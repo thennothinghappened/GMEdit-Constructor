@@ -62,7 +62,7 @@ export class IgorJob {
 
 		this.stdout += this.process.spawnargs.join(' ') + '\n\n';
 
-		this.process.on('exit', this.#onExit);
+		this.process.once('exit', this.onProcessExit);
 		this.process.stdout?.on('data', this.#onStdoutData);
 		this.process.stderr?.on('data', this.#onStdoutData);
 
@@ -82,7 +82,10 @@ export class IgorJob {
 
 	}
 
-	#onExit = () => {
+	/**
+	 * @private
+	 */
+	onProcessExit = () => {
 
 		if (this.status.status === 'running') {
 			this.status = {
