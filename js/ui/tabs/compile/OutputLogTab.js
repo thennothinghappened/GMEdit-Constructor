@@ -83,7 +83,8 @@ export class OutputLogTab extends ConstructorTab {
 
 		this.infoGroup = use(ui.group(this.element, this.file.name, [
 			ui.text_button('Stop', this.stopJob),
-			ui.text_button('Go to bottom', this.goToBottom)
+			ui.text_button('Go to bottom', this.goToBottom),
+			ui.text_button('Open directory', this.showDirectory)
 		])).also(it => {
 
 			it.classList.add('gm-constructor-viewer-output');
@@ -243,13 +244,26 @@ export class OutputLogTab extends ConstructorTab {
 	stopJob = () => {
 		
 		if (this.job === null) {
-			throw new Err('Attempting to stop a job that does not exist!');
+			throw new Err('Invalid state: Attempting to stop a job that does not exist!');
 		}
 
 		if (this.job.status.status !== 'stopped') {
 			this.job.stop();
 		}
 
+	}
+
+	/**
+	 * Visit the output directory of the task.
+	 */
+	showDirectory = () => {
+
+		if (this.job === null) {
+			throw new Err('Invalid state: no job is attached with which to visit its directory.');
+		}
+
+		Electron_Shell.showItemInFolder(this.job.settings.buildPath);
+		
 	}
 
 	/**
