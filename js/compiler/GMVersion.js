@@ -101,12 +101,6 @@ export class GMVersion {
 export class GMRuntimeVersion {
 
 	/**
-	 * The channel type of this runtime.
-	 * @type {GMChannelType}
-	 */
-	type;
-
-	/**
 	 * The underlying version data of this runtime.
 	 * 
 	 * @private
@@ -115,11 +109,9 @@ export class GMRuntimeVersion {
 	version;
 
 	/**
-	 * @param {GMChannelType} type 
 	 * @param {GMVersion} version
 	 */
-	constructor(type, version) {
-		this.type = type;
+	constructor(version) {
 		this.version = version;
 	}
 
@@ -228,11 +220,10 @@ export class GMRuntimeVersion {
 	/**
 	 * Try to parse a runtime version from a string.
 	 * 
-	 * @param {GMChannelType} type
 	 * @param {String} str 
 	 * @returns {Result<GMRuntimeVersion>}
 	 */
-	static parse(type, str) {
+	static parse(str) {
 
 		const split = str.split('runtime-');
 
@@ -257,7 +248,7 @@ export class GMRuntimeVersion {
 
 		return {
 			ok: true,
-			data: new GMRuntimeVersion(type, versionRes.data)
+			data: new GMRuntimeVersion(versionRes.data)
 		};
 
 	}

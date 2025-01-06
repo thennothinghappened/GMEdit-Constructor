@@ -391,9 +391,8 @@ export class Preferences {
 	 * @returns {Promise<Result<RuntimeInfo[]>>}
 	 */
 	static async loadRuntimeList(type) {
-
 		const { search_path } = this.getRuntimeOptions(type);
-		return this.loadRuntimeListFrom(type, search_path);
+		return this.loadRuntimeListFrom(search_path);
 	}
 
 	/**
@@ -403,19 +402,17 @@ export class Preferences {
 	 * @returns {Promise<Result<UserInfo[]>>}
 	 */
 	static async loadUserList(type) {
-
 		const { users_path } = this.getRuntimeOptions(type);
-		return this.loadUserListFrom(type, users_path);
+		return this.loadUserListFrom(users_path);
 	}
 
 	/**
 	 * Load the list of runtimes for the provided search path.
 	 * 
-	 * @param {GMChannelType} type 
 	 * @param {String} search_path 
 	 * @returns {Promise<Result<RuntimeInfo[]>>}
 	 */
-	static async loadRuntimeListFrom(type, search_path) {
+	static async loadRuntimeListFrom(search_path) {
 
 		const dir_res = await readdir(search_path);
 
@@ -432,7 +429,7 @@ export class Preferences {
 			.map(({ dirname, path }) => {
 
 				const igor_path = node.path.join(path, igor_path_segment);
-				const version_res = GMRuntimeVersion.parse(type, dirname);
+				const version_res = GMRuntimeVersion.parse(dirname);
 
 				if (!version_res.ok) {
 
@@ -474,12 +471,11 @@ export class Preferences {
 
 	/**
 	 * Load the list of users for the provided search path.
-	 * 
-	 * @param {GMChannelType} type 
+	 *  
 	 * @param {String} users_path 
 	 * @returns {Promise<Result<UserInfo[]>>}
 	 */
-	static async loadUserListFrom(type, users_path) {
+	static async loadUserListFrom(users_path) {
 
 		const dir_res = await readdir(users_path);
 		
