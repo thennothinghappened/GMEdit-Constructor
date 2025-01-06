@@ -65,7 +65,7 @@ export class ConstructorTab extends Editor {
 	 * Bring this tab into focus.
 	 */
 	focus = () => {
-		this.file.tabEl.click();
+		this.file.tabEl?.click();
 	}
 
 }
