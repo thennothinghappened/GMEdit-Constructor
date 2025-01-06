@@ -40,8 +40,8 @@ export class OutputLogTab extends ConstructorTab {
 	 */
 	static scrollGrabLines = 1;
 
-	/** @type {IgorJob?} */
-	job = null;
+	/** @type {IgorJob|undefined} */
+	job = undefined;
 
 	/**
 	 * @private
@@ -134,14 +134,14 @@ export class OutputLogTab extends ConstructorTab {
 	 */
 	detach = () => {
 		
-		if (this.job === null) {
+		if (this.job === undefined) {
 			return;
 		}
 
 		this.job.events.off('stdout', this.onJobStdout);
 		this.job.events.off('stop', this.onJobStop);
 
-		this.job = null;
+		this.job = undefined;
 
 	}
 
@@ -174,7 +174,7 @@ export class OutputLogTab extends ConstructorTab {
 	 */
 	onJobStop = (errors) => {
 
-		if (this.job === null) {
+		if (this.job === undefined) {
 			return;
 		}
 
@@ -247,7 +247,7 @@ export class OutputLogTab extends ConstructorTab {
 
 	stopJob = () => {
 		
-		if (this.job === null) {
+		if (this.job === undefined) {
 			return;
 		}
 
@@ -262,7 +262,7 @@ export class OutputLogTab extends ConstructorTab {
 	 */
 	showDirectory = () => {
 
-		if (this.job === null) {
+		if (this.job === undefined) {
 			return;
 		}
 
@@ -277,7 +277,7 @@ export class OutputLogTab extends ConstructorTab {
 	 */
 	destroy = () => {
 
-		if (this.job !== null) {
+		if (this.job !== undefined) {
 			this.stopJob();
 			this.detach();
 		}

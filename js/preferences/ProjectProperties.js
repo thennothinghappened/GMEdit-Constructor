@@ -141,7 +141,7 @@ export class ProjectProperties {
 
 	/**
 	 * Get the desired runtime version for this project.
-	 * @returns {string|null}
+	 * @returns {string|undefined}
 	 */
 	static get runtimeVersionOrDef() {
 		return properties.runtime_version ?? Preferences.getRuntimeVersion(this.runtimeChannelTypeOrDef);
@@ -177,7 +177,7 @@ export class ProjectProperties {
 		const type = this.runtimeChannelTypeOrDef;
 		const desired_runtime_list = Preferences.getRuntimes(type);
 
-		if (desired_runtime_list === null) {
+		if (desired_runtime_list === undefined) {
 			return {
 				ok: false,
 				err: new Err(`Runtime type ${type} list not loaded!`)
@@ -207,17 +207,17 @@ export class ProjectProperties {
 	static get user() {
 
 		const type = this.runtimeChannelTypeOrDef;
-		const desired_user_list = Preferences.getUsers(type);
+		const users = Preferences.getUsers(type);
 
-		if (desired_user_list === null) {
+		if (users === undefined) {
 			return {
 				ok: false,
 				err: new Err(`Users for runtime ${type} list not loaded!`)
 			};
 		}
 
-		const name = Preferences.getUser(type) ?? desired_user_list[0]?.name?.toString();
-		const user = desired_user_list.find(user => user.name.toString() === name);
+		const name = Preferences.getUser(type) ?? users[0]?.name?.toString();
+		const user = users.find(user => user.name.toString() === name);
 
 		if (user === undefined) {
 			return {

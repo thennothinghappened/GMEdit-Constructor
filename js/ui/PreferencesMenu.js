@@ -181,15 +181,10 @@ export function runtime_version_strings_get_for_type(type) {
  * @returns 
  */
 function user_strings_get_for_type(type) {
-	
-	const users = Preferences.getUsers(type);
-
-	if (users === null) {
-		return [];
-	}
-
-	return users.map(user => user.name.toString());
-
+	return Preferences
+		.getUsers(type)
+		?.map(user => user.name)
+		?? [];
 }
 
 /**

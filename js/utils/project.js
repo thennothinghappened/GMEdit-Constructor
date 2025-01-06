@@ -44,7 +44,7 @@ export function open_files_save() {
  * @returns {GMEdit.ChromeTab|undefined}
  */
 export function tab_current_get() {
-	return GmlFile.current?.tabEl;
+	return GmlFile.current?.tabEl ?? undefined;
 }
 
 /**

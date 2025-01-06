@@ -204,7 +204,7 @@ export class Preferences {
 	 * @param {GMChannelType} type 
 	 */
 	static getRuntimeVersion(type) {
-		return this.prefs.runtime_opts.type_opts[type].choice;
+		return this.prefs.runtime_opts.type_opts[type].choice ?? undefined;
 	}
 
 	/**
@@ -224,17 +224,17 @@ export class Preferences {
 	 * @param {GMChannelType} [type] 
 	 */
 	static getUser(type = this.defaultRuntimeChannel) {
-		return this.prefs.runtime_opts.type_opts[type].user;
+		return this.prefs.runtime_opts.type_opts[type].user ?? undefined;
 	}
 
 	/**
 	 * Set the global choice for default runtime for a given type.
 	 * 
 	 * @param {GMChannelType} type 
-	 * @param {string?} user 
+	 * @param {string|undefined} user 
 	 */
 	static setUser(type, user) {
-		this.prefs.runtime_opts.type_opts[type].user = user;
+		this.prefs.runtime_opts.type_opts[type].user = user ?? null;
 		this.save();
 	}
 
@@ -260,20 +260,20 @@ export class Preferences {
 	 * Function to get a list of runtime version names for a given runtime type.
 	 * 
 	 * @param {GMChannelType} type
-	 * @returns {RuntimeInfo[]?}
+	 * @returns {RuntimeInfo[]|undefined}
 	 */
 	static getRuntimes(type) {
-		return runtimes[type];
+		return runtimes[type] ?? undefined;
 	};
 
 	/**
 	 * Function to get a list of user names for a given runtime type.
 	 * 
 	 * @param {GMChannelType} type
-	 * @returns {UserInfo[]?}
+	 * @returns {UserInfo[]|undefined}
 	 */
 	static getUsers(type) {
-		return users[type];
+		return users[type] ?? undefined;
 	};
 
 	/**
@@ -307,7 +307,6 @@ export class Preferences {
 		runtimes[type] = res.data;
 
 		use(this.getRuntimeVersion(type))
-			.let(it => (it !== null) ? it : undefined)
 			?.takeIf(it => runtimes[type]?.find(info => info.version.toString() === it) === undefined)
 			?.also(it => {
 
@@ -369,7 +368,7 @@ export class Preferences {
 				.warn('Selected user is no longer valid', err)
 				.view(false);
 			
-			this.setUser(type, users[type]?.at(0)?.name?.toString() ?? null);
+			this.setUser(type, users[type]?.at(0)?.name?.toString());
 
 		}
 
@@ -442,7 +441,7 @@ export class Preferences {
 						version_res.err
 					));
 
-					return null;
+					return undefined;
 				}
 
 				const runtime = version_res.data;
@@ -454,7 +453,7 @@ export class Preferences {
 						`Excluding unsupported runtime ${runtime}`, supported_res.err
 					));
 					
-					return null;
+					return undefined;
 				}
 
 				return {
@@ -464,7 +463,7 @@ export class Preferences {
 				};
 
 			})
-			.filter(/** @returns {runtime is RuntimeInfo} */ (runtime) => runtime !== null)
+			.filter(/** @returns {runtime is RuntimeInfo} */ (runtime) => runtime !== undefined)
 			.sort((a, b) => b.version.compare(a.version));
 
 		return {
