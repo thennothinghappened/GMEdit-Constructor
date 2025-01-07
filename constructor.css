@@ -81,11 +81,34 @@ fieldset.gm-constructor-debug {
 }
 
 .gm-constructor-control-panel div.select {
-	padding: 5px 0;
+	padding: 0.25em 0;
 }
 
-.gm-constructor-control-panel div.checkbox > label > input {
-	margin-right: 5px;
+.gm-constructor-control-panel div.select.singleline {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: stretch;
+	vertical-align: middle;
+	padding: 0.25em 0;
+}
+
+.gm-constructor-control-panel div.select.singleline > label {
+	flex-grow: 1;
+	flex-basis: 30%;
+}
+
+.gm-constructor-control-panel div.select.singleline > select {
+	flex-grow: 1;
+	flex-basis: 70%;
+	width: auto;
+}
+
+.gm-constructor-control-panel div.checkbox > label {
+	display: flex;
+	column-gap: 0.25em;
+	align-items: center;
 }
 
 /************************

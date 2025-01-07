@@ -388,13 +388,15 @@ export class ControlPanelTab extends ConstructorTab {
 			(config_name) => ProjectProperties.buildConfig = config_name
 		);
 
+		this.projectSettings.buildConfigDropdown.classList.add('singleline');
+
 		UIPreferences.addDropdown(
 			this.projectSettings,
 			'Runner Type',
 			ProjectProperties.runtimeBuildType ?? USE_DEFAULT,
 			[...VALID_RUNNER_TYPES, USE_DEFAULT],
 			(value) => ProjectProperties.runtimeBuildType = default_undefined(value)
-		);
+		).classList.add('singleline');
 
 		UIPreferences.addDropdown(
 			this.projectSettings,
@@ -402,7 +404,7 @@ export class ControlPanelTab extends ConstructorTab {
 			ProjectProperties.runtimeChannelType ?? USE_DEFAULT,
 			[...GM_CHANNEL_TYPES, USE_DEFAULT],
 			(value) => ProjectProperties.runtimeChannelType = default_undefined(value)
-		);
+		).classList.add('singleline');
 
 		UIPreferences.addDropdown(
 			this.projectSettings,
@@ -418,7 +420,7 @@ export class ControlPanelTab extends ConstructorTab {
 					case USE_DEFAULT: return ProjectProperties.reuseCompilerTab = undefined;
 				}
 			}
-		);
+		).classList.add('singleline');
 
 		this.projectSettings.runtimeVersionDropdown = UIPreferences.addDropdown(
 			this.projectSettings,
@@ -427,6 +429,8 @@ export class ControlPanelTab extends ConstructorTab {
 			[...preferencesMenu.runtime_version_strings_get_for_type(ProjectProperties.runtimeChannelTypeOrDef), USE_DEFAULT],
 			(value) => ProjectProperties.runtimeVersion = default_undefined(value)
 		);
+
+		this.projectSettings.runtimeVersionDropdown.classList.add('singleline');
 
 	}
 

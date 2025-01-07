@@ -65,7 +65,7 @@ export function menu_create(prefs_group) {
 		Preferences.runtimeBuildType,
 		VALID_RUNNER_TYPES,
 		(runner) => Preferences.runtimeBuildType = runner
-	);
+	).classList.add('singleline');
 
 	UIPreferences.addDropdown(
 		prefs_group,
@@ -73,7 +73,7 @@ export function menu_create(prefs_group) {
 		Preferences.defaultRuntimeChannel,
 		GM_CHANNEL_TYPES,
 		(runtime_channel_type) => Preferences.defaultRuntimeChannel = runtime_channel_type
-	);
+	).classList.add('singleline');
 
 	UIPreferences.addInput(
 		prefs_group,
