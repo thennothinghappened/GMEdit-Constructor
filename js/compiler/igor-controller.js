@@ -4,7 +4,7 @@
  */
 
 import { IgorJob } from './job/IgorJob.js';
-import { igor_platform_cmd_name, output_blob_exts } from './igor-paths.js';
+import { output_blob_exts } from './igor-paths.js';
 import { Err } from '../utils/Err.js';
 import { child_process, path } from '../utils/node/node-import.js';
 
@@ -99,7 +99,7 @@ function job_flags_get(project, runtime_path, user_path, settings) {
 
 		case 'Package':
 
-			if (['Windows', 'Mac'].includes(igor_platform_cmd_name)) {
+			if (['Windows', 'Mac'].includes(settings.platform)) {
 				settings.verb = 'PackageZip';
 			}
 
@@ -116,7 +116,7 @@ function job_flags_get(project, runtime_path, user_path, settings) {
 	}
 
 	flags.push('--');
-	flags.push(igor_platform_cmd_name, settings.verb);
+	flags.push(settings.platform, settings.verb);
 
 	return {
 		ok: true,

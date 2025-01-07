@@ -393,6 +393,14 @@ export class ControlPanelTab extends ConstructorTab {
 		UIPreferences.addDropdown(
 			this.projectSettings,
 			'Runtime Type',
+			ProjectProperties.zeusPlatform ?? 'Current Platform',
+			['Current Platform', 'HTML5'],
+			(value) => ProjectProperties.zeusPlatform = (value === 'Current Platform') ? undefined : value
+		).classList.add('singleline');
+
+		UIPreferences.addDropdown(
+			this.projectSettings,
+			'Runtime Type',
 			ProjectProperties.runtimeBuildType ?? USE_DEFAULT,
 			[...ZEUS_RUNTIME_TYPES, USE_DEFAULT],
 			(value) => ProjectProperties.runtimeBuildType = default_undefined(value)

@@ -2,6 +2,7 @@
  * Handler for project-specific preferences.
  */
 
+import { igor_user_platform } from '../compiler/igor-paths.js';
 import { Err } from '../utils/Err.js';
 import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
 import { project_current_get } from '../utils/project.js';
@@ -135,6 +136,24 @@ export class ProjectProperties {
 
 		this.eventEmitter.emit('changeRuntimeChannel', runtime_type);
 
+	}
+
+	/**
+	 * The target platform for this project when using the current runtime. If undefined, the host
+	 * platform is assumed.
+	 * 
+	 * @returns {Zeus.Platform|undefined}
+	 */
+	static get zeusPlatform() {
+		return properties.zeus_platform;
+	}
+
+	/**
+	 * @param {Zeus.Platform|undefined} zeusPlatform 
+	 */
+	static set zeusPlatform(zeusPlatform) {
+		properties.zeus_platform = zeusPlatform;
+		this.save();
 	}
 
 	/**

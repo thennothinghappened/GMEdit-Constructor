@@ -57,6 +57,11 @@ export declare global {
 			 */
 			runner: RuntimeBuildType;
 
+			/**
+			 * The platform to target when building for the current runtime.
+			 */
+			zeus_platform: Zeus.Platform;
+
 			/** 
 			 * Whether to reuse the compile viewer tab between runs. 
 			 */

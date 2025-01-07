@@ -33,21 +33,17 @@ export class GMConstructor {
 
 	/**
 	 * Run a task on our current project.
+	 * 
+	 * @param {GMEdit.Project} project 
 	 * @param {AtLeast<Zeus.IgorSettings, 'verb'>} partial_settings
 	 */
-	async #runTask(partial_settings) {
-
-		const project = project_current_get();
-
-		if (project === undefined) {
-			return;
-		}
+	async #runTask(project, partial_settings) {
 
 		/** @type {Zeus.IgorSettings} */
 		const settings = {
 			verb: partial_settings.verb,
 			buildPath: partial_settings.buildPath ?? this.#getBuildDir(project),
-			platform: partial_settings.platform ?? igorPaths.igor_user_platform,
+			platform: partial_settings.platform ?? ProjectProperties.zeusPlatform ?? igorPaths.igor_user_platform,
 			runner: partial_settings.runner ?? ProjectProperties.runtimeBuildTypeOrDef,
 			threads: partial_settings.threads ?? 8,
 			configName: partial_settings.configName ?? ProjectProperties.buildConfig
@@ -184,8 +180,24 @@ export class GMConstructor {
 		ControlPanelTab.view(true);
 	}
 
+	runCurrent = () => {
+
+		const project = project_current_get();
+
+		if (project !== undefined) {
+			this.#runTask(project, { verb: 'Run' });
+		}
+
+	}
+
 	packageCurrent = () => {
-		this.#runTask({ verb: 'Package' });
+
+		const project = project_current_get();
+
+		if (project !== undefined) {
+			this.#runTask(project, { verb: 'Package' });
+		}
+		
 	}
 
 	stopCurrent = () => {
@@ -242,10 +254,6 @@ export class GMConstructor {
 			buttons: ['Ok']
 		});
 
-	}
-
-	runCurrent = () => {
-		this.#runTask({ verb: 'Run' });
 	}
 
 	/**

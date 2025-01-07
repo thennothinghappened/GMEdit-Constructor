@@ -78,6 +78,7 @@ export const output_blob_exts = {
 	Windows: 'win',
 	Mac: 'ios',
 	Linux: 'unx',
+	HTML5: 'zip'
 };
 
 /**
@@ -106,11 +107,6 @@ export const igor_user_platform = igor_platform_map[process.platform].user_platf
  * @type {string}
  */
 export let igor_path_segment;
-
-/**
- * Igor platform name for our platform.
- */
-export const igor_platform_cmd_name = igor_platform_map[process.platform].user_platform;
 
 /**
  * Called when the plugin is loading.
