@@ -11,12 +11,8 @@ export const JobCompilationError = {
 	 * ```
 	 * Error : some error
 	 * ```
-	 * 
-	 * Uses a look-behind assertion that the preceding character must
-	 * be a line break. This is done due to other types of errors that would otherwise
-	 * be matched by this rule, e.g. `Permission Error : some error`.
 	 */
-	regex: /(?<=\n)Error : (?<error>.+)/,
+	regex: /^Error : (?<error>.+)/m,
 
 	asHTML: ({ error }) => {
 

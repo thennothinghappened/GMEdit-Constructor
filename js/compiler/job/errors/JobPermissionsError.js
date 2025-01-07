@@ -15,11 +15,8 @@ export const JobPermissionsError = {
 	 * ```
 	 * Permission Error : some error
 	 * ```
-	 * 
-	 * Uses a look-behind assertion that the preceding character must
-	 * be a line break.
 	 */
-	regex: /(?<=\n)Permission Error : (?<error>.+)/,
+	regex: /^Permission Error : (?<error>.+)/m,
 
 	asHTML: ({ error }) => {
 
