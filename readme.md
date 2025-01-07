@@ -16,7 +16,7 @@ Constructor can currently compile for the current build target (your OS), and ca
 - **Automatic update-checking**. (This calls the GitHub API to check the latest release and can be toggled off.)
 - **Readable, central error messages** - the Control Panel shows any configuration issues, or internal errors. All errors display context, and most try to provide tips to resolve the issue where possible.
 
-![image](https://github.com/user-attachments/assets/a6be1b91-9a94-4f1e-8fdd-2c94c49f5c71)
+![image](https://github.com/user-attachments/assets/28239993-bfcd-4928-b917-73726871c703)
 
 ## Installation
 Installation is the same here as any other GMEdit plugin - clone it into your `plugins` folder (see below), or download the `.zip` from *Releases*, and extract the contained folder into `plugins`.
