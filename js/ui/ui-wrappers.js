@@ -7,7 +7,7 @@ const UIPreferences = $gmedit['ui.Preferences'];
 /**
  * Create a group of elements.
  * 
- * @param {HTMLElement} parent 
+ * @param {ParentNode} parent 
  * @param {string} label
  * @param {HTMLAnchorElement[]|undefined} [buttons]
  * @returns {UIGroup}
