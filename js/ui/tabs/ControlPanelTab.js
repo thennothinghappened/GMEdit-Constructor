@@ -1,6 +1,6 @@
 
 import { project_config_tree_get, project_config_tree_to_array, project_current_get, project_is_open } from '../../utils/project.js';
-import { UIDropdownGetSelect, UIDropdownMutate } from '../../utils/ui.js';
+import { UIDropdownGetSelect, UIDropdownMutate } from '../../utils/gmedit/UIPreferencesUtils.js';
 import { ConstructorTab, ConstructorTabFileKind } from './ConstructorTab.js';
 import { ProjectProperties } from '../../preferences/ProjectProperties.js';
 import * as ui from '../ui-wrappers.js';
