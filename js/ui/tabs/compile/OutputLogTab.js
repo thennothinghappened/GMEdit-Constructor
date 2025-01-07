@@ -7,6 +7,7 @@ import { ProjectProperties } from '../../../preferences/ProjectProperties.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];
+const PreferencesUI = $gmedit['ui.Preferences'];
 
 /**
  * File type for a compile job.
@@ -44,11 +45,13 @@ export class OutputLogTab extends ConstructorTab {
 
 	/**
 	 * @private
-	 * @type {UIGroup}
+	 * @type {HTMLHeadingElement}
 	 */
-	infoGroup;
+	jobNameHeading;
 
 	/**
+	 * Ace instance which shows log output.
+	 * 
 	 * @private
 	 * @type {AceAjax.Editor}
 	 */
@@ -67,10 +70,20 @@ export class OutputLogTab extends ConstructorTab {
 
 		super(file);
 
-		use(this.element).also(it => {
-			it.innerHTML = '';
-			it.classList.add('gm-constructor-viewer', 'popout-window');
-		});
+		this.element.classList.add('gm-constructor-viewer', 'popout-window');
+
+		const header = document.createElement('header');
+
+			this.jobNameHeading = ui.h4(this.file.name);
+			header.appendChild(this.jobNameHeading);
+
+			const navButtonsGroup = document.createElement('nav');
+				PreferencesUI.addButton(navButtonsGroup, 'Stop', this.stopJob);
+				PreferencesUI.addButton(navButtonsGroup, 'Go to bottom', this.goToBottom);
+				PreferencesUI.addButton(navButtonsGroup, 'Show directory', this.showDirectory);
+			header.appendChild(navButtonsGroup);
+			
+		this.element.appendChild(header);
 
 		this.logAceEditor = use(document.createElement('pre'))
 			.also(it => it.classList.add('gm-constructor-log'))
@@ -85,26 +98,13 @@ export class OutputLogTab extends ConstructorTab {
 			.also(it => it.setOption('scrollPastEnd', 0))
 			.also(it => it.renderer.setShowGutter(false))
 			.also(it => it.renderer.setShowPrintMargin(false))
+			.also(it => this.element.appendChild(it.container))
 			.value;
 
-		this.infoGroup = use(ui.group(this.element, this.file.name, [
-			ui.text_button('Stop', this.stopJob),
-			ui.text_button('Go to bottom', this.goToBottom),
-			ui.text_button('Open directory', this.showDirectory)
-		])).also(it => {
-
-			it.classList.add('gm-constructor-viewer-output');
-			it.appendChild(this.logAceEditor.container);
-
-		}).value;
-
-		this.errorsGroup = use(ui.group(this.element, 'Errors'))
-			.also(it => {
-				it.classList.add('gm-constructor-viewer-errors');
-				it.legend.addEventListener('click', () => this.logAceEditor.resize());
-				it.hidden = true;
-			})
-			.value;
+		this.errorsGroup = ui.group(this.element, 'Errors')
+		this.errorsGroup.classList.add('gm-constructor-viewer-errors');
+		this.errorsGroup.legend.addEventListener('click', () => this.logAceEditor.resize());
+		this.errorsGroup.hidden = true;
 
 	}
 
@@ -121,7 +121,7 @@ export class OutputLogTab extends ConstructorTab {
 		this.job = job;
 
 		GmlFileUtils.rename(this.file, this.jobDisplayName);
-		this.infoGroup.legend.childNodes[0].textContent = this.file.name;
+		this.jobNameHeading.textContent = this.file.name;
 		
 		this.logAceEditor.session.setValue('');
 		
@@ -187,7 +187,7 @@ export class OutputLogTab extends ConstructorTab {
 		}
 
 		GmlFileUtils.rename(this.file, this.jobDisplayName);
-		this.infoGroup.legend.childNodes[0].textContent = this.file.name;
+		this.jobNameHeading.textContent = this.file.name;
 
 		if (errors.length > 0) {
 

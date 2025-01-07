@@ -11,6 +11,8 @@
 	width: 100%;
 	height: 100%;
 
+	padding: 0;
+
 }
 
 .gm-constructor-tab fieldset {
@@ -90,37 +92,35 @@ fieldset.gm-constructor-debug {
 *     Compile Window    *
 *************************/
 
-.gm-constructor-viewer-output {
-	flex-grow: 1;
-	flex-shrink: 1.2;
-	overflow: auto;
-	min-width: 0;
-
+.gm-constructor-viewer > header {
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	border-bottom: 0.2em solid;
+	padding: 0.4em;
 }
 
-.gm-constructor-viewer-output > legend {
-	padding: 4px;
-}
-
-.gm-constructor-viewer-output.collapsed {
-	opacity: 1 !important;
-}
-
-.gm-constructor-viewer-output.collapsed .gm-constructor-log {
-	display: block;
-}
-
-.gm-constructor-viewer-output > pre {
+.gm-constructor-viewer > header > h4 {
 	margin: 0;
-	min-width: 0;
+}
+
+.gm-constructor-viewer > header > nav {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	column-gap: 1em;
+}
+
+.gm-constructor-viewer > pre {
 	flex-grow: 1;
 }
 
 /** Override GMEdit's rule that messes with our editor instance. */
 .popout-window.gm-constructor-viewer div:not(:first-child) {
-	margin-top: auto;
+	margin-top: unset;
 }
 
 .gm-constructor-viewer-errors:not(.collapsed) {
