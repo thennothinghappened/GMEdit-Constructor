@@ -17,11 +17,18 @@
 
 .gm-constructor-tab fieldset {
 	border-radius: 5px;
-	transition: 0.25s ease;
 }
 
 .gm-constructor-tab fieldset.collapsed > :not(legend) {
 	display: none !important;
+}
+
+.gm-constructor-tab fieldset.collapsed {
+	border-left: none;
+	border-right: none;
+	border-bottom: none;
+	border-radius: 0;
+	padding: 0;
 }
 
 .gm-constructor-tab fieldset > legend {
@@ -67,7 +74,7 @@ fieldset.gm-constructor-debug {
 	background-color: rgba(47, 47, 47, 0.098);
 }
 
-.gm-constructor-control-panel fieldset:not(.collapsed) {
+.gm-constructor-control-panel fieldset {
 	padding: 1em;
 }
 
@@ -127,8 +134,9 @@ fieldset.gm-constructor-debug {
 *     Compile Window    *
 *************************/
 
-.gm-constructor-viewer fieldset:not(.collapsed) {
+.gm-constructor-viewer fieldset {
 	padding: 0.5em;
+	transition: 0.25s ease;
 }
 
 .gm-constructor-viewer > header {
