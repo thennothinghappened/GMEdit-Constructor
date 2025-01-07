@@ -17,6 +17,7 @@ export default [
 	{
 		rules: {
 			'no-undef': 'off',
+			'getter-return': 'off',
 			'@typescript-eslint/no-unused-vars': [
 				'warn',
 				{
