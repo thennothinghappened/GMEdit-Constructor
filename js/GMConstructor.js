@@ -126,22 +126,43 @@ export class GMConstructor {
 
 		}
 		
-		const user_res = ProjectProperties.user;
+		const userResult = ProjectProperties.user;
 
-		const res = compileController.job_run(
+		/** @type {OutputLogTab|undefined} */
+		let tab = undefined;
+
+		/** @type {number|undefined} */
+		let jobIdToReuse = undefined;
+
+		if (ProjectProperties.reuseCompilerTabOrDef) {
+
+			tab = OutputLogTab.findUnusedOrSteal();
+			
+			if (tab?.inUse) {
+				jobIdToReuse = tab.job?.id;
+			}
+
+		}
+
+		tab ??= OutputLogTab.openNew();
+
+		const jobResult = await compileController.job_run(
 			project,
 			runtime_res.data,
-			(user_res.ok ? user_res.data : undefined),
-			settings
+			(userResult.ok ? userResult.data : undefined),
+			settings,
+			jobIdToReuse
 		);
 
-		if (!res.ok) {
+		if (!jobResult.ok) {
 			return ControlPanelTab
-				.error('Failed to run Igor job!', res.err)
+				.error('Failed to run Igor job!', jobResult.err)
 				.view(true);
 		}
 
-		compileController.job_open_editor(res.data, ProjectProperties.reuseCompilerTabOrDef);
+		tab.attach(jobResult.data);
+		tab.focus();
+
 	}
 
 	/**

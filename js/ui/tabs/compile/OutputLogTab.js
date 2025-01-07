@@ -197,43 +197,38 @@ export class OutputLogTab extends ConstructorTab {
 	}
 
 	/**
-	 * Set up an editor tab for a Job, and view it.
-	 * 
-	 * @param {IgorJob} job
-	 * @param {Boolean} reuse Whether to reuse an existing tab.
-	 * @returns {void}
+	 * Create and open a new tab.
+	 * @returns {OutputLogTab}
 	 */
-	static view = (job, reuse) => {
+	static openNew() {
+		const file = new GmlFile('Constructor Job', null, OutputLogFileKind.inst);
+		GmlFile.openTab(file);
 
-		if (!reuse) {
-			
-			const file = new GmlFile('Constructor Job', null, OutputLogFileKind.inst);
-			GmlFile.openTab(file);
+		return /** @type {OutputLogTab} */ (file.editor);
+	}
 
-			const tab = /** @type {OutputLogTab} */ (file.editor);
-			tab.attach(job);
+	/**
+	 * Find an unused tab instance, or steal an existing running one to be repurposed.
+	 * @returns {OutputLogTab|undefined}
+	 */
+	static findUnusedOrSteal() {
+		
+		const tabs = Array.from(ChromeTabs.getTabs())
+			.map(tab => tab.gmlFile.editor)
+			.filter(tab => tab instanceof OutputLogTab);
 
-			return;
-
+		if (tabs.length === 0) {
+			return undefined;
 		}
 
-		const tabs = Array.from(ChromeTabs.getTabs());
-		const editors = tabs.map(tab => tab.gmlFile.editor);
+		const unused = tabs.find(tab => !tab.inUse);
 
-		/** @type {OutputLogTab|undefined} */
-		const viewer = editors.find(editor => editor instanceof OutputLogTab);
-
-		if (viewer === undefined) {
-			return this.view(job, false);
+		if (unused !== undefined) {
+			return unused;
 		}
 
-		viewer.stopJob();
-		viewer.detach();
-
-		viewer.attach(job);
-
-		return viewer.focus();
-
+		return tabs[0];
+		
 	}
 
 	/**
@@ -284,6 +279,14 @@ export class OutputLogTab extends ConstructorTab {
 
 		this.logAceEditor.destroy();
 
+	}
+
+	/**
+	 * Returns whether this tab currently has a running job.
+	 * @returns {boolean}
+	 */
+	get inUse() {
+		return this.job !== undefined && this.job.status.status !== 'stopped';
 	}
 
 	/**

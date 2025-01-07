@@ -3,7 +3,6 @@
  * and starting new ones on projects.
  */
 
-import { OutputLogTab } from '../ui/tabs/compile/OutputLogTab.js';
 import { IgorJob } from './job/IgorJob.js';
 import { igor_platform_cmd_name, output_blob_exts } from './igor-paths.js';
 import { Err } from '../utils/Err.js';
@@ -19,13 +18,12 @@ export const jobs = [];
  * @param {RuntimeInfo} runtime
  * @param {UserInfo|undefined} user
  * @param {IgorSettings} settings
- * @returns {Result<IgorJob>}
+ * @param {number|undefined} [id] Specific ID to use for this job, for stealing from an existing one.
+ * @returns {Promise<Result<IgorJob>>}
  */
-export function job_run(project, runtime, user, settings) {
+export async function job_run(project, runtime, user, settings, id = job_create_id()) {
 
-	const id = job_create_id();
 	const id_string = id.toString();
-	
 	settings.buildPath = path.join(settings.buildPath, settings.platform, id_string);
 
 	const flags_res = job_flags_get(project, runtime.path, user?.path, settings);
@@ -36,6 +34,9 @@ export function job_run(project, runtime, user, settings) {
 			err: new Err('Failed to get Igor flags for this job!', flags_res.err)
 		};
 	}
+
+	const existingJob = jobs[id];
+	await existingJob?.stop();
 
 	/** @type {import('node:child_process').SpawnOptionsWithoutStdio} */
 	const spawn_opts = {
@@ -51,15 +52,6 @@ export function job_run(project, runtime, user, settings) {
 
 	return { ok: true, data: job };
 
-}
-
-/**
- * Create a new editor instance for a given job.
- * @param {IgorJob} job
- * @param {Boolean} reuse Whether to reuse an existing tab.
- */
-export function job_open_editor(job, reuse) {
-	OutputLogTab.view(job, reuse);
 }
 
 /**
