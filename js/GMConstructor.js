@@ -53,12 +53,11 @@ export class GMConstructor {
 			configName: partial_settings.configName ?? ProjectProperties.buildConfig
 		};
 		
-		const runtime_type = ProjectProperties.runtimeChannelTypeOrDef;
 		const runtime_res = ProjectProperties.runtime;
-		const user_res = ProjectProperties.user;
-
+		
 		if (!runtime_res.ok) {
-
+			
+			const runtime_type = ProjectProperties.runtimeChannelTypeOrDef;
 			const err = new Err(
 				`No ${runtime_type} runtimes available to compile!`,
 				runtime_res.err,
@@ -126,6 +125,8 @@ export class GMConstructor {
 			}
 
 		}
+		
+		const user_res = ProjectProperties.user;
 
 		const res = compileController.job_run(
 			project,
