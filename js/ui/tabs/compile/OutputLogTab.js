@@ -83,6 +83,8 @@ export class OutputLogTab extends ConstructorTab {
 			}))
 			.also(it => it.setReadOnly(true))
 			.also(it => it.setOption('scrollPastEnd', 0))
+			.also(it => it.renderer.setShowGutter(false))
+			.also(it => it.renderer.setShowPrintMargin(false))
 			.value;
 
 		this.infoGroup = use(ui.group(this.element, this.file.name, [
