@@ -151,7 +151,7 @@ export declare global {
 		'Stopped'	|
 		'Finished'	;
 
-	type JobStatus = 
+	type JobState = 
 		{ status: 'running' }	|
 		{ status: 'stopping' }	|
 		{ status: 'stopped', stopType: JobStopType, exitCode?: number };

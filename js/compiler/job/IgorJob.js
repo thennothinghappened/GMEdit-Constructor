@@ -29,7 +29,7 @@ export class IgorJob {
 
 	stdout = '';
 
-	/** @type {JobStatus} */
+	/** @type {JobState} */
 	state = { status: 'running' };
 
 	/**
