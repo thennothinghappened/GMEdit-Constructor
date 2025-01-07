@@ -15,7 +15,7 @@ export declare global {
 		 * Create a HTML representation of the given error that may be appended
 		 * somewhere we want to display it.
 		 */
-		asHTML(groups: Record<string, string>): DocumentFragment;
+		asHTML(groups: Record<string, string>): Node;
 
 		/**
 		 * Get a meaningful string representation of the given error.
@@ -43,7 +43,7 @@ export declare global {
 		 * Create a HTML representation of this error that may be appended
 		 * somewhere we want to display it.
 		 */
-		asHTML(): DocumentFragment;
+		asHTML(): Node;
 
 		/**
 		 * Get a meaningful string representation of this error.
