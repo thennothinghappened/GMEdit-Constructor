@@ -71,7 +71,7 @@ export class ProjectProperties {
 	 * @returns {RuntimeBuildType|undefined}
 	 */
 	static get runtimeBuildType() {
-		return properties.runner;
+		return properties.runner ?? undefined;
 	}
 
 	/**
@@ -87,7 +87,7 @@ export class ProjectProperties {
 	 * @returns {Boolean|undefined}
 	 */
 	static get reuseCompilerTab() {
-		return properties.reuse_compiler_tab;
+		return properties.reuse_compiler_tab ?? undefined;
 	}
 
 	/**
@@ -123,7 +123,7 @@ export class ProjectProperties {
 	 * @returns {GMChannelType|undefined}
 	 */
 	static get runtimeChannelType() {
-		return properties.runtime_type;
+		return properties.runtime_type ?? undefined;
 	}
 
 	/**
@@ -152,7 +152,7 @@ export class ProjectProperties {
 	 * @returns {string|undefined}
 	 */
 	static get runtimeVersion() {
-		return properties.runtime_version;
+		return properties.runtime_version ?? undefined;
 	}
 
 	/**
