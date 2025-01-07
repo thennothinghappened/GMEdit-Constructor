@@ -254,7 +254,7 @@ export class OutputLogTab extends ConstructorTab {
 			return;
 		}
 
-		if (this.job.status.status !== 'stopped') {
+		if (this.job.status.status === 'running') {
 			this.job.stop();
 		}
 

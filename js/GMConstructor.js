@@ -202,9 +202,7 @@ export class GMConstructor {
 			return;
 		}
 
-		if (editor.job?.status.status === 'running') {
-			editor.stopJob();
-		}
+		editor.stopJob();
 
 	}
 
