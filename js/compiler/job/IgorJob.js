@@ -32,8 +32,6 @@ export class IgorJob {
 	/** @type {JobStatus} */
 	status = { status: 'running' };
 
-	statusDisplay = '';
-
 	/**
 	 * @private
 	 * @type {EventEmitterImpl<JobEventMap>}
@@ -93,15 +91,9 @@ export class IgorJob {
 
 				this.status = {
 					status: 'stopped',
-					stoppedByUser: false,
-					exitCode: this.process.exitCode
+					stopType: (this.process.exitCode ?? 0 > 0) ? 'Failed' : 'Finished',
+					exitCode: this.process.exitCode ?? undefined
 				};
-
-				if (this.process.exitCode ?? 0 > 0) {
-					this.statusDisplay = 'Failed';
-				} else {
-					this.statusDisplay = 'Finished';
-				}
 
 			break;
 
@@ -109,11 +101,8 @@ export class IgorJob {
 
 				this.status = {
 					status: 'stopped',
-					stoppedByUser: true,
-					exitCode: 0
+					stopType: 'Stopped'
 				};
-
-				this.statusDisplay = 'Stopped';
 
 			break;
 			

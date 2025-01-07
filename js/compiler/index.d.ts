@@ -146,10 +146,15 @@ export declare global {
 		stop: Array<JobError>;
 	};
 
+	type JobStopType =
+		'Failed'	|
+		'Stopped'	|
+		'Finished'	;
+
 	type JobStatus = 
 		{ status: 'running' }	|
 		{ status: 'stopping' }	|
-		{ status: 'stopped', stoppedByUser: boolean, exitCode: number? };
+		{ status: 'stopped', stopType: JobStopType, exitCode?: number };
 	
 	interface StdoutEntry {
 		err: JobError;

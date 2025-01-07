@@ -105,13 +105,15 @@ export class OutputLogTab extends ConstructorTab {
 	 * Start watching the provided job.
 	 * @param {IgorJob} job The job to watch.
 	 */
-	attach = (job) => {
+	attach(job) {
 
 		if (this.job !== undefined) {
 			this.detach();
 		}
 
-		GmlFileUtils.rename(this.file, OutputLogTab.getJobName(job));
+		this.job = job;
+
+		GmlFileUtils.rename(this.file, this.jobDisplayName);
 		this.infoGroup.legend.childNodes[0].textContent = this.file.name;
 		
 		this.logAceEditor.session.setValue('');
@@ -125,14 +127,12 @@ export class OutputLogTab extends ConstructorTab {
 		job.events.on('stdout', this.onJobStdout);
 		job.events.on('stop', this.onJobStop);
 
-		this.job = job;
-
 	}
 
 	/**
 	 * Stop watching the job we're currently watching.
 	 */
-	detach = () => {
+	detach() {
 		
 		if (this.job === undefined) {
 			return;
@@ -178,7 +178,7 @@ export class OutputLogTab extends ConstructorTab {
 			return;
 		}
 
-		GmlFileUtils.rename(this.file, OutputLogTab.getJobName(this.job));
+		GmlFileUtils.rename(this.file, this.jobDisplayName);
 		this.infoGroup.legend.childNodes[0].textContent = this.file.name;
 
 		if (errors.length > 0) {
@@ -291,15 +291,20 @@ export class OutputLogTab extends ConstructorTab {
 
 	/**
 	 * @private
-	 * @param {IgorJob} job
+	 * @returns {string}
 	 */
-	static getJobName = (job) => {
+	get jobDisplayName() {
 
-		if (job.statusDisplay === '') {
-			return job.settings.verb;
+		if (this.job === undefined) {
+			return 'No attached job.';
 		}
 
-		return `${job.settings.verb}: ${job.statusDisplay}`;
+		switch (this.job.status.status) {
+			case 'running': return this.job.settings.verb;
+			case 'stopping': return `${this.job.settings.verb}: Stopping`;
+			case 'stopped': return `${this.job.settings.verb}: ${this.job.status.stopType}`;
+		}
+		
 	}
 
 }
