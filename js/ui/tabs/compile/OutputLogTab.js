@@ -107,7 +107,7 @@ export class OutputLogTab extends ConstructorTab {
 	 */
 	attach = (job) => {
 
-		if (this.job !== null) {
+		if (this.job !== undefined) {
 			this.detach();
 		}
 
