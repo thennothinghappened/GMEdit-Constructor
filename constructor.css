@@ -20,10 +20,6 @@
 	transition: 0.25s ease;
 }
 
-.gm-constructor-tab fieldset:not(.collapsed, .gm-constructor-viewer-output) {
-	padding: 8px;
-}
-
 .gm-constructor-tab fieldset.collapsed > :not(legend) {
 	display: none !important;
 }
@@ -69,6 +65,10 @@ fieldset.gm-constructor-warning {
 
 fieldset.gm-constructor-debug {
 	background-color: rgba(47, 47, 47, 0.098);
+}
+
+.gm-constructor-control-panel fieldset:not(.collapsed) {
+	padding: 1em;
 }
 
 .gm-constructor-control-panel p {
@@ -126,6 +126,10 @@ fieldset.gm-constructor-debug {
 /************************
 *     Compile Window    *
 *************************/
+
+.gm-constructor-viewer fieldset:not(.collapsed) {
+	padding: 0.5em;
+}
 
 .gm-constructor-viewer > header {
 	display: flex;
