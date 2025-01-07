@@ -1,5 +1,6 @@
-
-import { JobCompilationError, JobError, JobPermissionsError, JobRunnerError } from '../JobError.js';
+import { JobCompilationError } from '../errors/JobCompilationError.js';
+import { JobPermissionsError } from '../errors/JobPermissionsError.js';
+import { JobRunnerError } from '../errors/JobRunnerError.js';
 
 /**
  * List of recognised error types to iterate over discovering.
@@ -10,8 +11,10 @@ import { JobCompilationError, JobError, JobPermissionsError, JobRunnerError } fr
  * 
  * There's no doubt a way better way of doing this whole setup but
  * hey, it works, and I'm a bit busy to do a better solution now.
+ * 
+ * @type {JobErrorDescriptor[]}
  */
-const error_types = [
+const errorDescriptors = [
 	JobRunnerError,
 	JobPermissionsError,
 	JobCompilationError
@@ -19,6 +22,7 @@ const error_types = [
 
 /**
  * Parse the stdout of an Igor job for errors.
+ * 
  * @param {String} stdout 
  * @returns {JobError[]}
  */
@@ -29,24 +33,50 @@ export function job_parse_stdout(stdout) {
 
 	let string = stdout;
 
-	for (const error_type of error_types) {
+	for (const errorDescriptor of errorDescriptors) {
 		while (string.length > 0) {
 
-			const entry = error_type.fromStdout(string);
+			const entry = parseJobError(string, errorDescriptor);
 
 			if (entry === undefined) {
 				break;
 			}
 
-			errors.push(entry.err);
+			errors.push(entry);
 
 			string =
-				string.slice(0, entry.index - 1) +
-				string.slice(entry.index + entry.length);
+				string.slice(0, entry.offset - 1) +
+				string.slice(entry.offset + entry.length);
 
 		}
 	}
 
 	return errors;
+
+}
+
+/**
+ * Parse the next {@link JobError} of the given descriptor type, if any more exist.
+ * 
+ * @param {string} string The string - probably `stdout` or `stderr` - to search in.
+ * @param {JobErrorDescriptor} errorDescriptor The descriptor for the error type to search for.
+ * @returns {JobError|undefined}
+ */
+function parseJobError(string, errorDescriptor) {
+	
+	const match = string.match(errorDescriptor.regex);
+	
+	if (match === null || match.groups === undefined || match.index === undefined) {
+		return undefined;
+	}
+
+	const groups = match.groups;
+
+	return {
+		offset: match.index,
+		length: match[0].length,
+		asHTML: () => errorDescriptor.asHTML(groups),
+		toString: () => errorDescriptor.asString(groups)
+	};
 
 }

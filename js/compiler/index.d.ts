@@ -155,11 +155,5 @@ export declare global {
 		{ status: 'running' }	|
 		{ status: 'stopping' }	|
 		{ status: 'stopped', stopType: JobStopType, exitCode?: number };
-	
-	interface StdoutEntry {
-		err: JobError;
-		index: number;
-		length: number;
-	}
 
 };

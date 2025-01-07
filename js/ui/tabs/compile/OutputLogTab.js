@@ -1,8 +1,6 @@
 import { IgorJob } from '../../../compiler/job/IgorJob.js';
 import { ConstructorTab, ConstructorTabFileKind } from '../ConstructorTab.js';
 import * as ui from '../../ui-wrappers.js';
-import { JobError } from '../../../compiler/job/JobError.js';
-import { Err } from '../../../utils/Err.js';
 import { use } from '../../../utils/scope-extensions/use.js';
 import { GmlFileUtils } from '../../../utils/gmedit/GmlFileUtils.js';
 import { ProjectProperties } from '../../../preferences/ProjectProperties.js';
@@ -185,7 +183,7 @@ export class OutputLogTab extends ConstructorTab {
 		if (errors.length > 0) {
 
 			for (const error of errors) {
-				error.displayHTML(this.errorsGroup);
+				this.errorsGroup.appendChild(error.asHTML());
 			}
 			
 			this.errorsGroup.hidden = false;
