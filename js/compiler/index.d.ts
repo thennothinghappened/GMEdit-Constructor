@@ -2,15 +2,11 @@ import { GMRuntimeVersion } from './GMVersion';
 
 export declare global {
 
-	/**
-	 * Information for a specific found runtime.
-	 */
-	type RuntimeInfo = {
-		version: GMRuntimeVersion;
-		path: string;
-		igor_path: string;
-	};
-
+	type GMChannelType = 
+		'Stable'	|
+		'Beta'		|
+		'LTS'		;
+		
 	/**
 	 * Information for a specific found user.
 	 */
@@ -19,141 +15,137 @@ export declare global {
 		name: string;
 	};
 
-	type GMChannelType = 
-		'Stable'	|
-		'Beta'		|
-		'LTS'		;
-
-	type RuntimeBuildType =
-		'VM'	|
-		'YYC'	;
-
 	/**
-	 * Settings for running an Igor Job.
+	 * Things relating to the current GameMaker runtime (Zeus).
 	 */
-	type IgorSettings = {
+	namespace Zeus {
 
 		/**
-		 * Which platform the action will run for.
+		 * Information for a specific found runtime.
 		 */
-		platform: IgorPlatform;
+		type RuntimeInfo = {
+			version: GMRuntimeVersion;
+			path: string;
+			igorPath: string;
+		};
+
+		type RuntimeType =
+			'VM'	|
+			'YYC'	;
 
 		/**
-		 * The Igor action to run.
+		 * Settings for running an Igor Job.
 		 */
-		verb: IgorVerb;
+		type IgorSettings = {
 
-		/**
-		 * Which runner to use - default is VM.
-		 */
-		runner: RuntimeBuildType;
+			/**
+			 * Which platform the action will run for.
+			 */
+			platform: Platform;
 
-		/**
-		 * How many threads to use for this compilation.
-		 */
-		threads: number;
+			/**
+			 * The Igor action to run.
+			 */
+			verb: IgorVerb;
 
-		/**
-		 * Name of the Build Config to use for this compilation.
-		 */
-		configName: string;
+			/**
+			 * Which runner to use - default is VM.
+			 */
+			runner: RuntimeType;
 
-		/**
-		 * Path to the user folder. Required for packaging.
-		 */
-		userFolder?: string;
+			/**
+			 * How many threads to use for this compilation.
+			 */
+			threads: number;
 
-		/**
-		 * The path to the directory to output build files to.
-		 */
-		buildPath: string;
+			/**
+			 * Name of the Build Config to use for this compilation.
+			 */
+			configName: string;
 
-		/**
-		 * Launch the executable on the target device after building;
-		 * same as the "Create Executable and Launch" option in the IDE
-		 */
-		launch?: boolean;
+			/**
+			 * Path to the user folder. Required for packaging.
+			 */
+			userFolder?: string;
 
-	}
+			/**
+			 * The path to the directory to output build files to.
+			 */
+			buildPath: string;
 
-	/**
-	 * A supported platform for Igor to target.
-	 */
-	type IgorPlatform =
-		'OperaGX'			|
-		'Windows'			|
-		'Mac'				|
-		'Linux'				|
-		'HTML5'				|
-		'ios'				|
-		'Android'			|
-		'tvos'				|
-		'ps4'				|
-		'ps5'				|
-		'XBoxOne'			|
-		'XBoxOneSeriesXS'	|
-		'Switch'			;
+			/**
+			 * Launch the executable on the target device after building;
+			 * same as the "Create Executable and Launch" option in the IDE
+			 */
+			launch?: boolean;
 
-	/**
-	 * Host (OS) platform information for Igor.
-	 */
-	type IgorPlatformInfo = {
-
-		/** Extension of the `Igor` executable for the target platform's runtime. */
-		platform_executable_extension: string;
-
-		/** Platform-specific path segment of the `Igor` executable. */
-		platform_path_name: string;
-
-		/** {@link IgorPlatform} to native build for the host OS. */
-		user_platform: IgorPlatform;
-
-		/**
-		 * Default directories as per https://manual-en.yoyogames.com/Settings/Building_via_Command_Line.htm
-		 * to find runtimes.
-		 * 
-		 * Note that this only covers Windows and MacOS, elsewhere will crash trying to index these
-		 * as I don't know where the location is for Linux.
-		 */
-		default_runtime_paths: {
-			[key in GMChannelType]: string
 		};
 
 		/**
-		 * Default directories as per https://manual-en.yoyogames.com/Settings/Building_via_Command_Line.htm
-		 * to find user folders.
-		 * 
-		 * Note that this only covers Windows and MacOS, elsewhere will crash trying to index these
-		 * as I don't know where the location is for Linux.
+		 * A supported platform for Igor to target.
 		 */
-		default_user_paths: {
-			[key in GMChannelType]: string
-		};
+		type Platform =
+			'OperaGX'			|
+			'Windows'			|
+			'Mac'				|
+			'Linux'				|
+			'HTML5'				|
+			'ios'				|
+			'Android'			|
+			'tvos'				|
+			'ps4'				|
+			'ps5'				|
+			'XBoxOne'			|
+			'XBoxOneSeriesXS'	|
+			'Switch'			;
+		
+		/**
+		 * Host (OS) platform information for Igor.
+		 */
+		type IgorPlatformInfo = {
 
-		/** Default path to the global build directory. */
-		default_global_build_path: string;
+			/** Extension of the `Igor` executable for the target platform's runtime. */
+			platform_executable_extension: string;
+
+			/** Platform-specific path segment of the `Igor` executable. */
+			platform_path_name: string;
+
+			/** {@link Platform} to native build for the host OS. */
+			user_platform: Platform;
+
+			/**
+			 * Default directories as per https://manual-en.yoyogames.com/Settings/Building_via_Command_Line.htm
+			 * to find runtimes.
+			 * 
+			 * Note that this only covers Windows and MacOS, elsewhere will crash trying to index these
+			 * as I don't know where the location is for Linux.
+			 */
+			default_runtime_paths: {
+				[key in GMChannelType]: string
+			};
+
+			/**
+			 * Default directories as per https://manual-en.yoyogames.com/Settings/Building_via_Command_Line.htm
+			 * to find user folders.
+			 * 
+			 * Note that this only covers Windows and MacOS, elsewhere will crash trying to index these
+			 * as I don't know where the location is for Linux.
+			 */
+			default_user_paths: {
+				[key in GMChannelType]: string
+			};
+
+			/** Default path to the global build directory. */
+			default_global_build_path: string;
+
+		}
+
+		type IgorVerb = 
+			'Run'			|
+			'Package'		|
+			'PackageZip'	;
+
 
 	}
-
-	type IgorVerb = 
-		'Run'			|
-		'Package'		|
-		'PackageZip'	;
-	
-	interface JobEventMap {
-		stdout: string;
-		output: string;
-		stop: Array<JobError>;
-	};
-
-	type JobStopType =
-		'Failed'	|
-		'Stopped'	|
-		'Finished'	;
-
-	type JobState = 
-		{ status: 'running' }	|
-		{ status: 'stopping' }	|
-		{ status: 'stopped', stopType: JobStopType, exitCode?: number };
 
 };

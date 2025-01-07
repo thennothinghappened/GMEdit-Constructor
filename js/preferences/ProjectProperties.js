@@ -60,7 +60,7 @@ export class ProjectProperties {
 
 	/**
 	 * Get the desired runner type.
-	 * @returns {RuntimeBuildType}
+	 * @returns {Zeus.RuntimeType}
 	 */
 	static get runtimeBuildTypeOrDef() {
 		return this.runtimeBuildType ?? Preferences.runtimeBuildType;
@@ -68,7 +68,7 @@ export class ProjectProperties {
 
 	/**
 	 * Get the desired runner type for this project (without falling back to the global option).
-	 * @returns {RuntimeBuildType|undefined}
+	 * @returns {Zeus.RuntimeType|undefined}
 	 */
 	static get runtimeBuildType() {
 		return properties.runner ?? undefined;
@@ -101,7 +101,7 @@ export class ProjectProperties {
 
 	/**
 	 * Set the desired runtime channel type.
-	 * @param {RuntimeBuildType|undefined} runner 
+	 * @param {Zeus.RuntimeType|undefined} runner 
 	 */
 	static set runtimeBuildType(runner) {
 
@@ -170,7 +170,7 @@ export class ProjectProperties {
 
 	/**
 	 * Get the runtime version to use for the current project.
-	 * @returns {Result<RuntimeInfo>}
+	 * @returns {Result<Zeus.RuntimeInfo>}
 	 */
 	static get runtime() {
 

@@ -7,7 +7,7 @@ import * as ui from '../ui-wrappers.js';
 import * as preferencesMenu from '../PreferencesMenu.js';
 import { plugin_name, plugin_version } from '../../GMConstructor.js';
 import { use } from '../../utils/scope-extensions/use.js';
-import { GM_CHANNEL_TYPES, Preferences, VALID_RUNNER_TYPES } from '../../preferences/Preferences.js';
+import { GM_CHANNEL_TYPES, Preferences, ZEUS_RUNTIME_TYPES } from '../../preferences/Preferences.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];
@@ -394,7 +394,7 @@ export class ControlPanelTab extends ConstructorTab {
 			this.projectSettings,
 			'Runtime Type',
 			ProjectProperties.runtimeBuildType ?? USE_DEFAULT,
-			[...VALID_RUNNER_TYPES, USE_DEFAULT],
+			[...ZEUS_RUNTIME_TYPES, USE_DEFAULT],
 			(value) => ProjectProperties.runtimeBuildType = default_undefined(value)
 		).classList.add('singleline');
 

@@ -15,9 +15,9 @@ export const jobs = [];
  * Run a new job on a given project.
  * 
  * @param {GMEdit.Project} project
- * @param {RuntimeInfo} runtime
+ * @param {Zeus.RuntimeInfo} runtime
  * @param {UserInfo|undefined} user
- * @param {IgorSettings} settings
+ * @param {Zeus.IgorSettings} settings
  * @param {number|undefined} [id] Specific ID to use for this job, for stealing from an existing one.
  * @returns {Promise<Result<IgorJob>>}
  */
@@ -44,7 +44,7 @@ export async function job_run(project, runtime, user, settings, id = job_create_
 		detached: (process.platform !== 'win32')
 	};
 
-	const proc = child_process.spawn(runtime.igor_path, flags_res.data, spawn_opts);
+	const proc = child_process.spawn(runtime.igorPath, flags_res.data, spawn_opts);
 	const job = new IgorJob(id, settings, proc, project);
 	
 	jobs.push(job);
@@ -68,7 +68,7 @@ function job_remove(job) {
  * @param {GMEdit.Project} project
  * @param {string} runtime_path
  * @param {string|undefined} user_path
- * @param {IgorSettings} settings
+ * @param {Zeus.IgorSettings} settings
  * @returns {Result<string[]>}
  */
 function job_flags_get(project, runtime_path, user_path, settings) {

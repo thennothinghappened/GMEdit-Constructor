@@ -5,7 +5,7 @@
 import { plugin_name, plugin_version } from '../GMConstructor.js';
 import { UIDropdownMutate } from '../utils/gmedit/UIPreferencesUtils.js';
 import * as ui from '../ui/ui-wrappers.js';
-import { GM_CHANNEL_TYPES, Preferences, VALID_RUNNER_TYPES } from '../preferences/Preferences.js';
+import { GM_CHANNEL_TYPES, Preferences, ZEUS_RUNTIME_TYPES } from '../preferences/Preferences.js';
 import { use } from '../utils/scope-extensions/use.js';
 
 const UIPreferences = $gmedit['ui.Preferences'];
@@ -74,7 +74,7 @@ export function menu_create(prefs_group) {
 			section,
 			'Runtime Type',
 			Preferences.runtimeBuildType,
-			VALID_RUNNER_TYPES,
+			ZEUS_RUNTIME_TYPES,
 			(runner) => Preferences.runtimeBuildType = runner
 		)).also(it => {
 			it.classList.add('singleline');

@@ -6,7 +6,7 @@ const windowsLocalAppData = process.env?.LocalAppData ?? 'C:\\Users\\PLEASE_SPEC
 
 /**
  * Mappings of NodeJS platforms to various Igor information.
- * @type {{[key in NodeJS.Platform]: IgorPlatformInfo}}
+ * @type {{[key in NodeJS.Platform]: Zeus.IgorPlatformInfo}}
  */
 // @ts-expect-error We don't care that unsupported platforms are missing, GMEdit doesn't even run there.
 const igor_platform_map = {
@@ -62,7 +62,7 @@ const igor_platform_map = {
 
 /**
  * Mappings of Igor targets to output file extensions. TODO: other targets
- * @type {{[K in IgorPlatform]?: string}}
+ * @type {{[K in Zeus.Platform]?: string}}
 */
 export const output_package_exts = {
 	Windows: '.zip',
@@ -72,7 +72,7 @@ export const output_package_exts = {
 
 /**
  * Mappings of Igor targets to respective file extensions for output data blobs. TODO: other targets
- * @type {{[K in IgorPlatform]?: string}}
+ * @type {{[K in Zeus.Platform]?: string}}
 */
 export const output_blob_exts = {
 	Windows: 'win',

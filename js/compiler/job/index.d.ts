@@ -1,6 +1,22 @@
 
 export declare global {
 
+	interface JobEventMap {
+		stdout: string;
+		output: string;
+		stop: Array<JobError>;
+	};
+
+	type JobStopType =
+		'Failed'	|
+		'Stopped'	|
+		'Finished'	;
+
+	type JobState = 
+		{ status: 'running' }	|
+		{ status: 'stopping' }	|
+		{ status: 'stopped', stopType: JobStopType, exitCode?: number };
+
 	/**
 	 * A "descriptor" for an error type, which may be parsed from a Job's output.
 	 */

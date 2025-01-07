@@ -20,8 +20,8 @@ import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
  */
 export const GM_CHANNEL_TYPES = ['Stable', 'Beta', 'LTS'];
 
-/** @type {Readonly<RuntimeBuildType[]>} */
-export const VALID_RUNNER_TYPES = ['VM', 'YYC'];
+/** @type {Readonly<Zeus.RuntimeType[]>} */
+export const ZEUS_RUNTIME_TYPES = ['VM', 'YYC'];
 
 /** @type {Readonly<TPreferences.Data>} */
 const PREFS_DEFAULT = {
@@ -63,7 +63,7 @@ const PREFS_DEFAULT = {
  * List of runtimes for each type.
  * Populated after loading the list.
  * 
- * @type {{ [key in GMChannelType]: RuntimeInfo[]? }}
+ * @type {{ [key in GMChannelType]: Zeus.RuntimeInfo[]? }}
  */
 const runtimes = {
 	Stable: null,
@@ -172,7 +172,7 @@ export class Preferences {
 
 	/**
 	 * The desired runner type.
-	 * @returns {RuntimeBuildType}
+	 * @returns {Zeus.RuntimeType}
 	 */
 	static get runtimeBuildType() {
 		return this.prefs.runtime_opts.runner;
@@ -260,7 +260,7 @@ export class Preferences {
 	 * Function to get a list of runtime version names for a given runtime type.
 	 * 
 	 * @param {GMChannelType} type
-	 * @returns {RuntimeInfo[]|undefined}
+	 * @returns {Zeus.RuntimeInfo[]|undefined}
 	 */
 	static getRuntimes(type) {
 		return runtimes[type] ?? undefined;
@@ -388,7 +388,7 @@ export class Preferences {
 	 * Load the list of runtimes for the provided search path for a type.
 	 * 
 	 * @param {GMChannelType} type
-	 * @returns {Promise<Result<RuntimeInfo[]>>}
+	 * @returns {Promise<Result<Zeus.RuntimeInfo[]>>}
 	 */
 	static async loadRuntimeList(type) {
 		const { search_path } = this.getRuntimeOptions(type);
@@ -410,7 +410,7 @@ export class Preferences {
 	 * Load the list of runtimes for the provided search path.
 	 * 
 	 * @param {String} search_path 
-	 * @returns {Promise<Result<RuntimeInfo[]>>}
+	 * @returns {Promise<Result<Zeus.RuntimeInfo[]>>}
 	 */
 	static async loadRuntimeListFrom(search_path) {
 
@@ -428,7 +428,7 @@ export class Preferences {
 			.filter(({ path }) => Electron_FS.lstatSync(path).isDirectory())
 			.map(({ dirname, path }) => {
 
-				const igor_path = node.path.join(path, igor_path_segment);
+				const igorPath = node.path.join(path, igor_path_segment);
 				const version_res = GMRuntimeVersion.parse(dirname);
 
 				if (!version_res.ok) {
@@ -453,19 +453,15 @@ export class Preferences {
 					return undefined;
 				}
 
-				return {
-					path,
-					igor_path,
-					version: runtime
-				};
+				return { path, igorPath, version: runtime };
 
 			})
-			.filter(/** @returns {runtime is RuntimeInfo} */ (runtime) => runtime !== undefined)
+			.filter(/** @returns {runtime is Zeus.RuntimeInfo} */ (runtime) => runtime !== undefined)
 			.sort((a, b) => b.version.compare(a.version));
 
 		return {
 			ok: true,
-			data: runtimes.filter(runtime => Electron_FS.existsSync(runtime.igor_path))
+			data: runtimes.filter(runtime => Electron_FS.existsSync(runtime.igorPath))
 		};
 	}
 

@@ -18,7 +18,7 @@ export class IgorJob {
 	 */
 	id;
 
-	/** @type {IgorSettings} */
+	/** @type {Zeus.IgorSettings} */
 	settings;
 
 	/** @type {import('node:child_process').ChildProcess} */
@@ -47,7 +47,7 @@ export class IgorJob {
 	
 	/**
 	 * @param {number} id
-	 * @param {IgorSettings} settings
+	 * @param {Zeus.IgorSettings} settings
 	 * @param {import('node:child_process').ChildProcess} process
 	 * @param {GMEdit.Project} project
 	 */
