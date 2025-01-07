@@ -75,6 +75,15 @@ export class ProjectProperties {
 	}
 
 	/**
+	 * Set the desired runtime channel type.
+	 * @param {Zeus.RuntimeType|undefined} runner 
+	 */
+	static set runtimeBuildType(runner) {
+		properties.runner = runner;
+		this.save();
+	}
+
+	/**
 	 * Get whether to reuse a compiler tab.
 	 * @returns {Boolean}
 	 */
@@ -97,17 +106,6 @@ export class ProjectProperties {
 	static set reuseCompilerTab(reuse_compiler_tab) {
 		properties.reuse_compiler_tab = reuse_compiler_tab;
 		this.save();
-	}
-
-	/**
-	 * Set the desired runtime channel type.
-	 * @param {Zeus.RuntimeType|undefined} runner 
-	 */
-	static set runtimeBuildType(runner) {
-
-		properties.runner = runner;
-		this.save();
-
 	}
 
 	/**
