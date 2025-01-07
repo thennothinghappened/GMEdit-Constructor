@@ -55,7 +55,7 @@ const PREFS_DEFAULT = {
 	save_on_run_task: true,
 	reuse_compiler_tab: true,
 	check_for_updates: true,
-	use_global_build: false,
+	use_global_build: true,
 	global_build_path: def_global_build_path
 };
 
