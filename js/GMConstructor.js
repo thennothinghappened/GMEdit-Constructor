@@ -359,7 +359,9 @@ export class GMConstructor {
 	 * Some exposed functions to access at runtime via `window.GMConstructor.__debuggery.*`.
 	 */
 	__debuggery = {
-		project_current_get
+		project_current_get,
+		Preferences,
+		ProjectProperties
 	};
 
 }
