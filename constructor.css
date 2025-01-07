@@ -24,6 +24,10 @@
 	padding: 8px;
 }
 
+.gm-constructor-tab fieldset.collapsed > :not(legend) {
+	display: none !important;
+}
+
 .gm-constructor-tab fieldset > legend {
 	font-weight: bold;
 	cursor: pointer;
@@ -78,6 +82,14 @@ fieldset.gm-constructor-debug {
 
 .gm-constructor-control-panel fieldset {
 	margin: 10px 0;
+}
+
+.gm-constructor-control-panel section {
+	margin-top: 1em;
+}
+
+.gm-constructor-control-panel section h3 {
+	margin: 0;
 }
 
 .gm-constructor-control-panel div.select {

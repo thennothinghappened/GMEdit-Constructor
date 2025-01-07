@@ -6,6 +6,7 @@ import { plugin_name, plugin_version } from '../GMConstructor.js';
 import { UIDropdownMutate } from '../utils/ui.js';
 import * as ui from '../ui/ui-wrappers.js';
 import { GM_CHANNEL_TYPES, Preferences, VALID_RUNNER_TYPES } from '../preferences/Preferences.js';
+import { use } from '../utils/scope-extensions/use.js';
 
 const UIPreferences = $gmedit['ui.Preferences'];
 
@@ -38,128 +39,152 @@ export function __cleanup__() {
  */
 export function menu_create(prefs_group) {
 
-	UIPreferences.addCheckbox(
-		prefs_group,
-		'Automatically check for updates on startup',
-		Preferences.checkForUpdates,
-		(update_check) => { Preferences.checkForUpdates = update_check; }
-	);
+	use(document.createElement('section')).also(section => {
 
-	UIPreferences.addCheckbox(
-		prefs_group,
-		'Save automatically when running a task',
-		Preferences.saveOnRun,
-		(save_on_run_task) => { Preferences.saveOnRun = save_on_run_task; }
-	);
+		section.appendChild(ui.h3('Plugin Behaviour'));
 
-	UIPreferences.addCheckbox(
-		prefs_group,
-		'Reuse compiler output tab between runs',
-		Preferences.saveOnRun,
-		(reuse_compiler_tab) => Preferences.reuseCompilerTab = reuse_compiler_tab
-	);
+		UIPreferences.addCheckbox(
+			section,
+			'Automatically check for updates',
+			Preferences.checkForUpdates,
+			(update_check) => { Preferences.checkForUpdates = update_check; }
+		).title = 'Whether to check for updates on startup via GitHub.';
+	
+		UIPreferences.addCheckbox(
+			section,
+			'Auto-save open files when running tasks',
+			Preferences.saveOnRun,
+			(save_on_run_task) => { Preferences.saveOnRun = save_on_run_task; }
+		).title = 'Whether to automatically save when you run a project task.';
+	
+		UIPreferences.addCheckbox(
+			section,
+			'Reuse existing compiler tab',
+			Preferences.saveOnRun,
+			(reuse_compiler_tab) => Preferences.reuseCompilerTab = reuse_compiler_tab
+		).title = 'Whether to reuse an existing compiler output tab for re-running. This may be useful to disable if you intentionally want to run multiple at a time, e.g. for multiplayer.';
 
-	UIPreferences.addDropdown(
-		prefs_group,
-		'Runner Type',
-		Preferences.runtimeBuildType,
-		VALID_RUNNER_TYPES,
-		(runner) => Preferences.runtimeBuildType = runner
-	).classList.add('singleline');
+	}).also(it => prefs_group.appendChild(it));
 
-	UIPreferences.addDropdown(
-		prefs_group,
-		'Runtime Channel Type',
-		Preferences.defaultRuntimeChannel,
-		GM_CHANNEL_TYPES,
-		(runtime_channel_type) => Preferences.defaultRuntimeChannel = runtime_channel_type
-	).classList.add('singleline');
+	use(document.createElement('section')).also(section => {
 
-	UIPreferences.addInput(
-		prefs_group,
-		'Global Builds Path',
-		Preferences.globalBuildPath,
-		(global_build_path) => { Preferences.globalBuildPath = global_build_path; }
-	);
+		section.appendChild(ui.h3('Build Settings'));
 
-	UIPreferences.addCheckbox(
-		prefs_group,
-		'Use the global builds directory',
-		Preferences.useGlobalBuildPath,
-		(use_global_build) => { Preferences.useGlobalBuildPath = use_global_build; }
-	);
+		use(UIPreferences.addDropdown(
+			section,
+			'Runtime Type',
+			Preferences.runtimeBuildType,
+			VALID_RUNNER_TYPES,
+			(runner) => Preferences.runtimeBuildType = runner
+		)).also(it => {
+			it.classList.add('singleline');
+			it.title = 'The type of runtime to use.';
+		});
+	
+		use(UIPreferences.addDropdown(
+			section,
+			'Runtime Release Channel',
+			Preferences.defaultRuntimeChannel,
+			GM_CHANNEL_TYPES,
+			(runtime_channel_type) => Preferences.defaultRuntimeChannel = runtime_channel_type
+		)).also(it => {
+			it.classList.add('singleline');
+			it.title = 'The GameMaker update channel from which to pick the runtime version from.';
+		});
+		
+	}).also(it => prefs_group.appendChild(it));
 
-	for (const type of GM_CHANNEL_TYPES) {
+	use(document.createElement('section')).also(section => {
 
-		const group = ui.group(prefs_group, type);
-
-		/** @type {HTMLDivElement} */
-		let version_dropdown;
-
-		/** @type {HTMLDivElement} */
-		let user_dropdown;
+		section.appendChild(ui.h3('Paths'));
 
 		UIPreferences.addInput(
-			group,
-			'Search Path',
-			Preferences.getRuntimeSearchPath(type),
-			async (path) => {
-				
-				// Workaround for being called twice for some reason?
-				if (path === Preferences.getRuntimeSearchPath(type)) {
-					return;
+			section,
+			'Global Builds Path',
+			Preferences.globalBuildPath,
+			(global_build_path) => { Preferences.globalBuildPath = global_build_path; }
+		).title = 'Path to a central builds directory, which Constructor manages for you. Stops your project\'s directory being clogged by build files.';
+	
+		UIPreferences.addCheckbox(
+			section,
+			'Use the global builds directory',
+			Preferences.useGlobalBuildPath,
+			(use_global_build) => { Preferences.useGlobalBuildPath = use_global_build; }
+		).title = 'Whether to use the global builds directory, or instead to place build files in the project\'s own directory.';
+
+		for (const type of GM_CHANNEL_TYPES) {
+
+			const group = ui.group(section, type);
+	
+			/** @type {HTMLDivElement} */
+			let version_dropdown;
+	
+			/** @type {HTMLDivElement} */
+			let user_dropdown;
+	
+			UIPreferences.addInput(
+				group,
+				'Search Path',
+				Preferences.getRuntimeSearchPath(type),
+				async (path) => {
+					
+					// Workaround for being called twice for some reason?
+					if (path === Preferences.getRuntimeSearchPath(type)) {
+						return;
+					}
+					
+					await Preferences.setRuntimeSearchPath(type, path);
+	
+					UIDropdownMutate(
+						version_dropdown,
+						runtime_version_strings_get_for_type(type)
+					);
+	
 				}
-				
-				await Preferences.setRuntimeSearchPath(type, path);
-
-				UIDropdownMutate(
-					version_dropdown,
-					runtime_version_strings_get_for_type(type)
-				);
-
-			}
-		);
-
-		version_dropdown = UIPreferences.addDropdown(
-			group,
-			'Version',
-			Preferences.getRuntimeVersion(type) ?? '',
-			runtime_version_strings_get_for_type(type),
-			(choice) => {
-				Preferences.setRuntimeVersion(type, choice);
-			}
-		);
-
-		UIPreferences.addInput(
-			group,
-			'User Data Path',
-			Preferences.getUserSearchPath(type),
-			async (path) => {
-				// Workaround for being called twice for some reason?
-				if (path === Preferences.getUserSearchPath(type)) {
-					return;
+			);
+	
+			version_dropdown = UIPreferences.addDropdown(
+				group,
+				'Version',
+				Preferences.getRuntimeVersion(type) ?? '',
+				runtime_version_strings_get_for_type(type),
+				(choice) => {
+					Preferences.setRuntimeVersion(type, choice);
 				}
-
-				await Preferences.setUserSearchPath(type, path);
-
-				UIDropdownMutate(
-					user_dropdown,
-					user_strings_get_for_type(type)
-				);
-			}
-		);
-
-		user_dropdown = UIPreferences.addDropdown(
-			group,
-			'User',
-			Preferences.getUser(type) ?? '',
-			user_strings_get_for_type(type),
-			(choice) => {
-				Preferences.setUser(type, choice);
-			}
-		);
-
-	}
+			);
+	
+			UIPreferences.addInput(
+				group,
+				'User Data Path',
+				Preferences.getUserSearchPath(type),
+				async (path) => {
+					// Workaround for being called twice for some reason?
+					if (path === Preferences.getUserSearchPath(type)) {
+						return;
+					}
+	
+					await Preferences.setUserSearchPath(type, path);
+	
+					UIDropdownMutate(
+						user_dropdown,
+						user_strings_get_for_type(type)
+					);
+				}
+			);
+	
+			user_dropdown = UIPreferences.addDropdown(
+				group,
+				'User',
+				Preferences.getUser(type) ?? '',
+				user_strings_get_for_type(type),
+				(choice) => {
+					Preferences.setUser(type, choice);
+				}
+			);
+	
+		}	
+	
+	}).also(it => prefs_group.appendChild(it));
 
 }
 

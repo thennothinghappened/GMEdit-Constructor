@@ -392,7 +392,7 @@ export class ControlPanelTab extends ConstructorTab {
 
 		UIPreferences.addDropdown(
 			this.projectSettings,
-			'Runner Type',
+			'Runtime Type',
 			ProjectProperties.runtimeBuildType ?? USE_DEFAULT,
 			[...VALID_RUNNER_TYPES, USE_DEFAULT],
 			(value) => ProjectProperties.runtimeBuildType = default_undefined(value)
@@ -400,28 +400,12 @@ export class ControlPanelTab extends ConstructorTab {
 
 		UIPreferences.addDropdown(
 			this.projectSettings,
-			'Runtime Channel Type',
+			'Runtime Release Channel',
 			ProjectProperties.runtimeChannelType ?? USE_DEFAULT,
 			[...GM_CHANNEL_TYPES, USE_DEFAULT],
 			(value) => ProjectProperties.runtimeChannelType = default_undefined(value)
 		).classList.add('singleline');
-
-		UIPreferences.addDropdown(
-			this.projectSettings,
-			'Reuse compiler output tab between runs',
-			use(ProjectProperties.reuseCompilerTab)
-				?.let(it => it ? 'True' : 'False')
-				.value ?? USE_DEFAULT,
-			['True', 'False', USE_DEFAULT],
-			(value) => {
-				switch (value) {
-					case 'True': return ProjectProperties.reuseCompilerTab = true;
-					case 'False': return ProjectProperties.reuseCompilerTab = false;
-					case USE_DEFAULT: return ProjectProperties.reuseCompilerTab = undefined;
-				}
-			}
-		).classList.add('singleline');
-
+		
 		this.projectSettings.runtimeVersionDropdown = UIPreferences.addDropdown(
 			this.projectSettings,
 			'Runtime Version',
@@ -429,9 +413,25 @@ export class ControlPanelTab extends ConstructorTab {
 			[...preferencesMenu.runtime_version_strings_get_for_type(ProjectProperties.runtimeChannelTypeOrDef), USE_DEFAULT],
 			(value) => ProjectProperties.runtimeVersion = default_undefined(value)
 		);
-
+		
 		this.projectSettings.runtimeVersionDropdown.classList.add('singleline');
-
+		
+		UIPreferences.addDropdown(
+			this.projectSettings,
+			'Reuse existing compiler tab',
+			use(ProjectProperties.reuseCompilerTab)
+				?.let(it => it ? 'Yes' : 'No')
+				.value ?? USE_DEFAULT,
+			['Yes', 'No', USE_DEFAULT],
+			(value) => {
+				switch (value) {
+					case 'Yes': return ProjectProperties.reuseCompilerTab = true;
+					case 'No': return ProjectProperties.reuseCompilerTab = false;
+					case USE_DEFAULT: return ProjectProperties.reuseCompilerTab = undefined;
+				}
+			}
+		).classList.add('singleline');
+		
 	}
 
 	/**
