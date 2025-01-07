@@ -5,6 +5,7 @@ import { JobError } from '../../../compiler/job/JobError.js';
 import { Err } from '../../../utils/Err.js';
 import { use } from '../../../utils/scope-extensions/use.js';
 import { GmlFileUtils } from '../../../utils/gmedit/GmlFileUtils.js';
+import { ProjectProperties } from '../../../preferences/ProjectProperties.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];
@@ -299,12 +300,18 @@ export class OutputLogTab extends ConstructorTab {
 			return 'No attached job.';
 		}
 
-		switch (this.job.status.status) {
-			case 'running': return this.job.settings.verb;
-			case 'stopping': return `${this.job.settings.verb}: Stopping`;
-			case 'stopped': return `${this.job.settings.verb}: ${this.job.status.stopType}`;
+		let prefix = `${this.job.settings.verb}`;
+
+		if (!ProjectProperties.reuseCompilerTabOrDef) {
+			prefix += ` #${this.job.id}`;
 		}
-		
+
+		switch (this.job.status.status) {
+			case 'running': return prefix;
+			case 'stopping': return `${prefix}: Stopping`;
+			case 'stopped': return `${prefix}: ${this.job.status.stopType}`;
+		}
+
 	}
 
 }
