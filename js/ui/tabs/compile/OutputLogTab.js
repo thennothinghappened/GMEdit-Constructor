@@ -254,7 +254,7 @@ export class OutputLogTab extends ConstructorTab {
 			return;
 		}
 
-		if (this.job.status.status === 'running') {
+		if (this.job.state.status === 'running') {
 			this.job.stop();
 		}
 
@@ -294,7 +294,7 @@ export class OutputLogTab extends ConstructorTab {
 	 * @returns {boolean}
 	 */
 	get inUse() {
-		return this.job !== undefined && this.job.status.status !== 'stopped';
+		return this.job !== undefined && this.job.state.status !== 'stopped';
 	}
 
 	/**
@@ -313,10 +313,10 @@ export class OutputLogTab extends ConstructorTab {
 			prefix += ` #${this.job.id}`;
 		}
 
-		switch (this.job.status.status) {
+		switch (this.job.state.status) {
 			case 'running': return prefix;
 			case 'stopping': return `${prefix}: Stopping`;
-			case 'stopped': return `${prefix}: ${this.job.status.stopType}`;
+			case 'stopped': return `${prefix}: ${this.job.state.stopType}`;
 		}
 
 	}

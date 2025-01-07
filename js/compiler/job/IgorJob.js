@@ -30,7 +30,7 @@ export class IgorJob {
 	stdout = '';
 
 	/** @type {JobStatus} */
-	status = { status: 'running' };
+	state = { status: 'running' };
 
 	/**
 	 * @private
@@ -85,11 +85,11 @@ export class IgorJob {
 	 */
 	onProcessExit = () => {
 
-		switch (this.status.status) {
+		switch (this.state.status) {
 
 			case 'running':
 
-				this.status = {
+				this.state = {
 					status: 'stopped',
 					stopType: (this.process.exitCode ?? 0 > 0) ? 'Failed' : 'Finished',
 					exitCode: this.process.exitCode ?? undefined
@@ -99,7 +99,7 @@ export class IgorJob {
 
 			case 'stopping':
 
-				this.status = {
+				this.state = {
 					status: 'stopped',
 					stopType: 'Stopped'
 				};
@@ -120,11 +120,11 @@ export class IgorJob {
 	 */
 	stop = () => {
 
-		if (this.status.status !== 'running' || this.process.pid === undefined) {
+		if (this.state.status !== 'running' || this.process.pid === undefined) {
 			return Promise.resolve();
 		}
 
-		this.status = { status: 'stopping' };
+		this.state = { status: 'stopping' };
 
 		/** @type {Promise<void>} */
 		const onStopPromise = new Promise(resolve => {
