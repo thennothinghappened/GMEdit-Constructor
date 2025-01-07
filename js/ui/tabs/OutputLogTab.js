@@ -1,9 +1,9 @@
-import { IgorJob } from '../../../compiler/job/IgorJob.js';
-import { ConstructorTab, ConstructorTabFileKind } from '../ConstructorTab.js';
-import * as ui from '../../ui-wrappers.js';
-import { use } from '../../../utils/scope-extensions/use.js';
-import { GmlFileUtils } from '../../../utils/gmedit/GmlFileUtils.js';
-import { ProjectProperties } from '../../../preferences/ProjectProperties.js';
+import { IgorJob } from '../../compiler/job/IgorJob.js';
+import { ConstructorTab, ConstructorTabFileKind } from './ConstructorTab.js';
+import * as ui from '../ui-wrappers.js';
+import { use } from '../../utils/scope-extensions/use.js';
+import { GmlFileUtils } from '../../utils/gmedit/GmlFileUtils.js';
+import { ProjectProperties } from '../../preferences/ProjectProperties.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];

@@ -1,13 +1,13 @@
 
-import { project_config_tree_get, project_config_tree_to_array, project_current_get, project_is_open } from '../../../utils/project.js';
-import { UIDropdownGetSelect, UIDropdownMutate } from '../../../utils/ui.js';
-import { ConstructorTab, ConstructorTabFileKind } from '../ConstructorTab.js';
-import { ProjectProperties } from '../../../preferences/ProjectProperties.js';
-import * as ui from '../../ui-wrappers.js';
-import * as preferencesMenu from '../../PreferencesMenu.js';
-import { plugin_name, plugin_version } from '../../../GMConstructor.js';
-import { use } from '../../../utils/scope-extensions/use.js';
-import { GM_CHANNEL_TYPES, Preferences, VALID_RUNNER_TYPES } from '../../../preferences/Preferences.js';
+import { project_config_tree_get, project_config_tree_to_array, project_current_get, project_is_open } from '../../utils/project.js';
+import { UIDropdownGetSelect, UIDropdownMutate } from '../../utils/ui.js';
+import { ConstructorTab, ConstructorTabFileKind } from './ConstructorTab.js';
+import { ProjectProperties } from '../../preferences/ProjectProperties.js';
+import * as ui from '../ui-wrappers.js';
+import * as preferencesMenu from '../PreferencesMenu.js';
+import { plugin_name, plugin_version } from '../../GMConstructor.js';
+import { use } from '../../utils/scope-extensions/use.js';
+import { GM_CHANNEL_TYPES, Preferences, VALID_RUNNER_TYPES } from '../../preferences/Preferences.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];

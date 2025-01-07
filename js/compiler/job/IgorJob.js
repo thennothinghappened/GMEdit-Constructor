@@ -1,4 +1,4 @@
-import { ControlPanelTab } from '../../ui/tabs/control-panel/ControlPanelTab.js';
+import { ControlPanelTab } from '../../ui/tabs/ControlPanelTab.js';
 import { Err } from '../../utils/Err.js';
 import { EventEmitterImpl } from '../../utils/EventEmitterImpl.js';
 import { child_process, path } from '../../utils/node/node-import.js';

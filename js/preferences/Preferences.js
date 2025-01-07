@@ -10,7 +10,7 @@ import { deep_assign } from '../utils/object.js';
 import { plugin_name } from '../GMConstructor.js';
 import * as node from '../utils/node/node-import.js';
 import { GMRuntimeVersion } from '../compiler/GMVersion.js';
-import { ControlPanelTab } from '../ui/tabs/control-panel/ControlPanelTab.js';
+import { ControlPanelTab } from '../ui/tabs/ControlPanelTab.js';
 import { use } from '../utils/scope-extensions/use.js';
 import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
 
