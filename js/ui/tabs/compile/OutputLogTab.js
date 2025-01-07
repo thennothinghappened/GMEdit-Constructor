@@ -74,7 +74,13 @@ export class OutputLogTab extends ConstructorTab {
 
 		this.logAceEditor = use(document.createElement('pre'))
 			.also(it => it.classList.add('gm-constructor-log'))
-			.let(it => GMEdit.aceTools.createEditor(it, { statusBar: false, tooltips: false }))
+			.let(it => GMEdit.aceTools.createEditor(it, { 
+				statusBar: false,
+				tooltips: false,
+				completers: false,
+				linter: false,
+				inputHelpers: false
+			}))
 			.also(it => it.setReadOnly(true))
 			.also(it => it.setOption('scrollPastEnd', 0))
 			.value;
