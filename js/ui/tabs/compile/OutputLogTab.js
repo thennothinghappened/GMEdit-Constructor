@@ -130,6 +130,7 @@ export class OutputLogTab extends ConstructorTab {
 			.forEach(error => error.remove());
 
 		this.errorsGroup.hidden = true;
+		this.logAceEditor.resize();
 
 		job.events.on('stdout', this.onJobStdout);
 		job.events.on('stop', this.onJobStop);
