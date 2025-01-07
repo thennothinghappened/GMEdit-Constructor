@@ -138,8 +138,7 @@ export declare global {
 	type IgorVerb = 
 		'Run'			|
 		'Package'		|
-		'PackageZip'	|
-		'Clean'			;
+		'PackageZip'	;
 	
 	interface JobEventMap {
 		stdout: string;
