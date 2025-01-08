@@ -392,7 +392,7 @@ export class ControlPanelTab extends ConstructorTab {
 
 		UIPreferences.addDropdown(
 			this.projectSettings,
-			'Runtime Type',
+			'Runner Platform',
 			ProjectProperties.zeusPlatform ?? 'Current Platform',
 			['Current Platform', 'HTML5', 'OperaGX'],
 			(value) => ProjectProperties.zeusPlatform = (value === 'Current Platform') ? undefined : value
