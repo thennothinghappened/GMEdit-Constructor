@@ -308,9 +308,13 @@ export class ProjectPropertiesMenu {
 	}
 
 	static __cleanup__() {
+
 		GMEdit.off('projectPropertiesBuilt', this.deploy);
 		GMEdit.off('projectOpen', this.onOpenProject);
 		GMEdit.off('projectClose', this.onCloseProject);
+
+		this.group?.remove();
+
 	}
 
 }
