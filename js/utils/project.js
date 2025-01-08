@@ -81,7 +81,7 @@ export function project_config_tree_to_array(config) {
 export function project_format_get(project) {
 	
 	if (!project.isGMS23) {
-		return { ok: true, data: 'outdated' };
+		return { ok: true, data: '[Unsupported]' };
 	}
 
 	if (!project.isGM2024) {

@@ -41,6 +41,10 @@ export class ConfigTreeUi {
 		if (project === undefined) {
 			return;
 		}
+
+		if (!project.isGMS23) {
+			return;
+		}
 		
 		const rootConfig = project_config_tree_get(project);
 		configsTreeDir = TreeView.makeAssetDir('Build Configs', '', null);

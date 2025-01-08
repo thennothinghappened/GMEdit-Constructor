@@ -281,6 +281,10 @@ export class ProjectProperties {
 			return;
 		}
 
+		if (!project.isGMS23) {
+			return;
+		}
+
 		properties = {};
 
 		const saved = project.properties['GMEdit-Constructor'];

@@ -301,6 +301,10 @@ export class ControlPanelTab extends ConstructorTab {
 			return;
 		}
 
+		if (!project.isGMS23) {
+			return;
+		}
+
 		this.projectSettingsSetup(project);
 		this.projectSettings.hidden = false;
 		

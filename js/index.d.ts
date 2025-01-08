@@ -14,13 +14,13 @@ export declare global {
 	 * Project format type for the loaded project.
 	 */
 	type YYProjectFormat =
-		'outdated'	|
-		'2023.11'	|
-		'2024.2'	|
-		'2024.4'	|
-		'2024.6'	|
-		'2024.8'	|
-		'2024.11+'	;
+		'[Unsupported]'	|
+		'2023.11'		|
+		'2024.2'		|
+		'2024.4'		|
+		'2024.6'		|
+		'2024.8'		|
+		'2024.11+'		;
 
 	type ProjectYY = {
 
