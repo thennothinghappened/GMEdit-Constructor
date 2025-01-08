@@ -13,6 +13,7 @@ Constructor can currently compile for the current build target (your OS), and ca
 - **Switch between VM or YYC**. (Building for other systems is planned, eventually.)
 - **Switch build configurations** (`#macro Config:SOMETHING ...`) via the Control Panel, or by right-clicking a config in the project sidebar.
 - **Support for Beta, Monthly, and LTS runtimes**, with a per-project switch, and warnings for project-incompatible selections.
+- **Support for HTML5 and GX.Games targets**. Note that the "Package" option for both of these is currently not working YYG have not documented its usage for these targets, and the IDE uses a proprietary extra-undocumented method.
 - **Automatic update-checking**. (This calls the GitHub API to check the latest release and can be toggled off.)
 - **Readable, central error messages** - the Control Panel shows any configuration issues, or internal errors. All errors display context, and most try to provide tips to resolve the issue where possible.
 
@@ -54,7 +55,6 @@ The above are the defaults provided. You can rebind these through GMEdit's
 
 ## Planned features include:
 - **Support for other targets**:
-  - HTML5
   - Android
   - Remote compilation for other platforms using `devices.json` (compile on another machine via `ssh` as you can in the IDE)
 - Option for docked console as opposed to full-window
