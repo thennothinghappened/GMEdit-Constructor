@@ -13,7 +13,7 @@ const UIPreferences = $gmedit['ui.Preferences'];
 export class ProjectPropertiesMenu {
 
 	/**
-	 * @type {(DocumentFragment & { buildConfigDropdown?: GMEdit.UIDropdown<string>, runtimeVersionDropdown?: GMEdit.UIDropdown<string> })}
+	 * @type {DocumentFragment}
 	 */
 	element = new DocumentFragment();
 
@@ -222,7 +222,6 @@ export class ProjectPropertiesMenu {
 	 * @param {GMChannelType} channel 
 	 */
 	updateRuntimeVersionList(channel) {
-
 		UIDropdownMutate(this.runtimeVersionDropdown,
 			[...preferencesMenu.runtime_version_strings_get_for_type(channel), USE_DEFAULT],
 			ProjectProperties.runtimeVersion ?? USE_DEFAULT
