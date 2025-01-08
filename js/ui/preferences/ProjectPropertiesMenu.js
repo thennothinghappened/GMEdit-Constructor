@@ -189,12 +189,11 @@ export class ProjectPropertiesMenu {
 	 * @private
 	 * @param {TPreferences.ProjectPropertiesEventMap['changeRuntimeChannel']} channel
 	 */
-	onChangeRuntimeChannel = ({ previous, channel, isNetChange }) => {
+	onChangeRuntimeChannel = ({ channel, isNetChange }) => {
 
 		this.updateChannel(channel);
 
 		if (isNetChange) {
-			console.info(`Changed from ${previous} to ${channel}`);
 			this.updateRuntimeVersionList(channel ?? Preferences.defaultRuntimeChannel);
 		}
 
@@ -223,8 +222,6 @@ export class ProjectPropertiesMenu {
 	 * @param {GMChannelType} channel 
 	 */
 	updateRuntimeVersionList(channel) {
-
-		console.info(`Updating version list to channel ${channel}`);
 
 		UIDropdownMutate(this.runtimeVersionDropdown,
 			[...preferencesMenu.runtime_version_strings_get_for_type(channel), USE_DEFAULT],
