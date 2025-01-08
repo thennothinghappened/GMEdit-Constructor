@@ -394,7 +394,7 @@ export class ControlPanelTab extends ConstructorTab {
 			this.projectSettings,
 			'Runtime Type',
 			ProjectProperties.zeusPlatform ?? 'Current Platform',
-			['Current Platform', 'HTML5'],
+			['Current Platform', 'HTML5', 'OperaGX'],
 			(value) => ProjectProperties.zeusPlatform = (value === 'Current Platform') ? undefined : value
 		).classList.add('singleline');
 

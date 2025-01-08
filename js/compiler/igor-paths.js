@@ -78,7 +78,8 @@ export const output_blob_exts = {
 	Windows: 'win',
 	Mac: 'ios',
 	Linux: 'unx',
-	HTML5: 'zip'
+	HTML5: 'zip',
+	OperaGX: 'unx'
 };
 
 /**
