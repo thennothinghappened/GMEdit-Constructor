@@ -2,10 +2,9 @@
  * Handler for project-specific preferences.
  */
 
-import { igor_user_platform } from '../compiler/igor-paths.js';
 import { Err } from '../utils/Err.js';
 import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
-import { project_current_get } from '../utils/project.js';
+import { project_config_tree_get, project_current_get } from '../utils/project.js';
 import { Preferences } from './Preferences.js';
 
 const GMEditProjectProperties = $gmedit['ui.project.ProjectProperties'];
@@ -40,15 +39,34 @@ export class ProjectProperties {
 	 * Get the active compile config name.
 	 * @returns {string}
 	 */
-	static get buildConfig() {
+	static get buildConfigName() {
 		return properties.config_name ?? 'Default';
+	}
+
+	/**
+	 * The root build configuration of the project.
+	 * @returns {ProjectYYConfig}
+	 */
+	static get rootBuildConfig() {
+
+		const project = project_current_get();
+
+		if (project === undefined) {
+			return {
+				name: 'Default',
+				children: []
+			};
+		}
+
+		return project_config_tree_get(project);
+
 	}
 
 	/**
 	 * Set the active compile config name.
 	 * @param {string} config_name 
 	 */
-	static set buildConfig(config_name) {
+	static set buildConfigName(config_name) {
 
 		const previous = properties.config_name;
 
@@ -127,14 +145,33 @@ export class ProjectProperties {
 
 	/**
 	 * Set the desired runtime channel type.
-	 * @param {GMChannelType|undefined} runtime_type 
+	 * @param {GMChannelType|undefined} channel 
 	 */
-	static set runtimeChannelType(runtime_type) {
+	static set runtimeChannelType(channel) {
 
-		properties.runtime_type = runtime_type;
+		const previous = this.runtimeChannelType;
+
+		if (previous === channel) {
+			return;
+		}
+
+		properties.runtime_type = channel;
 		this.save();
-
-		this.eventEmitter.emit('changeRuntimeChannel', runtime_type);
+		
+		let isNetChange = true;
+		
+		if (previous === undefined && channel === Preferences.defaultRuntimeChannel) {
+			// No net change: changed from implicit default to explicit default.
+			isNetChange = false;
+		}
+		
+		if (channel === undefined && previous === Preferences.defaultRuntimeChannel) {
+			// No net change: changed from explicit default to implicit default.
+			isNetChange = false;
+		}
+		
+		// @ts-expect-error Check above ensures this only fires when a change has actually happened.
+		this.eventEmitter.emit('changeRuntimeChannel', { previous, channel, isNetChange });
 
 	}
 
@@ -293,28 +330,12 @@ export class ProjectProperties {
 			Object.assign(properties, saved);
 		}
 
-		Preferences.events.on('setDefaultRuntimeChannel', this.onPrefsGlobalChannelSet);
-
-	}
+	};
 
 	/**
 	 * @private
 	 */
 	static onProjectClose = () => {
-		Preferences.events.off('setDefaultRuntimeChannel', this.onPrefsGlobalChannelSet);
-	}
-
-	/**
-	 * @private
-	 * @param {GMChannelType} type
-	 */
-	static onPrefsGlobalChannelSet = (type) => {
-
-		if (this.runtimeChannelType !== undefined) {
-			return;
-		}
-
-		this.eventEmitter.emit('changeRuntimeChannel', type);
 
 	};
 

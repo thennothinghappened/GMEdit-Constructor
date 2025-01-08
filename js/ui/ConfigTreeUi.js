@@ -50,7 +50,7 @@ export class ConfigTreeUi {
 		configsTreeDir = TreeView.makeAssetDir('Build Configs', '', null);
 		
 		this.addConfigInTree(configsTreeDir.treeItems, rootConfig);
-		this.updateConfigTree(ProjectProperties.buildConfig);
+		this.updateConfigTree(ProjectProperties.buildConfigName);
 
 		TreeView.element.appendChild(configsTreeDir);
 		ProjectProperties.events.on('changeBuildConfig', this.onChangeBuildConfig);
@@ -95,7 +95,7 @@ export class ConfigTreeUi {
 		dir.treeHeader.title = 'Right-click to select.';
 		dir.treeHeader.addEventListener('click', TreeView.handleDirClick);
 		dir.treeHeader.addEventListener('contextmenu', () => {
-			ProjectProperties.buildConfig = config.name;
+			ProjectProperties.buildConfigName = config.name;
 		});
 
 		for (const childConfig of config.children) {

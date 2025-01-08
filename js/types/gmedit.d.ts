@@ -231,17 +231,17 @@ export declare global {
 		
 		}
 
-		type UIDropdown<T extends string> = HTMLDivElement;
+		type UIDropdown<T extends string> = HTMLDivElement & { __phantomTypeData?: T };
 
 		interface Preferences {
-			addText(parent: HTMLElement, label: string): HTMLElement;
-			addWiki(parent: HTMLElement, url: string, label: string): HTMLElement;
-			addCheckbox(parent: HTMLElement, label: string, value: boolean, update: (value: boolean) => void): HTMLElement;
-			addInput(parent: HTMLElement, label: string, value: string, update: (value: string) => void): HTMLElement;
-			addDropdown<T extends string>(parent: HTMLElement, label: string, value: T, choices: readonly T[], update: (value: T) => void): UIDropdown<T>;
-			addGroup(parent: HTMLElement, label: string): HTMLFieldSetElement;
-			addButton(parent: HTMLElement, text: string, callback: () => void): HTMLDivElement;
-			addBigButton(parent: HTMLElement, text: string, callback: () => void): HTMLDivElement;
+			addText(parent: ParentNode, label: string): HTMLElement;
+			addWiki(parent: ParentNode, url: string, label: string): HTMLElement;
+			addCheckbox(parent: ParentNode, label: string, value: boolean, update: (value: boolean) => void): HTMLElement;
+			addInput(parent: ParentNode, label: string, value: string, update: (value: string) => void): HTMLElement;
+			addDropdown<T extends string>(parent: ParentNode, label: string, value: T, choices: readonly T[], update: (value: T) => void): UIDropdown<T>;
+			addGroup(parent: ParentNode, label: string): HTMLFieldSetElement;
+			addButton(parent: ParentNode, text: string, callback: () => void): HTMLDivElement;
+			addBigButton(parent: ParentNode, text: string, callback: () => void): HTMLDivElement;
 		}
 	
 		interface ProjectProperties {

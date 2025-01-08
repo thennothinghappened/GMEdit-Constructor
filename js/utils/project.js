@@ -63,13 +63,11 @@ export function project_config_tree_get(project) {
  * @param {ProjectYYConfig} config 
  * @returns {string[]}
  */
-export function project_config_tree_to_array(config) {
-
-	const arr = config.children.flatMap(child => project_config_tree_to_array(child));
-	arr.push(config.name);
-
-	return arr.reverse();
-
+export function project_config_tree_flatten(config) {
+	return [
+		config.name, 
+		...config.children.flatMap(child => project_config_tree_flatten(child))
+	];
 }
 
 /**

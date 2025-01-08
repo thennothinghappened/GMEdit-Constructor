@@ -3,7 +3,7 @@ import * as hamburgerOptions from './ui/HamburgerOptions.js';
 import { project_current_get, open_files_save, project_format_get, tab_current_get } from './utils/project.js';
 import { ProjectProperties } from './preferences/ProjectProperties.js';
 import * as igorPaths from './compiler/igor-paths.js';
-import * as preferencesMenu from './ui/PreferencesMenu.js';
+import * as preferencesMenu from './ui/preferences/PreferencesMenu.js';
 import { Err } from './utils/Err.js';
 import { ControlPanelTab } from './ui/tabs/ControlPanelTab.js';
 import { plugin_update_check } from './update-checker/UpdateChecker.js';
@@ -46,7 +46,7 @@ export class GMConstructor {
 			platform: partial_settings.platform ?? ProjectProperties.zeusPlatform ?? igorPaths.igor_user_platform,
 			runner: partial_settings.runner ?? ProjectProperties.runtimeBuildTypeOrDef,
 			threads: partial_settings.threads ?? 8,
-			configName: partial_settings.configName ?? ProjectProperties.buildConfig
+			configName: partial_settings.configName ?? ProjectProperties.buildConfigName
 		};
 		
 		const runtime_res = ProjectProperties.runtime;
