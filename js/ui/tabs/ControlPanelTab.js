@@ -292,6 +292,9 @@ export class ControlPanelTab extends ConstructorTab {
 	 */
 	onOpenProject = () => {
 
+		// TODO: Workaround for GMEdit bug where hitting Ctrl+R doesn't call `onCloseProject`.
+		this.onCloseProject();
+
 		const project = project_current_get();
 
 		if (project === undefined) {
