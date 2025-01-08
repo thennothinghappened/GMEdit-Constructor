@@ -4,8 +4,28 @@ import { GM_CHANNEL_TYPES, Preferences, ZEUS_RUNTIME_TYPES } from '../../prefere
 import { project_config_tree_flatten } from '../../utils/project.js';
 import { ProjectProperties } from '../../preferences/ProjectProperties.js';
 import * as preferencesMenu from './PreferencesMenu.js';
+import { plugin_name } from '../../GMConstructor.js';
 
 const UIPreferences = $gmedit['ui.Preferences'];
+
+/**
+ * Used for runtime/user select dropdowns, to default to the global settings.
+ * Corresponds to `undefined` in the actual preferences files.
+ */
+const USE_DEFAULT = 'Use Default';
+
+/**
+ * Return the given `value`, but `USE_DEFAULT` gives `undefined`.
+ * 
+ * @template {string} T
+ * @param {T|USE_DEFAULT} value 
+ * @returns {T|undefined}
+ */
+function default_undefined(value) {
+	return (value === USE_DEFAULT)
+		? undefined
+		: value;
+}
 
 /**
  * User interface for managing project-specific properties.
@@ -235,23 +255,62 @@ export class ProjectPropertiesMenu {
 		this.onCloseProject();
 	}
 
-}
+	/**
+	 * Instance to be used for displaying in GMEdit's own Project Properties screen.
+	 * 
+	 * @readonly
+	 * @private
+	 * @type {ProjectPropertiesMenu}
+	 */
+	static instance = new ProjectPropertiesMenu();
 
-/**
- * Used for runtime/user select dropdowns, to default to the global settings.
- * Corresponds to `undefined` in the actual preferences files.
- */
-const USE_DEFAULT = 'Use Default';
+	/**
+	 * The group that holds the instance's element.
+	 * 
+	 * @private
+	 * @type {HTMLFieldSetElement|undefined}
+	 */
+	static group = undefined;
 
-/**
- * Return the given `value`, but `USE_DEFAULT` gives `undefined`.
- * 
- * @template {string} T
- * @param {T|USE_DEFAULT} value 
- * @returns {T|undefined}
- */
-function default_undefined(value) {
-	return (value === USE_DEFAULT)
-		? undefined
-		: value;
+	/**
+	 * Deploy the singleton instance to the tab.
+	 * 
+	 * @private
+	 * @param {GMEdit.PluginEventMap['projectPropertiesBuilt']} event
+	 */
+	static deploy = ({ target }) => {
+
+		if (this.group !== undefined) {
+			this.group.remove();
+			target.appendChild(this.group);
+		} else {
+			this.group = UIPreferences.addGroup(target, plugin_name);
+			this.group.appendChild(this.instance.element);
+		}
+		
+	};
+
+	/**
+	 * @private
+	 * @param {GMEdit.PluginEventMap['projectOpen']} event 
+	 */
+	static onOpenProject = ({ project }) => this.instance.onOpenProject(project);
+
+	/**
+	 * @private
+	 */
+	static onCloseProject = () => this.instance.onCloseProject();
+
+	static __setup__() {
+		GMEdit.on('projectPropertiesBuilt', this.deploy);
+		GMEdit.on('projectOpen', this.onOpenProject);
+		GMEdit.on('projectClose', this.onCloseProject);
+	}
+
+	static __cleanup__() {
+		GMEdit.off('projectPropertiesBuilt', this.deploy);
+		GMEdit.off('projectOpen', this.onOpenProject);
+		GMEdit.off('projectClose', this.onCloseProject);
+	}
+
 }

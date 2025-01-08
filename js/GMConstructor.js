@@ -13,6 +13,7 @@ import { OutputLogTab } from './ui/tabs/OutputLogTab.js';
 import { Preferences } from './preferences/Preferences.js';
 import { ConfigTreeUi } from './ui/ConfigTreeUi.js';
 import { unwrap } from './utils/Result.js';
+import { ProjectPropertiesMenu } from './ui/preferences/ProjectPropertiesMenu.js';
 
 /**
  * Name of the plugin 
@@ -305,6 +306,7 @@ export class GMConstructor {
 		}
 
 		ProjectProperties.__setup__();
+		ProjectPropertiesMenu.__setup__();
 		preferencesMenu.__setup__();
 		hamburgerOptions.__setup__();
 		ConfigTreeUi.__setup__();
@@ -353,6 +355,7 @@ export class GMConstructor {
 
 		Preferences.__cleanup__();
 		ProjectProperties.__cleanup__();
+		ProjectPropertiesMenu.__cleanup__();
 		compileController.__cleanup__();
 		hamburgerOptions.__cleanup__();
 		ConfigTreeUi.__cleanup__();
