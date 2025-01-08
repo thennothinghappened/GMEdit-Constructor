@@ -9,9 +9,9 @@ const TreeView = $gmedit['ui.treeview.TreeView'];
 let configTreeItems = {};
 
 /**
- * @type {GMEdit.TreeViewDir}
+ * @type {GMEdit.TreeViewDir|undefined}
  */
-let configsTreeDir;
+let configsTreeDir = undefined;
 
 /**
  * Sidebar folder that visually shows the project build configs to select from more easily than via
@@ -66,7 +66,9 @@ export class ConfigTreeUi {
 
 		ProjectProperties.events.off('changeBuildConfig', this.onChangeBuildConfig);
 
-		configsTreeDir.remove();
+		configsTreeDir?.remove();
+		configsTreeDir = undefined;
+		
 		configTreeItems = {};
 		
 	}
