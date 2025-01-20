@@ -91,8 +91,7 @@ export class OutputLogTab extends ConstructorTab {
 				statusBar: false,
 				tooltips: false,
 				completers: false,
-				linter: false,
-				inputHelpers: false
+				linter: false
 			}))
 			.also(it => it.setReadOnly(true))
 			.also(it => it.setOption('scrollPastEnd', 0))
