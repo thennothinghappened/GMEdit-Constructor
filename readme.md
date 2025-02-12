@@ -1,9 +1,13 @@
 # GMEdit-Constructor
 As the title suggests, Constructor is a plugin for YellowAfterlife's [GMEdit](<https://github.com/YellowAfterlife/GMEdit>), which allows you to compile from the editor just as you can in the GameMaker IDE.
 
-Currently, Constructor about matches the capabilities of [builder](<https://github.com/YAL-GMEdit/builder>), which is another plugin serving the same role, but as GM now uses Igor as a commandline tool to automate things, it means that interacting with the compiler is a lot easier and a lot less error-prone (especially as GM changes, which invoking the AssetCompiler directly cannot cope with.)
+For projects targetting new(ish) versions of GameMaker, Constructor is generally a more capable and
+stable option to the older [builder](<https://github.com/YAL-GMEdit/builder>), as it uses the
+compilation toolchain instead of invoking the asset compiler directly. If you are working on a
+codebase that must remain on a legacy (<2.3) version of GameMaker, use builder instead.
 
-Constructor can currently compile for the current build target (your OS), and can switch between build configs.
+Constructor can compile for the current build target (your OS), web targets (HTML5 and WASM),
+and can switch between build configs.
 
 ## Features
 - **Easily run, package releases, or clean projects from GMEdit!**
