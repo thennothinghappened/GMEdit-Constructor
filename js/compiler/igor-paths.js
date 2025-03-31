@@ -3,6 +3,8 @@ import * as node from '../utils/node/node-import.js';
 
 const windowsAppData = process.env?.AppData ?? 'C:\\Users\\PLEASE_SPECIFY_USERNAME\\AppData\\Roaming';
 const windowsLocalAppData = process.env?.LocalAppData ?? 'C:\\Users\\PLEASE_SPECIFY_USERNAME\\AppData\\Local';
+const linuxConfigPath = process.env.XDG_CONFIG_HOME ?? process.env.HOME + '/.config';
+const linuxDataPath = process.env.XDG_DATA_HOME ?? process.env.HOME + '/.local/share';
 
 /**
  * Mappings of NodeJS platforms to various Igor information.
@@ -47,16 +49,16 @@ const igor_platform_map = {
 		platform_path_name: 'linux',
 		user_platform: 'Linux',
 		default_runtime_paths: {
-			Stable:	process.env.HOME + '/.local/share/GameMakerStudio2/Cache/runtimes',
-			Beta:	process.env.HOME + '/.local/share/GameMakerStudio2-Beta/Cache/runtimes',
-			LTS:	process.env.HOME + '/.local/share/GameMakerStudio2-LTS/Cache/runtimes'
+			Stable:	linuxDataPath + '/GameMakerStudio2/Cache/runtimes',
+			Beta:	linuxDataPath + '/GameMakerStudio2-Beta/Cache/runtimes',
+			LTS:	linuxDataPath + '/GameMakerStudio2-LTS/Cache/runtimes'
 		},
 		default_user_paths: {
-			Stable:	process.env.HOME + '/.config/GameMakerStudio2',
-			Beta:	process.env.HOME + '/.config/GameMakerStudio2-Beta',
-			LTS:	process.env.HOME + '/.config/GameMakerStudio2-LTS'
+			Stable:	linuxConfigPath + '/GameMakerStudio2',
+			Beta:	linuxConfigPath + '/GameMakerStudio2-Beta',
+			LTS:	linuxConfigPath + '/GameMakerStudio2-LTS'
 		},
-		default_global_build_path: process.env.HOME + '/GMEdit-Constructor/builds'
+		default_global_build_path: linuxDataPath + '/GMEdit-Constructor/builds'
 	}
 };
 
