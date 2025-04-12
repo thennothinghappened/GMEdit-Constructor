@@ -7,10 +7,10 @@ export class Err extends Error {
 
 	/**
 	 * @param {string} message 
-	 * @param {any?} [cause] 
+	 * @param {unknown} [cause] 
 	 * @param {string} [solution]
 	 */
-	constructor(message, cause = null, solution) {
+	constructor(message, cause, solution) {
 		super(message, { cause });
 		this.solution = solution;
 	}
@@ -28,6 +28,27 @@ export class Err extends Error {
 		
 		return string;
 
+	}
+
+}
+
+/**
+ * The program has entered an invalid state.
+ * 
+ * This error should not be recovered from!
+ */
+export class InvalidStateErr extends Err {
+
+	/**
+	 * @param {string} message
+	 * @param {unknown} [cause]
+	 */
+	constructor(message, cause) {
+		super(
+			'Invalid State!!: ' + message,
+			cause,
+			'Please report this error through Constructor\'s GitHub Issues (https://github.com/thennothinghappened/GMEdit-Constructor/issues)!'
+		);
 	}
 
 }

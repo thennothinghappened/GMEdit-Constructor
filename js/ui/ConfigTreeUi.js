@@ -1,23 +1,65 @@
+import { GMConstructor } from '../GMConstructor.js';
 import { ProjectProperties } from '../preferences/ProjectProperties.js';
 import { project_config_tree_get, project_current_get } from '../utils/project.js';
 
 const TreeView = $gmedit['ui.treeview.TreeView'];
-
-/**
- * @type {Record<string, GMEdit.TreeViewDir>}
- */
-let configTreeItems = {};
-
-/**
- * @type {GMEdit.TreeViewDir|undefined}
- */
-let configsTreeDir = undefined;
-
 /**
  * Sidebar folder that visually shows the project build configs to select from more easily than via
  * the control panel.
  */
 export class ConfigTreeUi {
+
+	/**
+	 * @private
+	 * @type {ProjectProperties}
+	 */
+	projectProperties;
+
+	/**
+	 * @private
+	 * @type {Record<string, GMEdit.TreeViewDir>}
+	 */
+	configTreeItems = {};
+
+	/**
+	 * @private
+	 * @type {GMEdit.TreeViewDir}
+	 */
+	configsTreeDir;
+
+	/**
+	 * @private
+	 * @type {Map<GMEdit.Project, ConfigTreeUi>}
+	 */
+	static instances = new Map();
+
+	/**
+	 * @private
+	 * @param {GMEdit.Project} project 
+	 * @param {ProjectProperties} projectProperties 
+	 */
+	constructor(project, projectProperties) {
+
+		this.projectProperties = projectProperties;
+
+		const rootConfig = project_config_tree_get(project);
+		this.configsTreeDir = TreeView.makeAssetDir('Build Configs', '', null);
+		
+		this.addConfigInTree(this.configsTreeDir.treeItems, rootConfig);
+		this.updateConfigTree(this.projectProperties.buildConfigName);
+
+		TreeView.element.appendChild(this.configsTreeDir);
+		this.projectProperties.events.on('changeBuildConfig', this.onChangeBuildConfig);
+
+	}
+
+	/**
+	 * @private
+	 */
+	destroy() {
+		this.projectProperties.events.off('changeBuildConfig', this.onChangeBuildConfig);
+		this.configsTreeDir?.remove();
+	}
 
 	static __setup__() {
 		GMEdit.on('projectOpen', this.onProjectOpen);
@@ -25,51 +67,48 @@ export class ConfigTreeUi {
 	}
 
 	static __cleanup__() {
+		
 		GMEdit.off('projectOpen', this.onProjectOpen);
 		GMEdit.off('projectClose', this.onProjectClose);
+		
+		for (const instance of this.instances.values()) {
+			instance.destroy();
+		}
+
+		this.instances.clear();
+
 	}
 
 	/**
 	 * Set up tree view build configs.
 	 * 
+	 * @param {GMEdit.PluginEventMap['projectOpen']} event
 	 * @private
 	 */
-	static onProjectOpen = () => {
+	static onProjectOpen = ({ project }) => {
 
-		const project = project_current_get();
-
-		if (project === undefined) {
+		if (!GMConstructor.supportsProjectFormat(project)) {
 			return;
 		}
 
-		if (!project.isGMS23) {
-			return;
-		}
-		
-		const rootConfig = project_config_tree_get(project);
-		configsTreeDir = TreeView.makeAssetDir('Build Configs', '', null);
-		
-		this.addConfigInTree(configsTreeDir.treeItems, rootConfig);
-		this.updateConfigTree(ProjectProperties.buildConfigName);
-
-		TreeView.element.appendChild(configsTreeDir);
-		ProjectProperties.events.on('changeBuildConfig', this.onChangeBuildConfig);
+		this.instances.set(project, new ConfigTreeUi(project, ProjectProperties.get(project)));
 
 	}
 
 	/**
 	 * Clean up the build configs in the tree view.
 	 * 
+	 * @param {GMEdit.PluginEventMap['projectClose']} event
 	 * @private
 	 */
-	static onProjectClose = () => {
+	static onProjectClose = ({ project }) => {
 
-		ProjectProperties.events.off('changeBuildConfig', this.onChangeBuildConfig);
+		const instance = this.instances.get(project);
 
-		configsTreeDir?.remove();
-		configsTreeDir = undefined;
-		
-		configTreeItems = {};
+		if (instance !== undefined) {
+			instance.destroy();
+			this.instances.delete(project);
+		}
 		
 	}
 
@@ -77,7 +116,7 @@ export class ConfigTreeUi {
 	 * @private
 	 * @param {{ previous?: string, current: string }} event
 	 */
-	static onChangeBuildConfig = ({ previous, current }) =>
+	onChangeBuildConfig = ({ previous, current }) =>
 		this.updateConfigTree(current, previous);
 
 	/**
@@ -87,22 +126,21 @@ export class ConfigTreeUi {
 	 * @param {HTMLDivElement} parentElement 
 	 * @param {ProjectYYConfig} config 
 	 */
-	static addConfigInTree(parentElement, config) {
+	addConfigInTree(parentElement, config) {
 
-		
 		const dir = TreeView.makeDir(config.name);
 
 		dir.treeHeader.title = 'Right-click to select.';
 		dir.treeHeader.addEventListener('click', TreeView.handleDirClick);
 		dir.treeHeader.addEventListener('contextmenu', () => {
-			ProjectProperties.buildConfigName = config.name;
+			this.projectProperties.buildConfigName = config.name;
 		});
 
 		for (const childConfig of config.children) {
 			this.addConfigInTree(dir.treeItems, childConfig);
 		}
 
-		configTreeItems[config.name] = dir;
+		this.configTreeItems[config.name] = dir;
 		parentElement.appendChild(dir);
 
 	}
@@ -114,11 +152,11 @@ export class ConfigTreeUi {
 	 * @param {string} newConfigName 
 	 * @param {string} [oldConfigName] 
 	 */
-	static updateConfigTree(newConfigName, oldConfigName) {
+	updateConfigTree(newConfigName, oldConfigName) {
 
 		if (oldConfigName !== undefined) {
 
-			const prevTreeItem = configTreeItems[oldConfigName];
+			const prevTreeItem = this.configTreeItems[oldConfigName];
 
 			if (prevTreeItem !== undefined) {
 
@@ -131,7 +169,7 @@ export class ConfigTreeUi {
 			}
 		}
 
-		const treeItem = configTreeItems[newConfigName];
+		const treeItem = this.configTreeItems[newConfigName];
 
 		if (treeItem !== undefined) {
 			

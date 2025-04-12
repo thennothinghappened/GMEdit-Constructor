@@ -3,9 +3,10 @@ import { project_current_get } from '../../utils/project.js';
 import { ConstructorTab, ConstructorTabFileKind } from './ConstructorTab.js';
 import * as ui from '../ui-wrappers.js';
 import * as preferencesMenu from '../preferences/PreferencesMenu.js';
-import { plugin_name, plugin_version } from '../../GMConstructor.js';
+import { GMConstructor, plugin_name, plugin_version } from '../../GMConstructor.js';
 import { Preferences } from '../../preferences/Preferences.js';
 import { ProjectPropertiesMenu } from '../preferences/ProjectPropertiesMenu.js';
+import { ProjectProperties } from '../../preferences/ProjectProperties.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];
@@ -49,9 +50,9 @@ export class ControlPanelTab extends ConstructorTab {
 
 	/**
 	 * @private
-	 * @type {ProjectPropertiesMenu}
+	 * @type {ProjectPropertiesMenu|undefined}
 	 */
-	projectPropertiesMenu = new ProjectPropertiesMenu();
+	projectPropertiesMenu = undefined;
 
 	/**
 	 * @param {GMEdit.GmlFile} file
@@ -73,7 +74,6 @@ export class ControlPanelTab extends ConstructorTab {
 
 		this.projectSettingsElement = ui.group(this.element, 'Project Settings');
 		this.projectSettingsElement.hidden = true;
-		this.projectSettingsElement.appendChild(this.projectPropertiesMenu.element);
 
 		this.globalSettings = ui.group(this.element, 'Global Settings');
 
@@ -280,11 +280,13 @@ export class ControlPanelTab extends ConstructorTab {
 	 */
 	onOpenProject = ({ project }) => {
 
-		if (!project.isGMS23) {
+		if (!GMConstructor.supportsProjectFormat(project)) {
 			return;
 		}
 
-		this.projectPropertiesMenu.onOpenProject(project);
+		this.projectPropertiesMenu = new ProjectPropertiesMenu(ProjectProperties.get(project));
+
+		this.projectSettingsElement.appendChild(this.projectPropertiesMenu.element);
 		this.projectSettingsElement.hidden = false;
 		
 	}
@@ -295,12 +297,10 @@ export class ControlPanelTab extends ConstructorTab {
 	onCloseProject = () => {
 		
 		this.projectSettingsElement.hidden = true;
-		this.projectPropertiesMenu.onCloseProject();
-		
-		for (const element of Array.from(this.projectSettingsElement.children)) {
-			if (!(element instanceof HTMLLegendElement)) {
-				element.remove();
-			}
+
+		if (this.projectPropertiesMenu !== undefined) {
+			this.projectSettingsElement.removeChild(this.projectPropertiesMenu.element);
+			this.projectPropertiesMenu.destroy();
 		}
 
 	}
@@ -315,9 +315,14 @@ export class ControlPanelTab extends ConstructorTab {
 	}
 
 	destroy = () => {
+
 		GMEdit.off('projectOpen', this.onOpenProject);
 		GMEdit.off('projectClose', this.onCloseProject);
-		this.projectPropertiesMenu.destroy();
+
+		if (this.projectPropertiesMenu !== undefined) {
+			this.projectPropertiesMenu.destroy();
+		}
+
 	}
 
 }

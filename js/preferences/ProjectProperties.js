@@ -2,36 +2,66 @@
  * Handler for project-specific preferences.
  */
 
-import { Err } from '../utils/Err.js';
+import { GMConstructor } from '../GMConstructor.js';
+import { Err, InvalidStateErr } from '../utils/Err.js';
 import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
 import { project_config_tree_get, project_current_get } from '../utils/project.js';
 import { Preferences } from './Preferences.js';
 
 const GMEditProjectProperties = $gmedit['ui.project.ProjectProperties'];
 
-/**
- * The current properties instance.
- * @type {Partial<TPreferences.ProjectData>}
- */
-let properties = {};
-
 export class ProjectProperties {
+
+	/**
+	 * The project for which these properties are associated.
+	 * @type {GMEdit.Project}
+	 */
+	project;
+
+	/**
+	 * The current properties instance.
+	 * 
+	 * @private
+	 * @type {Partial<TPreferences.ProjectData>}
+	 */
+	properties;
 
 	/**
 	 * @readonly
 	 * @private
 	 * @type {EventEmitterImpl<TPreferences.ProjectPropertiesEventMap>}
 	 */
-	static eventEmitter = new EventEmitterImpl([
+	eventEmitter = new EventEmitterImpl([
 		'changeBuildConfig',
 		'changeRuntimeChannel',
 		'changeRuntimeVersion'
 	]);
 
 	/**
+	 * @private
+	 * @param {GMEdit.Project} project
+	 */
+	constructor(project) {
+
+		this.project = project;
+		this.properties = project.properties['GMEdit-Constructor'] ?? {};
+
+		this.events.on('changeRuntimeChannel', this.onChangeRuntimeChannel);
+		
+	}
+
+	/**
+	 * Clean up this properties instance.
+	 * @private
+	 */
+	destroy() {
+		this.events.off('changeRuntimeChannel', this.onChangeRuntimeChannel);
+	}
+
+	/**
 	 * @returns {EventEmitter<TPreferences.ProjectPropertiesEventMap>}
 	 */
-	static get events() {
+	get events() {
 		return this.eventEmitter;
 	}
 
@@ -39,15 +69,15 @@ export class ProjectProperties {
 	 * Get the active compile config name.
 	 * @returns {string}
 	 */
-	static get buildConfigName() {
-		return properties.config_name ?? 'Default';
+	get buildConfigName() {
+		return this.properties.config_name ?? 'Default';
 	}
 
 	/**
 	 * The root build configuration of the project.
 	 * @returns {ProjectYYConfig}
 	 */
-	static get rootBuildConfig() {
+	get rootBuildConfig() {
 
 		const project = project_current_get();
 
@@ -66,11 +96,11 @@ export class ProjectProperties {
 	 * Set the active compile config name.
 	 * @param {string} config_name 
 	 */
-	static set buildConfigName(config_name) {
+	set buildConfigName(config_name) {
 
-		const previous = properties.config_name;
+		const previous = this.properties.config_name;
 
-		properties.config_name = config_name;
+		this.properties.config_name = config_name;
 		this.save();
 
 		this.eventEmitter.emit('changeBuildConfig', { previous, current: config_name });
@@ -81,7 +111,7 @@ export class ProjectProperties {
 	 * Get the desired runner type.
 	 * @returns {Zeus.RuntimeType}
 	 */
-	static get runtimeBuildTypeOrDef() {
+	get runtimeBuildTypeOrDef() {
 		return this.runtimeBuildType ?? Preferences.runtimeBuildType;
 	}
 
@@ -89,16 +119,16 @@ export class ProjectProperties {
 	 * Get the desired runner type for this project (without falling back to the global option).
 	 * @returns {Zeus.RuntimeType|undefined}
 	 */
-	static get runtimeBuildType() {
-		return properties.runner ?? undefined;
+	get runtimeBuildType() {
+		return this.properties.runner ?? undefined;
 	}
 
 	/**
 	 * Set the desired runtime channel type.
 	 * @param {Zeus.RuntimeType|undefined} runner 
 	 */
-	static set runtimeBuildType(runner) {
-		properties.runner = runner;
+	set runtimeBuildType(runner) {
+		this.properties.runner = runner;
 		this.save();
 	}
 
@@ -106,7 +136,7 @@ export class ProjectProperties {
 	 * Get whether to reuse a compiler tab.
 	 * @returns {Boolean}
 	 */
-	static get reuseCompilerTabOrDef() {
+	get reuseCompilerTabOrDef() {
 		return this.reuseCompilerTab ?? Preferences.reuseCompilerTab;
 	}
 
@@ -114,16 +144,16 @@ export class ProjectProperties {
 	 * Get whether to reuse a compiler tab.
 	 * @returns {Boolean|undefined}
 	 */
-	static get reuseCompilerTab() {
-		return properties.reuse_compiler_tab ?? undefined;
+	get reuseCompilerTab() {
+		return this.properties.reuse_compiler_tab ?? undefined;
 	}
 
 	/**
 	 * Set whether to reuse a compiler tab.
 	 * @param {Boolean|undefined} reuse_compiler_tab 
 	 */
-	static set reuseCompilerTab(reuse_compiler_tab) {
-		properties.reuse_compiler_tab = reuse_compiler_tab;
+	set reuseCompilerTab(reuse_compiler_tab) {
+		this.properties.reuse_compiler_tab = reuse_compiler_tab;
 		this.save();
 	}
 
@@ -131,23 +161,23 @@ export class ProjectProperties {
 	 * Get the desired runtime channel type.
 	 * @returns {GMChannelType}
 	 */
-	static get runtimeChannelTypeOrDef() {
-		return properties.runtime_type ?? Preferences.defaultRuntimeChannel;
+	get runtimeChannelTypeOrDef() {
+		return this.properties.runtime_type ?? Preferences.defaultRuntimeChannel;
 	}
 
 	/**
 	 * Get the desired runtime channel type for this project (without falling back to the global option).
 	 * @returns {GMChannelType|undefined}
 	 */
-	static get runtimeChannelType() {
-		return properties.runtime_type ?? undefined;
+	get runtimeChannelType() {
+		return this.properties.runtime_type ?? undefined;
 	}
 
 	/**
 	 * Set the desired runtime channel type.
 	 * @param {GMChannelType|undefined} channel 
 	 */
-	static set runtimeChannelType(channel) {
+	set runtimeChannelType(channel) {
 
 		const previous = this.runtimeChannelType;
 
@@ -155,7 +185,7 @@ export class ProjectProperties {
 			return;
 		}
 
-		properties.runtime_type = channel;
+		this.properties.runtime_type = channel;
 		this.save();
 		
 		let isNetChange = true;
@@ -181,15 +211,15 @@ export class ProjectProperties {
 	 * 
 	 * @returns {Zeus.Platform|undefined}
 	 */
-	static get zeusPlatform() {
-		return properties.zeus_platform;
+	get zeusPlatform() {
+		return this.properties.zeus_platform;
 	}
 
 	/**
 	 * @param {Zeus.Platform|undefined} zeusPlatform 
 	 */
-	static set zeusPlatform(zeusPlatform) {
-		properties.zeus_platform = zeusPlatform;
+	set zeusPlatform(zeusPlatform) {
+		this.properties.zeus_platform = zeusPlatform;
 		this.save();
 	}
 
@@ -197,25 +227,25 @@ export class ProjectProperties {
 	 * Get the desired runtime version for this project.
 	 * @returns {string|undefined}
 	 */
-	static get runtimeVersionOrDef() {
-		return properties.runtime_version ?? Preferences.getRuntimeVersion(this.runtimeChannelTypeOrDef);
+	get runtimeVersionOrDef() {
+		return this.properties.runtime_version ?? Preferences.getRuntimeVersion(this.runtimeChannelTypeOrDef);
 	}
 
 	/**
 	 * Get the desired runtime channel type for this project (without falling back to the global option).
 	 * @returns {string|undefined}
 	 */
-	static get runtimeVersion() {
-		return properties.runtime_version ?? undefined;
+	get runtimeVersion() {
+		return this.properties.runtime_version ?? undefined;
 	}
 
 	/**
 	 * Set the desired runtime version.
 	 * @param {string|undefined} runtime_version 
 	 */
-	static set runtimeVersion(runtime_version) {
+	set runtimeVersion(runtime_version) {
 
-		properties.runtime_version = runtime_version;
+		this.properties.runtime_version = runtime_version;
 
 		this.save();
 		this.eventEmitter.emit('changeRuntimeVersion', runtime_version);
@@ -226,7 +256,7 @@ export class ProjectProperties {
 	 * Get the runtime version to use for the current project.
 	 * @returns {Result<Zeus.RuntimeInfo>}
 	 */
-	static get runtime() {
+	get runtime() {
 
 		const type = this.runtimeChannelTypeOrDef;
 		const desired_runtime_list = Preferences.getRuntimes(type);
@@ -258,7 +288,7 @@ export class ProjectProperties {
 	 * Get the user to use for the current project.
 	 * @returns {Result<UserInfo>}
 	 */
-	static get user() {
+	get user() {
 
 		const type = this.runtimeChannelTypeOrDef;
 		const users = Preferences.getUsers(type);
@@ -291,90 +321,96 @@ export class ProjectProperties {
 	 * 
 	 * @private
 	 */
-	static save() {
-
-		const project = project_current_get();
-
-		if (project === undefined) {
-			return;
-		}
+	save() {
 
 		// https://github.com/thennothinghappened/GMEdit-Constructor/issues/31:
 		// 
 		// GMEdit's stringification of `undefined` properties produces `null`, rather than omitting
 		// the keys, which means a default value can either be `null` or omission (never set), which
 		// is annoying, so we're manually removing these keys.
-		for (const [key, value] of Object.entries(properties)) {
+		for (const [key, value] of Object.entries(this.properties)) {
 			if (value == undefined) {
 				// @ts-expect-error We're iterating over the keys of `properties`...
-				delete properties[key];
+				delete this.properties[key];
 			}
 		}
 
-		project.properties['GMEdit-Constructor'] = properties;
-		GMEditProjectProperties.save(project, project.properties);
+		this.project.properties['GMEdit-Constructor'] = this.properties;
+		GMEditProjectProperties.save(this.project, this.project.properties);
 
 	}
-
-	/**
-	 * Make sure the project's properties contain Constructor's
-	 * data, and set up tree view build configs.
-	 * 
-	 * @private
-	 */
-	static onProjectOpen = () => {
-
-		const project = project_current_get();
-
-		if (project === undefined) {
-			return;
-		}
-
-		if (!project.isGMS23) {
-			return;
-		}
-
-		properties = {};
-
-		const saved = project.properties['GMEdit-Constructor'];
-		
-		if (saved != undefined) {
-			Object.assign(properties, saved);
-		}
-
-	};
-
-	/**
-	 * @private
-	 */
-	static onProjectClose = () => {
-
-	};
 
 	/**
 	 * Deselect the current runtime version when changing runtime channel.
 	 * @private
 	 */
-	static onChangeRuntimeChannel = () => {
+	onChangeRuntimeChannel = () => {
 		this.runtimeVersion = undefined;
 	};
 
+	/**
+	 * Project properties instances for any open projects.
+	 * 
+	 * @private
+	 * @type {Map<GMEdit.Project, ProjectProperties>}
+	 */
+	static instances = new Map();
+
+	/**
+	 * Get properties for the given project.
+	 * 
+	 * @param {GMEdit.Project} project The project to get properties for.
+	 * @throws {InvalidStateErr} Throws if the given project is not supported, this shouldn't happen.
+	 * @returns {ProjectProperties}
+	 */
+	static get(project) {
+
+		if (!GMConstructor.supportsProjectFormat(project)) {
+			throw new InvalidStateErr(`Tried to get properties for project ${project}, but the project is not a supported type`);
+		}
+
+		let instance = this.instances.get(project);
+
+		if (instance === undefined) {
+			instance = new ProjectProperties(project);
+			this.instances.set(project, instance);
+		}
+
+		return instance;
+
+	}
+
 	static __setup__() {
-
-		GMEdit.on('projectOpen', this.onProjectOpen);
 		GMEdit.on('projectClose', this.onProjectClose);
-
-		this.events.on('changeRuntimeChannel', this.onChangeRuntimeChannel);
-
 	}
 
 	static __cleanup__() {
 		
-		GMEdit.off('projectOpen', this.onProjectOpen);
 		GMEdit.off('projectClose', this.onProjectClose);
+		
+		for (const instance of this.instances.values()) {
+			instance.destroy();
+		}
 
-		this.events.off('changeRuntimeChannel', this.onChangeRuntimeChannel);
+		this.instances.clear();
 
 	}
+
+	/**
+	 * Clean up the properties instance for the project, if one was created.
+	 * 
+	 * @private
+	 * @param {GMEdit.PluginEventMap['projectOpen']} event
+	 */
+	static onProjectClose = ({ project }) => {
+
+		const instance = this.instances.get(project);
+
+		if (instance !== undefined) {
+			instance.destroy();
+			this.instances.delete(project);
+		}
+
+	};
 
 }

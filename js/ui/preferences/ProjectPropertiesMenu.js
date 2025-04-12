@@ -4,7 +4,7 @@ import { GM_CHANNEL_TYPES, Preferences, ZEUS_RUNTIME_TYPES } from '../../prefere
 import { project_config_tree_flatten } from '../../utils/project.js';
 import { ProjectProperties } from '../../preferences/ProjectProperties.js';
 import * as preferencesMenu from './PreferencesMenu.js';
-import { plugin_name } from '../../GMConstructor.js';
+import { GMConstructor, plugin_name } from '../../GMConstructor.js';
 
 const UIPreferences = $gmedit['ui.Preferences'];
 
@@ -33,9 +33,16 @@ function default_undefined(value) {
 export class ProjectPropertiesMenu {
 
 	/**
-	 * @type {DocumentFragment}
+	 * The project properties associated with this instance.
+	 * @type {ProjectProperties}
 	 */
-	element = new DocumentFragment();
+	properties;
+
+	/**
+	 * @readonly
+	 * @type {HTMLDivElement}
+	 */
+	element = document.createElement('div');
 
 	/**
 	 * @private
@@ -78,123 +85,89 @@ export class ProjectPropertiesMenu {
 	 */
 	reuseCompileTabDropdown;
 
-	constructor() {
+	/**
+	 * @param {ProjectProperties} properties
+	 */
+	constructor(properties) {
 
+		this.properties = properties;
+
+		this.subtitle.textContent = `Configure behaviour for ${properties.project.displayName}.`;
 		this.element.appendChild(this.subtitle);
 
 		this.buildConfigDropdown = UIPreferences.addDropdown(this.element,
 			'Build Configuration',
-			ProjectProperties.buildConfigName,
-			project_config_tree_flatten(ProjectProperties.rootBuildConfig),
-			(config_name) => ProjectProperties.buildConfigName = config_name
+			this.properties.buildConfigName,
+			project_config_tree_flatten(this.properties.rootBuildConfig),
+			(config_name) => this.properties.buildConfigName = config_name
 		);
 
 		this.buildConfigDropdown.classList.add('singleline');
 
 		this.zeusPlatformDropdown = UIPreferences.addDropdown(this.element,
 			'Runner Platform',
-			ProjectProperties.zeusPlatform ?? 'Current Platform',
+			this.properties.zeusPlatform ?? 'Current Platform',
 			['Current Platform', 'HTML5', 'OperaGX'],
-			(value) => ProjectProperties.zeusPlatform = (value === 'Current Platform') ? undefined : value
+			(value) => this.properties.zeusPlatform = (value === 'Current Platform') ? undefined : value
 		)
 		
 		this.zeusPlatformDropdown.classList.add('singleline');
 
 		this.zeusRuntimeTypeDropdown = UIPreferences.addDropdown(this.element,
 			'Runtime Type',
-			ProjectProperties.runtimeBuildType ?? USE_DEFAULT,
+			this.properties.runtimeBuildType ?? USE_DEFAULT,
 			[...ZEUS_RUNTIME_TYPES, USE_DEFAULT],
-			(value) => ProjectProperties.runtimeBuildType = default_undefined(value)
+			(value) => this.properties.runtimeBuildType = default_undefined(value)
 		);
 		
 		this.zeusRuntimeTypeDropdown.classList.add('singleline');
 
 		this.zeusReleaseChannelDropdown = UIPreferences.addDropdown(this.element,
 			'Runtime Release Channel',
-			ProjectProperties.runtimeChannelType ?? USE_DEFAULT,
+			this.properties.runtimeChannelType ?? USE_DEFAULT,
 			[...GM_CHANNEL_TYPES, USE_DEFAULT],
-			(value) => ProjectProperties.runtimeChannelType = default_undefined(value)
+			(value) => this.properties.runtimeChannelType = default_undefined(value)
 		);
 		
 		this.zeusReleaseChannelDropdown.classList.add('singleline');
 		
 		this.runtimeVersionDropdown = UIPreferences.addDropdown(this.element,
 			'Runtime Version',
-			ProjectProperties.runtimeVersion ?? USE_DEFAULT,
-			[...preferencesMenu.runtime_version_strings_get_for_type(ProjectProperties.runtimeChannelTypeOrDef), USE_DEFAULT],
-			(value) => ProjectProperties.runtimeVersion = default_undefined(value)
+			this.properties.runtimeVersion ?? USE_DEFAULT,
+			[...preferencesMenu.runtime_version_strings_get_for_type(this.properties.runtimeChannelTypeOrDef), USE_DEFAULT],
+			(value) => this.properties.runtimeVersion = default_undefined(value)
 		);
 		
 		this.runtimeVersionDropdown.classList.add('singleline');
 		
 		this.reuseCompileTabDropdown = UIPreferences.addDropdown(this.element,
 			'Reuse existing compiler tab',
-			USE_DEFAULT,
+			use(this.properties.reuseCompilerTab)?.let(it => it ? 'Yes' : 'No').value ?? USE_DEFAULT,
 			['Yes', 'No', USE_DEFAULT],
 			(value) => {
 				switch (value) {
-					case 'Yes': return ProjectProperties.reuseCompilerTab = true;
-					case 'No': return ProjectProperties.reuseCompilerTab = false;
-					case USE_DEFAULT: return ProjectProperties.reuseCompilerTab = undefined;
+					case 'Yes': return this.properties.reuseCompilerTab = true;
+					case 'No': return this.properties.reuseCompilerTab = false;
+					case USE_DEFAULT: return this.properties.reuseCompilerTab = undefined;
 				}
 			}
 		);
 		
 		this.reuseCompileTabDropdown.classList.add('singleline');
 
-	}
-
-	/**
-	 * Load the properties for the new project.
-	 * 
-	 * @param {GMEdit.Project} project
-	 */
-	onOpenProject = (project) => {
-		
-		this.subtitle.textContent = `Configure behaviour for ${project.displayName}.`;
-
-		UIDropdownMutate(this.buildConfigDropdown,
-			project_config_tree_flatten(ProjectProperties.rootBuildConfig),
-			ProjectProperties.buildConfigName
-		);
-
-		UIDropdownSetValue(this.zeusPlatformDropdown,
-			ProjectProperties.zeusPlatform ?? 'Current Platform'
-		);
-
-		UIDropdownSetValue(this.zeusRuntimeTypeDropdown,
-			ProjectProperties.runtimeBuildType ?? USE_DEFAULT,
-		);
-
-		const previousChannelType = UIDropdownGetValue(this.zeusReleaseChannelDropdown);
-		
-		UIDropdownSetValue(this.zeusReleaseChannelDropdown,
-			ProjectProperties.runtimeChannelType ?? USE_DEFAULT
-		);
-		
-		if (default_undefined(previousChannelType) !== ProjectProperties.runtimeChannelType) {
-			this.updateRuntimeVersionList(ProjectProperties.runtimeChannelTypeOrDef);
-		}
-		
-		UIDropdownSetValue(this.reuseCompileTabDropdown,
-			use(ProjectProperties.reuseCompilerTab)
-				?.let(it => it ? 'Yes' : 'No')
-				.value ?? USE_DEFAULT
-		);
-
 		Preferences.events.on('setDefaultRuntimeChannel', this.onChangeDefaultRuntimeChannel);
-		ProjectProperties.events.on('changeBuildConfig', this.onChangeBuildConfig);
-		ProjectProperties.events.on('changeRuntimeChannel', this.onChangeRuntimeChannel);
+		this.properties.events.on('changeBuildConfig', this.onChangeBuildConfig);
+		this.properties.events.on('changeRuntimeChannel', this.onChangeRuntimeChannel);
 
-	};
+	}
 
 	/**
 	 * Clean up our event listens.
 	 */
-	onCloseProject = () => {
+	destroy() {
 		Preferences.events.off('setDefaultRuntimeChannel', this.onChangeDefaultRuntimeChannel);
-		ProjectProperties.events.off('changeBuildConfig', this.onChangeBuildConfig);
-		ProjectProperties.events.off('changeRuntimeChannel', this.onChangeRuntimeChannel);
+		this.properties.events.off('changeBuildConfig', this.onChangeBuildConfig);
+		this.properties.events.off('changeRuntimeChannel', this.onChangeRuntimeChannel);
 	};
 
 	/**
@@ -244,25 +217,17 @@ export class ProjectPropertiesMenu {
 	updateRuntimeVersionList(channel) {
 		UIDropdownMutate(this.runtimeVersionDropdown,
 			[...preferencesMenu.runtime_version_strings_get_for_type(channel), USE_DEFAULT],
-			ProjectProperties.runtimeVersion ?? USE_DEFAULT
+			this.properties.runtimeVersion ?? USE_DEFAULT
 		);
-	}
-
-	/**
-	 * Clean up this menu's event listeners.
-	 */
-	destroy() {
-		this.onCloseProject();
 	}
 
 	/**
 	 * Instance to be used for displaying in GMEdit's own Project Properties screen.
 	 * 
-	 * @readonly
 	 * @private
-	 * @type {ProjectPropertiesMenu}
+	 * @type {ProjectPropertiesMenu|undefined}
 	 */
-	static instance = new ProjectPropertiesMenu();
+	static instance = undefined;
 
 	/**
 	 * The group that holds the instance's element.
@@ -278,7 +243,16 @@ export class ProjectPropertiesMenu {
 	 * @private
 	 * @param {GMEdit.PluginEventMap['projectPropertiesBuilt']} event
 	 */
-	static deploy = ({ target }) => {
+	static deploy = ({ target, project }) => {
+
+		if (!GMConstructor.supportsProjectFormat(project)) {
+			return;
+		}
+
+		if (this.instance?.properties?.project !== project) {
+			this.instance?.destroy();
+			this.instance = new ProjectPropertiesMenu(ProjectProperties.get(project));
+		}
 
 		if (this.group !== undefined) {
 			this.group.remove();
@@ -292,25 +266,17 @@ export class ProjectPropertiesMenu {
 
 	/**
 	 * @private
-	 * @param {GMEdit.PluginEventMap['projectOpen']} event 
 	 */
-	static onOpenProject = ({ project }) => this.instance.onOpenProject(project);
-
-	/**
-	 * @private
-	 */
-	static onCloseProject = () => this.instance.onCloseProject();
+	static onCloseProject = () => this.instance?.destroy();
 
 	static __setup__() {
 		GMEdit.on('projectPropertiesBuilt', this.deploy);
-		GMEdit.on('projectOpen', this.onOpenProject);
 		GMEdit.on('projectClose', this.onCloseProject);
 	}
 
 	static __cleanup__() {
 
 		GMEdit.off('projectPropertiesBuilt', this.deploy);
-		GMEdit.off('projectOpen', this.onOpenProject);
 		GMEdit.off('projectClose', this.onCloseProject);
 
 		this.group?.remove();

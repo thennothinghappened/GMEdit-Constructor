@@ -308,7 +308,7 @@ export class OutputLogTab extends ConstructorTab {
 
 		let prefix = `${this.job.settings.platform} - ${this.job.settings.verb}`;
 
-		if (!ProjectProperties.reuseCompilerTabOrDef) {
+		if (!ProjectProperties.get(this.job.project).reuseCompilerTabOrDef) {
 			prefix += ` #${this.job.id}`;
 		}
 

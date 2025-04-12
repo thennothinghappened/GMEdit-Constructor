@@ -40,21 +40,23 @@ export class GMConstructor {
 	 */
 	async #runTask(project, partial_settings) {
 
+		const projectProperties = ProjectProperties.get(project);
+
 		/** @type {Zeus.IgorSettings} */
 		const settings = {
 			verb: partial_settings.verb,
 			buildPath: partial_settings.buildPath ?? this.#getBuildDir(project),
-			platform: partial_settings.platform ?? ProjectProperties.zeusPlatform ?? igorPaths.igor_user_platform,
-			runner: partial_settings.runner ?? ProjectProperties.runtimeBuildTypeOrDef,
+			platform: partial_settings.platform ?? projectProperties.zeusPlatform ?? igorPaths.igor_user_platform,
+			runner: partial_settings.runner ?? projectProperties.runtimeBuildTypeOrDef,
 			threads: partial_settings.threads ?? 8,
-			configName: partial_settings.configName ?? ProjectProperties.buildConfigName
+			configName: partial_settings.configName ?? projectProperties.buildConfigName
 		};
 		
-		const runtime_res = ProjectProperties.runtime;
+		const runtime_res = projectProperties.runtime;
 		
 		if (!runtime_res.ok) {
 			
-			const runtime_type = ProjectProperties.runtimeChannelTypeOrDef;
+			const runtime_type = projectProperties.runtimeChannelTypeOrDef;
 			const err = new Err(
 				`No ${runtime_type} runtimes available to compile!`,
 				runtime_res.err,
@@ -123,7 +125,7 @@ export class GMConstructor {
 
 		}
 		
-		const userResult = ProjectProperties.user;
+		const userResult = projectProperties.user;
 
 		/** @type {OutputLogTab|undefined} */
 		let tab = undefined;
@@ -131,7 +133,7 @@ export class GMConstructor {
 		/** @type {number|undefined} */
 		let jobIdToReuse = undefined;
 
-		if (ProjectProperties.reuseCompilerTabOrDef) {
+		if (projectProperties.reuseCompilerTabOrDef) {
 
 			tab = OutputLogTab.findUnusedOrSteal();
 			
@@ -362,6 +364,16 @@ export class GMConstructor {
 
 		delete window.GMConstructor;
 		
+	}
+
+	/**
+	 * Check whether Constructor supports the given project's format at all.
+	 * 
+	 * @param {GMEdit.Project} project 
+	 * @returns {boolean}
+	 */
+	static supportsProjectFormat(project) {
+		return project.isGMS23;
 	}
 
 	/**
