@@ -205,6 +205,7 @@ export class ControlPanelTab extends ConstructorTab {
 		stacktrace.classList.add('collapsed');
 
 		this.problems.hidden = false;
+		error.scrollIntoView();
 
 	}
 
