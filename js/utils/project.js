@@ -20,13 +20,6 @@ export function project_current_get() {
 }
 
 /**
- * @returns Whether any project is currently open.
- */
-export function project_is_open() {
-	return project_current_get() !== undefined;
-}
-
-/**
  * Saves all unsaved open files in the editor.
  */
 export function open_files_save() {
