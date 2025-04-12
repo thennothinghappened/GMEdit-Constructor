@@ -157,10 +157,15 @@ export class GMRuntimeVersion {
 			if (this.version.month === 8 || this.version.month === 800) {
 				return '2024.8';
 			}
+
+			// 2024.8 is incompatible with 2024.11+.
+			if (this.version.month === 11 || this.version.month === 1100) {
+				return '2024.11';
+			}
 			
 		}
 
-		return '2024.11+';
+		return '2024.13+';
 
 	}
 

@@ -152,10 +152,15 @@ function ide_get_format(ideVersion) {
 		if (ideVersion.month === 8 || ideVersion.month === 800) {
 			return '2024.8';
 		}
+
+		// 2024.11 is incompatible with 2024.13+.
+		if (ideVersion.month === 11 || ideVersion.month === 1100) {
+			return '2024.11';
+		}
 		
 	}
 
-	return '2024.11+';
+	return '2024.13+';
 
 }
 
