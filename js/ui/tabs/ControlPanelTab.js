@@ -7,6 +7,7 @@ import { GMConstructor, plugin_name, plugin_version } from '../../GMConstructor.
 import { Preferences } from '../../preferences/Preferences.js';
 import { ProjectPropertiesMenu } from '../preferences/ProjectPropertiesMenu.js';
 import { ProjectProperties } from '../../preferences/ProjectProperties.js';
+import { InvalidStateErr } from '../../utils/Err.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];
@@ -282,6 +283,14 @@ export class ControlPanelTab extends ConstructorTab {
 	onOpenProject = ({ project }) => {
 
 		if (!GMConstructor.supportsProjectFormat(project)) {
+			return;
+		}
+
+		if (this.projectPropertiesMenu !== undefined) {
+			if (this.projectPropertiesMenu.properties.project !== project) {
+				throw new InvalidStateErr(`Control panel per-project properties instance exists for different project (${this.projectPropertiesMenu.properties.project.path}) than currently loaded (${project.path})!`);
+			}
+			
 			return;
 		}
 
