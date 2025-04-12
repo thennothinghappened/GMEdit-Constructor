@@ -8,7 +8,7 @@ export declare global {
 			/** Globally selected runtime options that may be overriden by projects. */
 			runtime_opts: {
 				type: GMChannelType;
-				runner: RuntimeBuildType;
+				runner: Zeus.RuntimeType;
 	
 				type_opts: {
 					[key in GMChannelType]: RuntimePreference;
@@ -55,7 +55,7 @@ export declare global {
 			/**
 			 * Chosen runner type to use.
 			 */
-			runner: RuntimeBuildType;
+			runner: Zeus.RuntimeType;
 
 			/**
 			 * The platform to target when building for the current runtime.
