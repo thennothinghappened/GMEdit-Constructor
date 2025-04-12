@@ -14,6 +14,12 @@ export declare global {
 					[key in GMChannelType]: RuntimePreference;
 				};
 			};
+
+			/** 
+			 * Local per-project data stored on this computer, for things that shouldn't be shared
+			 * between users on a project repo.
+			 */
+			projectLocalData: Record<string, Partial<Project.LocalData>>;
 	
 			/** Whether to automatically save open files when a task runs. */
 			save_on_run_task: boolean;
@@ -31,43 +37,57 @@ export declare global {
 			global_build_path: string;
 			
 		}
-	
+
 		/**
-		 * Project-specific preferences data!
+		 * Project-specific data.
 		 */
-		type ProjectData = {
-	
-			/** 
-			 * Name of the active config to compile with.
-			 */
-			config_name: string;
-	
-			/**
-			 * Chosen runtime type to use.
-			 */
-			runtime_type: GMChannelType;
-	
-			/**
-			 * Chosen runtime version to use.
-			 */
-			runtime_version: string;
-	
-			/**
-			 * Chosen runner type to use.
-			 */
-			runner: Zeus.RuntimeType;
+		namespace Project {
 
 			/**
-			 * The platform to target when building for the current runtime.
+			 * Project-specific preferences data that is stored alongside the project!
 			 */
-			zeus_platform: Zeus.Platform;
+			type PortableData = {
+		
+				/**
+				 * Chosen runtime type to use.
+				 */
+				runtime_type: GMChannelType;
+		
+				/**
+				 * Chosen runtime version to use.
+				 */
+				runtime_version: string;
+		
+			};
 
-			/** 
-			 * Whether to reuse the compile viewer tab between runs. 
+			/**
+			 * Project property data that is local to this machine.
 			 */
-			reuse_compiler_tab: boolean;
-	
-		};
+			type LocalData = {
+
+				/** 
+				 * Name of the active config to compile with.
+				 */
+				buildConfig: string;
+
+				/**
+				 * Chosen runner type to use.
+				 */
+				runtimeType: Zeus.RuntimeType;
+
+				/**
+				 * The platform to target when building for the current runtime.
+				 */
+				platform: Zeus.Platform;
+
+				/** 
+				 * Whether to reuse the compile viewer tab between runs. 
+				 */
+				reuseOutputTab: boolean;
+
+			};
+
+		}
 
 		type RuntimePreference = {
 			/** Where we should search for the list of runtimes. */

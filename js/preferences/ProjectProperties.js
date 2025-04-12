@@ -19,12 +19,20 @@ export class ProjectProperties {
 	project;
 
 	/**
-	 * The current properties instance.
+	 * Portable properties between users on this project.
 	 * 
 	 * @private
-	 * @type {Partial<TPreferences.ProjectData>}
+	 * @type {Partial<TPreferences.Project.PortableData>}
 	 */
-	properties;
+	portable;
+
+	/**
+	 * Local properties stored for this computer only.
+	 * 
+	 * @private
+	 * @type {Partial<TPreferences.Project.LocalData>}
+	 */
+	local;
 
 	/**
 	 * @readonly
@@ -44,7 +52,8 @@ export class ProjectProperties {
 	constructor(project) {
 
 		this.project = project;
-		this.properties = project.properties['GMEdit-Constructor'] ?? {};
+		this.portable = project.properties['GMEdit-Constructor'] ?? {};
+		this.local = Preferences.loadProjectLocalProps(this.project);
 
 		this.events.on('changeRuntimeChannel', this.onChangeRuntimeChannel);
 		
@@ -70,7 +79,7 @@ export class ProjectProperties {
 	 * @returns {string}
 	 */
 	get buildConfigName() {
-		return this.properties.config_name ?? 'Default';
+		return this.local.buildConfig ?? 'Default';
 	}
 
 	/**
@@ -94,16 +103,16 @@ export class ProjectProperties {
 
 	/**
 	 * Set the active compile config name.
-	 * @param {string} config_name 
+	 * @param {string} buildConfig 
 	 */
-	set buildConfigName(config_name) {
+	set buildConfigName(buildConfig) {
 
-		const previous = this.properties.config_name;
+		const previous = this.local.buildConfig;
 
-		this.properties.config_name = config_name;
-		this.save();
+		this.local.buildConfig = buildConfig;
+		this.saveLocalProps();
 
-		this.eventEmitter.emit('changeBuildConfig', { previous, current: config_name });
+		this.eventEmitter.emit('changeBuildConfig', { previous, current: buildConfig });
 
 	}
 
@@ -120,7 +129,7 @@ export class ProjectProperties {
 	 * @returns {Zeus.RuntimeType|undefined}
 	 */
 	get runtimeBuildType() {
-		return this.properties.runner ?? undefined;
+		return this.local.runtimeType ?? undefined;
 	}
 
 	/**
@@ -128,8 +137,8 @@ export class ProjectProperties {
 	 * @param {Zeus.RuntimeType|undefined} runner 
 	 */
 	set runtimeBuildType(runner) {
-		this.properties.runner = runner;
-		this.save();
+		this.local.runtimeType = runner;
+		this.saveLocalProps();
 	}
 
 	/**
@@ -145,7 +154,7 @@ export class ProjectProperties {
 	 * @returns {Boolean|undefined}
 	 */
 	get reuseCompilerTab() {
-		return this.properties.reuse_compiler_tab ?? undefined;
+		return this.local.reuseOutputTab ?? undefined;
 	}
 
 	/**
@@ -153,8 +162,8 @@ export class ProjectProperties {
 	 * @param {Boolean|undefined} reuse_compiler_tab 
 	 */
 	set reuseCompilerTab(reuse_compiler_tab) {
-		this.properties.reuse_compiler_tab = reuse_compiler_tab;
-		this.save();
+		this.local.reuseOutputTab = reuse_compiler_tab;
+		this.saveLocalProps();
 	}
 
 	/**
@@ -162,7 +171,7 @@ export class ProjectProperties {
 	 * @returns {GMChannelType}
 	 */
 	get runtimeChannelTypeOrDef() {
-		return this.properties.runtime_type ?? Preferences.defaultRuntimeChannel;
+		return this.portable.runtime_type ?? Preferences.defaultRuntimeChannel;
 	}
 
 	/**
@@ -170,7 +179,7 @@ export class ProjectProperties {
 	 * @returns {GMChannelType|undefined}
 	 */
 	get runtimeChannelType() {
-		return this.properties.runtime_type ?? undefined;
+		return this.portable.runtime_type ?? undefined;
 	}
 
 	/**
@@ -185,8 +194,8 @@ export class ProjectProperties {
 			return;
 		}
 
-		this.properties.runtime_type = channel;
-		this.save();
+		this.portable.runtime_type = channel;
+		this.savePortableProps();
 		
 		let isNetChange = true;
 		
@@ -212,15 +221,15 @@ export class ProjectProperties {
 	 * @returns {Zeus.Platform|undefined}
 	 */
 	get zeusPlatform() {
-		return this.properties.zeus_platform;
+		return this.local.platform;
 	}
 
 	/**
 	 * @param {Zeus.Platform|undefined} zeusPlatform 
 	 */
 	set zeusPlatform(zeusPlatform) {
-		this.properties.zeus_platform = zeusPlatform;
-		this.save();
+		this.local.platform = zeusPlatform;
+		this.saveLocalProps();
 	}
 
 	/**
@@ -228,7 +237,7 @@ export class ProjectProperties {
 	 * @returns {string|undefined}
 	 */
 	get runtimeVersionOrDef() {
-		return this.properties.runtime_version ?? Preferences.getRuntimeVersion(this.runtimeChannelTypeOrDef);
+		return this.portable.runtime_version ?? Preferences.getRuntimeVersion(this.runtimeChannelTypeOrDef);
 	}
 
 	/**
@@ -236,7 +245,7 @@ export class ProjectProperties {
 	 * @returns {string|undefined}
 	 */
 	get runtimeVersion() {
-		return this.properties.runtime_version ?? undefined;
+		return this.portable.runtime_version ?? undefined;
 	}
 
 	/**
@@ -245,9 +254,9 @@ export class ProjectProperties {
 	 */
 	set runtimeVersion(runtime_version) {
 
-		this.properties.runtime_version = runtime_version;
+		this.portable.runtime_version = runtime_version;
 
-		this.save();
+		this.savePortableProps();
 		this.eventEmitter.emit('changeRuntimeVersion', runtime_version);
 
 	}
@@ -317,27 +326,34 @@ export class ProjectProperties {
 	}
 
 	/**
-	 * Save the project properties.
-	 * 
+	 * Save the portable project properties.
 	 * @private
 	 */
-	save() {
+	savePortableProps() {
 
 		// https://github.com/thennothinghappened/GMEdit-Constructor/issues/31:
 		// 
 		// GMEdit's stringification of `undefined` properties produces `null`, rather than omitting
 		// the keys, which means a default value can either be `null` or omission (never set), which
 		// is annoying, so we're manually removing these keys.
-		for (const [key, value] of Object.entries(this.properties)) {
+		for (const [key, value] of Object.entries(this.portable)) {
 			if (value == undefined) {
 				// @ts-expect-error We're iterating over the keys of `properties`...
-				delete this.properties[key];
+				delete this.portable[key];
 			}
 		}
 
-		this.project.properties['GMEdit-Constructor'] = this.properties;
+		this.project.properties['GMEdit-Constructor'] = this.portable;
 		GMEditProjectProperties.save(this.project, this.project.properties);
 
+	}
+
+	/**
+	 * Save the local project properties.
+	 * @private
+	 */
+	saveLocalProps() {
+		Preferences.saveProjectLocalProps(this.project, this.local);
 	}
 
 	/**

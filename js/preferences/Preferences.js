@@ -45,7 +45,7 @@ const PREFS_DEFAULT = {
 			}
 		}
 	},
-
+	projectLocalData: {},
 	save_on_run_task: true,
 	reuse_compiler_tab: true,
 	check_for_updates: true,
@@ -516,6 +516,29 @@ export class Preferences {
 	 */
 	static get ready() {
 		return this.__ready__;
+	}
+
+	/**
+	 * Load the local properties of the given project.
+	 * 
+	 * @param {GMEdit.Project} project
+	 * @returns {Partial<TPreferences.Project.LocalData>}
+	 */
+	static loadProjectLocalProps(project) {
+		// We store the data for convenience, but its ownership is managed by the
+		// `ProjectProperties` instance, so we clone it to avoid any possible pass-by-ref trouble.
+		return structuredClone(this.prefs.projectLocalData[project.path] ?? {});
+	}
+
+	/**
+	 * Save the local properties of the given project to disk.
+	 * 
+	 * @param {GMEdit.Project} project
+	 * @param {Partial<TPreferences.Project.LocalData>} local
+	 */
+	static saveProjectLocalProps(project, local) {
+		this.prefs.projectLocalData[project.path] = local;
+		this.save();
 	}
 
 	/**
