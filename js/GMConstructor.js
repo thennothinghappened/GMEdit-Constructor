@@ -187,9 +187,11 @@ export class GMConstructor {
 
 		const project = project_current_get();
 
-		if (project !== undefined) {
-			this.#runTask(project, { verb: 'Run' });
+		if (project === undefined || !GMConstructor.supportsProjectFormat(project)) {
+			return;
 		}
+
+		this.#runTask(project, { verb: 'Run' });
 
 	}
 
@@ -197,9 +199,11 @@ export class GMConstructor {
 
 		const project = project_current_get();
 
-		if (project !== undefined) {
-			this.#runTask(project, { verb: 'Package' });
+		if (project === undefined || !GMConstructor.supportsProjectFormat(project)) {
+			return;
 		}
+
+		this.#runTask(project, { verb: 'Package' });
 		
 	}
 
@@ -225,7 +229,7 @@ export class GMConstructor {
 		
 		const project = project_current_get();
 
-		if (project === undefined) {
+		if (project === undefined || !GMConstructor.supportsProjectFormat(project)) {
 			return;
 		}
 

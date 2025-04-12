@@ -3,7 +3,7 @@
  */
 
 import { GMConstructor } from '../GMConstructor.js';
-import { project_is_open } from '../utils/project.js';
+import { project_current_get } from '../utils/project.js';
 
 const KeyboardShortcutsHandler = $gmedit['ui.KeyboardShortcuts'].hashHandler;
 const Menu = $gmedit['ui.MainMenu'].menu;
@@ -63,7 +63,7 @@ export function __setup__() {
 	menu_register();
 	commands_register();
 
-	menu_items_enable(project_is_open());
+	updateItemEnabledState();
 
 	GMEdit.on('projectOpen', on_project_open);
 	GMEdit.on('projectClose', on_project_close);
@@ -114,11 +114,11 @@ function on_run() {
 }
 
 function on_project_open() {
-	menu_items_enable(project_is_open());
+	updateItemEnabledState();
 }
 
 function on_project_close() {
-	menu_items_enable(project_is_open());
+	updateItemEnabledState();
 }
 
 /**
@@ -191,12 +191,16 @@ function commands_deregister() {
 	}
 }
 
-/**
- * Toggle whether menu items are enabled.
- * @param {boolean} enabled
- */
-function menu_items_enable(enabled) {
-	
+function updateItemEnabledState() {
+
+	let enabled = true;
+
+	const project = project_current_get();
+
+	if (project === undefined || !GMConstructor.supportsProjectFormat(project)) {
+		enabled = false;
+	}
+
 	const items = constructor_menu.submenu
 		?.items
 		?.filter(item => item.id.startsWith('constructor-project')) ?? [];
