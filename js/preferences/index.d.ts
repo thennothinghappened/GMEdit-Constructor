@@ -77,10 +77,10 @@ export declare global {
 			users_path: string;
 	
 			/** Chosen runtime to use. */
-			choice: string?;
+			choice?: string;
 	
 			/** Chosen user to use. */
-			user: string?;
+			user?: string;
 		};
 
 		interface PreferencesEventMap {

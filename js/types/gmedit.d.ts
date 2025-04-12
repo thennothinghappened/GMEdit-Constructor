@@ -256,7 +256,7 @@ export declare global {
 			/** API override */
 			gmlVersion: string;
 
-			'GMEdit-Constructor'?: Partial<TPreferences.ProjectData>?;
+			'GMEdit-Constructor'?: Partial<TPreferences.ProjectData>;
 
 		}>;
 	

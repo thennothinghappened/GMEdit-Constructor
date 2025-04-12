@@ -299,6 +299,18 @@ export class ProjectProperties {
 			return;
 		}
 
+		// https://github.com/thennothinghappened/GMEdit-Constructor/issues/31:
+		// 
+		// GMEdit's stringification of `undefined` properties produces `null`, rather than omitting
+		// the keys, which means a default value can either be `null` or omission (never set), which
+		// is annoying, so we're manually removing these keys.
+		for (const [key, value] of Object.entries(properties)) {
+			if (value == undefined) {
+				// @ts-expect-error We're iterating over the keys of `properties`...
+				delete properties[key];
+			}
+		}
+
 		project.properties['GMEdit-Constructor'] = properties;
 		GMEditProjectProperties.save(project, project.properties);
 
@@ -326,7 +338,7 @@ export class ProjectProperties {
 
 		const saved = project.properties['GMEdit-Constructor'];
 		
-		if (saved !== undefined && saved !== null) {
+		if (saved != undefined) {
 			Object.assign(properties, saved);
 		}
 

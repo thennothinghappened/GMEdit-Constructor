@@ -33,21 +33,15 @@ const PREFS_DEFAULT = {
 		type_opts: {
 			Stable: {
 				search_path: def_runtime_paths.Stable,
-				users_path: def_user_paths.Stable,
-				choice: null,
-				user: null
+				users_path: def_user_paths.Stable
 			},
 			Beta: {
 				search_path: def_runtime_paths.Beta,
-				users_path: def_user_paths.Beta,
-				choice: null,
-				user: null
+				users_path: def_user_paths.Beta
 			},
 			LTS: {
 				search_path: def_runtime_paths.LTS,
-				users_path: def_user_paths.LTS,
-				choice: null,
-				user: null
+				users_path: def_user_paths.LTS
 			}
 		}
 	},
@@ -63,25 +57,17 @@ const PREFS_DEFAULT = {
  * List of runtimes for each type.
  * Populated after loading the list.
  * 
- * @type {{ [key in GMChannelType]: Zeus.RuntimeInfo[]? }}
+ * @type {{ [key in GMChannelType]?: Zeus.RuntimeInfo[] }}
  */
-const runtimes = {
-	Stable: null,
-	Beta: null,
-	LTS: null
-};
+const runtimes = {};
 
 /**
  * List of users for each type.
  * Populated after loading the list.
  * 
- * @type {{ [key in GMChannelType]: UserInfo[]? }}
+ * @type {{ [key in GMChannelType]?: UserInfo[] }}
  */
-const users = {
-	Stable: null,
-	Beta: null,
-	LTS: null
-};
+const users = {};
 
 /**
  * Global preferences for Constructor's behaviour. Much of this behaviour can be over-ridden on a
@@ -211,7 +197,7 @@ export class Preferences {
 	 * Set the global choice for default runtime for a given type.
 	 * 
 	 * @param {GMChannelType} type 
-	 * @param {string?} choice 
+	 * @param {string|undefined} choice 
 	 */
 	static setRuntimeVersion(type, choice) {
 		this.prefs.runtime_opts.type_opts[type].choice = choice;
@@ -234,7 +220,7 @@ export class Preferences {
 	 * @param {string|undefined} user 
 	 */
 	static setUser(type, user) {
-		this.prefs.runtime_opts.type_opts[type].user = user ?? null;
+		this.prefs.runtime_opts.type_opts[type].user = user ?? undefined;
 		this.save();
 	}
 
@@ -287,7 +273,7 @@ export class Preferences {
 		this.prefs.runtime_opts.type_opts[type].search_path = search_path;
 		this.save();
 
-		runtimes[type] = null;
+		runtimes[type] = undefined;
 
 		const res = await this.loadRuntimeList(type);
 
@@ -317,7 +303,7 @@ export class Preferences {
 				);
 		
 				ControlPanelTab.debug('Chosen Runtime version not available', err);
-				this.setRuntimeVersion(type, runtimes[type]?.at(0)?.version?.toString() ?? null);
+				this.setRuntimeVersion(type, runtimes[type]?.at(0)?.version?.toString() ?? undefined);
 
 			});
 
@@ -336,7 +322,7 @@ export class Preferences {
 		this.prefs.runtime_opts.type_opts[type].users_path = users_path;
 		this.save();
 
-		users[type] = null;
+		users[type] = undefined;
 
 		const res = await this.loadUserList(type);
 
@@ -619,13 +605,13 @@ export class Preferences {
 					if (!res.ok) {
 						// Silently drop. Users don't care if a GM version they don't use couldn't be
 						// found!
-						options.choice = null;
+						options.choice = undefined;
 						return;
 					}
 
 					const runtimes_found = res.data;
 
-					if (options.choice === null && runtimes_found.length > 0) {
+					if (options.choice == undefined && runtimes_found.length > 0) {
 						options.choice = runtimes_found[0].version.toString();
 					}
 
@@ -637,13 +623,13 @@ export class Preferences {
 				.then((result) => {
 
 					if (!result.ok) {
-						options.user = null;
+						options.user = undefined;
 						return;
 					}
 
 					const users_found = result.data;
 
-					if (options.user === null && users_found.length > 0) {
+					if (options.user == undefined && users_found.length > 0) {
 						options.user = users_found[0].name.toString();
 					}
 					
