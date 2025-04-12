@@ -16,16 +16,16 @@ export class SemVer {
 	/** @type {number} */
 	patch;
 
-	/** @type {string?} */
+	/** @type {string|undefined} */
 	tag;
 
 	/**
 	 * @param {number} major The major release version.
 	 * @param {number} minor The minor release version.
 	 * @param {number} patch The patch version of the release.
-	 * @param {string?} [tag] An optional ending tag such as `beta`.
+	 * @param {string|undefined} [tag] An optional ending tag such as `beta`.
 	 */
-	constructor(major, minor, patch, tag = null) {
+	constructor(major, minor, patch, tag = undefined) {
 		this.major = major;
 		this.minor = minor;
 		this.patch = patch;
@@ -55,8 +55,8 @@ export class SemVer {
 
 		let [major_str, minor_str, patch_str] = sections;
 
-		/** @type {string?} */
-		let tag = null;
+		/** @type {string|undefined} */
+		let tag = undefined;
 		
 		if (patch_str.includes('-')) {
 			[patch_str, tag] = patch_str.split('-', 2);
@@ -113,7 +113,7 @@ export class SemVer {
 	}
 
 	toString() {
-		return `${this.major}.${this.minor}.${this.patch}${this.tag !== null ? '-' + this.tag : ''}`;
+		return `${this.major}.${this.minor}.${this.patch}${this.tag !== undefined ? '-' + this.tag : ''}`;
 	}
 
 }
