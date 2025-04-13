@@ -249,7 +249,7 @@ export class ProjectPropertiesMenu {
 			return;
 		}
 
-		if (this.instance?.properties?.project !== project) {
+		if (this.instance === undefined || this.instance.properties.project !== project) {
 			this.instance?.destroy();
 			this.instance = new ProjectPropertiesMenu(ProjectProperties.get(project));
 		}
