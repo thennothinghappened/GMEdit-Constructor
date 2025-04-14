@@ -2,18 +2,21 @@ import { GMConstructor } from './GMConstructor';
 import { None } from './utils/Option';
 
 export declare global {
-
+	
+	/**
+	 * A result holding either an error or some data.
+	 */
+	type Result<T, E = IErr> = Ok<T> | Err<E>;
 	type Ok<T> = (T extends void
 		? { ok: true }
 		: { ok: true, data: T });
-
 	type Err<E = IErr> = { ok: false, err: E };
 	
-	type Result<T, E = IErr> = Ok<T> | Err<E>;
-
+	/**
+	 * An optional value.
+	 */
 	type Option<T> = Some<T> | typeof None;
 	type Some<T> = { data: T };
-	// type None<T> = readonly { __phantomData?: T };
 
 	/**
 	 * An array of at least one element.
