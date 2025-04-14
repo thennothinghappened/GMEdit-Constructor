@@ -42,9 +42,9 @@ export class ProjectProperties {
 	 * @type {EventEmitterImpl<TPreferences.ProjectPropertiesEventMap>}
 	 */
 	eventEmitter = new EventEmitterImpl([
-		'changeBuildConfig',
-		'changeRuntimeChannel',
-		'changeRuntimeVersion'
+		'setBuildConfig',
+		'setRuntimeChannel',
+		'setRuntimeVersion'
 	]);
 
 	/**
@@ -57,7 +57,7 @@ export class ProjectProperties {
 		this.portable = project.properties['GMEdit-Constructor'] ?? {};
 		this.local = Preferences.loadProjectLocalProps(this.project);
 
-		this.events.on('changeRuntimeChannel', this.onChangeRuntimeChannel);
+		this.events.on('setRuntimeChannel', this.onChangeRuntimeChannel);
 		
 	}
 
@@ -66,7 +66,7 @@ export class ProjectProperties {
 	 * @private
 	 */
 	destroy() {
-		this.events.off('changeRuntimeChannel', this.onChangeRuntimeChannel);
+		this.events.off('setRuntimeChannel', this.onChangeRuntimeChannel);
 	}
 
 	/**
@@ -114,7 +114,7 @@ export class ProjectProperties {
 		this.local.buildConfig = buildConfig;
 		this.saveLocalProps();
 
-		this.eventEmitter.emit('changeBuildConfig', { previous, current: buildConfig });
+		this.eventEmitter.emit('setBuildConfig', { previous, current: buildConfig });
 
 	}
 
@@ -190,29 +190,14 @@ export class ProjectProperties {
 	 */
 	set runtimeChannelType(channel) {
 
-		const previous = this.runtimeChannelType;
-
-		if (previous === channel) {
+		if (this.runtimeChannelType === channel) {
 			return;
 		}
 
 		this.portable.runtime_type = channel;
 		this.savePortableProps();
 		
-		let isNetChange = true;
-		
-		if (previous === undefined && channel === Preferences.defaultRuntimeChannel) {
-			// No net change: changed from implicit default to explicit default.
-			isNetChange = false;
-		}
-		
-		if (channel === undefined && previous === Preferences.defaultRuntimeChannel) {
-			// No net change: changed from explicit default to implicit default.
-			isNetChange = false;
-		}
-		
-		// @ts-expect-error Check above ensures this only fires when a change has actually happened.
-		this.eventEmitter.emit('changeRuntimeChannel', { previous, channel, isNetChange });
+		this.eventEmitter.emit('setRuntimeChannel', { channel });
 
 	}
 
@@ -297,14 +282,14 @@ export class ProjectProperties {
 
 	/**
 	 * Set the desired runtime version.
-	 * @param {string|undefined} runtime_version 
+	 * @param {string|undefined} version 
 	 */
-	set runtimeVersion(runtime_version) {
+	set runtimeVersion(version) {
 
-		this.portable.runtime_version = runtime_version;
+		this.portable.runtime_version = version;
 
 		this.savePortableProps();
-		this.eventEmitter.emit('changeRuntimeVersion', runtime_version);
+		this.eventEmitter.emit('setRuntimeVersion', { version });
 
 	}
 

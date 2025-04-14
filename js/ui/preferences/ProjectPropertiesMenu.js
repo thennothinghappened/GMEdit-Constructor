@@ -172,8 +172,8 @@ export class ProjectPropertiesMenu {
 
 		// ------------------------------------------------------------------------------
 
-		this.properties.events.on('changeBuildConfig', this.onChangeBuildConfig);
-		this.properties.events.on('changeRuntimeChannel', this.onChangeRuntimeChannel);
+		this.properties.events.on('setBuildConfig', this.onChangeBuildConfig);
+		this.properties.events.on('setRuntimeChannel', this.onChangeRuntimeChannel);
 		Preferences.events.on('runtimeListChanged', this.onRuntimeListChanged);
 
 	}
@@ -182,14 +182,14 @@ export class ProjectPropertiesMenu {
 	 * Clean up our event listens.
 	 */
 	destroy() {
-		this.properties.events.off('changeBuildConfig', this.onChangeBuildConfig);
-		this.properties.events.off('changeRuntimeChannel', this.onChangeRuntimeChannel);
+		this.properties.events.off('setBuildConfig', this.onChangeBuildConfig);
+		this.properties.events.off('setRuntimeChannel', this.onChangeRuntimeChannel);
 		Preferences.events.off('runtimeListChanged', this.onRuntimeListChanged);
 	};
 
 	/**
 	 * @private
-	 * @param {TPreferences.ProjectPropertiesEventMap['changeBuildConfig']} event
+	 * @param {TPreferences.ProjectPropertiesEventMap['setBuildConfig']} event
 	 */
 	onChangeBuildConfig = ({ current }) => {
 		this.buildConfigDropdown.choice = current;
@@ -197,7 +197,7 @@ export class ProjectPropertiesMenu {
 
 	/**
 	 * @private
-	 * @param {TPreferences.ProjectPropertiesEventMap['changeRuntimeChannel']} channel
+	 * @param {TPreferences.ProjectPropertiesEventMap['setRuntimeChannel']} channel
 	 */
 	onChangeRuntimeChannel = ({ channel }) => {
 

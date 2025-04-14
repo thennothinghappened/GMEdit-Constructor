@@ -110,24 +110,9 @@ export declare global {
 		
 		interface ProjectPropertiesEventMap {
 
-			changeBuildConfig: { previous?: string, current: string };
-
-			/**
-			 * Fires when the runtime channel has changed. There are three variations corresponding
-			 * to the cases where:
-			 * 
-			 * a) The channel was set to the default.
-			 * 
-			 * b) The channel was explicitly set to a different value, where it previously was default.
-			 * 
-			 * c) The channel was changed from one option to another.
-			 */
-			changeRuntimeChannel: 
-				{ previous: GMChannelType, channel?: GMChannelType, isNetChange: boolean }	|
-				{ previous?: GMChannelType, channel: GMChannelType, isNetChange: boolean }	|
-				{ previous: GMChannelType, channel: GMChannelType, isNetChange: true }		;
-
-			changeRuntimeVersion: string | undefined;
+			setBuildConfig: { previous: string | undefined, current: string };
+			setRuntimeChannel: { channel: GMChannelType | undefined };
+			setRuntimeVersion: { version: string | undefined };
 
 		}
 

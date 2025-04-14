@@ -49,7 +49,7 @@ export class ConfigTreeUi {
 		this.updateConfigTree(this.projectProperties.buildConfigName);
 
 		TreeView.element.appendChild(this.configsTreeDir);
-		this.projectProperties.events.on('changeBuildConfig', this.onChangeBuildConfig);
+		this.projectProperties.events.on('setBuildConfig', this.onChangeBuildConfig);
 
 	}
 
@@ -57,7 +57,7 @@ export class ConfigTreeUi {
 	 * @private
 	 */
 	destroy() {
-		this.projectProperties.events.off('changeBuildConfig', this.onChangeBuildConfig);
+		this.projectProperties.events.off('setBuildConfig', this.onChangeBuildConfig);
 		this.configsTreeDir?.remove();
 	}
 
