@@ -28,25 +28,22 @@ export declare global {
 			element: HTMLElement;
 
 			/**
-			 * The currently selected option.
-			 * 
-			 * @throws {InvalidStateErr} Throws if the list is empty, and thus no element can be
-			 *                           selected. We cannot use a sentinel value, because `T` can
-			 *                           be anything, so exceptions are the only way to
-			 *                           differentiate.
+			 * Get the currently selected option.
+			 * @returns The selected option or {@link None} if the list is empty.
 			 */
-			get choice(): T;
-		
+			getSelectedOption(): Option<T>;
+
 			/**
-			 * @param newValue The newly chosen option.
+			 * Set the currently selected option.
+			 * @param choice The newly chosen option.
 			 */
-			set choice(newValue: T);
+			setSelectedOption(choice: T);
 		
 			/**
 			 * Update the list of choices to a new list.
 			 * @param choices The new list of choices. The list must be non-empty.
 			 */
-			set choiceList(choices: NonEmptyArray<DropdownEntry<T>>);
+			setOptions(choices: NonEmptyArray<DropdownEntry<T>>);
 
 		}
 

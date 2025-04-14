@@ -192,7 +192,7 @@ export class ProjectPropertiesMenu {
 	 * @param {TPreferences.ProjectPropertiesEventMap['setBuildConfig']} event
 	 */
 	onChangeBuildConfig = ({ current }) => {
-		this.buildConfigDropdown.choice = current;
+		this.buildConfigDropdown.setSelectedOption(current);
 	};
 
 	/**
@@ -225,7 +225,7 @@ export class ProjectPropertiesMenu {
 	 * @param {GMChannelType|undefined} channel
 	 */
 	updateChannel(channel) {
-		this.zeusReleaseChannelDropdown.choice = channel;
+		this.zeusReleaseChannelDropdown.setSelectedOption(channel);
 	}
 
 	/**
@@ -233,10 +233,10 @@ export class ProjectPropertiesMenu {
 	 * @param {GMChannelType} channel 
 	 */
 	updateRuntimeVersionList(channel) {
-		this.runtimeVersionDropdown.choiceList = [
+		this.runtimeVersionDropdown.setOptions([
 			USE_DEFAULT,
 			...runtime_channel_get_versions(channel)
-		];
+		]);
 	}
 
 	/**

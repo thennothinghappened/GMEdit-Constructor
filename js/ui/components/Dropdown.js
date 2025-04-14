@@ -1,4 +1,5 @@
 import { InvalidStateErr } from '../../utils/Err.js';
+import { isSome, None, Some } from '../../utils/Option.js';
 
 /**
  * @template T The element type held in the dropdown.
@@ -28,15 +29,15 @@ export class Dropdown {
 	 * @private
 	 * @type {(value: T) => void}
 	 */
-	onChoiceChanged;
+	onSelectChanged;
 
 	/**
 	 * @param {string} label Textual label for this dropdown.
-	 * @param {T} initialChoice The initial selection.
-	 * @param {(value: T) => void} onChoiceChanged Callback when the selected choice is changed.
-	 * @param {NonEmptyArray<Components.DropdownEntry<T>>} choices The initial list of choices.
+	 * @param {T} initialSelected The initial selection.
+	 * @param {(value: T) => void} onSelectedChanged Callback when the selected choice is changed.
+	 * @param {NonEmptyArray<Components.DropdownEntry<T>>} options The initial list of choices.
 	 */
-	constructor(label, initialChoice, onChoiceChanged, choices) {
+	constructor(label, initialSelected, onSelectedChanged, options) {
 
 		this.label.textContent = label;
 
@@ -44,44 +45,54 @@ export class Dropdown {
 		this.element.appendChild(this.select);
 		this.element.classList.add('select');
 
-		this.choiceList = choices;
-		this.choice = initialChoice;
+		this.setOptions(options);
+		this.setSelectedOption(initialSelected);
 
-		this.onChoiceChanged = onChoiceChanged;
-		this.select.addEventListener('change', () => this.onChoiceChanged(this.choice));
+		this.onSelectChanged = onSelectedChanged;
+		this.select.addEventListener('change', () => {
+
+			const maybe = this.getSelectedOption();
+
+			if (isSome(maybe)) {
+				this.onSelectChanged(maybe.data);
+			}
+
+		});
 
 	}
 
-	get choice() {
+	getSelectedOption() {
 
 		const choiceIndex = this.select.selectedIndex;
 		
 		if (choiceIndex < 0) {
-			throw new InvalidStateErr('No choice can be selected in an empty list!');
+			return None;
 		}
 		
-		return this.choiceValuesByIds[choiceIndex];
+		return Some(this.choiceValuesByIds[choiceIndex]);
 
 	}
 
-	set choice(newValue) {
+	/**
+	 * @param {T} choice
+	 */
+	setSelectedOption(choice) {
 
 		for (const [index, value] of this.choiceValuesByIds.entries()) {
-			if (value === newValue) {
+			if (value === choice) {
 				this.select.selectedIndex = index;
 				return;
 			}
 		}
 
-		throw new InvalidStateErr(`Choice '${newValue}' is not a valid option in the list [${this.choiceValuesByIds.join(', ')}]`);
+		throw new InvalidStateErr(`Choice '${choice}' is not a valid option in the list [${this.choiceValuesByIds.join(', ')}]`);
 
 	}
 
 	/**
-	 * Update the list of choices to a new list.
-	 * @param {NonEmptyArray<Components.DropdownEntry<T>>} choices The new list of choices.
+	 * @param {NonEmptyArray<Components.DropdownEntry<T>>} choices The new list of choices. The list must be non-empty.
 	 */
-	set choiceList(choices) {
+	setOptions(choices) {
 
 		// Preserve the current choice, if it is applicable still.
 		/** @type {T|undefined} */
@@ -126,10 +137,10 @@ export class Dropdown {
 
 		}
 
-		if (this.select.selectedIndex < 0) {
+		if (this.select.selectedIndex < 0 && this.choiceValuesByIds.length > 0) {
 			// No choices matched, so fallback to the first option.
 			this.select.selectedIndex = 0;
-			this.onChoiceChanged(this.choice);
+			this.onSelectChanged(this.choiceValuesByIds[0]);
 		}
 
 	}
