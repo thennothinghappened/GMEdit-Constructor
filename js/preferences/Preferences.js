@@ -307,7 +307,7 @@ export class Preferences {
 
 			});
 
-		this.eventEmitter.emit('runtimeListChanged', type);
+		this.eventEmitter.emit('runtimeListChanged', { channel: type, runtimes: runtimes[type] });
 
 	}
 

@@ -105,7 +105,7 @@ export declare global {
 
 		interface PreferencesEventMap {
 			setDefaultRuntimeChannel: GMChannelType;
-			runtimeListChanged: GMChannelType;
+			runtimeListChanged: { channel: GMChannelType, runtimes: Zeus.RuntimeInfo[] };
 		}
 		
 		interface ProjectPropertiesEventMap {
