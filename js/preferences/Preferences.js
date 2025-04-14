@@ -13,6 +13,7 @@ import { GMRuntimeVersion } from '../compiler/GMVersion.js';
 import { ControlPanelTab } from '../ui/tabs/ControlPanelTab.js';
 import { use } from '../utils/scope-extensions/use.js';
 import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
+import { Error, Ok } from '../utils/Result.js';
 
 /**
  * List of recognised GameMaker IDE/Runtime channel types.
@@ -403,10 +404,9 @@ export class Preferences {
 		const dir_res = await readdir(search_path);
 
 		if (!dir_res.ok) {
-			return {
-				ok: false,
-				err: new Err(`Failed to read search path '${search_path}': ${dir_res.err}`),
-			};
+			return Error(new Err(
+				`Failed to read search path '${search_path}': ${dir_res.err}`
+			));
 		}
 
 		const runtimes = dir_res.data
@@ -445,10 +445,9 @@ export class Preferences {
 			.filter(/** @returns {runtime is Zeus.RuntimeInfo} */ (runtime) => runtime !== undefined)
 			.sort((a, b) => b.version.compare(a.version));
 
-		return {
-			ok: true,
-			data: runtimes.filter(runtime => Electron_FS.existsSync(runtime.igorPath))
-		};
+		return Ok(
+			runtimes.filter(runtime => Electron_FS.existsSync(runtime.igorPath))
+		);
 	}
 
 	/**
@@ -462,10 +461,9 @@ export class Preferences {
 		const dir_res = await readdir(users_path);
 		
 		if (!dir_res.ok) {
-			return {
-				ok: false,
-				err: new Err(`Failed to read users path '${users_path}': ${dir_res.err}`),
-			};
+			return Error(new Err(
+				`Failed to read users path '${users_path}': ${dir_res.err}`
+			));
 		}
 
 		const users = dir_res.data
@@ -475,13 +473,10 @@ export class Preferences {
 			}))
 			.sort((a, b) => +(a.name > b.name));
 
-		return {
-			ok: true,
-			data: users.filter(user => 
-				Electron_FS.existsSync(node.path.join(user.path, 'license.plist')) ||
-				Electron_FS.existsSync(node.path.join(user.path, 'local_settings.json'))
-			)
-		};
+		return Ok(users.filter(user => 
+			Electron_FS.existsSync(node.path.join(user.path, 'license.plist')) ||
+			Electron_FS.existsSync(node.path.join(user.path, 'local_settings.json'))
+		));
 	}
 
 	/**

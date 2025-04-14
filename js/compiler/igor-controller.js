@@ -7,6 +7,7 @@ import { IgorJob } from './job/IgorJob.js';
 import { output_blob_exts } from './igor-paths.js';
 import { Err } from '../utils/Err.js';
 import { child_process, path } from '../utils/node/node-import.js';
+import { Error, Ok } from '../utils/Result.js';
 
 /** @type {IgorJob[]} */
 export const jobs = [];
@@ -29,10 +30,7 @@ export async function job_run(project, runtime, user, settings, id = job_create_
 	const flags_res = job_flags_get(project, runtime.path, user?.path, settings);
 
 	if (!flags_res.ok) {
-		return {
-			ok: false,
-			err: new Err('Failed to get Igor flags for this job!', flags_res.err)
-		};
+		return Error(new Err('Failed to get Igor flags for this job!', flags_res.err));
 	}
 
 	const existingJob = jobs[id];
@@ -50,7 +48,7 @@ export async function job_run(project, runtime, user, settings, id = job_create_
 	jobs.push(job);
 	job.events.once('stop', () => job_remove(job));
 
-	return { ok: true, data: job };
+	return Ok(job);
 
 }
 
@@ -109,19 +107,15 @@ function job_flags_get(project, runtime_path, user_path, settings) {
 		break;
 
 		default:
-			return {
-				ok: false,
-				err: new Err(`Unhandled command case for flags: ${settings.verb}`)
-			}
+			return Error(new Err(
+				`Unhandled command case for flags: ${settings.verb}`
+			));
 	}
 
 	flags.push('--');
 	flags.push(settings.platform, settings.verb);
 
-	return {
-		ok: true,
-		data: flags
-	};
+	return Ok(flags);
 }
 
 /**

@@ -1,5 +1,6 @@
 import { Err } from '../utils/Err.js';
 import { project_format_get } from '../utils/project.js';
+import { Error, Ok } from '../utils/Result.js';
 
 const expectedVersionFormat = 'year.month.major.patch';
 const expectedRuntimeVersionFormat = 'runtime-' + expectedVersionFormat;
@@ -21,25 +22,16 @@ export class GMVersion {
 			.map(number => Number(number));
 
 		if (numbers.length !== 4) {
-			return {
-				ok: false,
-				err: new Err(`Expected runtime version to be in format '${expectedVersionFormat}' - 4 values, found '${str}' - ${numbers.length} values.`)
-			};
+			return Error(new Err(`Expected runtime version to be in format '${expectedVersionFormat}' - 4 values, found '${str}' - ${numbers.length} values.`));
 		}
 
 		for (const number of numbers) {
 			if (isNaN(number)) {
-				return {
-					ok: false,
-					err: new Err(`String '${str}' has a NaN runtime value`)
-				};
+				return Error(new Err(`String '${str}' has a NaN runtime value`));
 			}
 		}
 
-		return {
-			ok: true,
-			data: new GMVersion(...numbers)
-		};
+		return Ok(new GMVersion(...numbers));
 
 	}
 
@@ -202,19 +194,13 @@ export class GMRuntimeVersion {
 		const projectFormatRes = project_format_get(project);
 
 		if (!projectFormatRes.ok) {
-			return {
-				ok: false,
-				err: new Err(
-					'Failed to check if this runtime version is supported by the given project',
-					projectFormatRes.err
-				)
-			};
+			return Error(new Err(
+				'Failed to check if this runtime version is supported by the given project',
+				projectFormatRes.err
+			));
 		}
 
-		return {
-			ok: true,
-			data: projectFormatRes.data === this.format
-		};
+		return Ok(projectFormatRes.data === this.format);
 
 	}
 
@@ -233,28 +219,19 @@ export class GMRuntimeVersion {
 		const split = str.split('runtime-');
 
 		if (split.length !== 2) {
-			return {
-				ok: false,
-				err: new Err(`Expected runtime version to be in format '${expectedRuntimeVersionFormat}', found '${str}'`)
-			};
+			return Error(new Err(`Expected runtime version to be in format '${expectedRuntimeVersionFormat}', found '${str}'`));
 		}
 
 		const versionRes = GMVersion.parse(split[1]);
 
 		if (!versionRes.ok) {
-			return {
-				ok: false,
-				err: new Err(
-					`Expected runtime version to be in format '${expectedRuntimeVersionFormat}', found '${str}'`,
-					versionRes.err
-				)
-			};
+			return Error(new Err(
+				`Expected runtime version to be in format '${expectedRuntimeVersionFormat}', found '${str}'`,
+				versionRes.err
+			));
 		}
 
-		return {
-			ok: true,
-			data: new GMRuntimeVersion(versionRes.data)
-		};
+		return Ok(new GMRuntimeVersion(versionRes.data));
 
 	}
 

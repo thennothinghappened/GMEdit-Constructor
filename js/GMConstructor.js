@@ -12,7 +12,7 @@ import * as node from './utils/node/node-import.js';
 import { OutputLogTab } from './ui/tabs/OutputLogTab.js';
 import { Preferences } from './preferences/Preferences.js';
 import { ConfigTreeUi } from './ui/ConfigTreeUi.js';
-import { unwrap } from './utils/Result.js';
+import { Error, Ok, unwrap } from './utils/Result.js';
 import { ProjectPropertiesMenu } from './ui/preferences/ProjectPropertiesMenu.js';
 
 /**
@@ -287,10 +287,7 @@ export class GMConstructor {
 				type: 'error'
 			});
 
-			return {
-				ok: false,
-				err: err
-			};
+			return Error(err);
 
 		}
 
@@ -305,10 +302,7 @@ export class GMConstructor {
 		const preferences_res = await Preferences.__setup__();
 
 		if (!preferences_res.ok) {
-			return {
-				ok: false,
-				err: new Err('Failed to init preferences', preferences_res.err)
-			};
+			return Error(new Err('Failed to init preferences', preferences_res.err));
 		}
 
 		ProjectProperties.__setup__();
@@ -348,10 +342,7 @@ export class GMConstructor {
 			
 		}
 
-		return {
-			ok: true,
-			data: new GMConstructor()
-		};
+		return Ok(new GMConstructor());
 	}
 
 	/**

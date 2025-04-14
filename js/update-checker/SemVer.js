@@ -1,4 +1,5 @@
 import { Err } from '../utils/Err.js';
+import { Error, Ok } from '../utils/Result.js';
 
 /**
  * Representation of a semantic versioning string `major.minor.patch`.
@@ -47,10 +48,9 @@ export class SemVer {
 		const sections = string.split('.', 3);
 
 		if (sections.length !== 3) {
-			return {
-				ok: false,
-				err: new Err(`Expected three parts separated by dots: "major.minor.patch[-tag]", found "${string}"`)
-			};
+			return Error(new Err(
+				`Expected three parts separated by dots: "major.minor.patch[-tag]", found "${string}"`
+			));
 		}
 
 		let [major_str, minor_str, patch_str] = sections;
@@ -65,20 +65,14 @@ export class SemVer {
 		const [major, minor, patch] = [major_str, minor_str, patch_str].map(str => Number(str));
 		
 		for (const num of [major, minor, patch]) {
-
 			if (isNaN(num)) {
-				return {
-					ok: false,
-					err: new Err(`Version number is non-numerical for given semantic version string "${string}"`)
-				};
+				return Error(new Err(
+					`Version number is non-numerical for given semantic version string "${string}"`
+				));
 			}
-
 		}
 
-		return {
-			ok: true,
-			data: new SemVer(major, minor, patch, tag)
-		};
+		return Ok(new SemVer(major, minor, patch, tag));
 
 	}
 

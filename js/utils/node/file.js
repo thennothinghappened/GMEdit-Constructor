@@ -1,4 +1,5 @@
 import { Err } from '../Err.js';
+import { Error, Ok } from '../Result.js';
 
 /**
  * Promise version of `Electron_FS.readFile`.
@@ -10,16 +11,14 @@ export function readFile(path) {
 		Electron_FS.readFile(path, (err, data) => {
 
 			if (data === undefined) {
-				return res({ 
-					ok: false,
-					err: new Err(`Failed to read the file '${path}'`, err)
-				});
+				return res(Error(new Err(
+					`Failed to read the file '${path}'`,
+					err
+				)));
 			}
 
-			res({
-				ok: true,
-				data
-			});
+			res(Ok(data));
+
 		})
 	});
 }
@@ -32,15 +31,9 @@ export function readFile(path) {
  */
 export function readFileSync(path) {
 	try {
-		return {
-			ok: true,
-			data: Electron_FS.readFileSync(path)
-		};
+		return Ok(Electron_FS.readFileSync(path));
 	} catch (err) {
-		return {
-			ok: false,
-			err: new Err(`Failed to read the file at "${path}"`, err)
-		};
+		return Error(new Err(`Failed to read the file at "${path}"`, err));
 	}
 }
 
@@ -54,16 +47,14 @@ export function readdir(path) {
 		Electron_FS.readdir(path, (err, data) => {
 			
 			if (data === undefined) {
-				return res({ 
-					ok: false,
-					err: new Err(`Failed to read contents of the directory '${path}'`, err)
-				});
+				return res(Error(new Err(
+					`Failed to read contents of the directory '${path}'`,
+					err
+				)));
 			}
 
-			res({ 
-				ok: true,
-				data
-			});
+			res(Ok(data));
+
 		})
 	});
 }
@@ -83,10 +74,10 @@ export function mkdir(path, recursive) {
 				return res({ ok: true });
 			}
 
-			return res({
-				ok: false,
-				err: new Err(`Failed to create the directory '${path}'`, err)
-			});
+			return res(Error(new Err(
+				`Failed to create the directory '${path}'`,
+				err
+			)));
 
 		});
 	});
@@ -102,10 +93,10 @@ export function writeFile(path, data) {
 	return new Promise(res => {
 		Electron_FS.writeFile(path, data, (err) => {
 			if (err !== undefined) {
-				return res({
-					ok: false,
-					err: new Err(`Failed to write the file '${path}'`, err)
-				});
+				return res(Error(new Err(
+					`Failed to write the file '${path}'`,
+					err
+				)));
 			}
 
 			res({ ok: true });
