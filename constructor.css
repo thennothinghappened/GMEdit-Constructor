@@ -46,6 +46,10 @@
 	font-family: monospace, monospace;
 }
 
+.gm-constructor-tab div.select[hidden] {
+	display: none !important;
+}
+
 /************************
 *     Control Panel     *
 *************************/
