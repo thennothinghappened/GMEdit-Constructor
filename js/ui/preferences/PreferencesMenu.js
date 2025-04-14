@@ -11,25 +11,25 @@ import { use } from '../../utils/scope-extensions/use.js';
 const UIPreferences = $gmedit['ui.Preferences'];
 
 /** @type {string} */
-let ele_css_query;
+let pluginSettingsQueryString;
 
 /**
  * Setup the preferences menu callback.
  */
 export function __setup__() {
 
-	ele_css_query = `.plugin-settings[for^="${plugin_name}"]`;
+	pluginSettingsQueryString = `.plugin-settings[for^="${plugin_name}"]`;
 
-	on_preferences_built();
-
-	GMEdit.on('preferencesBuilt', on_preferences_built);
+	onPreferencesBuilt();
+	GMEdit.on('preferencesBuilt', onPreferencesBuilt);
+	
 }
 
 /**
  * Deregister callback for setting up menu.
  */
 export function __cleanup__() {
-	GMEdit.off('preferencesBuilt', on_preferences_built);
+	GMEdit.off('preferencesBuilt', onPreferencesBuilt);
 }
 
 /**
@@ -37,7 +37,7 @@ export function __cleanup__() {
  * 
  * @param {HTMLElement} prefs_group Root Group element to add the preferences to.
  */
-export function menu_create(prefs_group) {
+export function createPreferencesMenu(prefs_group) {
 
 	use(document.createElement('section')).also(section => {
 
@@ -214,17 +214,14 @@ function user_strings_get_for_type(type) {
  * Callback for setting up our preferences menu when the user opens prefs.
  * @param {GMEdit.PluginEventMap['preferencesBuilt']} [e] 
  */
-function on_preferences_built(e) {
+function onPreferencesBuilt(e) {
 
 	const target = e?.target ?? document.body;
-	const prefs_group = target.querySelector(ele_css_query);
+	const prefs_group = target.querySelector(pluginSettingsQueryString);
 
 	if (prefs_group instanceof HTMLDivElement) {
-
-		menu_create(prefs_group);
+		createPreferencesMenu(prefs_group);
 		UIPreferences.addText(prefs_group, `Version: ${plugin_version}`);
-		
 	}
 
 }
-

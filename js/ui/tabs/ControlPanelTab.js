@@ -321,7 +321,7 @@ export class ControlPanelTab extends ConstructorTab {
 	 */
 	globalSettingsSetup() {
 		this.globalSettings.appendChild(ui.em(`Configure the default behaviour of ${plugin_name}.`));
-		preferencesMenu.menu_create(this.globalSettings);
+		preferencesMenu.createPreferencesMenu(this.globalSettings);
 	}
 
 	destroy = () => {
