@@ -7,6 +7,8 @@ import { UIDropdownMutate } from '../../utils/gmedit/UIPreferencesUtils.js';
 import * as ui from '../../ui/ui-wrappers.js';
 import { GM_CHANNEL_TYPES, Preferences, ZEUS_RUNTIME_TYPES } from '../../preferences/Preferences.js';
 import { use } from '../../utils/scope-extensions/use.js';
+import { Dropdown } from '../components/Dropdown.js';
+import { mapToOption, None, Some } from '../../utils/Option.js';
 
 const UIPreferences = $gmedit['ui.Preferences'];
 
@@ -70,26 +72,24 @@ export function createPreferencesMenu(prefs_group) {
 
 		section.appendChild(ui.h3('Build Settings'));
 
-		use(UIPreferences.addDropdown(
-			section,
-			'Runtime Type',
-			Preferences.runtimeBuildType,
-			ZEUS_RUNTIME_TYPES,
-			(runner) => Preferences.runtimeBuildType = runner
-		)).also(it => {
-			it.classList.add('singleline');
-			it.title = 'The type of runtime to use.';
+		use(new Dropdown('Runtime Type',
+			Some(Preferences.runtimeBuildType),
+			(runner) => Preferences.runtimeBuildType = runner,
+			ZEUS_RUNTIME_TYPES
+		)).let(it => it.element).also(element => {
+			element.classList.add('singleline');
+			element.title = 'The type of runtime to use.';
+			section.appendChild(element);
 		});
 	
-		use(UIPreferences.addDropdown(
-			section,
-			'Runtime Release Channel',
-			Preferences.defaultRuntimeChannel,
-			GM_CHANNEL_TYPES,
-			(runtime_channel_type) => Preferences.defaultRuntimeChannel = runtime_channel_type
-		)).also(it => {
-			it.classList.add('singleline');
-			it.title = 'The GameMaker update channel from which to pick the runtime version from.';
+		use(new Dropdown('Runtime Release Channel',
+			Some(Preferences.defaultRuntimeChannel),
+			(runtime_channel_type) => Preferences.defaultRuntimeChannel = runtime_channel_type,
+			GM_CHANNEL_TYPES
+		)).let(it => it.element).also(element => {
+			element.classList.add('singleline');
+			element.title = 'The GameMaker update channel from which to pick the runtime version from.';
+			section.appendChild(element);
 		});
 		
 	}).also(it => prefs_group.appendChild(it));
@@ -116,11 +116,11 @@ export function createPreferencesMenu(prefs_group) {
 
 			const group = ui.group(section, type);
 	
-			/** @type {HTMLDivElement} */
-			let version_dropdown;
+			/** @type {Components.IDropdown<string>} */
+			let versionDropdown;
 	
-			/** @type {HTMLDivElement} */
-			let user_dropdown;
+			/** @type {Components.IDropdown<string>} */
+			let userDropdown;
 	
 			UIPreferences.addInput(
 				group,
@@ -134,24 +134,18 @@ export function createPreferencesMenu(prefs_group) {
 					}
 					
 					await Preferences.setRuntimeSearchPath(type, path);
-	
-					UIDropdownMutate(
-						version_dropdown,
-						runtime_channel_get_versions(type)
-					);
+					versionDropdown.setOptions(runtime_channel_get_versions(type));
 	
 				}
 			);
 	
-			version_dropdown = UIPreferences.addDropdown(
-				group,
-				'Version',
-				Preferences.getRuntimeVersion(type) ?? '',
-				runtime_channel_get_versions(type),
-				(choice) => {
-					Preferences.setRuntimeVersion(type, choice);
-				}
+			versionDropdown = new Dropdown('Version',
+				mapToOption(Preferences.getRuntimeVersion(type)),
+				(choice) => { Preferences.setRuntimeVersion(type, choice); },
+				runtime_channel_get_versions(type)
 			);
+
+			group.appendChild(versionDropdown.element);
 	
 			UIPreferences.addInput(
 				group,
@@ -164,23 +158,18 @@ export function createPreferencesMenu(prefs_group) {
 					}
 	
 					await Preferences.setUserSearchPath(type, path);
-	
-					UIDropdownMutate(
-						user_dropdown,
-						user_strings_get_for_type(type)
-					);
+					userDropdown.setOptions(user_strings_get_for_type(type));
+
 				}
 			);
 	
-			user_dropdown = UIPreferences.addDropdown(
-				group,
-				'User',
-				Preferences.getUser(type) ?? '',
-				user_strings_get_for_type(type),
-				(choice) => {
-					Preferences.setUser(type, choice);
-				}
+			userDropdown = new Dropdown('User',
+				mapToOption(Preferences.getUser(type)),
+				(choice) => { Preferences.setUser(type, choice); },
+				user_strings_get_for_type(type)
 			);
+
+			group.appendChild(userDropdown.element);
 	
 		}	
 	

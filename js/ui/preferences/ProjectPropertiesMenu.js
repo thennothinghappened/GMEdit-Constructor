@@ -8,6 +8,7 @@ import { GMConstructor, plugin_name } from '../../GMConstructor.js';
 import { Dropdown } from '../components/Dropdown.js';
 import { ControlPanelTab } from '../tabs/ControlPanelTab.js';
 import { Err } from '../../utils/Err.js';
+import { mapToOption, Some } from '../../utils/Option.js';
 
 const UIPreferences = $gmedit['ui.Preferences'];
 
@@ -93,7 +94,7 @@ export class ProjectPropertiesMenu {
 		// ------------------------------------------------------------------------------
 
 		this.buildConfigDropdown = new Dropdown('Build Configuration',
-			this.properties.buildConfigName,
+			Some(this.properties.buildConfigName),
 			(config_name) => { this.properties.buildConfigName = config_name; },
 			project_config_tree_flatten(this.properties.rootBuildConfig)
 		);
@@ -104,7 +105,7 @@ export class ProjectPropertiesMenu {
 		// ------------------------------------------------------------------------------
 
 		this.platformDropdown = new Dropdown('Runner Platform',
-			this.properties.zeusPlatform,
+			Some(this.properties.zeusPlatform),
 			(value) => { this.properties.zeusPlatform = value; },
 			[
 				{ label: 'Current Platform', value: undefined },
@@ -119,7 +120,7 @@ export class ProjectPropertiesMenu {
 		// ------------------------------------------------------------------------------
 
 		this.zeusRuntimeTypeDropdown = new Dropdown('Runtime Type',
-			this.properties.runtimeBuildType,
+			Some(this.properties.runtimeBuildType),
 			(value) => { this.properties.runtimeBuildType = value; },
 			[USE_DEFAULT, ...ZEUS_RUNTIME_TYPES]
 		);
@@ -130,7 +131,7 @@ export class ProjectPropertiesMenu {
 		// ------------------------------------------------------------------------------
 
 		this.zeusReleaseChannelDropdown = new Dropdown('Runtime Release Channel',
-			this.properties.runtimeChannelType,
+			Some(this.properties.runtimeChannelType),
 			(value) => { this.properties.runtimeChannelType = value; },
 			[USE_DEFAULT, ...GM_CHANNEL_TYPES]
 		);
@@ -146,7 +147,7 @@ export class ProjectPropertiesMenu {
 			?? [];
 
 		this.runtimeVersionDropdown = new Dropdown('Runtime Version',
-			this.properties.runtimeVersion,
+			Some(this.properties.runtimeVersion),
 			(value) => { this.properties.runtimeVersion = value; },
 			[USE_DEFAULT, ...runtimeVersions]
 		);
@@ -158,7 +159,7 @@ export class ProjectPropertiesMenu {
 		// ------------------------------------------------------------------------------
 		
 		this.reuseCompileTabDropdown = use(new Dropdown('Reuse existing compiler tab',
-			this.properties.reuseCompilerTab,
+			Some(this.properties.reuseCompilerTab),
 			(value) => { this.properties.reuseCompilerTab = value; },
 			[
 				USE_DEFAULT,

@@ -2,7 +2,7 @@
 /**
  * The "no object" singleton.
  */
-export const None = Object.freeze({});
+export const None = Object.freeze({ __noneMarker: undefined });
 
 /**
  * @template T
@@ -11,6 +11,20 @@ export const None = Object.freeze({});
  */
 export function Some(data) {
     return { data };
+}
+
+/**
+ * Convert a non-nullable type or `undefined` into `Some(data)` or `None`
+ * respectively.
+ * 
+ * @template {Object} T
+ * @param {T|undefined} maybeData 
+ */
+export function mapToOption(maybeData) {
+    if (maybeData === undefined) {
+        return None;
+    }
+    return Some(maybeData);
 }
 
 /**

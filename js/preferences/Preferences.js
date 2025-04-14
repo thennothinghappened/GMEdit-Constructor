@@ -16,11 +16,11 @@ import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
 
 /**
  * List of recognised GameMaker IDE/Runtime channel types.
- * @type {Readonly<GMChannelType[]>} 
+ * @type {NonEmptyArray<GMChannelType>} 
  */
 export const GM_CHANNEL_TYPES = ['Stable', 'Beta', 'LTS'];
 
-/** @type {Readonly<Zeus.RuntimeType[]>} */
+/** @type {NonEmptyArray<Zeus.RuntimeType>} */
 export const ZEUS_RUNTIME_TYPES = ['VM', 'YYC'];
 
 /** @type {Readonly<TPreferences.Data>} */

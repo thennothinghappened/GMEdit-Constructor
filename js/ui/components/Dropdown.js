@@ -33,9 +33,9 @@ export class Dropdown {
 
 	/**
 	 * @param {string} label Textual label for this dropdown.
-	 * @param {T} initialSelected The initial selection.
+	 * @param {Option<T>} initialSelected The initial selection.
 	 * @param {(value: T) => void} onSelectedChanged Callback when the selected choice is changed.
-	 * @param {NonEmptyArray<Components.DropdownEntry<T>>} options The initial list of choices.
+	 * @param {ReadonlyArray<Components.DropdownEntry<T>>} options The initial list of choices.
 	 */
 	constructor(label, initialSelected, onSelectedChanged, options) {
 
@@ -46,7 +46,10 @@ export class Dropdown {
 		this.element.classList.add('select');
 
 		this.setOptions(options);
-		this.setSelectedOption(initialSelected);
+		
+		if (isSome(initialSelected)) {
+			this.setSelectedOption(initialSelected.data);
+		}
 
 		this.onSelectChanged = onSelectedChanged;
 		this.select.addEventListener('change', () => {
@@ -90,7 +93,7 @@ export class Dropdown {
 	}
 
 	/**
-	 * @param {NonEmptyArray<Components.DropdownEntry<T>>} choices The new list of choices. The list must be non-empty.
+	 * @param {ReadonlyArray<Components.DropdownEntry<T>>} choices The new list of choices. The list must be non-empty.
 	 */
 	setOptions(choices) {
 
