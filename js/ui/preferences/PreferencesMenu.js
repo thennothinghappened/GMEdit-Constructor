@@ -137,7 +137,7 @@ export function menu_create(prefs_group) {
 	
 					UIDropdownMutate(
 						version_dropdown,
-						runtime_version_strings_get_for_type(type)
+						runtime_channel_get_versions(type)
 					);
 	
 				}
@@ -147,7 +147,7 @@ export function menu_create(prefs_group) {
 				group,
 				'Version',
 				Preferences.getRuntimeVersion(type) ?? '',
-				runtime_version_strings_get_for_type(type),
+				runtime_channel_get_versions(type),
 				(choice) => {
 					Preferences.setRuntimeVersion(type, choice);
 				}
@@ -190,14 +190,12 @@ export function menu_create(prefs_group) {
 
 /**
  * Get an array of version strings for the given runtime type.
- * @param {GMChannelType} type 
- * @returns 
+ * 
+ * @param {GMChannelType} channel 
+ * @returns {string[]}
  */
-export function runtime_version_strings_get_for_type(type) {
-	return Preferences
-		.getRuntimes(type)
-		?.map(runtime => runtime.version.toString())
-		?? [];
+export function runtime_channel_get_versions(channel) {
+	return Preferences.getRuntimes(channel)?.map(runtime => runtime.version.toString()) ?? [];
 }
 
 /**
