@@ -11,6 +11,13 @@ export declare global {
 	type Result<T, E = IErr> = Ok<T> | Err<E>;
 
 	/**
+	 * An array of at least one element.
+	 * 
+	 * For this to be guaranteed, the array necessarily cannot be mutated.
+	 */
+	type NonEmptyArray<T> = readonly [T, ...T[]];
+
+	/**
 	 * Project format type for the loaded project.
 	 */
 	type YYProjectFormat =

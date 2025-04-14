@@ -54,7 +54,7 @@ export function project_config_tree_get(project) {
  * Returns the config tree as an array of config names.
  * 
  * @param {ProjectYYConfig} config 
- * @returns {string[]}
+ * @returns {NonEmptyArray<string>}
  */
 export function project_config_tree_flatten(config) {
 	return [
