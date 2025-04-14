@@ -297,6 +297,7 @@ export class ProjectPropertiesMenu {
 		GMEdit.off('projectPropertiesBuilt', this.deploy);
 		GMEdit.off('projectClose', this.onCloseProject);
 
+		this.instance?.destroy();
 		this.group?.remove();
 
 	}
