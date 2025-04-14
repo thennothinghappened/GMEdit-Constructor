@@ -3,9 +3,11 @@
  */
 
 import { GMConstructor } from '../GMConstructor.js';
+import { ControlPanelTab } from '../ui/tabs/ControlPanelTab.js';
 import { Err, InvalidStateErr } from '../utils/Err.js';
 import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
 import { project_config_tree_get, project_current_get } from '../utils/project.js';
+import { docString, trimIndent } from '../utils/StringUtils.js';
 import { Preferences } from './Preferences.js';
 
 const GMEditProjectProperties = $gmedit['ui.project.ProjectProperties'];
@@ -233,19 +235,64 @@ export class ProjectProperties {
 	}
 
 	/**
-	 * Get the desired runtime version for this project.
+	 * The runtime version to build this project with.
 	 * @returns {string|undefined}
 	 */
 	get runtimeVersionOrDef() {
-		return this.portable.runtime_version ?? Preferences.getRuntimeVersion(this.runtimeChannelTypeOrDef);
+		return this.runtimeVersion ?? Preferences.getRuntimeVersion(this.runtimeChannelTypeOrDef);
 	}
 
 	/**
-	 * Get the desired runtime channel type for this project (without falling back to the global option).
+	 * The user-specified runtime version for this project, if any.
+	 * 
 	 * @returns {string|undefined}
 	 */
 	get runtimeVersion() {
-		return this.portable.runtime_version ?? undefined;
+
+		// FIXME: I'm not really too pleased with this setup. Doing magical validity-checking which
+		// prints a message automatically behind the scenes on a getter isn't that great. IMO this
+		// should be merged into the `runtime` getter (which itself should not be a getter either).
+
+		// If no channel is specified, this value is meaningless.
+		if (this.runtimeChannelType === undefined) {
+			return undefined;
+		}
+
+		const version = this.portable.runtime_version;
+
+		if (version == undefined) {
+			return undefined;
+		}
+
+		const runtimes = Preferences.getRuntimes(this.runtimeChannelType);
+
+		if (runtimes === undefined) {
+			return undefined;
+		}
+
+		if (runtimes.find(it => it.version.toString() === version) === undefined) {
+		
+			ControlPanelTab.error('Project\'s selected Runtime is not installed!', new Err(
+				docString(`
+					This project specifies the runtime version '${version}', but this version
+					doesn\'t appear to be installed.
+					
+					The default runtime will be used, though the value in the config will not be
+					modified unless you do so.
+				`),
+				undefined,
+				docString(`
+					Install the runtime in the IDE and reload GMEdit if this is the correct runtime,
+					otherwise you may change the value to an installed runtime.
+				`)
+			));
+
+			return undefined;
+
+		}
+
+		return version;
+
 	}
 
 	/**
@@ -291,6 +338,7 @@ export class ProjectProperties {
 			ok: true,
 			data: runtime
 		};
+
 	}
 
 	/**
