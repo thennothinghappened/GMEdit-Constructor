@@ -77,8 +77,6 @@ export class ControlPanelTab extends ConstructorTab {
 		this.projectSettingsElement.hidden = true;
 
 		this.globalSettings = ui.group(this.element, 'Global Settings');
-
-		ControlPanelTab.problems.forEach(this.showProblem);
 		
 		if (Preferences.ready) {
 			this.globalSettingsSetup();
@@ -89,6 +87,8 @@ export class ControlPanelTab extends ConstructorTab {
 		if (project !== undefined) {
 			this.onOpenProject({ project });
 		}
+
+		ControlPanelTab.problems.forEach(this.showProblem);
 
 		GMEdit.on('projectOpen', this.onOpenProject);
 		GMEdit.on('projectClose', this.onCloseProject);
