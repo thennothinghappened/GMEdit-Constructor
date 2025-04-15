@@ -1,6 +1,6 @@
 import { BaseError } from '../utils/Err.js';
 import { project_format_get } from '../utils/project.js';
-import { Error, Ok } from '../utils/Result.js';
+import { Err, Ok } from '../utils/Result.js';
 import { docString } from '../utils/StringUtils.js';
 
 const expectedVersionFormat = 'year.month.major.patch';
@@ -23,7 +23,7 @@ export class GMVersion {
 			.map(number => Number(number));
 
 		if (numbers.length !== 4) {
-			return Error(new BaseError(docString(`
+			return Err(new BaseError(docString(`
 				Expected runtime version to be in format '${expectedVersionFormat}' - 4 values,
 				found '${str}' - ${numbers.length} values.
 			`)));
@@ -31,7 +31,7 @@ export class GMVersion {
 
 		for (const number of numbers) {
 			if (isNaN(number)) {
-				return Error(new BaseError(`String '${str}' has a NaN runtime value`));
+				return Err(new BaseError(`String '${str}' has a NaN runtime value`));
 			}
 		}
 
@@ -198,7 +198,7 @@ export class GMRuntimeVersion {
 		const projectFormatRes = project_format_get(project);
 
 		if (!projectFormatRes.ok) {
-			return Error(new BaseError(
+			return Err(new BaseError(
 				'Failed to check if this runtime version is supported by the given project',
 				projectFormatRes.err
 			));
@@ -223,7 +223,7 @@ export class GMRuntimeVersion {
 		const split = str.split('runtime-');
 
 		if (split.length !== 2) {
-			return Error(new BaseError(docString(`
+			return Err(new BaseError(docString(`
 				Expected runtime version to be in format '${expectedRuntimeVersionFormat}', found
 				'${str}'
 			`)));
@@ -232,7 +232,7 @@ export class GMRuntimeVersion {
 		const versionRes = GMVersion.parse(split[1]);
 
 		if (!versionRes.ok) {
-			return Error(new BaseError(
+			return Err(new BaseError(
 				`Expected runtime version to be in format '${expectedRuntimeVersionFormat}', found '${str}'`,
 				versionRes.err
 			));

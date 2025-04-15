@@ -1,7 +1,7 @@
 import { SemVer } from './SemVer.js';
 import { plugin_version } from '../GMConstructor.js';
 import { BaseError } from '../utils/Err.js';
-import { Error, Ok } from '../utils/Result.js';
+import { Err, Ok } from '../utils/Result.js';
 
 /**
  * URL we use to check for updates with.
@@ -23,7 +23,7 @@ export async function plugin_update_check() {
 	const our_version_res = SemVer.parse(plugin_version);
 
 	if (!our_version_res.ok) {
-		return Error(new BaseError(
+		return Err(new BaseError(
 			'Our own plugin version failed to parse. This should never happen!!',
 			our_version_res.err
 		));
@@ -33,7 +33,7 @@ export async function plugin_update_check() {
 
 	const res = await (fetch(update_check_url)
 		.then(async response => Ok(/** @type {UpdateChecker.GithubLatestVersionResponse} */ (await response.json())))
-		.catch(err => Error(new BaseError(err))));
+		.catch(err => Err(new BaseError(err))));
 	
 	if (!res.ok) {
 
@@ -44,7 +44,7 @@ export async function plugin_update_check() {
 			return Ok({ update_available: false });
 		}
 
-		return Error(new BaseError(
+		return Err(new BaseError(
 			'Querying latest version request failed.',
 			res.err
 		));
@@ -53,7 +53,7 @@ export async function plugin_update_check() {
 	const public_version_res = SemVer.parse(res.data.tag_name);
 
 	if (!public_version_res.ok) {
-		return Error(new BaseError(
+		return Err(new BaseError(
 			'Failed to parse the version name of the latest public release',
 			public_version_res.err
 		));

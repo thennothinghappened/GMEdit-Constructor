@@ -7,7 +7,7 @@ import { ControlPanelTab } from '../ui/tabs/ControlPanelTab.js';
 import { BaseError, InvalidStateErr, SolvableError } from '../utils/Err.js';
 import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
 import { project_config_tree_get, project_current_get } from '../utils/project.js';
-import { Error, Ok } from '../utils/Result.js';
+import { Err, Ok } from '../utils/Result.js';
 import { docString, trimIndent } from '../utils/StringUtils.js';
 import { Preferences } from './Preferences.js';
 
@@ -303,14 +303,14 @@ export class ProjectProperties {
 		const desired_runtime_list = Preferences.getRuntimes(type);
 
 		if (desired_runtime_list === undefined) {
-			return Error(new BaseError(`Runtime type ${type} list not loaded!`));
+			return Err(new BaseError(`Runtime type ${type} list not loaded!`));
 		}
 
 		const version = this.runtimeVersionOrDef ?? desired_runtime_list[0]?.version?.toString();
 		const runtime = desired_runtime_list.find(runtime => runtime.version.toString() === version);
 
 		if (runtime === undefined) {
-			return Error(new BaseError(`Failed to find any runtimes of type ${type}`));
+			return Err(new BaseError(`Failed to find any runtimes of type ${type}`));
 		}
 
 		return Ok(runtime);
@@ -327,14 +327,14 @@ export class ProjectProperties {
 		const users = Preferences.getUsers(type);
 
 		if (users === undefined) {
-			return Error(new BaseError(`Users for runtime ${type} list not loaded!`));
+			return Err(new BaseError(`Users for runtime ${type} list not loaded!`));
 		}
 
 		const name = Preferences.getUser(type) ?? users[0]?.name?.toString();
 		const user = users.find(user => user.name.toString() === name);
 
 		if (user === undefined) {
-			return Error(new BaseError(`Failed to find any users for runtime ${type}`));
+			return Err(new BaseError(`Failed to find any users for runtime ${type}`));
 		}
 
 		return Ok(user);

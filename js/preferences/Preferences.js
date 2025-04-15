@@ -13,7 +13,7 @@ import { GMRuntimeVersion } from '../compiler/GMVersion.js';
 import { ControlPanelTab } from '../ui/tabs/ControlPanelTab.js';
 import { use } from '../utils/scope-extensions/use.js';
 import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
-import { Error, Ok } from '../utils/Result.js';
+import { Err, Ok } from '../utils/Result.js';
 import { docString } from '../utils/StringUtils.js';
 
 /**
@@ -404,7 +404,7 @@ export class Preferences {
 		const dir_res = await readdir(search_path);
 
 		if (!dir_res.ok) {
-			return Error(new BaseError(
+			return Err(new BaseError(
 				`Failed to read search path '${search_path}': ${dir_res.err}`
 			));
 		}
@@ -462,7 +462,7 @@ export class Preferences {
 		const dir_res = await readdir(users_path);
 		
 		if (!dir_res.ok) {
-			return Error(new BaseError(
+			return Err(new BaseError(
 				`Failed to read users path '${users_path}': ${dir_res.err}`
 			));
 		}

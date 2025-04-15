@@ -32,6 +32,6 @@ export function Ok(data) {
  * @param {E} err 
  * @returns {Err<E>}
  */
-export function Error(err) {
+export function Err(err) {
 	return { ok: false, err };
 }
