@@ -1,18 +1,16 @@
+import { docString } from './StringUtils.js';
 
 /**
  * Base error type we use to try and be descriptive to the user :)
- * @implements {IErr}
  */
-export class Err extends Error {
+export class BaseError extends Error {
 
 	/**
 	 * @param {string} message 
-	 * @param {unknown} [cause] 
-	 * @param {string} [solution]
+	 * @param {unknown} [cause]
 	 */
-	constructor(message, cause, solution) {
+	constructor(message, cause) {
 		super(message, { cause });
-		this.solution = solution;
 	}
 
 	/**
@@ -33,11 +31,29 @@ export class Err extends Error {
 }
 
 /**
+ * An error with a potential solution to show to the user.
+ * @implements {ISolvableError}
+ */
+export class SolvableError extends BaseError {
+
+	/**
+	 * @param {string} message 
+	 * @param {string} solution
+	 * @param {unknown} [cause]
+	 */
+	constructor(message, solution, cause) {
+		super(message, cause);
+		this.solution = solution;
+	}
+
+}
+
+/**
  * The program has entered an invalid state.
  * 
  * This error should not be recovered from!
  */
-export class InvalidStateErr extends Err {
+export class InvalidStateErr extends BaseError {
 
 	/**
 	 * @param {string} message
@@ -45,9 +61,13 @@ export class InvalidStateErr extends Err {
 	 */
 	constructor(message, cause) {
 		super(
-			'Invalid State!!: ' + message,
-			cause,
-			'Please report this error through Constructor\'s GitHub Issues (https://github.com/thennothinghappened/GMEdit-Constructor/issues)!'
+			docString(`
+				Invalid State!!: ${message}
+
+				Please report this error through Constructor\'s GitHub Issues
+				(https://github.com/thennothinghappened/GMEdit-Constructor/issues)!
+			`),
+			cause
 		);
 	}
 

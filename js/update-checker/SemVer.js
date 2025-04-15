@@ -1,4 +1,4 @@
-import { Err } from '../utils/Err.js';
+import { BaseError } from '../utils/Err.js';
 import { Error, Ok } from '../utils/Result.js';
 
 /**
@@ -48,7 +48,7 @@ export class SemVer {
 		const sections = string.split('.', 3);
 
 		if (sections.length !== 3) {
-			return Error(new Err(
+			return Error(new BaseError(
 				`Expected three parts separated by dots: "major.minor.patch[-tag]", found "${string}"`
 			));
 		}
@@ -66,7 +66,7 @@ export class SemVer {
 		
 		for (const num of [major, minor, patch]) {
 			if (isNaN(num)) {
-				return Error(new Err(
+				return Error(new BaseError(
 					`Version number is non-numerical for given semantic version string "${string}"`
 				));
 			}

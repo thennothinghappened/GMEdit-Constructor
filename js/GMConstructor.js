@@ -4,7 +4,7 @@ import { project_current_get, open_files_save, project_format_get, tab_current_g
 import { ProjectProperties } from './preferences/ProjectProperties.js';
 import * as igorPaths from './compiler/igor-paths.js';
 import * as preferencesMenu from './ui/preferences/PreferencesMenu.js';
-import { Err } from './utils/Err.js';
+import { BaseError, SolvableError } from './utils/Err.js';
 import { ControlPanelTab } from './ui/tabs/ControlPanelTab.js';
 import { plugin_update_check } from './update-checker/UpdateChecker.js';
 import { mkdir, readdir } from './utils/node/file.js';
@@ -14,6 +14,7 @@ import { Preferences } from './preferences/Preferences.js';
 import { ConfigTreeUi } from './ui/ConfigTreeUi.js';
 import { Error, Ok, unwrap } from './utils/Result.js';
 import { ProjectPropertiesMenu } from './ui/preferences/ProjectPropertiesMenu.js';
+import { docString } from './utils/StringUtils.js';
 
 /**
  * Name of the plugin 
@@ -57,10 +58,13 @@ export class GMConstructor {
 		if (!runtime_res.ok) {
 			
 			const runtime_type = projectProperties.runtimeChannelTypeOrDef;
-			const err = new Err(
+			const err = new SolvableError(
 				`No ${runtime_type} runtimes available to compile!`,
-				runtime_res.err,
-				`Try specifying a different runtime channel type below, or check the runtime search path for ${runtime_type} runtimes.`
+				docString(`
+					Try specifying a different runtime channel type below, or check the runtime
+					search path for ${runtime_type} runtimes.
+				`),
+				runtime_res.err
 			);
 
 			return ControlPanelTab
@@ -73,7 +77,7 @@ export class GMConstructor {
 
 		if (!supportedRes.ok) {
 
-			const err = new Err(
+			const err = new BaseError(
 				`Failed to check runtime version '${runtime.version}' is compatible with the project!`,
 				supportedRes.err
 			);
@@ -90,10 +94,15 @@ export class GMConstructor {
 
 			const format = unwrap(project_format_get(project));
 
-			const err = new Err(
+			const err = new SolvableError(
 				`Runtime version '${runtime.version}' is not compatible with this project format!`,
-				undefined,
-				`This project is in the YY ${format} format, where the chosen runtime (${runtime.version}) expects the ${runtime.version.format} format.\n\nPlease pick a matching runtime, or you can convert your project to the desired format using ProjectTool in the IDE.`
+				docString(`
+					This project is in the YY ${format} format, where the chosen runtime
+					(${runtime.version}) expects the ${runtime.version.format} format.
+					
+					Please pick a matching runtime, or you can convert your project to the desired
+					format using ProjectTool in the IDE.
+				`)
 			);
 
 			return ControlPanelTab
@@ -111,10 +120,13 @@ export class GMConstructor {
 			
 			if (!res.ok) {
 
-				const err = new Err(
+				const err = new SolvableError(
 					'Failed to create the build directory for project output!',
-					res.err,
-					`Ensure the path '${settings.buildPath}' is valid, and that GMEdit would have permission to edit files and directories there.`
+					docString(`
+						Ensure the path '${settings.buildPath}' is valid, and that GMEdit would have
+						permission to edit files and directories there.
+					`),
+					res.err
 				);
 
 				return ControlPanelTab
@@ -247,10 +259,10 @@ export class GMConstructor {
 				Electron_FS.rmSync(build_dir, { recursive: true });
 			} catch (err) {
 				return ControlPanelTab
-					.error('Failed to clean project!', new Err(
+					.error('Failed to clean project!', new SolvableError(
 						`An unexpected error occurred while removing the build directory '${build_dir}'.`,
-						err,
-						'Do you have this directory open somewhere?'
+						'Do you have this directory open somewhere?',
+						err
 					))
 					.view();
 			}
@@ -277,7 +289,11 @@ export class GMConstructor {
 		// Prevent Constructor loading when running on Rosetta, since it has a bunch of issues there.
 		if (rosetta_check(node_child_process.execSync)) {
 
-			const err = new Err(`${_plugin_name} does not work correctly on Rosetta - please consider using GMEdit's native Arm64 build found at https://yellowafterlife.itch.io/gmedit`);
+			const err = new BaseError(docString(`
+				${_plugin_name} does not work correctly on Rosetta - please consider using GMEdit's
+				native Arm64 build found at https://yellowafterlife.itch.io/gmedit
+			`));
+
 			console.error(err);
 
 			Electron_Dialog.showMessageBox({
@@ -302,7 +318,7 @@ export class GMConstructor {
 		const preferences_res = await Preferences.__setup__();
 
 		if (!preferences_res.ok) {
-			return Error(new Err('Failed to init preferences', preferences_res.err));
+			return Error(new BaseError('Failed to init preferences', preferences_res.err));
 		}
 
 		ProjectProperties.__setup__();
@@ -331,11 +347,11 @@ export class GMConstructor {
 					// Bit silly to use an error message for this but it works :P
 					ControlPanelTab.warn(
 						'An update is available for Constructor!',
-						new Err(
-							'There is an update available.',
-							'Update Check',
-							`${plugin_name} ${res.data.version} is available on GitHub!\n\n${res.data.url}`
-						)
+						new SolvableError('There is an update available.', docString(`
+							${plugin_name} ${res.data.version} is available on GitHub!
+							
+							${res.data.url}
+						`))
 					);
 
 				});

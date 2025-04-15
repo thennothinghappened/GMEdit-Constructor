@@ -1,4 +1,4 @@
-import { Err } from '../Err.js';
+import { BaseError } from '../Err.js';
 import { Error, Ok } from '../Result.js';
 
 /**
@@ -11,7 +11,7 @@ export function readFile(path) {
 		Electron_FS.readFile(path, (err, data) => {
 
 			if (data === undefined) {
-				return res(Error(new Err(
+				return res(Error(new BaseError(
 					`Failed to read the file '${path}'`,
 					err
 				)));
@@ -33,7 +33,7 @@ export function readFileSync(path) {
 	try {
 		return Ok(Electron_FS.readFileSync(path));
 	} catch (err) {
-		return Error(new Err(`Failed to read the file at "${path}"`, err));
+		return Error(new BaseError(`Failed to read the file at "${path}"`, err));
 	}
 }
 
@@ -47,7 +47,7 @@ export function readdir(path) {
 		Electron_FS.readdir(path, (err, data) => {
 			
 			if (data === undefined) {
-				return res(Error(new Err(
+				return res(Error(new BaseError(
 					`Failed to read contents of the directory '${path}'`,
 					err
 				)));
@@ -74,7 +74,7 @@ export function mkdir(path, recursive) {
 				return res({ ok: true });
 			}
 
-			return res(Error(new Err(
+			return res(Error(new BaseError(
 				`Failed to create the directory '${path}'`,
 				err
 			)));
@@ -93,7 +93,7 @@ export function writeFile(path, data) {
 	return new Promise(res => {
 		Electron_FS.writeFile(path, data, (err) => {
 			if (err !== undefined) {
-				return res(Error(new Err(
+				return res(Error(new BaseError(
 					`Failed to write the file '${path}'`,
 					err
 				)));

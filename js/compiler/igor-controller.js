@@ -5,7 +5,7 @@
 
 import { IgorJob } from './job/IgorJob.js';
 import { output_blob_exts } from './igor-paths.js';
-import { Err } from '../utils/Err.js';
+import { BaseError } from '../utils/Err.js';
 import { child_process, path } from '../utils/node/node-import.js';
 import { Error, Ok } from '../utils/Result.js';
 
@@ -30,7 +30,7 @@ export async function job_run(project, runtime, user, settings, id = job_create_
 	const flags_res = job_flags_get(project, runtime.path, user?.path, settings);
 
 	if (!flags_res.ok) {
-		return Error(new Err('Failed to get Igor flags for this job!', flags_res.err));
+		return Error(new BaseError('Failed to get Igor flags for this job!', flags_res.err));
 	}
 
 	const existingJob = jobs[id];
@@ -107,7 +107,7 @@ function job_flags_get(project, runtime_path, user_path, settings) {
 		break;
 
 		default:
-			return Error(new Err(
+			return Error(new BaseError(
 				`Unhandled command case for flags: ${settings.verb}`
 			));
 	}

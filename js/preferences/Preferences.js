@@ -5,7 +5,7 @@
 
 import { def_global_build_path, def_runtime_paths, def_user_paths, igor_path_segment } from '../compiler/igor-paths.js';
 import { readFileSync, readdir } from '../utils/node/file.js';
-import { Err } from '../utils/Err.js';
+import { BaseError, SolvableError } from '../utils/Err.js';
 import { deep_assign } from '../utils/object.js';
 import { plugin_name } from '../GMConstructor.js';
 import * as node from '../utils/node/node-import.js';
@@ -14,6 +14,7 @@ import { ControlPanelTab } from '../ui/tabs/ControlPanelTab.js';
 import { use } from '../utils/scope-extensions/use.js';
 import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
 import { Error, Ok } from '../utils/Result.js';
+import { docString } from '../utils/StringUtils.js';
 
 /**
  * List of recognised GameMaker IDE/Runtime channel types.
@@ -280,10 +281,10 @@ export class Preferences {
 
 		if (!res.ok) {
 
-			const err = new Err(
+			const err = new SolvableError(
 				`An error occurred while loading the runtime list for ${type} channel runtimes.`,
-				res.err,
-				'Make sure the search path is valid!'
+				'Make sure the search path is valid!',
+				res.err
 			);
 
 			return ControlPanelTab
@@ -297,9 +298,8 @@ export class Preferences {
 			?.takeIf(it => runtimes[type]?.find(info => info.version.toString() === it) === undefined)
 			?.also(it => {
 
-				const err = new Err(
+				const err = new SolvableError(
 					`Runtime version "${it}" not available in new search path "${search_path}".`,
-					undefined,
 					`Is the path correct? Have you deleted the runtime "${it}"?`
 				);
 		
@@ -329,10 +329,10 @@ export class Preferences {
 
 		if (!res.ok) {
 
-			const err = new Err(
+			const err = new SolvableError(
 				`An error occured while loading the list of users for ${type} from "${users_path}".`,
+				'Make sure the users path is valid!',
 				res.err,
-				'Make sure the users path is valid!'
 			);
 
 			return ControlPanelTab
@@ -349,7 +349,7 @@ export class Preferences {
 			users[type]?.find(user => user.name === choice) === undefined
 		) {
 
-			const err = new Err(`User "${choice}" not available in new users path "${users_path}".`);
+			const err = new BaseError(`User "${choice}" not available in new users path "${users_path}".`);
 
 			ControlPanelTab
 				.warn('Selected user is no longer valid', err)
@@ -404,7 +404,7 @@ export class Preferences {
 		const dir_res = await readdir(search_path);
 
 		if (!dir_res.ok) {
-			return Error(new Err(
+			return Error(new BaseError(
 				`Failed to read search path '${search_path}': ${dir_res.err}`
 			));
 		}
@@ -419,7 +419,7 @@ export class Preferences {
 
 				if (!version_res.ok) {
 
-					ControlPanelTab.debug('Invalid runtime found in search path', new Err(
+					ControlPanelTab.debug('Invalid runtime found in search path', new BaseError(
 						`Failed to parse runtime version name for runtime at '${path}'`, 
 						version_res.err
 					));
@@ -432,8 +432,9 @@ export class Preferences {
 
 				if (!supported_res.ok) {
 
-					ControlPanelTab.debug('Excluding unsupported runtime', new Err(
-						`Excluding unsupported runtime ${runtime}`, supported_res.err
+					ControlPanelTab.debug('Excluding unsupported runtime', new BaseError(
+						`Excluding unsupported runtime ${runtime}`,
+						supported_res.err
 					));
 					
 					return undefined;
@@ -461,7 +462,7 @@ export class Preferences {
 		const dir_res = await readdir(users_path);
 		
 		if (!dir_res.ok) {
-			return Error(new Err(
+			return Error(new BaseError(
 				`Failed to read users path '${users_path}': ${dir_res.err}`
 			));
 		}
@@ -556,15 +557,15 @@ export class Preferences {
 				loaded_prefs = JSON.parse(prefsLoadRes.data.toString());
 			} catch (err_cause) {
 
-				const err = new Err(
+				ControlPanelTab.error('Failed to load preferences', new SolvableError(
 					'JSON parse error while reading the preferences file!', 
-					err_cause,
-					`Please check your preferences file (${this.save_path}) for syntax errors as you must have edited it manually - see stacktrace below.`
-				);
-
-				ControlPanelTab
-					.error('Failed to load preferences', err)
-					.view(true);
+					docString(`
+						Please check your preferences file (${this.save_path})
+						for syntax errors as you must have edited it manually -
+						see stacktrace below.
+					`),
+					err_cause
+				)).view(true);
 
 			}
 
@@ -573,10 +574,10 @@ export class Preferences {
 		if (loaded_prefs?.runtime_opts?.type !== undefined) {
 			if (!GM_CHANNEL_TYPES.includes(loaded_prefs.runtime_opts.type)) {
 
-				ControlPanelTab.warn(
-					`Invalid preferred runtime type`,
-					new Err(`'${loaded_prefs.runtime_opts.type}' is invalid, changed to ${this.prefs.runtime_opts.type}`)
-				);
+				ControlPanelTab.warn(`Invalid preferred runtime type`, new BaseError(docString(`
+					'${loaded_prefs.runtime_opts.type}' is invalid, changed to
+					${this.prefs.runtime_opts.type}
+				`)));
 				
 				loaded_prefs.runtime_opts.type = this.prefs.runtime_opts.type;
 
@@ -590,7 +591,7 @@ export class Preferences {
 			for (const type of GM_CHANNEL_TYPES) {
 				if (!(type in type_opts)) {
 
-					ControlPanelTab.warn('Missing runtime type preference data', new Err(
+					ControlPanelTab.warn('Missing runtime type preference data', new BaseError(
 						`Missing runtime type preference data for type '${type}', replacing with default.`
 					));
 

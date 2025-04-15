@@ -1,4 +1,5 @@
 import { GMConstructor } from './GMConstructor';
+import { BaseError } from './utils/Err';
 import { None } from './utils/Option';
 
 export declare global {
@@ -6,11 +7,11 @@ export declare global {
 	/**
 	 * A result holding either an error or some data.
 	 */
-	type Result<T, E = IErr> = Ok<T> | Err<E>;
+	type Result<T, E = BaseError> = Ok<T> | Err<E>;
 	type Ok<T> = (T extends void
 		? { ok: true }
 		: { ok: true, data: T });
-	type Err<E = IErr> = { ok: false, err: E };
+	type Err<E = BaseError> = { ok: false, err: E };
 	
 	/**
 	 * An optional value.

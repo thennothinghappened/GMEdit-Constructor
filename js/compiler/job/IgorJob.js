@@ -1,5 +1,5 @@
 import { ControlPanelTab } from '../../ui/tabs/ControlPanelTab.js';
-import { Err } from '../../utils/Err.js';
+import { BaseError } from '../../utils/Err.js';
 import { EventEmitterImpl } from '../../utils/EventEmitterImpl.js';
 import { child_process, path } from '../../utils/node/node-import.js';
 import { killRecursive } from '../../utils/node/process-handling.js';
@@ -173,7 +173,7 @@ export class IgorJob {
 		} catch (err) {
 			ControlPanelTab.error(
 				`Failed to stop the job ${this.settings.verb}!`,
-				new Err('Failed stopping MacOS-specific residual processes', err)
+				new BaseError('Failed stopping MacOS-specific residual processes', err)
 			);
 		}
 

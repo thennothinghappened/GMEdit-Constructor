@@ -1,6 +1,7 @@
-import { Err } from '../utils/Err.js';
+import { BaseError } from '../utils/Err.js';
 import { project_format_get } from '../utils/project.js';
 import { Error, Ok } from '../utils/Result.js';
+import { docString } from '../utils/StringUtils.js';
 
 const expectedVersionFormat = 'year.month.major.patch';
 const expectedRuntimeVersionFormat = 'runtime-' + expectedVersionFormat;
@@ -22,12 +23,15 @@ export class GMVersion {
 			.map(number => Number(number));
 
 		if (numbers.length !== 4) {
-			return Error(new Err(`Expected runtime version to be in format '${expectedVersionFormat}' - 4 values, found '${str}' - ${numbers.length} values.`));
+			return Error(new BaseError(docString(`
+				Expected runtime version to be in format '${expectedVersionFormat}' - 4 values,
+				found '${str}' - ${numbers.length} values.
+			`)));
 		}
 
 		for (const number of numbers) {
 			if (isNaN(number)) {
-				return Error(new Err(`String '${str}' has a NaN runtime value`));
+				return Error(new BaseError(`String '${str}' has a NaN runtime value`));
 			}
 		}
 
@@ -194,7 +198,7 @@ export class GMRuntimeVersion {
 		const projectFormatRes = project_format_get(project);
 
 		if (!projectFormatRes.ok) {
-			return Error(new Err(
+			return Error(new BaseError(
 				'Failed to check if this runtime version is supported by the given project',
 				projectFormatRes.err
 			));
@@ -219,13 +223,16 @@ export class GMRuntimeVersion {
 		const split = str.split('runtime-');
 
 		if (split.length !== 2) {
-			return Error(new Err(`Expected runtime version to be in format '${expectedRuntimeVersionFormat}', found '${str}'`));
+			return Error(new BaseError(docString(`
+				Expected runtime version to be in format '${expectedRuntimeVersionFormat}', found
+				'${str}'
+			`)));
 		}
 
 		const versionRes = GMVersion.parse(split[1]);
 
 		if (!versionRes.ok) {
-			return Error(new Err(
+			return Error(new BaseError(
 				`Expected runtime version to be in format '${expectedRuntimeVersionFormat}', found '${str}'`,
 				versionRes.err
 			));

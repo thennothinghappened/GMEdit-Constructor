@@ -4,7 +4,7 @@
 
 import { GMConstructor } from '../GMConstructor.js';
 import { ControlPanelTab } from '../ui/tabs/ControlPanelTab.js';
-import { Err, InvalidStateErr } from '../utils/Err.js';
+import { BaseError, InvalidStateErr, SolvableError } from '../utils/Err.js';
 import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
 import { project_config_tree_get, project_current_get } from '../utils/project.js';
 import { Error, Ok } from '../utils/Result.js';
@@ -258,7 +258,7 @@ export class ProjectProperties {
 
 		if (runtimes.find(it => it.version.toString() === version) === undefined) {
 		
-			ControlPanelTab.error('Project\'s selected Runtime is not installed!', new Err(
+			ControlPanelTab.error('Project\'s selected Runtime is not installed!', new SolvableError(
 				docString(`
 					This project specifies the runtime version '${version}', but this version
 					doesn\'t appear to be installed.
@@ -266,7 +266,6 @@ export class ProjectProperties {
 					The default runtime will be used, though the value in the config will not be
 					modified unless you do so.
 				`),
-				undefined,
 				docString(`
 					Install the runtime in the IDE and reload GMEdit if this is the correct runtime,
 					otherwise you may change the value to an installed runtime.
@@ -304,16 +303,14 @@ export class ProjectProperties {
 		const desired_runtime_list = Preferences.getRuntimes(type);
 
 		if (desired_runtime_list === undefined) {
-			return Error(new Err(`Runtime type ${type} list not loaded!`));
+			return Error(new BaseError(`Runtime type ${type} list not loaded!`));
 		}
 
 		const version = this.runtimeVersionOrDef ?? desired_runtime_list[0]?.version?.toString();
 		const runtime = desired_runtime_list.find(runtime => runtime.version.toString() === version);
 
 		if (runtime === undefined) {
-			return Error(new Err(
-				`Failed to find any runtimes of type ${type}`
-			));
+			return Error(new BaseError(`Failed to find any runtimes of type ${type}`));
 		}
 
 		return Ok(runtime);
@@ -330,14 +327,14 @@ export class ProjectProperties {
 		const users = Preferences.getUsers(type);
 
 		if (users === undefined) {
-			return Error(new Err(`Users for runtime ${type} list not loaded!`));
+			return Error(new BaseError(`Users for runtime ${type} list not loaded!`));
 		}
 
 		const name = Preferences.getUser(type) ?? users[0]?.name?.toString();
 		const user = users.find(user => user.name.toString() === name);
 
 		if (user === undefined) {
-			return Error(new Err(`Failed to find any users for runtime ${type}`));
+			return Error(new BaseError(`Failed to find any users for runtime ${type}`));
 		}
 
 		return Ok(user);

@@ -7,7 +7,7 @@ import { GMConstructor, plugin_name, plugin_version } from '../../GMConstructor.
 import { Preferences } from '../../preferences/Preferences.js';
 import { ProjectPropertiesMenu } from '../preferences/ProjectPropertiesMenu.js';
 import { ProjectProperties } from '../../preferences/ProjectProperties.js';
-import { InvalidStateErr } from '../../utils/Err.js';
+import { BaseError, InvalidStateErr } from '../../utils/Err.js';
 
 const GmlFile = $gmedit['gml.file.GmlFile'];
 const ChromeTabs = $gmedit['ui.ChromeTabs'];
@@ -99,7 +99,7 @@ export class ControlPanelTab extends ConstructorTab {
 	 * Show the user an error in the UI.
 	 * 
 	 * @param {string} title
-	 * @param {IErr} err
+	 * @param {BaseError} err
 	 */
 	static error = (title, err) => this.addProblem({ severity: 'error', title, err });
 
@@ -107,7 +107,7 @@ export class ControlPanelTab extends ConstructorTab {
 	 * Show the user a warning in the UI.
 	 * 
 	 * @param {string} title
-	 * @param {IErr} err
+	 * @param {BaseError} err
 	 */
 	static warn = (title, err) => this.addProblem({ severity: 'warning', title, err });
 
@@ -115,7 +115,7 @@ export class ControlPanelTab extends ConstructorTab {
 	 * Show the user a debug message in the UI.
 	 * 
 	 * @param {string} title
-	 * @param {IErr} err
+	 * @param {BaseError} err
 	 */
 	static debug = (title, err) => this.addProblem({ severity: 'debug', title, err });
 

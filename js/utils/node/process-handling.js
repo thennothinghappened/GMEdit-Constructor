@@ -1,4 +1,4 @@
-import { Err } from '../Err.js';
+import { BaseError } from '../Err.js';
 import { Error } from '../Result.js';
 import { child_process } from './node-import.js';
 
@@ -52,7 +52,7 @@ export function killRecursive(pid, signal = 'SIGTERM'){
 		}
 
 	} catch (err) {
-		return Error(new Err(
+		return Error(new BaseError(
 			`Failed to recursively kill process tree of PID ${pid}.`,
 			err
 		));

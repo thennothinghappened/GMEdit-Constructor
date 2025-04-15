@@ -7,7 +7,7 @@ import { runtime_channel_get_versions } from './PreferencesMenu.js';
 import { GMConstructor, plugin_name } from '../../GMConstructor.js';
 import { Dropdown } from '../components/Dropdown.js';
 import { ControlPanelTab } from '../tabs/ControlPanelTab.js';
-import { Err } from '../../utils/Err.js';
+import { BaseError } from '../../utils/Err.js';
 import { mapToOption, Some } from '../../utils/Option.js';
 
 const UIPreferences = $gmedit['ui.Preferences'];

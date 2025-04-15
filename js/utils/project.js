@@ -1,5 +1,5 @@
 import { GMVersion } from '../compiler/GMVersion.js';
-import { Err } from './Err.js';
+import { BaseError } from './Err.js';
 import { Error, Ok } from './Result.js';
 import { docString } from './StringUtils.js';
 
@@ -86,9 +86,10 @@ export function project_format_get(project) {
 	const ideVersionRes = GMVersion.parse(ideVersionStr);
 	
 	if (!ideVersionRes.ok) {
-		return Error(new Err(docString(`
-				Somehow the IDEVersion field could not be parsed,
-				did YYG change the version naming scheme or something??
+		return Error(new BaseError(docString(`
+				Somehow the IDEVersion field could not be parsed, did YYG change the version naming
+				scheme or something??
+
 				Please report this as a Constructor bug!
 			`),
 			ideVersionRes.err
