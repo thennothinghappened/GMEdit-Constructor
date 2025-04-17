@@ -211,30 +211,6 @@ export class GMRuntimeVersion {
 		return { ok: true };
 	}
 
-	/**
-	 * Returns whether this runtime version is supported by a given project.
-	 * 
-	 * Projects on 2023.11 and earlier use a different format to 2024.2 and greater
-	 * as per [Prefabs Phase 1](https://github.com/YoYoGames/GameMaker-Bugs/issues/3218).
-	 * 
-	 * @param {GMEdit.Project} project 
-	 * @returns {Result<boolean>}
-	 */
-	supportedByProject(project) {
-
-		const projectFormatRes = project_format_get(project);
-
-		if (!projectFormatRes.ok) {
-			return Err(new BaseError(
-				'Failed to check if this runtime version is supported by the given project',
-				projectFormatRes.err
-			));
-		}
-
-		return Ok(projectFormatRes.data === this.format);
-
-	}
-
 	toString() {
 		return `runtime-${this.version}`;
 	}
