@@ -10,7 +10,7 @@ export const None = Object.freeze({ __noneMarker: undefined });
  * @returns {Option<T>}
  */
 export function Some(data) {
-    return { data };
+	return { data };
 }
 
 /**
@@ -21,10 +21,10 @@ export function Some(data) {
  * @param {T|undefined} maybeData 
  */
 export function mapToOption(maybeData) {
-    if (maybeData === undefined) {
-        return None;
-    }
-    return Some(maybeData);
+	if (maybeData === undefined) {
+		return None;
+	}
+	return Some(maybeData);
 }
 
 /**
@@ -35,7 +35,7 @@ export function mapToOption(maybeData) {
  * @returns {option is Some<T>}
  */
 export function isSome(option) {
-    return option !== None;
+	return option !== None;
 }
 
 /**
@@ -46,5 +46,5 @@ export function isSome(option) {
  * @returns {option is None}
  */
 export function isNone(option) {
-    return option === None;
+	return option === None;
 }

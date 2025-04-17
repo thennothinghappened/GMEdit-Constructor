@@ -27,10 +27,27 @@ export declare global {
 	type NonEmptyArray<T> = readonly [T, ...T[]];
 
 	/**
+	 * An object which can be compared for equality against another object of type `T`.
+	 */
+	interface Eq<T> {
+		/**
+		 * Check whether this instance is equal to the other.
+		 * @param other The other instance to compare against.
+		 */
+		equals(other: T): boolean;
+	}
+
+	/**
 	 * Project format type for the loaded project.
 	 */
-	type YYProjectFormat =
-		'[Unsupported]'	|
+	type ProjectFormat =
+		'[Unsupported]'			|
+		SupportedProjectFormat	;
+
+	/**
+	 * Project format type for a loaded project which is supported by the plugin.
+	 */
+	type SupportedProjectFormat =
 		'2023.11'		|
 		'2024.2'		|
 		'2024.4'		|

@@ -13,7 +13,7 @@
 	const load = (async () => {
 
 		if ('GMConstructor' in window && window.GMConstructor !== undefined) {
-			await window.GMConstructor.cleanup();
+			window.GMConstructor.cleanup();
 		}
 
 		const res = await import('./js/GMConstructor.js')
@@ -41,8 +41,8 @@
 		init: async () => {
 			await load();
 		},
-		cleanup: async () => {
-			await window.GMConstructor?.cleanup();
+		cleanup: () => {
+			window.GMConstructor?.cleanup();
 		}
 	});
 

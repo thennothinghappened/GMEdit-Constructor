@@ -10,11 +10,10 @@ import { deep_assign } from '../utils/object.js';
 import { plugin_name } from '../GMConstructor.js';
 import * as node from '../utils/node/node-import.js';
 import { GMRuntimeVersion } from '../compiler/GMVersion.js';
-import { ControlPanelTab } from '../ui/tabs/ControlPanelTab.js';
-import { use } from '../utils/scope-extensions/use.js';
 import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
-import { Err, Ok } from '../utils/Result.js';
+import { Err, Ok, okOrUndefined } from '../utils/Result.js';
 import { docString } from '../utils/StringUtils.js';
+import { asNonEmptyArray } from '../utils/ArrayUtils.js';
 
 /**
  * List of recognised GameMaker IDE/Runtime channel types.
@@ -59,17 +58,17 @@ const PREFS_DEFAULT = {
  * List of runtimes for each type.
  * Populated after loading the list.
  * 
- * @type {{ [key in GMChannelType]?: Zeus.RuntimeInfo[] }}
+ * @type {{ [key in GMChannelType]?: NonEmptyArray<Zeus.RuntimeInfo> }}
  */
-const runtimes = {};
+const runtimesInChannels = {};
 
 /**
  * List of users for each type.
  * Populated after loading the list.
  * 
- * @type {{ [key in GMChannelType]?: UserInfo[] }}
+ * @type {{ [key in GMChannelType]?: NonEmptyArray<UserInfo> }}
  */
-const users = {};
+const usersInChannels = {};
 
 /**
  * Global preferences for Constructor's behaviour. Much of this behaviour can be over-ridden on a
@@ -83,7 +82,13 @@ export class Preferences {
 	 */
 	static eventEmitter = new EventEmitterImpl([
 		'setDefaultRuntimeChannel',
-		'runtimeListChanged'
+		'runtimeListChanged',
+		'userListChanged',
+		'setCheckForUpdates',
+		'setSaveOnRun',
+		'setReuseOutputTab',
+		'setUseGlobalBuildPath',
+		'setGlobalBuildPath'
 	]);
 
 	/**
@@ -98,13 +103,17 @@ export class Preferences {
 	 * Whether to reuse a compiler tab.
 	 * @returns {Boolean}
 	 */
-	static get reuseCompilerTab() {
+	static get reuseOutputTab() {
 		return this.prefs.reuse_compiler_tab;
 	}
 
-	static set reuseCompilerTab(reuse_compiler_tab) {
-		this.prefs.reuse_compiler_tab = reuse_compiler_tab;
+	static set reuseOutputTab(value) {
+
+		this.prefs.reuse_compiler_tab = value;
 		this.save();
+
+		this.eventEmitter.emit('setReuseOutputTab', { reuseOutputTab: value });
+
 	}
 
 	/**
@@ -115,9 +124,13 @@ export class Preferences {
 		return this.prefs.save_on_run_task;
 	}
 
-	static set saveOnRun(save_on_run_task) {
-		this.prefs.save_on_run_task = save_on_run_task;
+	static set saveOnRun(value) {
+		
+		this.prefs.save_on_run_task = value;
 		this.save();
+
+		this.eventEmitter.emit('setSaveOnRun', { saveOnRun: value });
+
 	}
 
 	/**
@@ -128,9 +141,13 @@ export class Preferences {
 		return this.prefs.check_for_updates;
 	}
 
-	static set checkForUpdates(check_for_updates) {
-		this.prefs.check_for_updates = check_for_updates;
+	static set checkForUpdates(value) {
+		
+		this.prefs.check_for_updates = value;
 		this.save();
+
+		this.eventEmitter.emit('setCheckForUpdates', { checkForUpdates: value });
+
 	}
 
 	/**
@@ -140,9 +157,13 @@ export class Preferences {
 		return this.prefs.use_global_build;
 	}
 
-	static set useGlobalBuildPath(use_global_build) {
-		this.prefs.use_global_build = use_global_build;
+	static set useGlobalBuildPath(value) {
+		
+		this.prefs.use_global_build = value;
 		this.save();
+
+		this.eventEmitter.emit('setUseGlobalBuildPath', { useGlobalBuildPath: value });
+
 	}
 
 	/**
@@ -153,9 +174,13 @@ export class Preferences {
 		return this.prefs.global_build_path;
 	}
 
-	static set globalBuildPath(global_build_path) {
-		this.prefs.global_build_path = global_build_path;
+	static set globalBuildPath(value) {
+		
+		this.prefs.global_build_path = value;
 		this.save();
+
+		this.eventEmitter.emit('setGlobalBuildPath', { globalBuildPath: value });
+
 	}
 
 	/**
@@ -188,31 +213,99 @@ export class Preferences {
 	}
 
 	/**
-	 * Get the global choice for default runtime for a given type.
-	 * @param {GMChannelType} type 
+	 * Get the global preference choice for default runtime for a given type. This may be
+	 * `undefined` in the case that no runtimes are installed for the given channel, or if the user
+	 * has not chosen one.
+	 * 
+	 * @param {GMChannelType} channel
+	 * @returns {Zeus.RuntimeInfo|undefined}
 	 */
-	static getRuntimeVersion(type) {
-		return this.prefs.runtime_opts.type_opts[type].choice ?? undefined;
+	static getPreferredRuntimeVersion(channel) {
+
+		const version = this.prefs.runtime_opts.type_opts[channel].choice;
+
+		if (version == undefined) {
+			return undefined;
+		}
+
+		return okOrUndefined(this.getRuntimeInfo(channel, version));
+
 	}
 
 	/**
 	 * Set the global choice for default runtime for a given type.
 	 * 
 	 * @param {GMChannelType} type 
-	 * @param {string|undefined} choice 
+	 * @param {GMRuntimeVersion|undefined} version The runtime version to use, or `undefined` to clear the preference.
 	 */
-	static setRuntimeVersion(type, choice) {
-		this.prefs.runtime_opts.type_opts[type].choice = choice;
+	static setPreferredRuntimeVersion(type, version) {
+		this.prefs.runtime_opts.type_opts[type].choice = version?.toString();
 		this.save();
 	}
 
 	/**
-	 * Get the global choice for default user for a given type.
+	 * Get information regarding a particular runtime version.
 	 * 
-	 * @param {GMChannelType} [type] 
+	 * If the given runtime version string is invalid, is not installed, or the given channel has no
+	 * loaded list, an error is returned.
+	 * 
+	 * @param {GMChannelType} channel The channel the runtime version was released in.
+	 * @param {GMRuntimeVersion|string} versionOrVersionString The version.
+	 * @returns {Result<Zeus.RuntimeInfo>}
 	 */
-	static getUser(type = this.defaultRuntimeChannel) {
-		return this.prefs.runtime_opts.type_opts[type].user ?? undefined;
+	static getRuntimeInfo(channel, versionOrVersionString) {
+
+		const runtimes = this.getInstalledRuntimeVersions(channel);
+
+		if (runtimes === undefined) {
+			return Err(new BaseError(`No runtime list is loaded for the channel "${channel}"`));
+		}
+
+		/** @type {GMRuntimeVersion} */
+		let version;
+
+		if (typeof versionOrVersionString === 'string') {
+
+			const versionRes = GMRuntimeVersion.parse(versionOrVersionString);
+
+			if (!versionRes.ok) {
+				return Err(versionRes.err);
+			}
+
+			version = versionRes.data;
+
+		} else {
+			version = versionOrVersionString;
+		}
+
+		const runtimeInfo = runtimes.find(it => it.version.equals(version));
+
+		if (runtimeInfo === undefined) {
+			return Err(new BaseError(`The runtime "${version}" of channel "${channel}" not found in the installed list`));
+		}
+
+		return Ok(runtimeInfo);
+
+	}
+
+	/**
+	 * Get the global choice for default user for a given type. This may be `undefined` in the case
+	 * that no users are found for the given channel.
+	 * 
+	 * @param {GMChannelType} channel
+	 * @returns {UserInfo|undefined}
+	 */
+	static getUser(channel) {
+
+		const userName = this.prefs.runtime_opts.type_opts[channel].user;
+		const usersInChannel = usersInChannels[channel];
+
+		if (userName == undefined || usersInChannel === undefined) {
+			return undefined;
+		}
+
+		return usersInChannel.find(it => it.name === userName);
+
 	}
 
 	/**
@@ -245,119 +338,111 @@ export class Preferences {
 	}
 
 	/**
-	 * Function to get a list of runtime version names for a given runtime type.
+	 * Get the list of runtime version names for a given runtime type.
 	 * 
-	 * @param {GMChannelType} type
-	 * @returns {Zeus.RuntimeInfo[]|undefined}
+	 * @param {GMChannelType} channel
+	 * @returns {NonEmptyArray<Zeus.RuntimeInfo>|undefined}
 	 */
-	static getRuntimes(type) {
-		return runtimes[type] ?? undefined;
+	static getInstalledRuntimeVersions(channel) {
+		return runtimesInChannels[channel];
 	};
 
 	/**
-	 * Function to get a list of user names for a given runtime type.
+	 * Get the list of users for a given runtime type.
 	 * 
 	 * @param {GMChannelType} type
-	 * @returns {UserInfo[]|undefined}
+	 * @returns {NonEmptyArray<UserInfo>|undefined}
 	 */
 	static getUsers(type) {
-		return users[type] ?? undefined;
+		return usersInChannels[type] ?? undefined;
 	};
 
 	/**
 	 * Set the search path for runtime of a given type.
 	 * 
-	 * @param {GMChannelType} type 
+	 * @param {GMChannelType} channel 
 	 * @param {string} search_path 
 	 */
-	static async setRuntimeSearchPath(type, search_path) {
+	static async setRuntimeSearchPath(channel, search_path) {
 
-		this.prefs.runtime_opts.type_opts[type].search_path = search_path;
+		this.prefs.runtime_opts.type_opts[channel].search_path = search_path;
 		this.save();
 
-		runtimes[type] = undefined;
-
-		const res = await this.loadRuntimeList(type);
+		runtimesInChannels[channel] = undefined;
+		const res = await this.loadRuntimeList(channel);
 
 		if (!res.ok) {
 
-			const err = new SolvableError(
-				`An error occurred while loading the runtime list for ${type} channel runtimes.`,
+			this.problemLogger.error(`Failed to load ${channel} runtime list`, new SolvableError(
+				`An error occurred while loading the runtime list for ${channel} channel runtimes.`,
 				'Make sure the search path is valid!',
 				res.err
-			);
+			));
 
-			return ControlPanelTab
-				.error(`Failed to load ${type} runtime list`, err)
-				.view(true);
-		}
-
-		runtimes[type] = res.data;
-
-		use(this.getRuntimeVersion(type))
-			?.takeIf(it => runtimes[type]?.find(info => info.version.toString() === it) === undefined)
-			?.also(it => {
-
-				const err = new SolvableError(
-					`Runtime version "${it}" not available in new search path "${search_path}".`,
-					`Is the path correct? Have you deleted the runtime "${it}"?`
-				);
-		
-				ControlPanelTab.debug('Chosen Runtime version not available', err);
-				this.setRuntimeVersion(type, runtimes[type]?.at(0)?.version?.toString() ?? undefined);
-
+			this.eventEmitter.emit('runtimeListChanged', {
+				channel,
+				runtimesInfo: undefined
 			});
 
-		this.eventEmitter.emit('runtimeListChanged', { channel: type, runtimes: runtimes[type] });
+			return;
+
+		}
+
+		const runtimesList = res.data;
+		runtimesInChannels[channel] = runtimesList;
+
+		this.eventEmitter.emit('runtimeListChanged', {
+			channel,
+			runtimesInfo: {
+				runtimes: runtimesList,
+				preferredRuntime: this.getPreferredRuntimeVersion(channel)
+			}
+		});
 
 	}
 
 	/**
 	 * Set the users path for runtime of a given type.
 	 * 
-	 * @param {GMChannelType} type 
+	 * @param {GMChannelType} channel 
 	 * @param {string} users_path 
 	 */
-	static async setUserSearchPath(type, users_path) {
+	static async setUserSearchPath(channel, users_path) {
 
-		this.prefs.runtime_opts.type_opts[type].users_path = users_path;
+		this.prefs.runtime_opts.type_opts[channel].users_path = users_path;
 		this.save();
 
-		users[type] = undefined;
+		usersInChannels[channel] = undefined;
 
-		const res = await this.loadUserList(type);
+		const userListRes = await this.loadUserList(channel);
 
-		if (!res.ok) {
+		if (!userListRes.ok) {
 
-			const err = new SolvableError(
-				`An error occured while loading the list of users for ${type} from "${users_path}".`,
+			this.problemLogger.error(`Failed to load ${channel} user list`, new SolvableError(
+				`An error occured while loading the list of users for ${channel} from "${users_path}".`,
 				'Make sure the users path is valid!',
-				res.err,
-			);
+				userListRes.err,
+			));
 
-			return ControlPanelTab
-				.error(`Failed to load ${type} user list`, err)
-				.view(true);
-		}
+			this.eventEmitter.emit('userListChanged', {
+				channel,
+				usersInfo: undefined
+			});
 
-		users[type] = res.data;
-
-		const choice = this.getUser(type);
-
-		if (
-			choice !== undefined && 
-			users[type]?.find(user => user.name === choice) === undefined
-		) {
-
-			const err = new BaseError(`User "${choice}" not available in new users path "${users_path}".`);
-
-			ControlPanelTab
-				.warn('Selected user is no longer valid', err)
-				.view(false);
-			
-			this.setUser(type, users[type]?.at(0)?.name?.toString());
+			return;
 
 		}
+
+		const users = userListRes.data;
+		const defaultUser = users[0];
+
+		usersInChannels[channel] = users;
+		this.setUser(channel, defaultUser.name);
+
+		this.eventEmitter.emit('userListChanged', {
+			channel,
+			usersInfo: { users, defaultUser }
+		});
 
 	}
 
@@ -375,41 +460,40 @@ export class Preferences {
 	 * Load the list of runtimes for the provided search path for a type.
 	 * 
 	 * @param {GMChannelType} type
-	 * @returns {Promise<Result<Zeus.RuntimeInfo[]>>}
+	 * @returns {Promise<Result<NonEmptyArray<Zeus.RuntimeInfo>>>}
 	 */
-	static async loadRuntimeList(type) {
-		const { search_path } = this.getRuntimeOptions(type);
-		return this.loadRuntimeListFrom(search_path);
+	static loadRuntimeList(type) {
+		return this.loadRuntimeListFrom(this.getRuntimeOptions(type).search_path);
 	}
 
 	/**
 	 * Load the list of users for the provided users path for a type.
 	 * 
 	 * @param {GMChannelType} type
-	 * @returns {Promise<Result<UserInfo[]>>}
+	 * @returns {Promise<Result<NonEmptyArray<UserInfo>>>}
 	 */
-	static async loadUserList(type) {
-		const { users_path } = this.getRuntimeOptions(type);
-		return this.loadUserListFrom(users_path);
+	static loadUserList(type) {
+		return this.loadUserListFrom(this.getRuntimeOptions(type).users_path);
 	}
 
 	/**
 	 * Load the list of runtimes for the provided search path.
 	 * 
 	 * @param {String} search_path 
-	 * @returns {Promise<Result<Zeus.RuntimeInfo[]>>}
+	 * @returns {Promise<Result<NonEmptyArray<Zeus.RuntimeInfo>>>}
 	 */
 	static async loadRuntimeListFrom(search_path) {
 
-		const dir_res = await readdir(search_path);
+		const runtimeVersionListRes = await readdir(search_path);
 
-		if (!dir_res.ok) {
+		if (!runtimeVersionListRes.ok) {
 			return Err(new BaseError(
-				`Failed to read search path '${search_path}': ${dir_res.err}`
+				`Failed to read search path '${search_path}': ${runtimeVersionListRes.err}`
 			));
 		}
 
-		const runtimes = dir_res.data
+		const runtimeVersionList = runtimeVersionListRes.data;
+		const runtimes = runtimeVersionList
 			.map(dirname => ({ dirname, path: node.path.join(search_path, dirname) }))
 			.filter(({ path }) => Electron_FS.lstatSync(path).isDirectory())
 			.map(({ dirname, path }) => {
@@ -419,12 +503,13 @@ export class Preferences {
 
 				if (!version_res.ok) {
 
-					ControlPanelTab.debug('Invalid runtime found in search path', new BaseError(
+					this.problemLogger.debug('Invalid runtime found in search path', new BaseError(
 						`Failed to parse runtime version name for runtime at '${path}'`, 
 						version_res.err
 					));
 
 					return undefined;
+
 				}
 
 				const runtime = version_res.data;
@@ -432,52 +517,68 @@ export class Preferences {
 
 				if (!supported_res.ok) {
 
-					ControlPanelTab.debug('Excluding unsupported runtime', new BaseError(
+					this.problemLogger.debug('Excluding unsupported runtime', new BaseError(
 						`Excluding unsupported runtime ${runtime}`,
 						supported_res.err
 					));
 					
 					return undefined;
+
 				}
 
 				return { path, igorPath, version: runtime };
 
 			})
-			.filter(/** @returns {runtime is Zeus.RuntimeInfo} */ (runtime) => runtime !== undefined)
+			.filter(runtime => runtime !== undefined)
+			.filter(runtime => Electron_FS.existsSync(runtime.igorPath))
 			.sort((a, b) => b.version.compare(a.version));
+		
+		const nonEmptyRuntimesArray = asNonEmptyArray(runtimes);
 
-		return Ok(
-			runtimes.filter(runtime => Electron_FS.existsSync(runtime.igorPath))
-		);
+		if (nonEmptyRuntimesArray === undefined) {
+			return Err(new BaseError(`Runtimes list at path "${search_path}" is empty`));
+		}
+
+		return Ok(nonEmptyRuntimesArray);
+
 	}
 
 	/**
 	 * Load the list of users for the provided search path.
 	 *  
 	 * @param {String} users_path 
-	 * @returns {Promise<Result<UserInfo[]>>}
+	 * @returns {Promise<Result<NonEmptyArray<UserInfo>>>}
 	 */
 	static async loadUserListFrom(users_path) {
 
-		const dir_res = await readdir(users_path);
+		const userNameListRes = await readdir(users_path);
 		
-		if (!dir_res.ok) {
+		if (!userNameListRes.ok) {
 			return Err(new BaseError(
-				`Failed to read users path '${users_path}': ${dir_res.err}`
+				`Failed to read users path '${users_path}': ${userNameListRes.err}`
 			));
 		}
 
-		const users = dir_res.data
-			.map(dirname => ({
+		const userNameList = userNameListRes.data;
+
+		const users = userNameList.map(dirname => ({
 				path: node.path.join(users_path, dirname),
 				name: dirname
 			}))
+			.filter(user => (
+				Electron_FS.existsSync(node.path.join(user.path, 'license.plist')) ||
+				Electron_FS.existsSync(node.path.join(user.path, 'local_settings.json')
+			)))
 			.sort((a, b) => +(a.name > b.name));
+		
+		const nonEmptyUsersList = asNonEmptyArray(users);
 
-		return Ok(users.filter(user => 
-			Electron_FS.existsSync(node.path.join(user.path, 'license.plist')) ||
-			Electron_FS.existsSync(node.path.join(user.path, 'local_settings.json'))
-		));
+		if (nonEmptyUsersList === undefined) {
+			return Err(new BaseError(`No users found at path "${users_path}"`));
+		}
+
+		return Ok(nonEmptyUsersList);
+
 	}
 
 	/**
@@ -503,16 +604,12 @@ export class Preferences {
 	static save_path;
 
 	/**
+	 * Logger for displaying problems to the user.
+	 * 
 	 * @private
+	 * @type {ProblemLogger}
 	 */
-	static __ready__ = false;
-
-	/**
-	 * Returns whether the preferences are loaded.
-	 */
-	static get ready() {
-		return this.__ready__;
-	}
+	static problemLogger;
 
 	/**
 	 * Load the local properties of the given project.
@@ -540,10 +637,12 @@ export class Preferences {
 	/**
 	 * Init a new instance of Preferences asynchronously (requires loading file.)
 	 * 
-	 * @returns {Promise<Result<void>>}
+	 * @param {ProblemLogger} problemLogger
+	 * @returns {Promise<Result<typeof Preferences>>}
 	 */
-	static async __setup__() {
+	static async create(problemLogger) {
 
+		this.problemLogger = problemLogger;
 		this.save_path = node.path.join(Electron_App.getPath('userData'), 'GMEdit', 'config', `${plugin_name}.json`);
 
 		/** @type {Partial<TPreferences.Data>|undefined} */
@@ -557,7 +656,7 @@ export class Preferences {
 				loaded_prefs = JSON.parse(prefsLoadRes.data.toString());
 			} catch (err_cause) {
 
-				ControlPanelTab.error('Failed to load preferences', new SolvableError(
+				this.problemLogger.error('Failed to load preferences', new SolvableError(
 					'JSON parse error while reading the preferences file!', 
 					docString(`
 						Please check your preferences file (${this.save_path})
@@ -565,7 +664,7 @@ export class Preferences {
 						see stacktrace below.
 					`),
 					err_cause
-				)).view(true);
+				));
 
 			}
 
@@ -574,7 +673,7 @@ export class Preferences {
 		if (loaded_prefs?.runtime_opts?.type !== undefined) {
 			if (!GM_CHANNEL_TYPES.includes(loaded_prefs.runtime_opts.type)) {
 
-				ControlPanelTab.warn(`Invalid preferred runtime type`, new BaseError(docString(`
+				this.problemLogger.warn(`Invalid preferred runtime type`, new BaseError(docString(`
 					'${loaded_prefs.runtime_opts.type}' is invalid, changed to
 					${this.prefs.runtime_opts.type}
 				`)));
@@ -591,7 +690,7 @@ export class Preferences {
 			for (const type of GM_CHANNEL_TYPES) {
 				if (!(type in type_opts)) {
 
-					ControlPanelTab.warn('Missing runtime type preference data', new BaseError(
+					this.problemLogger.warn('Missing runtime type preference data', new BaseError(
 						`Missing runtime type preference data for type '${type}', replacing with default.`
 					));
 
@@ -634,7 +733,7 @@ export class Preferences {
 						options.choice = runtimes_found[0].version.toString();
 					}
 
-					runtimes[type] = runtimes_found;
+					runtimesInChannels[type] = runtimes_found;
 
 				}));
 				
@@ -652,23 +751,15 @@ export class Preferences {
 						options.user = users_found[0].name.toString();
 					}
 					
-					users[type] = users_found;
+					usersInChannels[type] = users_found;
 
 				}));
 			
 		}
 
 		await Promise.all(reqs);
-		this.__ready__ = true;
+		return Ok(this);
 
-		return { ok: true };
-	}
-
-	/**
-	 * Called on deregistering the plugin.
-	 */
-	static __cleanup__() {
-		return;
 	}
 
 }

@@ -32,31 +32,31 @@ export function __setup__() {
 			name: 'constructor-panel',
 			title: 'Constructor - Control Panel',
 			bindKey: { win: default_binds.control_panel, mac: default_binds.control_panel },
-			exec: on_control_panel
+			exec: showControlPanel
 		},
 		{
 			name: 'constructor-package',
 			title: 'Constructor - Package',
 			bindKey: { win: default_binds.package, mac: default_binds.package },
-			exec: on_package
+			exec: packageCurrentProject
 		},
 		{
 			name: 'constructor-clean',
 			title: 'Constructor - Clean',
 			bindKey: { win: default_binds.clean, mac: default_binds.clean },
-			exec: on_clean
+			exec: cleanCurrentProject
 		},
 		{
 			name: 'constructor-stop',
 			title: 'Constructor - Stop',
 			bindKey: { win: default_binds.stop, mac: default_binds.stop },
-			exec: on_stop
+			exec: stopCurrentProject
 		},
 		{
 			name: 'constructor-run',
 			title: 'Constructor - Run',
 			bindKey: { win: default_binds.run, mac: default_binds.run },
-			exec: on_run
+			exec: runCurrentProject
 		}
 	];
 	
@@ -65,8 +65,8 @@ export function __setup__() {
 
 	updateItemEnabledState();
 
-	GMEdit.on('projectOpen', on_project_open);
-	GMEdit.on('projectClose', on_project_close);
+	GMEdit.on('projectOpen', onProjectOpen);
+	GMEdit.on('projectClose', onProjectClose);
 
 }
 
@@ -78,46 +78,46 @@ export function __cleanup__() {
 	// We can't remove existing menu items at the top level, so leave them be.
 	commands_deregister();
 
-	GMEdit.off('projectOpen', on_project_open);
-	GMEdit.off('projectClose', on_project_close);
+	GMEdit.off('projectOpen', onProjectOpen);
+	GMEdit.off('projectClose', onProjectClose);
 
 }
 
-function on_control_panel() {
+function showControlPanel() {
 	if (window.GMConstructor instanceof GMConstructor) {
-		window.GMConstructor.onControlPanel();
+		window.GMConstructor.showControlPanel();
 	}
 }
 
-function on_package() {
+function packageCurrentProject() {
 	if (window.GMConstructor instanceof GMConstructor) {
 		window.GMConstructor.packageCurrent();
 	}
 }
 
-function on_stop() {
+function stopCurrentProject() {
 	if (window.GMConstructor instanceof GMConstructor) {
 		window.GMConstructor.stopCurrent();
 	}
 }
 
-function on_clean() {
+function cleanCurrentProject() {
 	if (window.GMConstructor instanceof GMConstructor) {
 		window.GMConstructor.cleanCurrent();
 	}
 }
 
-function on_run() {
+function runCurrentProject() {
 	if (window.GMConstructor instanceof GMConstructor) {
 		window.GMConstructor.runCurrent();
 	}
 }
 
-function on_project_open() {
+function onProjectOpen() {
 	updateItemEnabledState();
 }
 
-function on_project_close() {
+function onProjectClose() {
 	updateItemEnabledState();
 }
 
@@ -141,35 +141,35 @@ function menu_register() {
 				id: 'constructor-control_panel',
 				label: 'Control Panel',
 				accelerator: default_binds.control_panel,
-				click: on_control_panel,
+				click: showControlPanel,
 				enabled: true
 			}),
 			new Electron_MenuItem({
 				id: 'constructor-project-package',
 				label: 'Package',
 				accelerator: default_binds.package,
-				click: on_package,
+				click: packageCurrentProject,
 				enabled: false
 			}),
 			new Electron_MenuItem({
 				id: 'constructor-project-clean',
 				label: 'Clean',
 				accelerator: default_binds.clean,
-				click: on_clean,
+				click: cleanCurrentProject,
 				enabled: false
 			}),
 			new Electron_MenuItem({
 				id: 'constructor-project-stop',
 				label: 'Stop',
 				accelerator: default_binds.stop,
-				click: on_stop,
+				click: stopCurrentProject,
 				enabled: false
 			}),
 			new Electron_MenuItem({
 				id: 'constructor-project-run',
 				label: 'Run',
 				accelerator: default_binds.run,
-				click: on_run,
+				click: runCurrentProject,
 				enabled: false
 			})
 		]

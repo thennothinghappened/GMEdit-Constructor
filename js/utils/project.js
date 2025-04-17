@@ -69,7 +69,7 @@ export function project_config_tree_flatten(config) {
  * Returns what kind of project YY format we're running.
  * 
  * @param {GMEdit.Project} project 
- * @returns {Result<YYProjectFormat>}
+ * @returns {Result<ProjectFormat>}
  */
 export function project_format_get(project) {
 	
@@ -102,7 +102,7 @@ export function project_format_get(project) {
 
 /**
  * @param {GMVersion} ideVersion 
- * @returns {YYProjectFormat}
+ * @returns {ProjectFormat}
  */
 function ide_get_format(ideVersion) {
 

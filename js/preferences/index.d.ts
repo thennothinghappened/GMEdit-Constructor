@@ -1,3 +1,6 @@
+import { GMRuntimeVersion } from "../compiler/GMVersion";
+import { BaseError, InvalidStateErr } from "../utils/Err";
+import { Preferences } from "./Preferences";
 
 export declare global {
 
@@ -11,7 +14,7 @@ export declare global {
 				runner: Zeus.RuntimeType;
 	
 				type_opts: {
-					[key in GMChannelType]: RuntimePreference;
+					[key in GMChannelType]: RuntimePerChannelPrefs;
 				};
 			};
 
@@ -89,7 +92,7 @@ export declare global {
 
 		}
 
-		type RuntimePreference = {
+		type RuntimePerChannelPrefs = {
 			/** Where we should search for the list of runtimes. */
 			search_path: string;
 	
@@ -104,17 +107,101 @@ export declare global {
 		};
 
 		interface PreferencesEventMap {
+
 			setDefaultRuntimeChannel: GMChannelType;
-			runtimeListChanged: { channel: GMChannelType, runtimes: Zeus.RuntimeInfo[] };
+
+			setCheckForUpdates: { checkForUpdates: boolean };
+			setSaveOnRun: { saveOnRun: boolean };
+			setReuseOutputTab: { reuseOutputTab: boolean };
+			setUseGlobalBuildPath: { useGlobalBuildPath: boolean };
+			setGlobalBuildPath: { globalBuildPath: string };
+
+			/**
+			 * Fires when the list of runtimes is modified for a given release channel.
+			 */
+			runtimeListChanged: {
+
+				/**
+				 * The channel in question.
+				 */
+				channel: GMChannelType;
+
+				/**
+				 * Information about the new configuration, or `undefined` if the channel is no
+				 * longer active, i.e. its path points to somewhere empty or invalid.
+				 */
+				runtimesInfo?: {
+
+					/**
+					 * The new list of runtimes.
+					 */
+					runtimes: NonEmptyArray<Zeus.RuntimeInfo>;
+
+					/**
+					 * The user's preferred runtime, if they've chosen any.
+					 */
+					preferredRuntime?: Zeus.RuntimeInfo;
+
+				};
+
+			};
+
+			/**
+			 * Fires when the list of users is modified for a given release channel.
+			 */
+			userListChanged: {
+
+				/**
+				 * The channel in question.
+				 */
+				channel: GMChannelType;
+
+				/**
+				 * Information about the new configuration, or `undefined` if the channel is no
+				 * longer active, i.e. its path points to somewhere empty or invalid.
+				 */
+				usersInfo?: {
+
+					/**
+					 * The new list of users.
+					 */
+					users: NonEmptyArray<UserInfo>;
+
+					/**
+					 * The default selected user.
+					 */
+					defaultUser: UserInfo;
+
+				};
+
+			};
+
 		}
 		
 		interface ProjectPropertiesEventMap {
 
-			setBuildConfig: { previous: string | undefined, current: string };
-			setRuntimeChannel: { channel: GMChannelType | undefined };
-			setRuntimeVersion: { version: string | undefined };
+			setBuildConfig: {
+				previous?: string;
+				current: string;
+			};
+
+			setRuntimeChannel: {
+				channel?: GMChannelType;
+			};
+
+			setRuntimeVersion: {
+				version?: GMRuntimeVersion;
+			};
+
+			setReuseOutputTab: {
+				reuseOutputTab?: boolean;
+			};
 
 		}
+
+		type ProjectPropertiesGetError =
+			{ isPluginError: false, error: BaseError }		|
+			{ isPluginError: true, error: InvalidStateErr }	;
 
 	};
 

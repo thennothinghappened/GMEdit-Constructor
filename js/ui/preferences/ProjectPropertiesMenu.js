@@ -1,14 +1,11 @@
 import { use } from '../../utils/scope-extensions/use.js';
-import { UIDropdownGetValue, UIDropdownMutate, UIDropdownSetValue } from '../../utils/gmedit/UIPreferencesUtils.js';
 import { GM_CHANNEL_TYPES, Preferences, ZEUS_RUNTIME_TYPES } from '../../preferences/Preferences.js';
 import { project_config_tree_flatten } from '../../utils/project.js';
 import { ProjectProperties } from '../../preferences/ProjectProperties.js';
-import { runtime_channel_get_versions } from './PreferencesMenu.js';
 import { GMConstructor, plugin_name } from '../../GMConstructor.js';
 import { Dropdown } from '../components/Dropdown.js';
-import { ControlPanelTab } from '../tabs/ControlPanelTab.js';
-import { BaseError } from '../../utils/Err.js';
 import { mapToOption, Some } from '../../utils/Option.js';
+import { GMRuntimeVersion } from '../../compiler/GMVersion.js';
 
 const UIPreferences = $gmedit['ui.Preferences'];
 
@@ -33,6 +30,12 @@ export class ProjectPropertiesMenu {
 	 * @type {ProjectProperties}
 	 */
 	properties;
+
+	/**
+	 * The preferences provider.
+	 * @type {typeof Preferences}
+	 */
+	preferences;
 
 	/**
 	 * @readonly
@@ -71,7 +74,7 @@ export class ProjectPropertiesMenu {
 
 	/**
 	 * @private
-	 * @type {Components.IDropdown<string|undefined>}
+	 * @type {Components.IDropdown<Zeus.RuntimeInfo|undefined>}
 	 */
 	runtimeVersionDropdown;
 
@@ -79,14 +82,16 @@ export class ProjectPropertiesMenu {
 	 * @private
 	 * @type {Components.IDropdown<boolean|undefined>}
 	 */
-	reuseCompileTabDropdown;
+	reuseOutputTabDropdown;
 
 	/**
 	 * @param {ProjectProperties} properties
+	 * @param {typeof Preferences} preferences 
 	 */
-	constructor(properties) {
+	constructor(properties, preferences) {
 
 		this.properties = properties;
+		this.preferences = preferences;
 
 		this.subtitle.textContent = `Configure behaviour for ${properties.project.displayName}.`;
 		this.element.appendChild(this.subtitle);
@@ -141,15 +146,10 @@ export class ProjectPropertiesMenu {
 
 		// ------------------------------------------------------------------------------
 
-		const runtimeVersions = use(this.properties.runtimeChannelType)
-			?.let(channel => runtime_channel_get_versions(channel))
-			?.value
-			?? [];
-
 		this.runtimeVersionDropdown = new Dropdown('Runtime Version',
 			Some(this.properties.runtimeVersion),
-			(value) => { this.properties.runtimeVersion = value; },
-			[USE_DEFAULT, ...runtimeVersions]
+			(value) => { this.properties.runtimeVersion = value?.version; },
+			[USE_DEFAULT, ...this.mapRuntimesInChannelToList() ?? []]
 		);
 		
 		this.runtimeVersionDropdown.element.classList.add('singleline');
@@ -158,9 +158,9 @@ export class ProjectPropertiesMenu {
 
 		// ------------------------------------------------------------------------------
 		
-		this.reuseCompileTabDropdown = use(new Dropdown('Reuse existing compiler tab',
-			Some(this.properties.reuseCompilerTab),
-			(value) => { this.properties.reuseCompilerTab = value; },
+		this.reuseOutputTabDropdown = use(new Dropdown('Reuse existing compiler tab',
+			Some(this.properties.reuseOutputTab),
+			(value) => { this.properties.reuseOutputTab = value; },
 			[
 				USE_DEFAULT,
 				{ label: 'Yes', value: true },
@@ -175,7 +175,8 @@ export class ProjectPropertiesMenu {
 
 		this.properties.events.on('setBuildConfig', this.onChangeBuildConfig);
 		this.properties.events.on('setRuntimeChannel', this.onChangeRuntimeChannel);
-		Preferences.events.on('runtimeListChanged', this.onRuntimeListChanged);
+		this.properties.events.on('setReuseOutputTab', this.onSetReuseOutputTab);
+		this.preferences.events.on('runtimeListChanged', this.onRuntimeListChanged);
 
 	}
 
@@ -185,8 +186,28 @@ export class ProjectPropertiesMenu {
 	destroy() {
 		this.properties.events.off('setBuildConfig', this.onChangeBuildConfig);
 		this.properties.events.off('setRuntimeChannel', this.onChangeRuntimeChannel);
-		Preferences.events.off('runtimeListChanged', this.onRuntimeListChanged);
+		this.properties.events.off('setReuseOutputTab', this.onSetReuseOutputTab);
+		this.preferences.events.off('runtimeListChanged', this.onRuntimeListChanged);
 	};
+
+	/**
+	 * @private
+	 * @returns {Components.NormalizedDropdownEntry<Zeus.RuntimeInfo>[]|undefined}
+	 */
+	mapRuntimesInChannelToList() {
+		
+		const channel = this.properties.runtimeChannelType;
+
+		if (channel === undefined) {
+			return undefined;
+		}
+
+		return this.preferences.getInstalledRuntimeVersions(channel)?.map(runtime => ({
+			label: runtime.version.toString(),
+			value: runtime
+		}));
+
+	}
 
 	/**
 	 * @private
@@ -198,7 +219,7 @@ export class ProjectPropertiesMenu {
 
 	/**
 	 * @private
-	 * @param {TPreferences.ProjectPropertiesEventMap['setRuntimeChannel']} channel
+	 * @param {TPreferences.ProjectPropertiesEventMap['setRuntimeChannel']} event
 	 */
 	onChangeRuntimeChannel = ({ channel }) => {
 
@@ -206,9 +227,17 @@ export class ProjectPropertiesMenu {
 		this.runtimeVersionDropdown.element.hidden = (channel === undefined);
 
 		if (channel !== undefined) {
-			this.updateRuntimeVersionList(channel);
+			this.updateRuntimeVersionList();
 		}
 
+	};
+
+	/**
+	 * @private
+	 * @param {TPreferences.ProjectPropertiesEventMap['setReuseOutputTab']} event
+	 */
+	onSetReuseOutputTab = ({ reuseOutputTab }) => {
+		this.reuseOutputTabDropdown.setSelectedOption(reuseOutputTab);
 	};
 
 	/**
@@ -217,7 +246,7 @@ export class ProjectPropertiesMenu {
 	 */
 	onRuntimeListChanged = ({ channel }) => {
 		if (this.properties.runtimeChannelType === channel) {
-			this.updateRuntimeVersionList(channel);
+			this.updateRuntimeVersionList();
 		}
 	};
 
@@ -231,14 +260,19 @@ export class ProjectPropertiesMenu {
 
 	/**
 	 * @private
-	 * @param {GMChannelType} channel 
 	 */
-	updateRuntimeVersionList(channel) {
+	updateRuntimeVersionList() {
 		this.runtimeVersionDropdown.setOptions([
 			USE_DEFAULT,
-			...runtime_channel_get_versions(channel)
-		]);
+			...this.mapRuntimesInChannelToList() ?? []
+		], this.properties.runtimeVersion);
 	}
+
+	/**
+	 * @private
+	 * @type {typeof Preferences}
+	 */
+	static preferences;
 
 	/**
 	 * Instance to be used for displaying in GMEdit's own Project Properties screen.
@@ -264,13 +298,21 @@ export class ProjectPropertiesMenu {
 	 */
 	static deploy = ({ target, project }) => {
 
-		if (!GMConstructor.supportsProjectFormat(project)) {
+		const projectProperties = ProjectProperties.get(project);
+
+		if (!projectProperties.ok) {
 			return;
 		}
 
 		if (this.instance === undefined || this.instance.properties.project !== project) {
+			
 			this.instance?.destroy();
-			this.instance = new ProjectPropertiesMenu(ProjectProperties.get(project));
+
+			this.instance = new ProjectPropertiesMenu(
+				projectProperties.data,
+				this.preferences
+			);
+
 		}
 
 		if (this.group !== undefined) {
@@ -288,9 +330,17 @@ export class ProjectPropertiesMenu {
 	 */
 	static onCloseProject = () => this.instance?.destroy();
 
-	static __setup__() {
+	/**
+	 * 
+	 * @param {typeof Preferences} preferences 
+	 */
+	static __setup__(preferences) {
+
+		this.preferences = preferences;
+
 		GMEdit.on('projectPropertiesBuilt', this.deploy);
 		GMEdit.on('projectClose', this.onCloseProject);
+
 	}
 
 	static __cleanup__() {

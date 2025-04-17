@@ -14,6 +14,21 @@ export function unwrap(result) {
 }
 
 /**
+ * Get the held data of a result, or `undefined` if none is held.
+ * 
+ * @template T
+ * @param {Result<T>} result
+ * @returns {T|undefined}
+ */
+export function okOrUndefined(result) {
+	if (result.ok) {
+		// @ts-expect-error `void` isn't a real type and it can't hurt you.
+		return result.data;
+	}
+	return undefined;
+}
+
+/**
  * Produce an `Ok` result given some data.
  * 
  * @template T

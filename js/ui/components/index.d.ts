@@ -41,9 +41,14 @@ export declare global {
 		
 			/**
 			 * Update the list of choices to a new list.
+			 * 
 			 * @param choices The new list of choices. The list must be non-empty.
+			 * @param selectedChoice The new selected choice.
 			 */
-			setOptions(choices: ReadonlyArray<DropdownEntry<T>>);
+			setOptions(
+				choices: ReadonlyArray<DropdownEntry<T>>,
+				selectedChoice: T
+			);
 
 		}
 

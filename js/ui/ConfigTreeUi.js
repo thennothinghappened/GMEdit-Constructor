@@ -87,11 +87,11 @@ export class ConfigTreeUi {
 	 */
 	static onProjectOpen = ({ project }) => {
 
-		if (!GMConstructor.supportsProjectFormat(project)) {
-			return;
-		}
+		const properties = ProjectProperties.get(project);
 
-		this.instances.set(project, new ConfigTreeUi(project, ProjectProperties.get(project)));
+		if (properties.ok) {
+			this.instances.set(project, new ConfigTreeUi(project, properties.data));
+		}
 
 	}
 

@@ -6,6 +6,9 @@ import { docString } from '../utils/StringUtils.js';
 const expectedVersionFormat = 'year.month.major.patch';
 const expectedRuntimeVersionFormat = 'runtime-' + expectedVersionFormat;
 
+/**
+ * @implements {Eq<GMVersion>}
+ */
 export class GMVersion {
 
 	/**
@@ -88,12 +91,25 @@ export class GMVersion {
 
 	}
 
+	/**
+	 * Determine whether this version is equivalent to `other`.
+	 * 
+	 * @param {GMVersion} other
+	 * @returns {boolean}
+	 */
+	equals(other) {
+		return this.compare(other) === 0;
+	}
+
 	toString() {
 		return `${this.year}.${this.month}.${this.major}.${this.build}`;
 	}
 
 }
 
+/**
+ * @implements {Eq<GMRuntimeVersion>}
+ */
 export class GMRuntimeVersion {
 
 	/**
@@ -113,7 +129,7 @@ export class GMRuntimeVersion {
 
 	/**
 	 * The expected YY format this runtime requires.
-	 * @returns {YYProjectFormat}
+	 * @returns {ProjectFormat}
 	 */
 	get format() {
 
@@ -170,9 +186,20 @@ export class GMRuntimeVersion {
 	 * newer.
 	 * 
 	 * @param {GMRuntimeVersion} other 
+	 * @returns {number}
 	 */
 	compare(other) {
 		return this.version.compare(other.version);
+	}
+
+	/**
+	 * Determine whether this version is equivalent to `other`.
+	 * 
+	 * @param {GMRuntimeVersion} other
+	 * @returns {boolean}
+	 */
+	equals(other) {
+		return this.version.equals(other.version);
 	}
 
 	/**

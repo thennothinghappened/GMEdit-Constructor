@@ -14,7 +14,7 @@ const PreferencesUI = $gmedit['ui.Preferences'];
  */
 class OutputLogFileKind extends ConstructorTabFileKind {
 
-	static inst = new OutputLogFileKind();
+	static instance = new OutputLogFileKind();
 
 	constructor() {
 		super();
@@ -64,6 +64,12 @@ export class OutputLogTab extends ConstructorTab {
 	errorsGroup;
 
 	/**
+	 * @private
+	 * @type {NodeJS.Timeout|undefined}
+	 */
+	tickIntervalId = undefined;
+
+	/**
 	 * @param {GMEdit.GmlFile} file
 	 */
 	constructor(file) {
@@ -104,7 +110,7 @@ export class OutputLogTab extends ConstructorTab {
 		this.errorsGroup.classList.add('gm-constructor-viewer-errors');
 		this.errorsGroup.legend.addEventListener('click', () => this.logAceEditor.resize());
 		this.errorsGroup.hidden = true;
-
+		
 	}
 
 	/**
@@ -118,9 +124,7 @@ export class OutputLogTab extends ConstructorTab {
 		}
 
 		this.job = job;
-
-		GmlFileUtils.rename(this.file, this.jobDisplayName);
-		this.jobNameHeading.textContent = this.file.name;
+		this.updateTitle();
 		
 		this.logAceEditor.session.setValue('');
 		
@@ -134,6 +138,19 @@ export class OutputLogTab extends ConstructorTab {
 		job.events.on('stdout', this.onJobStdout);
 		job.events.on('stop', this.onJobStop);
 
+		this.tickIntervalId = setTimeout(this.updateTitle, 1000);
+
+	}
+
+	/**
+	 * Job "tick" function called every second to update the status bar. Later we'll chuck in a
+	 * timer for how long the job has been running.
+	 * 
+	 * @private
+	 */
+	updateTitle = () => {
+		GmlFileUtils.rename(this.file, this.jobDisplayName);
+		this.jobNameHeading.textContent = this.file.name;
 	}
 
 	/**
@@ -149,6 +166,7 @@ export class OutputLogTab extends ConstructorTab {
 		this.job.events.off('stop', this.onJobStop);
 
 		this.job = undefined;
+		clearInterval(this.tickIntervalId);
 
 	}
 
@@ -185,8 +203,8 @@ export class OutputLogTab extends ConstructorTab {
 			return;
 		}
 
-		GmlFileUtils.rename(this.file, this.jobDisplayName);
-		this.jobNameHeading.textContent = this.file.name;
+		clearInterval(this.tickIntervalId);
+		this.updateTitle();
 
 		if (errors.length > 0) {
 
@@ -208,7 +226,7 @@ export class OutputLogTab extends ConstructorTab {
 	 * @returns {OutputLogTab}
 	 */
 	static openNew() {
-		const file = new GmlFile('Constructor Job', null, OutputLogFileKind.inst);
+		const file = new GmlFile('Constructor Job', null, OutputLogFileKind.instance);
 		GmlFile.openTab(file);
 
 		return /** @type {OutputLogTab} */ (file.editor);
@@ -220,9 +238,7 @@ export class OutputLogTab extends ConstructorTab {
 	 */
 	static findUnusedOrSteal() {
 		
-		const tabs = Array.from(ChromeTabs.getTabs())
-			.map(tab => tab.gmlFile.editor)
-			.filter(tab => tab instanceof OutputLogTab);
+		const tabs = this.getOpenTabs();
 
 		if (tabs.length === 0) {
 			return undefined;
@@ -236,6 +252,16 @@ export class OutputLogTab extends ConstructorTab {
 
 		return tabs[0];
 		
+	}
+
+	/**
+	 * Get a list of the currently open tabs.
+	 * @returns {OutputLogTab[]}
+	 */
+	static getOpenTabs() {
+		return Array.from(ChromeTabs.getTabs())
+			.map(tab => tab.gmlFile.editor)
+			.filter(tab => tab instanceof OutputLogTab);
 	}
 
 	/**
@@ -273,9 +299,8 @@ export class OutputLogTab extends ConstructorTab {
 	}
 
 	/**
-	 * Called when closing the tab,
-	 * for now we have it also kill the job, so it doesn't run
-	 * on in the background.
+	 * Called when closing the tab, for now we have it also kill the job, so it doesn't run on in
+	 * the background.
 	 */
 	destroy = () => {
 
@@ -308,7 +333,7 @@ export class OutputLogTab extends ConstructorTab {
 
 		let prefix = `${this.job.settings.platform} - ${this.job.settings.verb}`;
 
-		if (!ProjectProperties.get(this.job.project).reuseCompilerTabOrDef) {
+		if (OutputLogTab.getOpenTabs().length > 1) {
 			prefix += ` #${this.job.id}`;
 		}
 

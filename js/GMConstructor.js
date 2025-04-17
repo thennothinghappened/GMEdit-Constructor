@@ -3,7 +3,7 @@ import * as hamburgerOptions from './ui/HamburgerOptions.js';
 import { project_current_get, open_files_save, project_format_get, tab_current_get } from './utils/project.js';
 import { ProjectProperties } from './preferences/ProjectProperties.js';
 import * as igorPaths from './compiler/igor-paths.js';
-import * as preferencesMenu from './ui/preferences/PreferencesMenu.js';
+import { PreferencesMenu } from './ui/preferences/PreferencesMenu.js';
 import { BaseError, SolvableError } from './utils/Err.js';
 import { ControlPanelTab } from './ui/tabs/ControlPanelTab.js';
 import { plugin_update_check } from './update-checker/UpdateChecker.js';
@@ -15,6 +15,7 @@ import { ConfigTreeUi } from './ui/ConfigTreeUi.js';
 import { Err, Ok, unwrap } from './utils/Result.js';
 import { ProjectPropertiesMenu } from './ui/preferences/ProjectPropertiesMenu.js';
 import { docString } from './utils/StringUtils.js';
+import { ControlPanelProblemLogger } from './ui/tabs/ControlPanelProblemReporter.js';
 
 /**
  * Name of the plugin 
@@ -34,70 +35,80 @@ export let plugin_version;
 export class GMConstructor {
 
 	/**
+	 * @private
+	 * @type {typeof Preferences}
+	 */
+	preferences;
+
+	/**
+	 * @private
+	 * @type {ProblemLogger}
+	 */
+	problemLogger;
+
+	/**
+	 * @private
+	 * @param {typeof Preferences} preferences 
+	 * @param {ProblemLogger} problemLogger
+	 */
+	constructor(preferences, problemLogger) {
+		this.preferences = preferences;
+		this.problemLogger = problemLogger;
+	}
+
+	/**
 	 * Run a task on our current project.
 	 * 
 	 * @param {GMEdit.Project} project 
-	 * @param {AtLeast<Zeus.IgorSettings, 'verb'>} partial_settings
+	 * @param {AtLeast<Zeus.IgorSettings, 'verb'>} partialSettings
 	 */
-	async #runTask(project, partial_settings) {
+	async #runTask(project, partialSettings) {
 
-		const projectProperties = ProjectProperties.get(project);
+		const projectPropertiesResult = ProjectProperties.get(project);
+
+		if (!projectPropertiesResult.ok) {
+			return;
+		}
+
+		const projectProperties = projectPropertiesResult.data;
 
 		/** @type {Zeus.IgorSettings} */
 		const settings = {
-			verb: partial_settings.verb,
-			buildPath: partial_settings.buildPath ?? this.#getBuildDir(project),
-			platform: partial_settings.platform ?? projectProperties.zeusPlatform ?? igorPaths.igor_user_platform,
-			runner: partial_settings.runner ?? projectProperties.runtimeBuildTypeOrDef,
-			threads: partial_settings.threads ?? 8,
-			configName: partial_settings.configName ?? projectProperties.buildConfigName
+			verb: partialSettings.verb,
+			buildPath: partialSettings.buildPath ?? this.#getBuildDir(project),
+			platform: partialSettings.platform ?? projectProperties.zeusPlatform ?? igorPaths.igor_user_platform,
+			runner: partialSettings.runner ?? projectProperties.runtimeBuildTypeOrDef,
+			threads: partialSettings.threads ?? 8,
+			configName: partialSettings.configName ?? projectProperties.buildConfigName
 		};
 		
-		const runtime_res = projectProperties.runtime;
+		const runtimeResult = projectProperties.runtime;
 		
-		if (!runtime_res.ok) {
+		if (!runtimeResult.ok) {
 			
-			const runtime_type = projectProperties.runtimeChannelTypeOrDef;
+			const channel = projectProperties.runtimeChannelTypeOrDef;
 			const err = new SolvableError(
-				`No ${runtime_type} runtimes available to compile!`,
+				`No ${channel} runtimes available to compile!`,
 				docString(`
 					Try specifying a different runtime channel type below, or check the runtime
-					search path for ${runtime_type} runtimes.
+					search path for ${channel} runtimes.
 				`),
-				runtime_res.err
+				runtimeResult.err
 			);
 
-			return ControlPanelTab
-				.error('No installed runtimes available of this type', err)
-				.view(true);
+			this.problemLogger.error('No installed runtimes available of this type', err);
+			return;
 		}
 
-		const runtime = runtime_res.data;
-		const supportedRes = runtime.version.supportedByProject(project);
-
-		if (!supportedRes.ok) {
-
-			const err = new BaseError(
-				`Failed to check runtime version '${runtime.version}' is compatible with the project!`,
-				supportedRes.err
-			);
-
-			return ControlPanelTab
-				.error('Runtime compatibility check for this project failed', err)
-				.view(true);
-
-		}
-
-		const supported = supportedRes.data;
+		const runtime = runtimeResult.data;
+		const supported = (runtime.version.format === projectProperties.projectFormat);
 
 		if (!supported) {
-
-			const format = unwrap(project_format_get(project));
 
 			const err = new SolvableError(
 				`Runtime version '${runtime.version}' is not compatible with this project format!`,
 				docString(`
-					This project is in the YY ${format} format, where the chosen runtime
+					This project is in the YY ${projectProperties.projectFormat} format, where the chosen runtime
 					(${runtime.version}) expects the ${runtime.version.format} format.
 					
 					Please pick a matching runtime, or you can convert your project to the desired
@@ -105,12 +116,11 @@ export class GMConstructor {
 				`)
 			);
 
-			return ControlPanelTab
-				.error('Incompatible runtime selected', err)
-				.view(true);
+			this.problemLogger.error('Incompatible runtime selected', err);
+			return;
 		}
 
-		if (Preferences.saveOnRun) {
+		if (this.preferences.saveOnRun) {
 			open_files_save();
 		}
 
@@ -129,9 +139,8 @@ export class GMConstructor {
 					res.err
 				);
 
-				return ControlPanelTab
-					.error(res.err.message, err)
-					.view(true);
+				this.problemLogger.error(res.err.message, err);
+				return;
 				
 			}
 
@@ -145,7 +154,7 @@ export class GMConstructor {
 		/** @type {number|undefined} */
 		let jobIdToReuse = undefined;
 
-		if (projectProperties.reuseCompilerTabOrDef) {
+		if (projectProperties.reuseOutputTabOrDef) {
 
 			tab = OutputLogTab.findUnusedOrSteal();
 			
@@ -157,18 +166,15 @@ export class GMConstructor {
 
 		tab ??= OutputLogTab.openNew();
 
-		const jobResult = await compileController.job_run(
-			project,
-			runtime_res.data,
+		const jobResult = await compileController.job_run(project, runtime,
 			(userResult.ok ? userResult.data : undefined),
 			settings,
 			jobIdToReuse
 		);
 
 		if (!jobResult.ok) {
-			return ControlPanelTab
-				.error('Failed to run Igor job!', jobResult.err)
-				.view(true);
+			this.problemLogger.error('Failed to run Igor job!', jobResult.err);
+			return;
 		}
 
 		tab.attach(jobResult.data);
@@ -183,17 +189,15 @@ export class GMConstructor {
 	 */
 	#getBuildDir(project) {
 		
-		if (Preferences.useGlobalBuildPath) {
-			return node.path.join(Preferences.globalBuildPath, project.displayName);
+		if (this.preferences.useGlobalBuildPath) {
+			return node.path.join(this.preferences.globalBuildPath, project.displayName);
 		}
 
 		return node.path.join(project.dir, 'build');
 
 	}
 
-	onControlPanel = () => {
-		ControlPanelTab.view(true);
-	}
+	showControlPanel = () => ControlPanelTab.show();
 
 	runCurrent = () => {
 
@@ -258,13 +262,12 @@ export class GMConstructor {
 			try {
 				Electron_FS.rmSync(build_dir, { recursive: true });
 			} catch (err) {
-				return ControlPanelTab
-					.error('Failed to clean project!', new SolvableError(
-						`An unexpected error occurred while removing the build directory '${build_dir}'.`,
-						'Do you have this directory open somewhere?',
-						err
-					))
-					.view();
+				this.problemLogger.error('Failed to clean project!', new SolvableError(
+					`An unexpected error occurred while removing the build directory '${build_dir}'.`,
+					'Do you have this directory open somewhere?',
+					err
+				));
+				return;
 			}
 		}
 
@@ -309,69 +312,68 @@ export class GMConstructor {
 
 		node.__setup__(node_path, node_child_process);
 
+		const problemLogger = new ControlPanelProblemLogger();
+
 		plugin_name = _plugin_name;
 		plugin_version = _plugin_version;
 
 		igorPaths.__setup__();
 
 		// Setting up preferences //
-		const preferences_res = await Preferences.__setup__();
+		const preferencesRes = await Preferences.create(problemLogger);
 
-		if (!preferences_res.ok) {
-			return Err(new BaseError('Failed to init preferences', preferences_res.err));
+		if (!preferencesRes.ok) {
+			return Err(new BaseError('Failed to init preferences', preferencesRes.err));
 		}
 
-		ProjectProperties.__setup__();
-		ProjectPropertiesMenu.__setup__();
-		preferencesMenu.__setup__();
+		const preferences = preferencesRes.data;
+		ControlPanelTab.providePreferences(preferences);
+
+		ProjectProperties.__setup__(preferences, problemLogger);
+		ProjectPropertiesMenu.__setup__(preferences);
+		PreferencesMenu.__setup__();
 		hamburgerOptions.__setup__();
 		ConfigTreeUi.__setup__();
 
 		// Check for updates //
-		if (Preferences.checkForUpdates) {
-
-			plugin_update_check()
-				.then(res => {
+		if (preferences.checkForUpdates) {
+			plugin_update_check().then(res => {
 					
-					if (!res.ok) {
-						return ControlPanelTab.warn(
-							'Failed to check for plugin updates.',
-							res.err
-						);
-					}
+				if (!res.ok) {
+					return problemLogger.warn('Failed to check for plugin updates.', res.err);
+				}
 
-					if (!res.data.update_available) {
-						return;
-					}
+				if (!res.data.update_available) {
+					return;
+				}
 
-					// Bit silly to use an error message for this but it works :P
-					ControlPanelTab.warn(
-						'An update is available for Constructor!',
-						new SolvableError('There is an update available.', docString(`
-							${plugin_name} ${res.data.version} is available on GitHub!
-							
-							${res.data.url}
-						`))
-					);
+				// Bit silly to use an error message for this but it works :P
+				problemLogger.warn('An update is available for Constructor!',
+					new SolvableError('There is an update available.', docString(`
+						${plugin_name} ${res.data.version} is available on GitHub!
+						
+						${res.data.url}
+					`))
+				);
 
-				});
-			
+			});
 		}
 
-		return Ok(new GMConstructor());
+		return Ok(new GMConstructor(preferences, problemLogger));
+
 	}
 
 	/**
 	 * Called on deregistering the plugin.
 	 */
-	async cleanup() {
+	cleanup() {
 
-		Preferences.__cleanup__();
 		ProjectProperties.__cleanup__();
 		ProjectPropertiesMenu.__cleanup__();
 		compileController.__cleanup__();
 		hamburgerOptions.__cleanup__();
 		ConfigTreeUi.__cleanup__();
+		ControlPanelTab.cleanup();
 
 		delete window.GMConstructor;
 		

@@ -3,6 +3,13 @@ export declare global {
 
 	namespace GMEdit {
 
+		/**
+		 * Haxe doesn't differentiate `undefined` and `null` - to it there is only `null`, which is
+		 * nice, but over here in JavaScript, we have to handle the fact that this means we cannot
+		 * be sure if a value coming from Haxe is one or the other, if it is nullable.
+		 */
+		type HaxeNull<T> = T | undefined | null;
+
 		class PluginState {
 
 			name: string;
@@ -233,15 +240,19 @@ export declare global {
 
 		type UIDropdown<T extends string> = HTMLDivElement & { __phantomTypeData?: T };
 
-		interface Preferences {
-			addText(parent: ParentNode, label: string): HTMLElement;
-			addWiki(parent: ParentNode, url: string, label: string): HTMLElement;
-			addCheckbox(parent: ParentNode, label: string, value: boolean, update: (value: boolean) => void): HTMLElement;
-			addInput(parent: ParentNode, label: string, value: string, update: (value: string) => void): HTMLElement;
-			addDropdown<T extends string>(parent: ParentNode, label: string, value: T, choices: readonly T[], update: (value: T) => void): UIDropdown<T>;
-			addGroup(parent: ParentNode, label: string): HTMLFieldSetElement;
-			addButton(parent: ParentNode, text: string, callback: () => void): HTMLDivElement;
-			addBigButton(parent: ParentNode, text: string, callback: () => void): HTMLDivElement;
+		class Preferences {
+
+			static menuMain: HaxeNull<HTMLElement>;
+
+			static addText(parent: ParentNode, label: string): HTMLElement;
+			static addWiki(parent: ParentNode, url: string, label: string): HTMLElement;
+			static addCheckbox(parent: ParentNode, label: string, value: boolean, update: (value: boolean) => void): HTMLElement;
+			static addInput(parent: ParentNode, label: string, value: string, update: (value: string) => void): HTMLElement;
+			static addDropdown<T extends string>(parent: ParentNode, label: string, value: T, choices: readonly T[], update: (value: T) => void): UIDropdown<T>;
+			static addGroup(parent: ParentNode, label: string): HTMLFieldSetElement;
+			static addButton(parent: ParentNode, text: string, callback: () => void): HTMLDivElement;
+			static addBigButton(parent: ParentNode, text: string, callback: () => void): HTMLDivElement;
+
 		}
 	
 		interface ProjectProperties {
@@ -482,7 +493,7 @@ export declare global {
 	};
 	
 	const $gmedit: {
-		'ui.Preferences': GMEdit.Preferences;
+		'ui.Preferences': typeof GMEdit.Preferences;
 		'ui.MainMenu': GMEdit.MainMenu;
 		'ui.project.ProjectProperties': GMEdit.ProjectProperties;
 		'ui.ChromeTabs': GMEdit.ChromeTabs;

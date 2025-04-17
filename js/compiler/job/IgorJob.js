@@ -1,8 +1,8 @@
-import { ControlPanelTab } from '../../ui/tabs/ControlPanelTab.js';
 import { BaseError } from '../../utils/Err.js';
 import { EventEmitterImpl } from '../../utils/EventEmitterImpl.js';
 import { child_process, path } from '../../utils/node/node-import.js';
 import { killRecursive } from '../../utils/node/process-handling.js';
+import { Err } from '../../utils/Result.js';
 import { job_parse_stdout } from './output-parsing/parse-stdout.js';
 
 /**
@@ -116,28 +116,28 @@ export class IgorJob {
 	/**
 	 * Stop the job. Returns a promise that resolves when the job has stopped.
 	 * 
-	 * @returns {Promise<void>}
+	 * @returns {Promise<Result<void>>}
 	 */
 	stop = () => {
 
 		if (this.state.status !== 'running' || this.process.pid === undefined) {
-			return Promise.resolve();
+			return Promise.resolve({ ok: true });
 		}
 
 		this.state = { status: 'stopping' };
 
-		/** @type {Promise<void>} */
+		/** @type {Promise<Result<void>>} */
 		const onStopPromise = new Promise(resolve => {
-			this.events.once('stop', () => resolve());
+			this.events.once('stop', () => resolve({ ok: true }));
 		});
 
 		const res = killRecursive(this.process.pid);
 		
 		if (!res.ok) {
-			ControlPanelTab.error(
-				`Failed to stop the job ${this.settings.verb}!`,
+			return Promise.resolve(Err(new BaseError(
+				`Failed to stop the job ${this.settings.verb}`,
 				res.err
-			);
+			)));
 		}
 
 		if (process.platform !== 'darwin') {
@@ -171,10 +171,10 @@ export class IgorJob {
 				.forEach(it => killRecursive(it));
 
 		} catch (err) {
-			ControlPanelTab.error(
-				`Failed to stop the job ${this.settings.verb}!`,
-				new BaseError('Failed stopping MacOS-specific residual processes', err)
-			);
+			return Promise.resolve(Err(new BaseError(
+				'Failed stopping MacOS-specific residual processes',
+				err
+			)));
 		}
 
 		return onStopPromise;
