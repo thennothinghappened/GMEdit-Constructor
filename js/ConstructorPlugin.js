@@ -94,11 +94,8 @@ export class ConstructorPlugin {
 		const problemLogger = new ControlPanelProblemLogger();
 		igorPaths.__setup__();
 
-		// Setting up preferences //
+		const preferences = new Preferences(problemLogger, new GMS2RuntimeIndexerImpl());
 		const preferencesDataPath = nodeModulesProvider.path.join(Electron_App.getPath('userData'), 'GMEdit', 'config', `${PLUGIN_NAME}.json`);
-
-		const gms2RuntimeIndexer = new GMS2RuntimeIndexerImpl();
-		const preferences = new Preferences(problemLogger, gms2RuntimeIndexer);
 		const preferencesLoadResult = await preferences.load(preferencesDataPath);
 
 		if (!preferencesLoadResult.ok) {
