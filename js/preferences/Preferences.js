@@ -685,54 +685,34 @@ export class Preferences {
 
 		}
 
-		/** @type {Promise<any>[]} */
-		const reqs = [];
+		const loadRequests = GM_CHANNEL_TYPES.map(async channel => {
 
-		for (const type of GM_CHANNEL_TYPES) {
+			const runtimesRequest = this.loadRuntimeList(channel);
+			const usersRequest = this.loadUserList(channel);
 
-			const options = this.prefs.runtime_opts.type_opts[type];
+			const [runtimesResult, usersResult] = await Promise.all([runtimesRequest, usersRequest]);
 
-			reqs.push(this.loadRuntimeList(type)
-				.then((res) => {
-
-					if (!res.ok) {
-						// Silently drop. Users don't care if a GM version they don't use couldn't be
-						// found!
-						options.choice = undefined;
-						return;
-					}
-
-					const runtimes_found = res.data;
-
-					if (options.choice == undefined && runtimes_found.length > 0) {
-						options.choice = runtimes_found[0].version.toString();
-					}
-
-					runtimesInChannels[type] = runtimes_found;
-
-				}));
-				
-			reqs.push(this.loadUserList(type)
-				.then((result) => {
-
-					if (!result.ok) {
-						options.user = undefined;
-						return;
-					}
-
-					const users_found = result.data;
-
-					if (options.user == undefined && users_found.length > 0) {
-						options.user = users_found[0].name.toString();
-					}
-					
-					usersInChannels[type] = users_found;
-
-				}));
+			if (runtimesResult.ok) {
+				// TODO: pass onto constructor instead when Preferences is not a singleton.
+				runtimesInChannels[channel] = runtimesResult.data;
+			}
 			
-		}
+			if (usersResult.ok) {
+				// TODO: pass onto constructor instead when Preferences is not a singleton.
+				usersInChannels[channel] = usersResult.data;
+			}
 
-		await Promise.all(reqs);
+			return {
+				channel,
+				runtimes: runtimesResult.ok ? runtimesResult.data : undefined,
+				users: usersResult.ok ? usersResult.data : undefined
+			};
+
+		});
+
+		// TODO: pass onto constructor when Preferences is not a singleton.
+		const channelDataList = await Promise.all(loadRequests);
+
 		return Ok(this);
 
 	}
