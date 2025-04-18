@@ -2,12 +2,9 @@ import { use } from '../../utils/scope-extensions/use.js';
 import { GM_CHANNEL_TYPES, Preferences, ZEUS_RUNTIME_TYPES } from '../../preferences/Preferences.js';
 import { project_config_tree_flatten } from '../../utils/project.js';
 import { ProjectProperties } from '../../preferences/ProjectProperties.js';
-import { GMConstructor, PLUGIN_NAME } from '../../GMConstructor.js';
 import { Dropdown } from '../components/Dropdown.js';
-import { mapToOption, Some } from '../../utils/Option.js';
+import { Some } from '../../utils/Option.js';
 import { GMRuntimeVersion } from '../../compiler/GMVersion.js';
-
-const UIPreferences = $gmedit['ui.Preferences'];
 
 /**
  * Used for runtime/user select dropdowns, to default to the global settings.
@@ -17,6 +14,14 @@ const UIPreferences = $gmedit['ui.Preferences'];
  */
 const USE_DEFAULT = {
 	label: 'Use Default',
+	value: undefined
+};
+
+/**
+ * @type {Components.NormalizedDropdownEntry<undefined>}
+ */
+const USE_COMPATIBLE_RUNTIME = {
+	label: 'Pick a compatible runtime',
 	value: undefined
 };
 
@@ -74,7 +79,7 @@ export class ProjectPropertiesMenu {
 
 	/**
 	 * @private
-	 * @type {Components.IDropdown<GMS2.RuntimeInfo|undefined>}
+	 * @type {Components.IDropdown<GMRuntimeVersion|undefined>}
 	 */
 	runtimeVersionDropdown;
 
@@ -148,9 +153,9 @@ export class ProjectPropertiesMenu {
 
 		this.runtimeVersionDropdown = new Dropdown('Runtime Version',
 			Some(this.properties.runtimeVersion),
-			(value) => { this.properties.runtimeVersion = value?.version; },
-			[USE_DEFAULT, ...this.mapRuntimesInChannelToEntries() ?? []],
-			(a, b) => a.version.equals(b.version)
+			(value) => { this.properties.runtimeVersion = value; },
+			[USE_COMPATIBLE_RUNTIME, ...this.mapRuntimesInChannelToEntries() ?? []],
+			(a, b) => a.equals(b)
 		);
 		
 		this.runtimeVersionDropdown.element.classList.add('singleline');
@@ -193,7 +198,7 @@ export class ProjectPropertiesMenu {
 
 	/**
 	 * @private
-	 * @returns {Components.NormalizedDropdownEntry<GMS2.RuntimeInfo>[]|undefined}
+	 * @returns {Components.NormalizedDropdownEntry<GMRuntimeVersion>[]|undefined}
 	 */
 	mapRuntimesInChannelToEntries() {
 		
@@ -205,7 +210,7 @@ export class ProjectPropertiesMenu {
 
 		return this.preferences.getInstalledRuntimeVersions(channel)?.map(runtime => ({
 			label: runtime.version.toString(),
-			value: runtime
+			value: runtime.version
 		}));
 
 	}
@@ -264,94 +269,9 @@ export class ProjectPropertiesMenu {
 	 */
 	updateRuntimeVersionList() {
 		this.runtimeVersionDropdown.setOptions([
-			USE_DEFAULT,
+			USE_COMPATIBLE_RUNTIME,
 			...this.mapRuntimesInChannelToEntries() ?? []
 		], this.properties.runtimeVersion);
-	}
-
-	/**
-	 * @private
-	 * @type {Preferences}
-	 */
-	static preferences;
-
-	/**
-	 * Instance to be used for displaying in GMEdit's own Project Properties screen.
-	 * 
-	 * @private
-	 * @type {ProjectPropertiesMenu|undefined}
-	 */
-	static instance = undefined;
-
-	/**
-	 * The group that holds the instance's element.
-	 * 
-	 * @private
-	 * @type {HTMLFieldSetElement|undefined}
-	 */
-	static group = undefined;
-
-	/**
-	 * Deploy the singleton instance to the tab.
-	 * 
-	 * @private
-	 * @param {GMEdit.PluginEventMap['projectPropertiesBuilt']} event
-	 */
-	static deploy = ({ target, project }) => {
-
-		const projectProperties = ProjectProperties.get(project);
-
-		if (!projectProperties.ok) {
-			return;
-		}
-
-		if (this.instance === undefined || this.instance.properties.project !== project) {
-			
-			this.instance?.destroy();
-
-			this.instance = new ProjectPropertiesMenu(
-				projectProperties.data,
-				this.preferences
-			);
-
-		}
-
-		if (this.group !== undefined) {
-			this.group.remove();
-			target.appendChild(this.group);
-		} else {
-			this.group = UIPreferences.addGroup(target, PLUGIN_NAME);
-			this.group.appendChild(this.instance.element);
-		}
-		
-	};
-
-	/**
-	 * @private
-	 */
-	static onCloseProject = () => this.instance?.destroy();
-
-	/**
-	 * 
-	 * @param {Preferences} preferences 
-	 */
-	static __setup__(preferences) {
-
-		this.preferences = preferences;
-
-		GMEdit.on('projectPropertiesBuilt', this.deploy);
-		GMEdit.on('projectClose', this.onCloseProject);
-
-	}
-
-	static __cleanup__() {
-
-		GMEdit.off('projectPropertiesBuilt', this.deploy);
-		GMEdit.off('projectClose', this.onCloseProject);
-
-		this.instance?.destroy();
-		this.group?.remove();
-
 	}
 
 }

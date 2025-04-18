@@ -3,12 +3,8 @@
  */
 
 import { GMRuntimeVersion } from '../compiler/GMVersion.js';
-import { GMConstructor } from '../GMConstructor.js';
-import { BaseError, InvalidStateErr, SolvableError } from '../utils/Err.js';
 import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
-import { project_config_tree_get, project_current_get, project_format_get } from '../utils/project.js';
-import { Err, Ok } from '../utils/Result.js';
-import { docString } from '../utils/StringUtils.js';
+import { project_config_tree_get } from '../utils/project.js';
 import { Preferences } from './Preferences.js';
 
 const GMEditProjectProperties = $gmedit['ui.project.ProjectProperties'];
@@ -249,23 +245,11 @@ export class ProjectProperties {
 	}
 
 	/**
-	 * The runtime version to build this project with.
-	 * @returns {GMS2.RuntimeInfo|undefined}
-	 */
-	get runtimeVersionOrDef() {
-		return this.runtimeVersion ?? this.preferences.getPreferredRuntimeVersion(this.runtimeChannelTypeOrDef);
-	}
-
-	/**
 	 * The user-specified runtime version for this project, if any.
 	 * 
-	 * @returns {GMS2.RuntimeInfo|undefined}
+	 * @returns {GMRuntimeVersion|undefined}
 	 */
 	get runtimeVersion() {
-
-		// FIXME: I'm not really too pleased with this setup. Doing magical validity-checking which
-		// prints a message automatically behind the scenes on a getter isn't that great. IMO this
-		// should be merged into the `runtime` getter (which itself should not be a getter either).
 
 		const channel = this.runtimeChannelType;
 
@@ -280,29 +264,13 @@ export class ProjectProperties {
 			return undefined;
 		}
 
-		const runtimeInfoRes = this.preferences.getRuntimeInfo(channel, versionString);
+		const version = GMRuntimeVersion.parse(versionString);
 
-		if (!runtimeInfoRes.ok) {
-
-			this.problemLogger.error('Project\'s selected Runtime is not installed!', new SolvableError(
-				docString(`
-					This project specifies the runtime version '${versionString}', but this version
-					doesn't appear to be installed.
-					
-					The default runtime will be used, though the value in the config will not be
-					modified unless you do so.
-				`),
-				docString(`
-					Install the runtime in the IDE and reload GMEdit if this is the correct runtime,
-					otherwise you may change the value to an installed runtime.
-				`)
-			));
-
+		if (!version.ok) {
 			return undefined;
-
 		}
 
-		return runtimeInfoRes.data;
+		return version.data;
 
 	}
 
@@ -316,58 +284,6 @@ export class ProjectProperties {
 
 		this.savePortableProps();
 		this.eventEmitter.emit('setRuntimeVersion', { version });
-
-	}
-
-	/**
-	 * Get the runtime version to use for the current project.
-	 * @returns {Result<GMS2.RuntimeInfo>}
-	 */
-	get runtime() {
-
-		const runtime = this.runtimeVersionOrDef;
-		
-		if (runtime !== undefined) {
-			return Ok(runtime);
-		}
-
-		const channel = this.runtimeChannelTypeOrDef;
-		const runtimes = this.preferences.getInstalledRuntimeVersions(channel);
-
-		if (runtimes === undefined) {
-			return Err(new BaseError(`Runtime type ${channel} list not loaded!`));
-		}
-
-		const compatibleRuntimes = runtimes.filter(it => it.version.format === this.projectFormat);
-
-		if (compatibleRuntimes.length > 0) {
-			return Ok(compatibleRuntimes[0]);
-		}
-
-		return Err(new BaseError(`Failed to find any runtimes of type ${channel}`));
-
-	}
-
-	/**
-	 * Get the user to use for the current project.
-	 * @returns {Result<UserInfo>}
-	 */
-	get user() {
-
-		const channel = this.runtimeChannelTypeOrDef;
-		const user = this.preferences.getUser(channel);
-
-		if (user !== undefined) {
-			return Ok(user);
-		}
-
-		const users = this.preferences.getUsers(channel);
-		
-		if (users === undefined) {
-			return Err(new BaseError(`Users for runtime ${channel} list not loaded!`));
-		}
-
-		return Ok(users[0]);
 
 	}
 
@@ -408,150 +324,6 @@ export class ProjectProperties {
 	 */
 	onChangeRuntimeChannel = () => {
 		this.runtimeVersion = undefined;
-	};
-
-	/**
-	 * Project properties instances for any open projects.
-	 * 
-	 * @private
-	 * @type {Map<GMEdit.Project, Result<ProjectProperties, TPreferences.ProjectPropertiesGetError>>}
-	 */
-	static instances = new Map();
-
-	/**
-	 * The global preferences handler, to be injected into instances.
-	 * 
-	 * @private
-	 * @type {Preferences}
-	 */
-	static preferences;
-
-	/**
-	 * @private
-	 * @type {ProblemLogger}
-	 */
-	static problemLogger;
-
-	/**
-	 * Get properties for the given project, if the project is supported.
-	 * 
-	 * @param {GMEdit.Project} project The project to get properties for.
-	 * @returns {Result<ProjectProperties, TPreferences.ProjectPropertiesGetError>}
-	 */
-	static get(project) {
-
-		let result = this.instances.get(project);
-
-		if (result !== undefined) {
-			return result;
-		}
-
-		if (!GMConstructor.supportsProjectFormat(project)) {
-
-			result = Err({
-				isPluginError: false,
-				error: new BaseError(`The format of the project "${project.name}" is not supported`)
-			});
-
-			this.instances.set(project, result);
-			return result;
-
-		}
-
-		const projectFormat = project_format_get(project);
-
-		if (!projectFormat.ok) {
-			
-			result = Err({
-				isPluginError: true,
-				error: new InvalidStateErr(
-					`Failed to parse project format of project "${project.name}"`,
-					projectFormat.err
-				)
-			});
-
-			this.problemLogger.error('Plugin Internal Error!', result.err.error);
-
-			this.instances.set(project, result);
-			return result;
-
-		}
-
-		if (projectFormat.data === '[Unsupported]') {
-
-			result = Err({
-				isPluginError: false,
-				error: new BaseError(`The format of the project "${project.name}" is not supported`)
-			});
-
-			this.instances.set(project, result);
-			return result;
-
-		}
-
-		const projectProperties = new ProjectProperties(
-			project,
-			projectFormat.data,
-			this.preferences,
-			this.preferences.getLocalProjectPropertiesStore(project),
-			this.problemLogger
-		);
-
-		result = Ok(projectProperties);
-		this.instances.set(project, result);
-
-		return result;
-
-
-	}
-
-	/**
-	 * @param {Preferences} preferences Preferences instance to inject.
-	 * @param {ProblemLogger} problemLogger Problem logging method.
-	 */
-	static __setup__(preferences, problemLogger) {
-		
-		this.preferences = preferences;
-		this.problemLogger = problemLogger;
-
-		GMEdit.on('projectClose', this.onProjectClose);
-
-	}
-
-	static __cleanup__() {
-		
-		GMEdit.off('projectClose', this.onProjectClose);
-		
-		for (const instance of this.instances.values()) {
-			if (instance.ok) {
-				instance.data.destroy();
-			}
-		}
-
-		this.instances.clear();
-
-	}
-
-	/**
-	 * Clean up the properties instance for the project, if one was created.
-	 * 
-	 * @private
-	 * @param {GMEdit.PluginEventMap['projectOpen']} event
-	 */
-	static onProjectClose = ({ project }) => {
-
-		const instance = this.instances.get(project);
-
-		if (instance !== undefined) {
-
-			if (instance.ok) {
-				instance.data.destroy();
-			}
-
-			this.instances.delete(project);
-
-		}
-
 	};
 
 }

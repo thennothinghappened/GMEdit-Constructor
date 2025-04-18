@@ -2,11 +2,7 @@
  * Handler for the hamburger menu options.
  */
 
-import { GMConstructor } from '../GMConstructor.js';
-import { project_current_get } from '../utils/project.js';
-
 const KeyboardShortcutsHandler = $gmedit['ui.KeyboardShortcuts'].hashHandler;
-const Menu = $gmedit['ui.MainMenu'].menu;
 
 /**
  * Default set of key binds to use. These are overwritten by the user if they choose.
@@ -84,31 +80,31 @@ export function __cleanup__() {
 }
 
 function showControlPanel() {
-	if (window.GMConstructor instanceof GMConstructor) {
+	if (window.GMConstructor !== undefined) {
 		window.GMConstructor.showControlPanel();
 	}
 }
 
 function packageCurrentProject() {
-	if (window.GMConstructor instanceof GMConstructor) {
+	if (window.GMConstructor !== undefined) {
 		window.GMConstructor.packageCurrent();
 	}
 }
 
 function stopCurrentProject() {
-	if (window.GMConstructor instanceof GMConstructor) {
+	if (window.GMConstructor !== undefined) {
 		window.GMConstructor.stopCurrent();
 	}
 }
 
 function cleanCurrentProject() {
-	if (window.GMConstructor instanceof GMConstructor) {
+	if (window.GMConstructor !== undefined) {
 		window.GMConstructor.cleanCurrent();
 	}
 }
 
 function runCurrentProject() {
-	if (window.GMConstructor instanceof GMConstructor) {
+	if (window.GMConstructor !== undefined) {
 		window.GMConstructor.runCurrent();
 	}
 }
@@ -126,6 +122,7 @@ function onProjectClose() {
  */
 function menu_register() {
 
+	const Menu = $gmedit['ui.MainMenu'].menu;
 	const existing_menu = Menu.items.find(item => item.id === 'constructor');
 
 	if (existing_menu !== undefined) {
@@ -193,13 +190,13 @@ function commands_deregister() {
 
 function updateItemEnabledState() {
 
-	let enabled = true;
+	const pluginInstance = window.GMConstructor;
 
-	const project = project_current_get();
-
-	if (project === undefined || !GMConstructor.supportsProjectFormat(project)) {
-		enabled = false;
+	if (pluginInstance === undefined) {
+		return;
 	}
+
+	const enabled = (pluginInstance.currentProjectComponents !== undefined);
 
 	const items = constructor_menu.submenu
 		?.items

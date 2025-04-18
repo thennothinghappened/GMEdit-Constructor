@@ -11,18 +11,6 @@ import { mapToOption, Some } from '../../utils/Option.js';
 
 const UIPreferences = $gmedit['ui.Preferences'];
 
-/** @type {string} */
-let pluginSettingsQueryString;
-
-/** @type {PreferencesMenu|undefined} */
-let singletonInstance = undefined;
-
-/** @type {Components.NormalizedDropdownEntry<undefined>} */
-const USE_NEWEST = {
-	label: 'Use Newest Installed',
-	value: undefined
-};
-
 export class PreferencesMenu {
 
 	/**
@@ -38,7 +26,7 @@ export class PreferencesMenu {
 
 	/**
 	 * @private
-	 * @type {{ [key in GMChannelType]: { versionDropdown: Components.IDropdown<GMS2.RuntimeInfo|undefined>, userDropdown: Components.IDropdown<UserInfo> } }}
+	 * @type {{ [key in GMChannelType]: { userDropdown: Components.IDropdown<UserInfo> } }}
 	 */
 	channelWidgets = {
 		// @ts-expect-error Filled in during the constructor.
@@ -143,27 +131,6 @@ export class PreferencesMenu {
 					}
 				);
 
-				const runtimes = this.preferences.getInstalledRuntimeVersions(channel);
-		
-				widgets.versionDropdown = new Dropdown('Version',
-					Some(this.preferences.getPreferredRuntimeVersion(channel)),
-					(runtime) => this.preferences.setPreferredRuntimeVersion(channel, runtime?.version),
-					[
-						USE_NEWEST,
-						...runtimes?.map(runtime => ({
-							label: runtime.version.toString(),
-							value: runtime
-						})) ?? []
-					],
-					(a, b) => a.version.equals(b.version)
-				);
-
-				if (runtimes === undefined) {
-					widgets.versionDropdown.element.hidden = true;
-				}
-
-				group.appendChild(widgets.versionDropdown.element);
-		
 				UIPreferences.addInput(group, 'Installation Data Directory',
 					this.preferences.getUserSearchPath(channel),
 					(path) => {
@@ -196,6 +163,8 @@ export class PreferencesMenu {
 
 				// Presumably not-installed groups can start collapsed, since the user probably
 				// doesn't care about them unless they specifically want to set them up.
+				const runtimes = this.preferences.getInstalledRuntimeVersions(channel);
+
 				if ((runtimes === undefined) && (users === undefined)) {
 					group.classList.add('collapsed');
 				}
@@ -210,7 +179,6 @@ export class PreferencesMenu {
 		this.preferences.events.on('setReuseOutputTab', this.onSetReuseOutputTab);
 		this.preferences.events.on('setUseGlobalBuildPath', this.onSetUseGlobalBuildPath);
 		this.preferences.events.on('setGlobalBuildPath', this.onSetGlobalBuildPath);
-		this.preferences.events.on('runtimeListChanged', this.onRuntimeListChanged);
 		this.preferences.events.on('userListChanged', this.onUserListChanged);
 
 	}
@@ -225,7 +193,6 @@ export class PreferencesMenu {
 		this.preferences.events.off('setReuseOutputTab', this.onSetReuseOutputTab);
 		this.preferences.events.off('setUseGlobalBuildPath', this.onSetUseGlobalBuildPath);
 		this.preferences.events.off('setGlobalBuildPath', this.onSetGlobalBuildPath);
-		this.preferences.events.off('runtimeListChanged', this.onRuntimeListChanged);
 		this.preferences.events.off('userListChanged', this.onUserListChanged);
 	}
 
@@ -280,34 +247,6 @@ export class PreferencesMenu {
 	}
 
 	/**
-	 * Update the runtime version dropdown when the list of installed versions change for that
-	 * channel.
-	 * 
-	 * @private
-	 * @param {TPreferences.PreferencesEventMap['runtimeListChanged']} event
-	 */
-	onRuntimeListChanged = ({ channel, runtimesInfo }) => {
-		
-		const versionDropdown = this.channelWidgets[channel].versionDropdown;
-
-		if (runtimesInfo === undefined) {
-			versionDropdown.element.hidden = true;
-			return;
-		}
-
-		versionDropdown.setOptions([
-			USE_NEWEST,
-			...runtimesInfo.runtimes.map(runtime => ({
-				label: runtime.version.toString(),
-				value: runtime
-			}))
-		], runtimesInfo.preferredRuntime);
-
-		versionDropdown.element.hidden = false;
-
-	}
-
-	/**
 	 * Update the user dropdown when the list of users change for that channel.
 	 * 
 	 * @private
@@ -330,54 +269,5 @@ export class PreferencesMenu {
 		userDropdown.element.hidden = false;
 
 	}
-
-	/**
-	 * @private
-	 * @type {Preferences}
-	 */
-	static preferences;
-
-	/**
-	 * Setup the preferences menu callback.
-	 * @param {Preferences} preferences 
-	 */
-	static __setup__(preferences) {
-
-		this.preferences = preferences;
-		pluginSettingsQueryString = `.plugin-settings[for^="${PLUGIN_NAME}"]`;
-
-		if (UIPreferences.menuMain != undefined) {
-			this.onPreferencesBuilt({ target: UIPreferences.menuMain });
-		}
-
-		GMEdit.on('preferencesBuilt', this.onPreferencesBuilt);
-		
-	}
-
-	/**
-	 * Deregister callback for setting up menu.
-	 */
-	static __cleanup__() {
-		GMEdit.off('preferencesBuilt', this.onPreferencesBuilt);
-	}
-
-	/**
-	 * Callback for setting up our preferences menu when the user opens prefs.
-	 * @param {GMEdit.PluginEventMap['preferencesBuilt']} event
-	 */
-	static onPreferencesBuilt = ({ target }) => {
-
-		const group = target.querySelector(pluginSettingsQueryString);
-
-		if (group instanceof HTMLDivElement) {
-
-			singletonInstance ??= new PreferencesMenu(this.preferences);
-
-			group.appendChild(singletonInstance.element);
-			UIPreferences.addText(group, `Version: ${PLUGIN_VERSION}`);
-
-		}
-
-	};
 
 }

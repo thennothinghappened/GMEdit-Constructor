@@ -26,17 +26,9 @@ export class ConfigTreeUi {
 	configsTreeDir;
 
 	/**
-	 * @private
-	 * @type {Map<GMEdit.Project, ConfigTreeUi>}
-	 */
-	static instances = new Map();
-
-	/**
-	 * @private
-	 * @param {GMEdit.Project} project 
 	 * @param {ProjectProperties} projectProperties 
 	 */
-	constructor(project, projectProperties) {
+	constructor(projectProperties) {
 
 		this.projectProperties = projectProperties;
 
@@ -51,63 +43,9 @@ export class ConfigTreeUi {
 
 	}
 
-	/**
-	 * @private
-	 */
 	destroy() {
 		this.projectProperties.events.off('setBuildConfig', this.onChangeBuildConfig);
 		this.configsTreeDir?.remove();
-	}
-
-	static __setup__() {
-		GMEdit.on('projectOpen', this.onProjectOpen);
-		GMEdit.on('projectClose', this.onProjectClose);
-	}
-
-	static __cleanup__() {
-		
-		GMEdit.off('projectOpen', this.onProjectOpen);
-		GMEdit.off('projectClose', this.onProjectClose);
-		
-		for (const instance of this.instances.values()) {
-			instance.destroy();
-		}
-
-		this.instances.clear();
-
-	}
-
-	/**
-	 * Set up tree view build configs.
-	 * 
-	 * @param {GMEdit.PluginEventMap['projectOpen']} event
-	 * @private
-	 */
-	static onProjectOpen = ({ project }) => {
-
-		const properties = ProjectProperties.get(project);
-
-		if (properties.ok) {
-			this.instances.set(project, new ConfigTreeUi(project, properties.data));
-		}
-
-	}
-
-	/**
-	 * Clean up the build configs in the tree view.
-	 * 
-	 * @param {GMEdit.PluginEventMap['projectClose']} event
-	 * @private
-	 */
-	static onProjectClose = ({ project }) => {
-
-		const instance = this.instances.get(project);
-
-		if (instance !== undefined) {
-			instance.destroy();
-			this.instances.delete(project);
-		}
-		
 	}
 
 	/**

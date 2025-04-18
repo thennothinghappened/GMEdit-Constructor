@@ -118,9 +118,6 @@ export declare global {
 			/** Where we should search for the list of users. */
 			users_path: string;
 	
-			/** Chosen runtime to use. */
-			choice?: string;
-	
 			/** Chosen user to use. */
 			user?: string;
 		};
@@ -155,12 +152,7 @@ export declare global {
 					 * The new list of runtimes.
 					 */
 					runtimes: NonEmptyArray<GMS2.RuntimeInfo>;
-
-					/**
-					 * The user's preferred runtime, if they've chosen any.
-					 */
-					preferredRuntime?: GMS2.RuntimeInfo;
-
+					
 				};
 
 			};

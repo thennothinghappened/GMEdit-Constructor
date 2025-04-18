@@ -1,11 +1,8 @@
 
-import { project_current_get } from '../../utils/project.js';
 import { ConstructorTab, ConstructorTabFileKind } from './ConstructorTab.js';
 import * as ui from '../ui-wrappers.js';
-import { GMConstructor, PLUGIN_NAME, PLUGIN_VERSION } from '../../GMConstructor.js';
-import { Preferences } from '../../preferences/Preferences.js';
+import { PLUGIN_NAME, PLUGIN_VERSION } from '../../GMConstructor.js';
 import { ProjectPropertiesMenu } from '../preferences/ProjectPropertiesMenu.js';
-import { ProjectProperties } from '../../preferences/ProjectProperties.js';
 import { BaseError, InvalidStateErr } from '../../utils/Err.js';
 import { PreferencesMenu } from '../preferences/PreferencesMenu.js';
 import { docString } from '../../utils/StringUtils.js';
@@ -54,16 +51,6 @@ export class ControlPanelTab extends ConstructorTab {
 	static problems = [];
 
 	/**
-	 * The preferences instance to reference. If the preferences are not ready, the control panel
-	 * can only show problems (i.e., probably how this condition arose), and cannot serve the
-	 * preferences UI.
-	 * 
-	 * @private
-	 * @type {Preferences|undefined}
-	 */
-	static preferences = undefined;
-
-	/**
 	 * @private
 	 * @type {PreferencesMenu|undefined}
 	 */
@@ -100,7 +87,7 @@ export class ControlPanelTab extends ConstructorTab {
 		this.element.appendChild(ui.p(`Version: ${PLUGIN_VERSION}`));
 
 		this.problems = ui.group(this.element, 'Problems', [
-			ui.text_button('Dismiss All', ControlPanelTab.dismissAll)
+			ui.text_button('Dismiss All', this.dismissAll)
 		]);
 		this.problems.classList.add('gm-constructor-control-panel-errors');
 		this.problems.hidden = true;
@@ -109,54 +96,8 @@ export class ControlPanelTab extends ConstructorTab {
 		this.projectPropertiesGroupElement.hidden = true;
 
 		this.preferencesGroupElement = ui.group(this.element, 'Global Settings');
-		
-		if (ControlPanelTab.preferences !== undefined) {
-			this.setupPreferencesMenu(ControlPanelTab.preferences);
-		}
-
-		const project = project_current_get();
-
-		if (project !== undefined) {
-			this.onOpenProject({ project });
-		}
 
 		ControlPanelTab.problems.forEach(this.showProblem);
-
-		GMEdit.on('projectOpen', this.onOpenProject);
-		GMEdit.on('projectClose', this.onCloseProject);
-
-	}
-
-	/**
-	 * Setup the control panel's state when possible during startup. Note that the control panel is
-	 * always available, as it must be able to show the problems UI from the moment the plugin is
-	 * started. An error in configuration, for instance in the user preferences, should be
-	 * reportable through the control panel - thus the control panel has a *soft* dependency on the
-	 * preferences, and only shows the relevant UI once it becomes available.
-	 * 
-	 * @param {Preferences} preferences 
-	 */
-	static providePreferences(preferences) {
-
-		this.preferences = preferences;
-		const instance = this.find();
-
-		if (instance !== undefined) {
-
-			const project = project_current_get();
-			instance.setupPreferencesMenu(preferences);
-			
-			if (project !== undefined) {
-
-				const properties = ProjectProperties.get(project);
-				
-				if (properties.ok) {
-					instance.setupProjectPropertiesMenu(preferences, properties.data);
-				}
-
-			}
-
-		}
 
 	}
 
@@ -164,8 +105,16 @@ export class ControlPanelTab extends ConstructorTab {
 	 * Reset the control panel's state for reloading the plugin.
 	 */
 	static cleanup() {
-		this.preferences = undefined;
+		
+		const instance = this.find();
+
+		if (instance !== undefined) {
+			instance.dismissAll();
+			instance.close();
+		}
+
 		this.problems.length = 0;
+
 	}
 
 	/**
@@ -287,23 +236,17 @@ export class ControlPanelTab extends ConstructorTab {
 	 * Dismiss all errors in the panel.
 	 * @private
 	 */
-	static dismissAll = () => {
+	dismissAll = () => {
 
-		const controlPanel = this.find();
+		this.problems.hidden = true;
 
-		if (controlPanel !== undefined) {
-
-			for (const element of Array.from(controlPanel.problems.children)) {
-				if (element instanceof HTMLFieldSetElement) {
-					element.remove();
-				}
+		for (const element of Array.from(this.problems.children)) {
+			if (element instanceof HTMLFieldSetElement) {
+				element.remove();
 			}
-
-			controlPanel.problems.hidden = true;
-
 		}
 
-		this.problems = [];
+		ControlPanelTab.problems.length = 0;
 
 	}
 
@@ -343,10 +286,9 @@ export class ControlPanelTab extends ConstructorTab {
 	}
 
 	/**
-	 * @private
-	 * @param {Preferences} preferences 
+	 * @param {PreferencesMenu} preferencesMenu
 	 */
-	setupPreferencesMenu(preferences) {
+	setupPreferencesMenu(preferencesMenu) {
 
 		if (this.preferencesMenu !== undefined) {
 			
@@ -359,7 +301,7 @@ export class ControlPanelTab extends ConstructorTab {
 
 		}
 		
-		this.preferencesMenu = new PreferencesMenu(preferences);
+		this.preferencesMenu = preferencesMenu;
 
 		this.preferencesGroupElement.appendChild(ui.em(`Configure the default behaviour of ${PLUGIN_NAME}.`));
 		this.preferencesGroupElement.appendChild(this.preferencesMenu.element);
@@ -367,79 +309,38 @@ export class ControlPanelTab extends ConstructorTab {
 	}
 
 	/**
-	 * @private
-	 * @param {Preferences} preferences 
-	 * @param {ProjectProperties} projectProperties 
+	 * @param {ProjectPropertiesMenu} projectPropertiesMenu
 	 */
-	setupProjectPropertiesMenu(preferences, projectProperties) {
+	openProject(projectPropertiesMenu) {
 
 		if (this.projectPropertiesMenu !== undefined) {
-			
-			if (this.projectPropertiesMenu.properties.project === projectProperties.project) {
-				return;
-			}
-			
-			this.projectPropertiesGroupElement.removeChild(this.projectPropertiesMenu.element);
+			this.projectPropertiesMenu.element.remove();
 			this.projectPropertiesMenu.destroy();
-
-			this.projectPropertiesMenu = undefined;
-
 		}
 
-		this.projectPropertiesMenu = new ProjectPropertiesMenu(projectProperties, preferences);
+		this.projectPropertiesMenu = projectPropertiesMenu;
 
 		this.projectPropertiesGroupElement.appendChild(this.projectPropertiesMenu.element);
 		this.projectPropertiesGroupElement.hidden = false;
 
 	}
 
-	/**
-	 * @private
-	 * @param {{ project: GMEdit.Project }} event
-	 */
-	onOpenProject = ({ project }) => {
-
-		if (!GMConstructor.supportsProjectFormat(project)) {
-			return;
-		}
-
-		const preferences = ControlPanelTab.preferences;
-
-		if (preferences === undefined) {
-			// Wait for preferences to be provided, see `ControlPanelTab::providePreferences`.
-			return;
-		}
-
-		const projectProperties = ProjectProperties.get(project);
-
-		if (projectProperties.ok) {
-			this.setupProjectPropertiesMenu(preferences, projectProperties.data);
-		}
-		
-	}
-
-	/**
-	 * @private
-	 */
-	onCloseProject = () => {
+	closeProject() {
 		
 		this.projectPropertiesGroupElement.hidden = true;
 
 		if (this.projectPropertiesMenu !== undefined) {
 			
-			this.projectPropertiesGroupElement.removeChild(this.projectPropertiesMenu.element);
-
+			this.projectPropertiesMenu.element.remove();
 			this.projectPropertiesMenu.destroy();
-			this.projectPropertiesMenu = undefined;
+
+			delete this.projectPropertiesMenu;
 
 		}
 
 	}
 
 	destroy = () => {
-
-		GMEdit.off('projectOpen', this.onOpenProject);
-		GMEdit.off('projectClose', this.onCloseProject);
 
 		if (this.projectPropertiesMenu !== undefined) {
 			this.projectPropertiesMenu.destroy();

@@ -64,8 +64,21 @@ export class ConstructorTab extends Editor {
 	/**
 	 * Bring this tab into focus.
 	 */
-	focus = () => {
+	focus() {
 		this.file.tabEl?.click();
+	}
+
+	/**
+	 * Close this tab.
+	 */
+	close() {
+
+		const closeButton = this.file.tabEl?.querySelector('.chrome-tab-close');
+		
+		if (closeButton instanceof HTMLDivElement) {
+			closeButton.click();
+		}
+
 	}
 
 }

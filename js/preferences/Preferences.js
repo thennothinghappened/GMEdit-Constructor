@@ -7,7 +7,6 @@ import { def_global_build_path, def_runtime_paths, def_user_paths, igor_path_seg
 import { readFile, readdir } from '../utils/node/file.js';
 import { BaseError, SolvableError } from '../utils/Err.js';
 import { deep_assign } from '../utils/object.js';
-import { PLUGIN_NAME } from '../GMConstructor.js';
 import * as node from '../utils/node/node-import.js';
 import { GMRuntimeVersion } from '../compiler/GMVersion.js';
 import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
@@ -399,37 +398,6 @@ export class Preferences {
 	}
 
 	/**
-	 * Get the global preference choice for default runtime for a given type. This may be
-	 * `undefined` in the case that no runtimes are installed for the given channel, or if the user
-	 * has not chosen one.
-	 * 
-	 * @param {GMChannelType} channel
-	 * @returns {GMS2.RuntimeInfo|undefined}
-	 */
-	getPreferredRuntimeVersion(channel) {
-
-		const version = this.prefs.runtime_opts.type_opts[channel].choice;
-
-		if (version == undefined) {
-			return undefined;
-		}
-
-		return okOrUndefined(this.getRuntimeInfo(channel, version));
-
-	}
-
-	/**
-	 * Set the global choice for default runtime for a given type.
-	 * 
-	 * @param {GMChannelType} type 
-	 * @param {GMRuntimeVersion|undefined} version The runtime version to use, or `undefined` to clear the preference.
-	 */
-	setPreferredRuntimeVersion(type, version) {
-		this.prefs.runtime_opts.type_opts[type].choice = version?.toString();
-		this.save();
-	}
-
-	/**
 	 * Get information regarding a particular runtime version.
 	 * 
 	 * If the given runtime version string is invalid, is not installed, or the given channel has no
@@ -579,10 +547,7 @@ export class Preferences {
 
 		this.eventEmitter.emit('runtimeListChanged', {
 			channel,
-			runtimesInfo: {
-				runtimes: runtimesList,
-				preferredRuntime: this.getPreferredRuntimeVersion(channel)
-			}
+			runtimesInfo: { runtimes: runtimesList }
 		});
 
 	}

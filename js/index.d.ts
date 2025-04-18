@@ -1,10 +1,21 @@
 import { GMConstructor } from './GMConstructor';
+import { ProjectProperties } from './preferences/ProjectProperties';
+import { ConfigTreeUi } from './ui/ConfigTreeUi';
+import { ProjectPropertiesMenu } from './ui/preferences/ProjectPropertiesMenu';
 
 export declare global {
 
+	/**
+	 * Components held by the plugin singleton for the currently open project.
+	 */
 	type ProjectComponents = {
 		project: GMEdit.Project;
 		projectProperties: ProjectProperties;
+		projectPropertiesMenuComponents?: {
+			group: HTMLFieldSetElement;
+			projectPropertiesMenu: ProjectPropertiesMenu;
+		};
+		configTreeUi: ConfigTreeUi;
 	};
 
 	/**
