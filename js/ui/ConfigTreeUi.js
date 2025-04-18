@@ -1,6 +1,4 @@
-import { GMConstructor } from '../GMConstructor.js';
 import { ProjectProperties } from '../preferences/ProjectProperties.js';
-import { project_config_tree_get, project_current_get } from '../utils/project.js';
 
 const TreeView = $gmedit['ui.treeview.TreeView'];
 /**
@@ -42,7 +40,7 @@ export class ConfigTreeUi {
 
 		this.projectProperties = projectProperties;
 
-		const rootConfig = project_config_tree_get(project);
+		const rootConfig = this.projectProperties.rootBuildConfig;
 		this.configsTreeDir = TreeView.makeAssetDir('Build Configs', '', null);
 		
 		this.addConfigInTree(this.configsTreeDir.treeItems, rootConfig);
