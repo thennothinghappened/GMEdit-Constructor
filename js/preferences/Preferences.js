@@ -4,7 +4,7 @@
  */
 
 import { def_global_build_path, def_runtime_paths, def_user_paths, igor_path_segment } from '../compiler/igor-paths.js';
-import { readFileSync, readdir } from '../utils/node/file.js';
+import { readFile, readdir } from '../utils/node/file.js';
 import { BaseError, SolvableError } from '../utils/Err.js';
 import { deep_assign } from '../utils/object.js';
 import { PLUGIN_NAME } from '../GMConstructor.js';
@@ -586,7 +586,7 @@ export class Preferences {
 	 * @private
 	 */
 	static save() {
-		return Electron_FS.writeFileSync(this.save_path, JSON.stringify(this.prefs));
+		return Electron_FS.writeFileSync(this.savePath, JSON.stringify(this.prefs));
 	}
 
 	/**
@@ -601,7 +601,7 @@ export class Preferences {
 	 * @type {string}
 	 * @private
 	 */
-	static save_path;
+	static savePath;
 
 	/**
 	 * Logger for displaying problems to the user.
@@ -643,12 +643,12 @@ export class Preferences {
 	static async create(problemLogger) {
 
 		this.problemLogger = problemLogger;
-		this.save_path = node.path.join(Electron_App.getPath('userData'), 'GMEdit', 'config', `${PLUGIN_NAME}.json`);
+		this.savePath = node.path.join(Electron_App.getPath('userData'), 'GMEdit', 'config', `${PLUGIN_NAME}.json`);
 
 		/** @type {Partial<TPreferences.Data>|undefined} */
 		let loaded_prefs = undefined;
 
-		const prefsLoadRes = readFileSync(this.save_path);
+		const prefsLoadRes = await readFile(this.savePath);
 
 		if (prefsLoadRes.ok) {
 			
@@ -659,9 +659,8 @@ export class Preferences {
 				this.problemLogger.error('Failed to load preferences', new SolvableError(
 					'JSON parse error while reading the preferences file!', 
 					docString(`
-						Please check your preferences file (${this.save_path})
-						for syntax errors as you must have edited it manually -
-						see stacktrace below.
+						Please check your preferences file (${this.savePath}) for syntax errors as
+						you must have edited it manually - see the stacktrace below.
 					`),
 					err_cause
 				));
