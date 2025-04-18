@@ -18,7 +18,7 @@ export declare global {
 	/**
 	 * Things relating to the current GameMaker runtime (Zeus).
 	 */
-	namespace Zeus {
+	namespace GMS2 {
 
 		/**
 		 * Information for a specific found runtime.

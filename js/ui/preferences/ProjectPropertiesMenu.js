@@ -56,13 +56,13 @@ export class ProjectPropertiesMenu {
 
 	/**
 	 * @private
-	 * @type {Components.IDropdown<Zeus.Platform|undefined>}
+	 * @type {Components.IDropdown<GMS2.Platform|undefined>}
 	 */
 	platformDropdown;
 
 	/**
 	 * @private
-	 * @type {Components.IDropdown<Zeus.RuntimeType|undefined>}
+	 * @type {Components.IDropdown<GMS2.RuntimeType|undefined>}
 	 */
 	zeusRuntimeTypeDropdown;
 
@@ -74,7 +74,7 @@ export class ProjectPropertiesMenu {
 
 	/**
 	 * @private
-	 * @type {Components.IDropdown<Zeus.RuntimeInfo|undefined>}
+	 * @type {Components.IDropdown<GMS2.RuntimeInfo|undefined>}
 	 */
 	runtimeVersionDropdown;
 
@@ -193,7 +193,7 @@ export class ProjectPropertiesMenu {
 
 	/**
 	 * @private
-	 * @returns {Components.NormalizedDropdownEntry<Zeus.RuntimeInfo>[]|undefined}
+	 * @returns {Components.NormalizedDropdownEntry<GMS2.RuntimeInfo>[]|undefined}
 	 */
 	mapRuntimesInChannelToEntries() {
 		

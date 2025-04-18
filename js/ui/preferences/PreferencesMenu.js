@@ -38,7 +38,7 @@ export class PreferencesMenu {
 
 	/**
 	 * @private
-	 * @type {{ [key in GMChannelType]: { versionDropdown: Components.IDropdown<Zeus.RuntimeInfo|undefined>, userDropdown: Components.IDropdown<UserInfo> } }}
+	 * @type {{ [key in GMChannelType]: { versionDropdown: Components.IDropdown<GMS2.RuntimeInfo|undefined>, userDropdown: Components.IDropdown<UserInfo> } }}
 	 */
 	channelWidgets = {
 		// @ts-expect-error Filled in during the constructor.

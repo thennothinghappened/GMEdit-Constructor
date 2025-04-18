@@ -11,7 +11,7 @@ export declare global {
 			/** Globally selected runtime options that may be overriden by projects. */
 			runtime_opts: {
 				type: GMChannelType;
-				runner: Zeus.RuntimeType;
+				runner: GMS2.RuntimeType;
 	
 				type_opts: {
 					[key in GMChannelType]: RuntimePerChannelPrefs;
@@ -76,12 +76,12 @@ export declare global {
 				/**
 				 * Chosen runner type to use.
 				 */
-				runtimeType: Zeus.RuntimeType;
+				runtimeType: GMS2.RuntimeType;
 
 				/**
 				 * The platform to target when building for the current runtime.
 				 */
-				platform: Zeus.Platform;
+				platform: GMS2.Platform;
 
 				/** 
 				 * Whether to reuse the compile viewer tab between runs. 
@@ -135,12 +135,12 @@ export declare global {
 					/**
 					 * The new list of runtimes.
 					 */
-					runtimes: NonEmptyArray<Zeus.RuntimeInfo>;
+					runtimes: NonEmptyArray<GMS2.RuntimeInfo>;
 
 					/**
 					 * The user's preferred runtime, if they've chosen any.
 					 */
-					preferredRuntime?: Zeus.RuntimeInfo;
+					preferredRuntime?: GMS2.RuntimeInfo;
 
 				};
 

@@ -21,7 +21,7 @@ import { asNonEmptyArray } from '../utils/ArrayUtils.js';
  */
 export const GM_CHANNEL_TYPES = ['Stable', 'Beta', 'LTS'];
 
-/** @type {NonEmptyArray<Zeus.RuntimeType>} */
+/** @type {NonEmptyArray<GMS2.RuntimeType>} */
 export const ZEUS_RUNTIME_TYPES = ['VM', 'YYC'];
 
 /** @type {Readonly<TPreferences.Data>} */
@@ -119,7 +119,7 @@ export class Preferences {
 	 * Populated after loading the list.
 	 * 
 	 * @private
-	 * @type {{ [key in GMChannelType]?: NonEmptyArray<Zeus.RuntimeInfo> }}
+	 * @type {{ [key in GMChannelType]?: NonEmptyArray<GMS2.RuntimeInfo> }}
 	 */
 	runtimesInChannels = {};
 
@@ -328,7 +328,7 @@ export class Preferences {
 
 	/**
 	 * The desired runner type.
-	 * @returns {Zeus.RuntimeType}
+	 * @returns {GMS2.RuntimeType}
 	 */
 	get runtimeBuildType() {
 		return this.prefs.runtime_opts.runner;
@@ -361,7 +361,7 @@ export class Preferences {
 	 * has not chosen one.
 	 * 
 	 * @param {GMChannelType} channel
-	 * @returns {Zeus.RuntimeInfo|undefined}
+	 * @returns {GMS2.RuntimeInfo|undefined}
 	 */
 	getPreferredRuntimeVersion(channel) {
 
@@ -394,7 +394,7 @@ export class Preferences {
 	 * 
 	 * @param {GMChannelType} channel The channel the runtime version was released in.
 	 * @param {GMRuntimeVersion|string} versionOrVersionString The version.
-	 * @returns {Result<Zeus.RuntimeInfo>}
+	 * @returns {Result<GMS2.RuntimeInfo>}
 	 */
 	getRuntimeInfo(channel, versionOrVersionString) {
 
@@ -484,7 +484,7 @@ export class Preferences {
 	 * Get the list of runtime version names for a given runtime type.
 	 * 
 	 * @param {GMChannelType} channel
-	 * @returns {NonEmptyArray<Zeus.RuntimeInfo>|undefined}
+	 * @returns {NonEmptyArray<GMS2.RuntimeInfo>|undefined}
 	 */
 	getInstalledRuntimeVersions(channel) {
 		return this.runtimesInChannels[channel];
@@ -603,7 +603,7 @@ export class Preferences {
 	 * Load the list of runtimes for the provided search path for a type.
 	 * 
 	 * @param {GMChannelType} channel
-	 * @returns {Promise<Result<NonEmptyArray<Zeus.RuntimeInfo>>>}
+	 * @returns {Promise<Result<NonEmptyArray<GMS2.RuntimeInfo>>>}
 	 */
 	loadRuntimeList(channel) {
 		return this.loadRuntimeListFrom(this.getRuntimeOptions(channel).search_path);
@@ -623,7 +623,7 @@ export class Preferences {
 	 * Load the list of runtimes for the provided search path.
 	 * 
 	 * @param {String} search_path 
-	 * @returns {Promise<Result<NonEmptyArray<Zeus.RuntimeInfo>>>}
+	 * @returns {Promise<Result<NonEmptyArray<GMS2.RuntimeInfo>>>}
 	 */
 	async loadRuntimeListFrom(search_path) {
 

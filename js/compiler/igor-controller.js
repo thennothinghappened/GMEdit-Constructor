@@ -16,9 +16,9 @@ export const jobs = [];
  * Run a new job on a given project.
  * 
  * @param {GMEdit.Project} project
- * @param {Zeus.RuntimeInfo} runtime
+ * @param {GMS2.RuntimeInfo} runtime
  * @param {UserInfo|undefined} user
- * @param {Zeus.IgorSettings} settings
+ * @param {GMS2.IgorSettings} settings
  * @param {number|undefined} [id] Specific ID to use for this job, for stealing from an existing one.
  * @returns {Promise<Result<IgorJob>>}
  */
@@ -66,7 +66,7 @@ function job_remove(job) {
  * @param {GMEdit.Project} project
  * @param {string} runtime_path
  * @param {string|undefined} user_path
- * @param {Zeus.IgorSettings} settings
+ * @param {GMS2.IgorSettings} settings
  * @returns {Result<string[]>}
  */
 function job_flags_get(project, runtime_path, user_path, settings) {

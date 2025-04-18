@@ -154,7 +154,7 @@ export class ProjectProperties {
 
 	/**
 	 * Get the desired runner type.
-	 * @returns {Zeus.RuntimeType}
+	 * @returns {GMS2.RuntimeType}
 	 */
 	get runtimeBuildTypeOrDef() {
 		return this.runtimeBuildType ?? this.preferences.runtimeBuildType;
@@ -162,7 +162,7 @@ export class ProjectProperties {
 
 	/**
 	 * Get the desired runner type for this project (without falling back to the global option).
-	 * @returns {Zeus.RuntimeType|undefined}
+	 * @returns {GMS2.RuntimeType|undefined}
 	 */
 	get runtimeBuildType() {
 		return this.local.runtimeType ?? undefined;
@@ -170,7 +170,7 @@ export class ProjectProperties {
 
 	/**
 	 * Set the desired runtime channel type.
-	 * @param {Zeus.RuntimeType|undefined} runner 
+	 * @param {GMS2.RuntimeType|undefined} runner 
 	 */
 	set runtimeBuildType(runner) {
 		this.local.runtimeType = runner;
@@ -243,14 +243,14 @@ export class ProjectProperties {
 	 * The target platform for this project when using the current runtime. If undefined, the host
 	 * platform is assumed.
 	 * 
-	 * @returns {Zeus.Platform|undefined}
+	 * @returns {GMS2.Platform|undefined}
 	 */
 	get zeusPlatform() {
 		return this.local.platform;
 	}
 
 	/**
-	 * @param {Zeus.Platform|undefined} zeusPlatform 
+	 * @param {GMS2.Platform|undefined} zeusPlatform 
 	 */
 	set zeusPlatform(zeusPlatform) {
 		this.local.platform = zeusPlatform;
@@ -259,7 +259,7 @@ export class ProjectProperties {
 
 	/**
 	 * The runtime version to build this project with.
-	 * @returns {Zeus.RuntimeInfo|undefined}
+	 * @returns {GMS2.RuntimeInfo|undefined}
 	 */
 	get runtimeVersionOrDef() {
 		return this.runtimeVersion ?? this.preferences.getPreferredRuntimeVersion(this.runtimeChannelTypeOrDef);
@@ -268,7 +268,7 @@ export class ProjectProperties {
 	/**
 	 * The user-specified runtime version for this project, if any.
 	 * 
-	 * @returns {Zeus.RuntimeInfo|undefined}
+	 * @returns {GMS2.RuntimeInfo|undefined}
 	 */
 	get runtimeVersion() {
 
@@ -330,7 +330,7 @@ export class ProjectProperties {
 
 	/**
 	 * Get the runtime version to use for the current project.
-	 * @returns {Result<Zeus.RuntimeInfo>}
+	 * @returns {Result<GMS2.RuntimeInfo>}
 	 */
 	get runtime() {
 

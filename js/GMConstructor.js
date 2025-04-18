@@ -191,7 +191,7 @@ export class GMConstructor {
 	 * Run a task on our current project.
 	 * 
 	 * @param {GMEdit.Project} project 
-	 * @param {AtLeast<Zeus.IgorSettings, 'verb'>} partialSettings
+	 * @param {AtLeast<GMS2.IgorSettings, 'verb'>} partialSettings
 	 */
 	async #runTask(project, partialSettings) {
 
@@ -203,7 +203,7 @@ export class GMConstructor {
 
 		const projectProperties = projectPropertiesResult.data;
 
-		/** @type {Zeus.IgorSettings} */
+		/** @type {GMS2.IgorSettings} */
 		const settings = {
 			verb: partialSettings.verb,
 			buildPath: partialSettings.buildPath ?? this.#getBuildDir(project),
