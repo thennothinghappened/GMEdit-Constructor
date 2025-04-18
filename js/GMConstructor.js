@@ -8,11 +8,11 @@ import { BaseError, SolvableError } from './utils/Err.js';
 import { ControlPanelTab } from './ui/tabs/ControlPanelTab.js';
 import { plugin_update_check } from './update-checker/UpdateChecker.js';
 import { mkdir, readdir } from './utils/node/file.js';
-import * as node from './utils/node/node-import.js';
+import * as nodeModulesProvider from './utils/node/node-import.js';
 import { OutputLogTab } from './ui/tabs/OutputLogTab.js';
 import { Preferences } from './preferences/Preferences.js';
 import { ConfigTreeUi } from './ui/ConfigTreeUi.js';
-import { Err, Ok, unwrap } from './utils/Result.js';
+import { Err, Ok } from './utils/Result.js';
 import { ProjectPropertiesMenu } from './ui/preferences/ProjectPropertiesMenu.js';
 import { docString } from './utils/StringUtils.js';
 import { ControlPanelProblemLogger } from './ui/tabs/ControlPanelProblemReporter.js';
@@ -21,13 +21,13 @@ import { ControlPanelProblemLogger } from './ui/tabs/ControlPanelProblemReporter
  * Name of the plugin 
  * @type {String}
  */
-export let plugin_name;
+export let PLUGIN_NAME;
 
 /**
  * Current plugin version
  * @type {String}
  */
-export let plugin_version;
+export let PLUGIN_VERSION;
 
 /**
  * Main controller instance for the plugin!
@@ -47,6 +47,97 @@ export class GMConstructor {
 	problemLogger;
 
 	/**
+	 * @type {ProjectComponents|undefined}
+	 */
+	currentProjectComponents = undefined;
+
+	/**
+	 * Initialise an instance of the plugin!
+	 * 
+	 * @param {string} pluginName Name of the plugin.
+	 * @param {string} pluginVersion Current version of the plugin.
+	 * @param {NodeModules} nodeModules References to various NodeJS modules we need.
+	 * @returns {Promise<Result<GMConstructor>>}
+	 */
+	static async initialize(pluginName, pluginVersion, nodeModules) {
+
+		PLUGIN_NAME = pluginName;
+		PLUGIN_VERSION = pluginVersion;
+
+		nodeModulesProvider.inject(nodeModules);
+		
+		// Prevent Constructor loading when running on Rosetta, since it has a bunch of issues there.
+		if (rosetta_check(nodeModulesProvider.child_process.execSync)) {
+
+			const err = new BaseError(docString(`
+				${PLUGIN_NAME} does not work correctly on Rosetta - please consider using GMEdit's
+				native Arm64 build found at https://yellowafterlife.itch.io/gmedit
+			`));
+
+			console.error(err);
+
+			Electron_Dialog.showMessageBox({
+				title: 'GMEdit-Constructor cannot load on Rosetta!',
+				message: err.message,
+				buttons: ['Dismiss'],
+				type: 'error'
+			});
+
+			return Err(err);
+
+		}
+
+		const problemLogger = new ControlPanelProblemLogger();
+		igorPaths.__setup__();
+
+		// Setting up preferences //
+		const preferencesRes = await Preferences.create(problemLogger);
+
+		if (!preferencesRes.ok) {
+			return Err(new BaseError('Failed to init preferences', preferencesRes.err));
+		}
+
+		const preferences = preferencesRes.data;
+		ControlPanelTab.providePreferences(preferences);
+
+		ProjectProperties.__setup__(preferences, problemLogger);
+		ProjectPropertiesMenu.__setup__(preferences);
+		PreferencesMenu.__setup__();
+		hamburgerOptions.__setup__();
+		ConfigTreeUi.__setup__();
+
+		// Check for updates //
+		if (preferences.checkForUpdates) {
+			plugin_update_check().then(res => {
+					
+				if (!res.ok) {
+					return problemLogger.warn('Failed to check for plugin updates.', res.err);
+				}
+
+				if (!res.data.update_available) {
+					return;
+				}
+
+				// Bit silly to use an error message for this but it works :P
+				problemLogger.warn('An update is available for Constructor!',
+					new SolvableError('There is an update available.', docString(`
+						${PLUGIN_NAME} ${res.data.version} is available on GitHub!
+						
+						${res.data.url}
+					`))
+				);
+
+			});
+		}
+
+		return Ok(new GMConstructor(preferences, problemLogger));
+
+	}
+
+	/**
+	 * Final, synchronous setup for the plugin instance happens here, once we've done the various
+	 * asynchronous and fallible options during the {@link initialize} call.
+	 * 
 	 * @private
 	 * @param {typeof Preferences} preferences 
 	 * @param {ProblemLogger} problemLogger
@@ -55,6 +146,42 @@ export class GMConstructor {
 		this.preferences = preferences;
 		this.problemLogger = problemLogger;
 	}
+
+	/**
+	 * Clean up the plugin instance upon disabling or reloading.
+	 */
+	destroy() {
+
+		ProjectProperties.__cleanup__();
+		ProjectPropertiesMenu.__cleanup__();
+		compileController.__cleanup__();
+		hamburgerOptions.__cleanup__();
+		ConfigTreeUi.__cleanup__();
+		ControlPanelTab.cleanup();
+
+		delete window.GMConstructor;
+		
+	}
+
+	/**
+	 * Set up the plugin for the given opened project.
+	 * 
+	 * @private
+	 * @param {GMEdit.PluginEventMap['projectOpen']} event
+	 */
+	onProjectOpen = ({ project }) => {
+
+	};
+
+	/**
+	 * Clean the plugin for the opened project.
+	 * 
+	 * @private
+	 * @param {GMEdit.PluginEventMap['projectClose']} event
+	 */
+	onProjectClose = ({ project }) => {
+
+	};
 
 	/**
 	 * Run a task on our current project.
@@ -190,10 +317,10 @@ export class GMConstructor {
 	#getBuildDir(project) {
 		
 		if (this.preferences.useGlobalBuildPath) {
-			return node.path.join(this.preferences.globalBuildPath, project.displayName);
+			return nodeModulesProvider.path.join(this.preferences.globalBuildPath, project.displayName);
 		}
 
-		return node.path.join(project.dir, 'build');
+		return nodeModulesProvider.path.join(project.dir, 'build');
 
 	}
 
@@ -276,107 +403,6 @@ export class GMConstructor {
 			buttons: ['Ok']
 		});
 
-	}
-
-	/**
-	 * Create an instance of the plugin.
-	 * 
-	 * @param {string} _plugin_name Name of the plugin - redundant, but saves typing it everywhere.
-	 * @param {string} _plugin_version Current version of the plugin
-	 * @param {import('node:path')} node_path 
-	 * @param {import('node:child_process')} node_child_process
-	 * @returns {Promise<Result<GMConstructor>>}
-	 */
-	static async create(_plugin_name, _plugin_version, node_path, node_child_process) {
-		
-		// Prevent Constructor loading when running on Rosetta, since it has a bunch of issues there.
-		if (rosetta_check(node_child_process.execSync)) {
-
-			const err = new BaseError(docString(`
-				${_plugin_name} does not work correctly on Rosetta - please consider using GMEdit's
-				native Arm64 build found at https://yellowafterlife.itch.io/gmedit
-			`));
-
-			console.error(err);
-
-			Electron_Dialog.showMessageBox({
-				title: 'GMEdit-Constructor cannot load on Rosetta!',
-				message: err.message,
-				buttons: ['Dismiss'],
-				type: 'error'
-			});
-
-			return Err(err);
-
-		}
-
-		node.__setup__(node_path, node_child_process);
-
-		const problemLogger = new ControlPanelProblemLogger();
-
-		plugin_name = _plugin_name;
-		plugin_version = _plugin_version;
-
-		igorPaths.__setup__();
-
-		// Setting up preferences //
-		const preferencesRes = await Preferences.create(problemLogger);
-
-		if (!preferencesRes.ok) {
-			return Err(new BaseError('Failed to init preferences', preferencesRes.err));
-		}
-
-		const preferences = preferencesRes.data;
-		ControlPanelTab.providePreferences(preferences);
-
-		ProjectProperties.__setup__(preferences, problemLogger);
-		ProjectPropertiesMenu.__setup__(preferences);
-		PreferencesMenu.__setup__();
-		hamburgerOptions.__setup__();
-		ConfigTreeUi.__setup__();
-
-		// Check for updates //
-		if (preferences.checkForUpdates) {
-			plugin_update_check().then(res => {
-					
-				if (!res.ok) {
-					return problemLogger.warn('Failed to check for plugin updates.', res.err);
-				}
-
-				if (!res.data.update_available) {
-					return;
-				}
-
-				// Bit silly to use an error message for this but it works :P
-				problemLogger.warn('An update is available for Constructor!',
-					new SolvableError('There is an update available.', docString(`
-						${plugin_name} ${res.data.version} is available on GitHub!
-						
-						${res.data.url}
-					`))
-				);
-
-			});
-		}
-
-		return Ok(new GMConstructor(preferences, problemLogger));
-
-	}
-
-	/**
-	 * Called on deregistering the plugin.
-	 */
-	cleanup() {
-
-		ProjectProperties.__cleanup__();
-		ProjectPropertiesMenu.__cleanup__();
-		compileController.__cleanup__();
-		hamburgerOptions.__cleanup__();
-		ConfigTreeUi.__cleanup__();
-		ControlPanelTab.cleanup();
-
-		delete window.GMConstructor;
-		
 	}
 
 	/**

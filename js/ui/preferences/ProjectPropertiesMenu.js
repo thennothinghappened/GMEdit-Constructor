@@ -2,7 +2,7 @@ import { use } from '../../utils/scope-extensions/use.js';
 import { GM_CHANNEL_TYPES, Preferences, ZEUS_RUNTIME_TYPES } from '../../preferences/Preferences.js';
 import { project_config_tree_flatten } from '../../utils/project.js';
 import { ProjectProperties } from '../../preferences/ProjectProperties.js';
-import { GMConstructor, plugin_name } from '../../GMConstructor.js';
+import { GMConstructor, PLUGIN_NAME } from '../../GMConstructor.js';
 import { Dropdown } from '../components/Dropdown.js';
 import { mapToOption, Some } from '../../utils/Option.js';
 import { GMRuntimeVersion } from '../../compiler/GMVersion.js';
@@ -319,7 +319,7 @@ export class ProjectPropertiesMenu {
 			this.group.remove();
 			target.appendChild(this.group);
 		} else {
-			this.group = UIPreferences.addGroup(target, plugin_name);
+			this.group = UIPreferences.addGroup(target, PLUGIN_NAME);
 			this.group.appendChild(this.instance.element);
 		}
 		

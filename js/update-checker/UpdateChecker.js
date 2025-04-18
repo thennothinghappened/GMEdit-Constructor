@@ -1,5 +1,5 @@
 import { SemVer } from './SemVer.js';
-import { plugin_version } from '../GMConstructor.js';
+import { PLUGIN_VERSION } from '../GMConstructor.js';
 import { BaseError } from '../utils/Err.js';
 import { Err, Ok } from '../utils/Result.js';
 
@@ -20,7 +20,7 @@ const internet_check_url = 'https://example.com/';
  */
 export async function plugin_update_check() {
 
-	const our_version_res = SemVer.parse(plugin_version);
+	const our_version_res = SemVer.parse(PLUGIN_VERSION);
 
 	if (!our_version_res.ok) {
 		return Err(new BaseError(

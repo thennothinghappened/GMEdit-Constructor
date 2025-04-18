@@ -4,28 +4,29 @@
  */
 (() => {
 
-	const plugin_name = 'GMEdit-Constructor';
-	const plugin_version = '0.21.0';
+	const PLUGIN_NAME = 'GMEdit-Constructor';
+	const PLUGIN_VERSION = '0.21.0';
 
-	const node_child_process = require('node:child_process');
-	const node_path = require('node:path');
+	/** @type {NodeModules} */
+	const nodeModules = {
+		path: require('node:path'),
+		child_process: require('node:child_process')
+	};
 
 	const load = (async () => {
 
 		if ('GMConstructor' in window && window.GMConstructor !== undefined) {
-			window.GMConstructor.cleanup();
+			window.GMConstructor.destroy();
 		}
 
 		const res = await import('./js/GMConstructor.js')
-			.then(({ GMConstructor }) => 
-				GMConstructor.create(plugin_name, plugin_version, node_path, node_child_process)
-			)
+			.then(({ GMConstructor }) => GMConstructor.initialize(PLUGIN_NAME, PLUGIN_VERSION, nodeModules))
 			.catch(err => /** @type {Result<import('js/GMConstructor.js').GMConstructor>} */ ({
 				ok: false,
 				err: err
 			}));
 
-		if (res.ok === false) {
+		if (!res.ok) {
 			
 			alert('Failed to launch Constructor, see the JavaScript console for details.');
 			console.error('Failed to launch Constructor!', res.err);
@@ -37,12 +38,12 @@
 
 	});
 
-	GMEdit.register(plugin_name, {
+	GMEdit.register(PLUGIN_NAME, {
 		init: async () => {
 			await load();
 		},
 		cleanup: () => {
-			window.GMConstructor?.cleanup();
+			window.GMConstructor?.destroy();
 		}
 	});
 

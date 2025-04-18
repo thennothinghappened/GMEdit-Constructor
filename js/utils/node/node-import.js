@@ -12,10 +12,9 @@ export let path;
 export let child_process;
 
 /**
- * @param {import('node:path')} node_path 
- * @param {import('node:child_process')} node_child_process
+ * @param {NodeModules} nodeModules 
  */
-export function __setup__(node_path, node_child_process) {
-	path = node_path;
-	child_process = node_child_process;
+export function inject(nodeModules) {
+	path = nodeModules.path;
+	child_process = nodeModules.child_process;
 }

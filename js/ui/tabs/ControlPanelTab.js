@@ -2,7 +2,7 @@
 import { project_current_get } from '../../utils/project.js';
 import { ConstructorTab, ConstructorTabFileKind } from './ConstructorTab.js';
 import * as ui from '../ui-wrappers.js';
-import { GMConstructor, plugin_name, plugin_version } from '../../GMConstructor.js';
+import { GMConstructor, PLUGIN_NAME, PLUGIN_VERSION } from '../../GMConstructor.js';
 import { Preferences } from '../../preferences/Preferences.js';
 import { ProjectPropertiesMenu } from '../preferences/ProjectPropertiesMenu.js';
 import { ProjectProperties } from '../../preferences/ProjectProperties.js';
@@ -97,7 +97,7 @@ export class ControlPanelTab extends ConstructorTab {
 		this.element.classList.add('gm-constructor-control-panel', 'popout-window');
 
 		this.element.appendChild(ui.h1(ControlPanelTab.tabName));
-		this.element.appendChild(ui.p(`Version: ${plugin_version}`));
+		this.element.appendChild(ui.p(`Version: ${PLUGIN_VERSION}`));
 
 		this.problems = ui.group(this.element, 'Problems', [
 			ui.text_button('Dismiss All', ControlPanelTab.dismissAll)
@@ -361,7 +361,7 @@ export class ControlPanelTab extends ConstructorTab {
 		
 		this.preferencesMenu = new PreferencesMenu(preferences);
 
-		this.preferencesGroupElement.appendChild(ui.em(`Configure the default behaviour of ${plugin_name}.`));
+		this.preferencesGroupElement.appendChild(ui.em(`Configure the default behaviour of ${PLUGIN_NAME}.`));
 		this.preferencesGroupElement.appendChild(this.preferencesMenu.element);
 
 	}

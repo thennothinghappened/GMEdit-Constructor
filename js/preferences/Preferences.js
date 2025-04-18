@@ -7,7 +7,7 @@ import { def_global_build_path, def_runtime_paths, def_user_paths, igor_path_seg
 import { readFileSync, readdir } from '../utils/node/file.js';
 import { BaseError, SolvableError } from '../utils/Err.js';
 import { deep_assign } from '../utils/object.js';
-import { plugin_name } from '../GMConstructor.js';
+import { PLUGIN_NAME } from '../GMConstructor.js';
 import * as node from '../utils/node/node-import.js';
 import { GMRuntimeVersion } from '../compiler/GMVersion.js';
 import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
@@ -643,7 +643,7 @@ export class Preferences {
 	static async create(problemLogger) {
 
 		this.problemLogger = problemLogger;
-		this.save_path = node.path.join(Electron_App.getPath('userData'), 'GMEdit', 'config', `${plugin_name}.json`);
+		this.save_path = node.path.join(Electron_App.getPath('userData'), 'GMEdit', 'config', `${PLUGIN_NAME}.json`);
 
 		/** @type {Partial<TPreferences.Data>|undefined} */
 		let loaded_prefs = undefined;

@@ -2,7 +2,7 @@
  * Controller for the Preferences configuration on the menu.
  */
 
-import { plugin_name, plugin_version } from '../../GMConstructor.js';
+import { PLUGIN_NAME, PLUGIN_VERSION } from '../../GMConstructor.js';
 import * as ui from '../../ui/ui-wrappers.js';
 import { GM_CHANNEL_TYPES, Preferences, ZEUS_RUNTIME_TYPES } from '../../preferences/Preferences.js';
 import { use } from '../../utils/scope-extensions/use.js';
@@ -336,7 +336,7 @@ export class PreferencesMenu {
 	 */
 	static __setup__() {
 
-		pluginSettingsQueryString = `.plugin-settings[for^="${plugin_name}"]`;
+		pluginSettingsQueryString = `.plugin-settings[for^="${PLUGIN_NAME}"]`;
 
 		if (UIPreferences.menuMain != undefined) {
 			onPreferencesBuilt({ target: UIPreferences.menuMain });
@@ -368,7 +368,7 @@ function onPreferencesBuilt({ target }) {
 		singletonInstance ??= new PreferencesMenu(Preferences);
 
 		group.appendChild(singletonInstance.element);
-		UIPreferences.addText(group, `Version: ${plugin_version}`);
+		UIPreferences.addText(group, `Version: ${PLUGIN_VERSION}`);
 
 	}
 
