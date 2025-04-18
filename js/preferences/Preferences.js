@@ -590,10 +590,15 @@ export class Preferences {
 	}
 
 	/**
-	 * @type {TPreferences.Data} 
+	 * Underlying preferences structure.
+	 * 
 	 * @private
-	 */
-	static prefs = Object.create(PREFS_DEFAULT);
+	 * @type {TPreferences.Data} 
+	*/
+	// prefs_default has to be cloned (instead of using Object.create),
+	// otherwise properties inside other objects won't be saved into the config file,
+	// as JSON.stringify doesn't stringify properties in object prototypes
+	static prefs = structuredClone(PREFS_DEFAULT);;
 
 	/**
 	 * Path preferences are saved to.
@@ -646,67 +651,38 @@ export class Preferences {
 		this.savePath = node.path.join(Electron_App.getPath('userData'), 'GMEdit', 'config', `${PLUGIN_NAME}.json`);
 
 		/** @type {Partial<TPreferences.Data>|undefined} */
-		let loaded_prefs = undefined;
+		let loadedPrefs = undefined;
 
 		const prefsLoadRes = await readFile(this.savePath);
 
 		if (prefsLoadRes.ok) {
 			
 			try {
-				loaded_prefs = JSON.parse(prefsLoadRes.data.toString());
-			} catch (err_cause) {
-
+				loadedPrefs = JSON.parse(prefsLoadRes.data.toString());
+			} catch (err) {
 				this.problemLogger.error('Failed to load preferences', new SolvableError(
 					'JSON parse error while reading the preferences file!', 
 					docString(`
 						Please check your preferences file (${this.savePath}) for syntax errors as
 						you must have edited it manually - see the stacktrace below.
 					`),
-					err_cause
+					err
 				));
-
 			}
 
 		}
 
-		if (loaded_prefs?.runtime_opts?.type !== undefined) {
-			if (!GM_CHANNEL_TYPES.includes(loaded_prefs.runtime_opts.type)) {
+		if (loadedPrefs !== undefined) {
 
-				this.problemLogger.warn(`Invalid preferred runtime type`, new BaseError(docString(`
-					'${loaded_prefs.runtime_opts.type}' is invalid, changed to
-					${this.prefs.runtime_opts.type}
-				`)));
-				
-				loaded_prefs.runtime_opts.type = this.prefs.runtime_opts.type;
-
-			}
-		}
-
-		if (loaded_prefs?.runtime_opts?.type_opts !== undefined) {
-
-			const type_opts = loaded_prefs?.runtime_opts?.type_opts;
-
-			for (const type of GM_CHANNEL_TYPES) {
-				if (!(type in type_opts)) {
-
-					this.problemLogger.warn('Missing runtime type preference data', new BaseError(
-						`Missing runtime type preference data for type '${type}', replacing with default.`
-					));
-
-					loaded_prefs.runtime_opts.type_opts[type] = this.prefs.runtime_opts.type_opts[type];
-
+			if (loadedPrefs.runtime_opts?.type != undefined) {
+				if (!GM_CHANNEL_TYPES.includes(loadedPrefs.runtime_opts.type)) {
+					// Fix invalid channel choice.
+					loadedPrefs.runtime_opts.type = this.prefs.runtime_opts.type;
 				}
 			}
 
-		}
-		
-		// prefs_default has to be cloned (instead of using Object.create),
-		// otherwise properties inside other objects won't be saved into the config file,
-		// as JSON.stringify doesn't stringify properties in object prototypes
-		this.prefs = structuredClone(PREFS_DEFAULT);
+			deep_assign(this.prefs, loadedPrefs);
 
-		if (loaded_prefs !== undefined) {
-			deep_assign(this.prefs, loaded_prefs);
 		}
 
 		/** @type {Promise<any>[]} */
