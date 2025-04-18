@@ -253,6 +253,39 @@ export class Preferences {
 	}
 
 	/**
+	 * Get a local properties store for the given project.
+	 * 
+	 * @param {GMEdit.Project} project 
+	 * @returns {TPreferences.LocalProjectPropertiesStore}
+	 */
+	getLocalProjectPropertiesStore(project) {
+
+		const preferences = this;
+
+		return {
+
+			/**
+			 * @type {TPreferences.LocalProjectPropertiesStore['loadProjectLocalProps']}
+			 */
+			loadProjectLocalProps() {
+				// We store the data for convenience, but its ownership is managed by the
+				// `ProjectProperties` instance, so we clone it to avoid any possible pass-by-ref trouble.
+				return structuredClone(preferences.prefs.projectLocalData[project.path] ?? {});
+			},
+
+			/**
+			 * @type {TPreferences.LocalProjectPropertiesStore['saveProjectLocalProps']}
+			 */
+			saveProjectLocalProps(localProps) {
+				preferences.prefs.projectLocalData[project.path] = localProps;
+				preferences.save();
+			}
+
+		};
+
+	}
+
+	/**
 	 * Whether to reuse a compiler tab.
 	 * @returns {Boolean}
 	 */
@@ -722,29 +755,6 @@ export class Preferences {
 
 		return Ok(nonEmptyUsersList);
 
-	}
-
-	/**
-	 * Load the local properties of the given project.
-	 * 
-	 * @param {GMEdit.Project} project
-	 * @returns {Partial<TPreferences.Project.LocalData>}
-	 */
-	loadProjectLocalProps(project) {
-		// We store the data for convenience, but its ownership is managed by the
-		// `ProjectProperties` instance, so we clone it to avoid any possible pass-by-ref trouble.
-		return structuredClone(this.prefs.projectLocalData[project.path] ?? {});
-	}
-
-	/**
-	 * Save the local properties of the given project to disk.
-	 * 
-	 * @param {GMEdit.Project} project
-	 * @param {Partial<TPreferences.Project.LocalData>} local
-	 */
-	saveProjectLocalProps(project, local) {
-		this.prefs.projectLocalData[project.path] = local;
-		this.save();
 	}
 
 }

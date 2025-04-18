@@ -76,20 +76,22 @@ export class ProjectProperties {
 	]);
 
 	/**
-	 * @private
+	 * 
 	 * @param {GMEdit.Project} project The project this properties instance is for.
 	 * @param {SupportedProjectFormat} projectFormat The format of this project.
 	 * @param {Preferences} preferences The global preferences object to reference.
+	 * @param {TPreferences.LocalProjectPropertiesStore} localProjectPropertiesStore
 	 * @param {ProblemLogger} problemLogger Method of logging problems.
 	 */
-	constructor(project, projectFormat, preferences, problemLogger) {
+	constructor(project, projectFormat, preferences, localProjectPropertiesStore, problemLogger) {
 
 		this.problemLogger = problemLogger;
 		this.project = project;
 		this.projectFormat = projectFormat;
 		this.preferences = preferences;
+		this.localProjectPropertiesStore = localProjectPropertiesStore;
 		this.portable = project.properties['GMEdit-Constructor'] ?? {};
-		this.local = this.preferences.loadProjectLocalProps(this.project);
+		this.local = this.localProjectPropertiesStore.loadProjectLocalProps();
 
 		this.events.on('setRuntimeChannel', this.onChangeRuntimeChannel);
 		
@@ -408,7 +410,7 @@ export class ProjectProperties {
 	 * @private
 	 */
 	saveLocalProps() {
-		this.preferences.saveProjectLocalProps(this.project, this.local);
+		this.localProjectPropertiesStore.saveProjectLocalProps(this.local);
 	}
 
 	/**
@@ -502,6 +504,7 @@ export class ProjectProperties {
 			project,
 			projectFormat.data,
 			this.preferences,
+			this.preferences.getLocalProjectPropertiesStore(project),
 			this.problemLogger
 		);
 

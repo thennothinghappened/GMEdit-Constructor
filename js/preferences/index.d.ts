@@ -6,6 +6,25 @@ export declare global {
 
 	namespace TPreferences {
 
+		/**
+		 * A method of saving and loading local project properties for a specific project.
+		 */
+		interface LocalProjectPropertiesStore {
+
+			/**
+			 * Load the local properties of the given project.
+			 */
+			loadProjectLocalProps(): Partial<TPreferences.Project.LocalData>;
+
+			/**
+			 * Save the local properties of the given project to disk.
+			 * 
+			 * @param localProps
+			 */
+			saveProjectLocalProps(localProps: Partial<TPreferences.Project.LocalData>);
+
+		};
+
 		type Data = {
 
 			/** Globally selected runtime options that may be overriden by projects. */
