@@ -33,7 +33,7 @@ export class ProjectPropertiesMenu {
 
 	/**
 	 * The preferences provider.
-	 * @type {typeof Preferences}
+	 * @type {Preferences}
 	 */
 	preferences;
 
@@ -86,7 +86,7 @@ export class ProjectPropertiesMenu {
 
 	/**
 	 * @param {ProjectProperties} properties
-	 * @param {typeof Preferences} preferences 
+	 * @param {Preferences} preferences 
 	 */
 	constructor(properties, preferences) {
 
@@ -271,7 +271,7 @@ export class ProjectPropertiesMenu {
 
 	/**
 	 * @private
-	 * @type {typeof Preferences}
+	 * @type {Preferences}
 	 */
 	static preferences;
 
@@ -333,7 +333,7 @@ export class ProjectPropertiesMenu {
 
 	/**
 	 * 
-	 * @param {typeof Preferences} preferences 
+	 * @param {Preferences} preferences 
 	 */
 	static __setup__(preferences) {
 

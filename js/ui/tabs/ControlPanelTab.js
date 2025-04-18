@@ -59,7 +59,7 @@ export class ControlPanelTab extends ConstructorTab {
 	 * preferences UI.
 	 * 
 	 * @private
-	 * @type {typeof Preferences|undefined}
+	 * @type {Preferences|undefined}
 	 */
 	static preferences = undefined;
 
@@ -134,7 +134,7 @@ export class ControlPanelTab extends ConstructorTab {
 	 * reportable through the control panel - thus the control panel has a *soft* dependency on the
 	 * preferences, and only shows the relevant UI once it becomes available.
 	 * 
-	 * @param {typeof Preferences} preferences 
+	 * @param {Preferences} preferences 
 	 */
 	static providePreferences(preferences) {
 
@@ -344,7 +344,7 @@ export class ControlPanelTab extends ConstructorTab {
 
 	/**
 	 * @private
-	 * @param {typeof Preferences} preferences 
+	 * @param {Preferences} preferences 
 	 */
 	setupPreferencesMenu(preferences) {
 
@@ -368,7 +368,7 @@ export class ControlPanelTab extends ConstructorTab {
 
 	/**
 	 * @private
-	 * @param {typeof Preferences} preferences 
+	 * @param {Preferences} preferences 
 	 * @param {ProjectProperties} projectProperties 
 	 */
 	setupProjectPropertiesMenu(preferences, projectProperties) {

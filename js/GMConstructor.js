@@ -36,7 +36,7 @@ export class GMConstructor {
 
 	/**
 	 * @private
-	 * @type {typeof Preferences}
+	 * @type {Preferences}
 	 */
 	preferences;
 
@@ -91,18 +91,22 @@ export class GMConstructor {
 		igorPaths.__setup__();
 
 		// Setting up preferences //
-		const preferencesRes = await Preferences.create(problemLogger);
+		const preferencesDataPath = nodeModulesProvider.path.join(Electron_App.getPath('userData'), 'GMEdit', 'config', `${PLUGIN_NAME}.json`);
 
-		if (!preferencesRes.ok) {
-			return Err(new BaseError('Failed to init preferences', preferencesRes.err));
+		const preferences = new Preferences(problemLogger);
+		const preferencesLoadResult = await preferences.load(preferencesDataPath);
+
+		if (!preferencesLoadResult.ok) {
+			problemLogger.warn('Failed to load your preferences!', new BaseError(docString(`
+				An error occurred in loading your preferences. The default values are being used.
+			`), preferencesLoadResult.err))
 		}
 
-		const preferences = preferencesRes.data;
 		ControlPanelTab.providePreferences(preferences);
 
 		ProjectProperties.__setup__(preferences, problemLogger);
 		ProjectPropertiesMenu.__setup__(preferences);
-		PreferencesMenu.__setup__();
+		PreferencesMenu.__setup__(preferences);
 		hamburgerOptions.__setup__();
 		ConfigTreeUi.__setup__();
 
@@ -139,7 +143,7 @@ export class GMConstructor {
 	 * asynchronous and fallible options during the {@link initialize} call.
 	 * 
 	 * @private
-	 * @param {typeof Preferences} preferences 
+	 * @param {Preferences} preferences 
 	 * @param {ProblemLogger} problemLogger
 	 */
 	constructor(preferences, problemLogger) {

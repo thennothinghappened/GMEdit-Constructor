@@ -54,21 +54,7 @@ const PREFS_DEFAULT = {
 	global_build_path: def_global_build_path
 };
 
-/**
- * List of runtimes for each type.
- * Populated after loading the list.
- * 
- * @type {{ [key in GMChannelType]?: NonEmptyArray<Zeus.RuntimeInfo> }}
- */
-const runtimesInChannels = {};
-
-/**
- * List of users for each type.
- * Populated after loading the list.
- * 
- * @type {{ [key in GMChannelType]?: NonEmptyArray<UserInfo> }}
- */
-const usersInChannels = {};
+const MAX_LOAD_TRIES = 3;
 
 /**
  * Global preferences for Constructor's behaviour. Much of this behaviour can be over-ridden on a
@@ -80,7 +66,7 @@ export class Preferences {
 	 * @private
 	 * @type {EventEmitterImpl<TPreferences.PreferencesEventMap>}
 	 */
-	static eventEmitter = new EventEmitterImpl([
+	eventEmitter = new EventEmitterImpl([
 		'setDefaultRuntimeChannel',
 		'runtimeListChanged',
 		'userListChanged',
@@ -95,19 +81,176 @@ export class Preferences {
 	 * Events for changing preferences!
 	 * @returns {EventEmitter<TPreferences.PreferencesEventMap>}
 	 */
-	static get events() {
+	get events() {
 		return this.eventEmitter;
+	}
+
+	/**
+	 * Underlying preferences structure.
+	 * 
+	 * @private
+	 * @type {TPreferences.Data} 
+	*/
+	prefs = structuredClone(PREFS_DEFAULT);
+
+	/**
+	 * Path preferences are saved to.
+	 * 
+	 * @type {string|undefined}
+	 * @private
+	 */
+	dataPath = undefined;
+
+	/**
+	 * @private
+	 */
+	loadTries = 0;
+
+	/**
+	 * Logger for displaying problems to the user.
+	 * 
+	 * @private
+	 * @type {ProblemLogger}
+	 */
+	problemLogger;
+
+	/**
+	 * List of runtimes for each type.
+	 * Populated after loading the list.
+	 * 
+	 * @private
+	 * @type {{ [key in GMChannelType]?: NonEmptyArray<Zeus.RuntimeInfo> }}
+	 */
+	runtimesInChannels = {};
+
+	/**
+	 * List of users for each type.
+	 * Populated after loading the list.
+	 * 
+	 * @private
+	 * @type {{ [key in GMChannelType]?: NonEmptyArray<UserInfo> }}
+	 */
+	usersInChannels = {};
+
+	/**
+	 * @param {ProblemLogger} problemLogger
+	 */
+	constructor(problemLogger) {
+		this.problemLogger = problemLogger;
+	}
+
+	/**
+	 * Whether the preferences cannot be modified.
+	 */
+	get readonly() {
+		return (this.dataPath === undefined);
+	}
+
+	/**
+	 * Save preferences back to the file.
+	 * @private
+	 */
+	save() {
+		if (this.dataPath !== undefined) {
+			Electron_FS.writeFileSync(this.dataPath, JSON.stringify(this.prefs));
+		}
+	}
+
+	/**
+	 * Load the preferences, runtimes, and user information from the provided path.
+	 * 
+	 * @param {string} dataPath Path to where the preferences data is stored.
+	 * @returns {Promise<Result<void>>}
+	 */
+	async load(dataPath) {
+
+		this.loadTries ++;
+
+		if (this.dataPath !== undefined) {
+			// Reset the existing state.
+			this.prefs = structuredClone(PREFS_DEFAULT);
+			this.dataPath = undefined;
+			this.loadTries = 0;
+		}
+
+		if (this.loadTries > MAX_LOAD_TRIES) {
+			return Err(new BaseError(docString(`
+				Exceeded the maximum number of load attempts. The preferences file (${dataPath})
+				failed to load!
+			`)));
+		}
+		
+		const prefsFile = await readFile(dataPath);
+
+		if (!prefsFile.ok) {
+			try {
+				Electron_FS.writeFileSync(dataPath, JSON.stringify(this.prefs));
+				return this.load(dataPath);
+			} catch (err) {
+				return Err(new BaseError(docString(`
+					An unexpected error occurred in writing the default preferences file to disk.
+				`), err));
+			}
+		}
+
+		/** @type {Partial<TPreferences.Data>} */
+		let loadedPrefs;
+
+		try {
+			loadedPrefs = JSON.parse(prefsFile.data.toString());
+		} catch (err) {
+			return Err(new SolvableError(
+				'JSON parse error while reading the preferences file!', 
+				docString(`
+					Please check your preferences file (${dataPath}) for syntax errors as
+					you must have edited it manually - see the stacktrace below.
+				`),
+				err
+			));
+		}
+
+		this.dataPath = dataPath;
+
+		if (loadedPrefs.runtime_opts?.type != undefined) {
+			if (!GM_CHANNEL_TYPES.includes(loadedPrefs.runtime_opts.type)) {
+				// Fix invalid channel choice.
+				loadedPrefs.runtime_opts.type = this.prefs.runtime_opts.type;
+			}
+		}
+
+		deep_assign(this.prefs, loadedPrefs);
+
+		const loadRequests = GM_CHANNEL_TYPES.map(async channel => {
+
+			const runtimesRequest = this.loadRuntimeList(channel);
+			const usersRequest = this.loadUserList(channel);
+
+			const [runtimesResult, usersResult] = await Promise.all([runtimesRequest, usersRequest]);
+
+			if (runtimesResult.ok) {
+				this.runtimesInChannels[channel] = runtimesResult.data;
+			}
+			
+			if (usersResult.ok) {
+				this.usersInChannels[channel] = usersResult.data;
+			}
+
+		});
+
+		await Promise.all(loadRequests);
+		return { ok: true };
+
 	}
 
 	/**
 	 * Whether to reuse a compiler tab.
 	 * @returns {Boolean}
 	 */
-	static get reuseOutputTab() {
+	get reuseOutputTab() {
 		return this.prefs.reuse_compiler_tab;
 	}
 
-	static set reuseOutputTab(value) {
+	set reuseOutputTab(value) {
 
 		this.prefs.reuse_compiler_tab = value;
 		this.save();
@@ -120,11 +263,11 @@ export class Preferences {
 	 * Whether to save all files on running a task.
 	 * @returns {Boolean}
 	 */
-	static get saveOnRun() {
+	get saveOnRun() {
 		return this.prefs.save_on_run_task;
 	}
 
-	static set saveOnRun(value) {
+	set saveOnRun(value) {
 		
 		this.prefs.save_on_run_task = value;
 		this.save();
@@ -137,11 +280,11 @@ export class Preferences {
 	 * Whether we should automatically check for updates on startup.
 	 * @returns {Boolean}
 	 */
-	static get checkForUpdates() {
+	get checkForUpdates() {
 		return this.prefs.check_for_updates;
 	}
 
-	static set checkForUpdates(value) {
+	set checkForUpdates(value) {
 		
 		this.prefs.check_for_updates = value;
 		this.save();
@@ -153,11 +296,11 @@ export class Preferences {
 	/**
 	 * Whether to use the global build directory.
 	 */
-	static get useGlobalBuildPath() {
+	get useGlobalBuildPath() {
 		return this.prefs.use_global_build;
 	}
 
-	static set useGlobalBuildPath(value) {
+	set useGlobalBuildPath(value) {
 		
 		this.prefs.use_global_build = value;
 		this.save();
@@ -170,11 +313,11 @@ export class Preferences {
 	 * The global build directory path.
 	 * @returns {String}
 	 */
-	static get globalBuildPath() {
+	get globalBuildPath() {
 		return this.prefs.global_build_path;
 	}
 
-	static set globalBuildPath(value) {
+	set globalBuildPath(value) {
 		
 		this.prefs.global_build_path = value;
 		this.save();
@@ -187,11 +330,11 @@ export class Preferences {
 	 * The desired runner type.
 	 * @returns {Zeus.RuntimeType}
 	 */
-	static get runtimeBuildType() {
+	get runtimeBuildType() {
 		return this.prefs.runtime_opts.runner;
 	}
 
-	static set runtimeBuildType(runner) {
+	set runtimeBuildType(runner) {
 		this.prefs.runtime_opts.runner = runner;
 		this.save();
 	}
@@ -199,11 +342,11 @@ export class Preferences {
 	/**
 	 * The default runtime type used globally.
 	 */
-	static get defaultRuntimeChannel() {
+	get defaultRuntimeChannel() {
 		return this.prefs.runtime_opts.type;
 	}
 
-	static set defaultRuntimeChannel(type) {
+	set defaultRuntimeChannel(type) {
 		
 		this.prefs.runtime_opts.type = type;
 		this.save();
@@ -220,7 +363,7 @@ export class Preferences {
 	 * @param {GMChannelType} channel
 	 * @returns {Zeus.RuntimeInfo|undefined}
 	 */
-	static getPreferredRuntimeVersion(channel) {
+	getPreferredRuntimeVersion(channel) {
 
 		const version = this.prefs.runtime_opts.type_opts[channel].choice;
 
@@ -238,7 +381,7 @@ export class Preferences {
 	 * @param {GMChannelType} type 
 	 * @param {GMRuntimeVersion|undefined} version The runtime version to use, or `undefined` to clear the preference.
 	 */
-	static setPreferredRuntimeVersion(type, version) {
+	setPreferredRuntimeVersion(type, version) {
 		this.prefs.runtime_opts.type_opts[type].choice = version?.toString();
 		this.save();
 	}
@@ -253,7 +396,7 @@ export class Preferences {
 	 * @param {GMRuntimeVersion|string} versionOrVersionString The version.
 	 * @returns {Result<Zeus.RuntimeInfo>}
 	 */
-	static getRuntimeInfo(channel, versionOrVersionString) {
+	getRuntimeInfo(channel, versionOrVersionString) {
 
 		const runtimes = this.getInstalledRuntimeVersions(channel);
 
@@ -295,10 +438,10 @@ export class Preferences {
 	 * @param {GMChannelType} channel
 	 * @returns {UserInfo|undefined}
 	 */
-	static getUser(channel) {
+	getUser(channel) {
 
 		const userName = this.prefs.runtime_opts.type_opts[channel].user;
-		const usersInChannel = usersInChannels[channel];
+		const usersInChannel = this.usersInChannels[channel];
 
 		if (userName == undefined || usersInChannel === undefined) {
 			return undefined;
@@ -314,7 +457,7 @@ export class Preferences {
 	 * @param {GMChannelType} type 
 	 * @param {string|undefined} user 
 	 */
-	static setUser(type, user) {
+	setUser(type, user) {
 		this.prefs.runtime_opts.type_opts[type].user = user ?? undefined;
 		this.save();
 	}
@@ -324,7 +467,7 @@ export class Preferences {
 	 * 
 	 *  @param {GMChannelType} type 
 	 */
-	static getRuntimeSearchPath(type) {
+	getRuntimeSearchPath(type) {
 		return this.prefs.runtime_opts.type_opts[type].search_path;
 	}
 
@@ -333,7 +476,7 @@ export class Preferences {
 	 * 
 	 *  @param {GMChannelType} type 
 	 */
-	static getUserSearchPath(type) {
+	getUserSearchPath(type) {
 		return this.prefs.runtime_opts.type_opts[type].users_path;
 	}
 
@@ -343,8 +486,8 @@ export class Preferences {
 	 * @param {GMChannelType} channel
 	 * @returns {NonEmptyArray<Zeus.RuntimeInfo>|undefined}
 	 */
-	static getInstalledRuntimeVersions(channel) {
-		return runtimesInChannels[channel];
+	getInstalledRuntimeVersions(channel) {
+		return this.runtimesInChannels[channel];
 	};
 
 	/**
@@ -353,8 +496,8 @@ export class Preferences {
 	 * @param {GMChannelType} type
 	 * @returns {NonEmptyArray<UserInfo>|undefined}
 	 */
-	static getUsers(type) {
-		return usersInChannels[type] ?? undefined;
+	getUsers(type) {
+		return this.usersInChannels[type] ?? undefined;
 	};
 
 	/**
@@ -363,12 +506,12 @@ export class Preferences {
 	 * @param {GMChannelType} channel 
 	 * @param {string} search_path 
 	 */
-	static async setRuntimeSearchPath(channel, search_path) {
+	async setRuntimeSearchPath(channel, search_path) {
 
 		this.prefs.runtime_opts.type_opts[channel].search_path = search_path;
 		this.save();
 
-		runtimesInChannels[channel] = undefined;
+		this.runtimesInChannels[channel] = undefined;
 		const res = await this.loadRuntimeList(channel);
 
 		if (!res.ok) {
@@ -389,7 +532,7 @@ export class Preferences {
 		}
 
 		const runtimesList = res.data;
-		runtimesInChannels[channel] = runtimesList;
+		this.runtimesInChannels[channel] = runtimesList;
 
 		this.eventEmitter.emit('runtimeListChanged', {
 			channel,
@@ -407,12 +550,12 @@ export class Preferences {
 	 * @param {GMChannelType} channel 
 	 * @param {string} users_path 
 	 */
-	static async setUserSearchPath(channel, users_path) {
+	async setUserSearchPath(channel, users_path) {
 
 		this.prefs.runtime_opts.type_opts[channel].users_path = users_path;
 		this.save();
 
-		usersInChannels[channel] = undefined;
+		this.usersInChannels[channel] = undefined;
 
 		const userListRes = await this.loadUserList(channel);
 
@@ -436,7 +579,7 @@ export class Preferences {
 		const users = userListRes.data;
 		const defaultUser = users[0];
 
-		usersInChannels[channel] = users;
+		this.usersInChannels[channel] = users;
 		this.setUser(channel, defaultUser.name);
 
 		this.eventEmitter.emit('userListChanged', {
@@ -452,18 +595,18 @@ export class Preferences {
 	 * @private
 	 * @param {GMChannelType} type 
 	 */
-	static getRuntimeOptions(type) {
+	getRuntimeOptions(type) {
 		return this.prefs.runtime_opts.type_opts[type];
 	}
 
 	/**
 	 * Load the list of runtimes for the provided search path for a type.
 	 * 
-	 * @param {GMChannelType} type
+	 * @param {GMChannelType} channel
 	 * @returns {Promise<Result<NonEmptyArray<Zeus.RuntimeInfo>>>}
 	 */
-	static loadRuntimeList(type) {
-		return this.loadRuntimeListFrom(this.getRuntimeOptions(type).search_path);
+	loadRuntimeList(channel) {
+		return this.loadRuntimeListFrom(this.getRuntimeOptions(channel).search_path);
 	}
 
 	/**
@@ -472,7 +615,7 @@ export class Preferences {
 	 * @param {GMChannelType} type
 	 * @returns {Promise<Result<NonEmptyArray<UserInfo>>>}
 	 */
-	static loadUserList(type) {
+	loadUserList(type) {
 		return this.loadUserListFrom(this.getRuntimeOptions(type).users_path);
 	}
 
@@ -482,7 +625,7 @@ export class Preferences {
 	 * @param {String} search_path 
 	 * @returns {Promise<Result<NonEmptyArray<Zeus.RuntimeInfo>>>}
 	 */
-	static async loadRuntimeListFrom(search_path) {
+	async loadRuntimeListFrom(search_path) {
 
 		const runtimeVersionListRes = await readdir(search_path);
 
@@ -549,7 +692,7 @@ export class Preferences {
 	 * @param {String} users_path 
 	 * @returns {Promise<Result<NonEmptyArray<UserInfo>>>}
 	 */
-	static async loadUserListFrom(users_path) {
+	async loadUserListFrom(users_path) {
 
 		const userNameListRes = await readdir(users_path);
 		
@@ -582,47 +725,12 @@ export class Preferences {
 	}
 
 	/**
-	 * Save preferences back to the file.
-	 * @private
-	 */
-	static save() {
-		return Electron_FS.writeFileSync(this.savePath, JSON.stringify(this.prefs));
-	}
-
-	/**
-	 * Underlying preferences structure.
-	 * 
-	 * @private
-	 * @type {TPreferences.Data} 
-	*/
-	// prefs_default has to be cloned (instead of using Object.create),
-	// otherwise properties inside other objects won't be saved into the config file,
-	// as JSON.stringify doesn't stringify properties in object prototypes
-	static prefs = structuredClone(PREFS_DEFAULT);;
-
-	/**
-	 * Path preferences are saved to.
-	 * 
-	 * @type {string}
-	 * @private
-	 */
-	static savePath;
-
-	/**
-	 * Logger for displaying problems to the user.
-	 * 
-	 * @private
-	 * @type {ProblemLogger}
-	 */
-	static problemLogger;
-
-	/**
 	 * Load the local properties of the given project.
 	 * 
 	 * @param {GMEdit.Project} project
 	 * @returns {Partial<TPreferences.Project.LocalData>}
 	 */
-	static loadProjectLocalProps(project) {
+	loadProjectLocalProps(project) {
 		// We store the data for convenience, but its ownership is managed by the
 		// `ProjectProperties` instance, so we clone it to avoid any possible pass-by-ref trouble.
 		return structuredClone(this.prefs.projectLocalData[project.path] ?? {});
@@ -634,87 +742,9 @@ export class Preferences {
 	 * @param {GMEdit.Project} project
 	 * @param {Partial<TPreferences.Project.LocalData>} local
 	 */
-	static saveProjectLocalProps(project, local) {
+	saveProjectLocalProps(project, local) {
 		this.prefs.projectLocalData[project.path] = local;
 		this.save();
-	}
-
-	/**
-	 * Init a new instance of Preferences asynchronously (requires loading file.)
-	 * 
-	 * @param {ProblemLogger} problemLogger
-	 * @returns {Promise<Result<typeof Preferences>>}
-	 */
-	static async create(problemLogger) {
-
-		this.problemLogger = problemLogger;
-		this.savePath = node.path.join(Electron_App.getPath('userData'), 'GMEdit', 'config', `${PLUGIN_NAME}.json`);
-
-		/** @type {Partial<TPreferences.Data>|undefined} */
-		let loadedPrefs = undefined;
-
-		const prefsLoadRes = await readFile(this.savePath);
-
-		if (prefsLoadRes.ok) {
-			
-			try {
-				loadedPrefs = JSON.parse(prefsLoadRes.data.toString());
-			} catch (err) {
-				this.problemLogger.error('Failed to load preferences', new SolvableError(
-					'JSON parse error while reading the preferences file!', 
-					docString(`
-						Please check your preferences file (${this.savePath}) for syntax errors as
-						you must have edited it manually - see the stacktrace below.
-					`),
-					err
-				));
-			}
-
-		}
-
-		if (loadedPrefs !== undefined) {
-
-			if (loadedPrefs.runtime_opts?.type != undefined) {
-				if (!GM_CHANNEL_TYPES.includes(loadedPrefs.runtime_opts.type)) {
-					// Fix invalid channel choice.
-					loadedPrefs.runtime_opts.type = this.prefs.runtime_opts.type;
-				}
-			}
-
-			deep_assign(this.prefs, loadedPrefs);
-
-		}
-
-		const loadRequests = GM_CHANNEL_TYPES.map(async channel => {
-
-			const runtimesRequest = this.loadRuntimeList(channel);
-			const usersRequest = this.loadUserList(channel);
-
-			const [runtimesResult, usersResult] = await Promise.all([runtimesRequest, usersRequest]);
-
-			if (runtimesResult.ok) {
-				// TODO: pass onto constructor instead when Preferences is not a singleton.
-				runtimesInChannels[channel] = runtimesResult.data;
-			}
-			
-			if (usersResult.ok) {
-				// TODO: pass onto constructor instead when Preferences is not a singleton.
-				usersInChannels[channel] = usersResult.data;
-			}
-
-			return {
-				channel,
-				runtimes: runtimesResult.ok ? runtimesResult.data : undefined,
-				users: usersResult.ok ? usersResult.data : undefined
-			};
-
-		});
-
-		// TODO: pass onto constructor when Preferences is not a singleton.
-		const channelDataList = await Promise.all(loadRequests);
-
-		return Ok(this);
-
 	}
 
 }

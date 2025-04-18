@@ -32,7 +32,7 @@ export class PreferencesMenu {
 
 	/**
 	 * @private
-	 * @type {typeof Preferences}
+	 * @type {Preferences}
 	 */
 	preferences;
 
@@ -49,10 +49,8 @@ export class PreferencesMenu {
 		LTS: {},
 	};
 
-	// TODO: refactor Preferences not to be a singleton for testability. this is why we're passing
-	// it explicitly here.
 	/**
-	 * @param {typeof Preferences} preferences The preferences instance to bind to.
+	 * @param {Preferences} preferences The preferences instance to bind to.
 	 */
 	constructor(preferences) {
 
@@ -334,17 +332,25 @@ export class PreferencesMenu {
 	}
 
 	/**
-	 * Setup the preferences menu callback.
+	 * @private
+	 * @type {Preferences}
 	 */
-	static __setup__() {
+	static preferences;
 
+	/**
+	 * Setup the preferences menu callback.
+	 * @param {Preferences} preferences 
+	 */
+	static __setup__(preferences) {
+
+		this.preferences = preferences;
 		pluginSettingsQueryString = `.plugin-settings[for^="${PLUGIN_NAME}"]`;
 
 		if (UIPreferences.menuMain != undefined) {
-			onPreferencesBuilt({ target: UIPreferences.menuMain });
+			this.onPreferencesBuilt({ target: UIPreferences.menuMain });
 		}
 
-		GMEdit.on('preferencesBuilt', onPreferencesBuilt);
+		GMEdit.on('preferencesBuilt', this.onPreferencesBuilt);
 		
 	}
 
@@ -352,26 +358,26 @@ export class PreferencesMenu {
 	 * Deregister callback for setting up menu.
 	 */
 	static __cleanup__() {
-		GMEdit.off('preferencesBuilt', onPreferencesBuilt);
+		GMEdit.off('preferencesBuilt', this.onPreferencesBuilt);
 	}
 
-}
+	/**
+	 * Callback for setting up our preferences menu when the user opens prefs.
+	 * @param {GMEdit.PluginEventMap['preferencesBuilt']} event
+	 */
+	static onPreferencesBuilt = ({ target }) => {
 
-/**
- * Callback for setting up our preferences menu when the user opens prefs.
- * @param {GMEdit.PluginEventMap['preferencesBuilt']} event
- */
-function onPreferencesBuilt({ target }) {
+		const group = target.querySelector(pluginSettingsQueryString);
 
-	const group = target.querySelector(pluginSettingsQueryString);
+		if (group instanceof HTMLDivElement) {
 
-	if (group instanceof HTMLDivElement) {
+			singletonInstance ??= new PreferencesMenu(this.preferences);
 
-		singletonInstance ??= new PreferencesMenu(Preferences);
+			group.appendChild(singletonInstance.element);
+			UIPreferences.addText(group, `Version: ${PLUGIN_VERSION}`);
 
-		group.appendChild(singletonInstance.element);
-		UIPreferences.addText(group, `Version: ${PLUGIN_VERSION}`);
+		}
 
-	}
+	};
 
 }

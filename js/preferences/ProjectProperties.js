@@ -36,7 +36,7 @@ export class ProjectProperties {
 	 * 
 	 * @private
 	 * @readonly
-	 * @type {typeof Preferences}
+	 * @type {Preferences}
 	 */
 	preferences;
 
@@ -79,7 +79,7 @@ export class ProjectProperties {
 	 * @private
 	 * @param {GMEdit.Project} project The project this properties instance is for.
 	 * @param {SupportedProjectFormat} projectFormat The format of this project.
-	 * @param {typeof Preferences} preferences The global preferences object to reference.
+	 * @param {Preferences} preferences The global preferences object to reference.
 	 * @param {ProblemLogger} problemLogger Method of logging problems.
 	 */
 	constructor(project, projectFormat, preferences, problemLogger) {
@@ -431,7 +431,7 @@ export class ProjectProperties {
 	 * The global preferences handler, to be injected into instances.
 	 * 
 	 * @private
-	 * @type {typeof Preferences}
+	 * @type {Preferences}
 	 */
 	static preferences;
 
@@ -514,7 +514,7 @@ export class ProjectProperties {
 	}
 
 	/**
-	 * @param {typeof Preferences} preferences Preferences instance to inject.
+	 * @param {Preferences} preferences Preferences instance to inject.
 	 * @param {ProblemLogger} problemLogger Problem logging method.
 	 */
 	static __setup__(preferences, problemLogger) {
