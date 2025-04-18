@@ -125,18 +125,7 @@ export class ProjectProperties {
 	 * @returns {ProjectYYConfig}
 	 */
 	get rootBuildConfig() {
-
-		const project = project_current_get();
-
-		if (project === undefined) {
-			return {
-				name: 'Default',
-				children: []
-			};
-		}
-
-		return project_config_tree_get(project);
-
+		return project_config_tree_get(this.project);
 	}
 
 	/**
