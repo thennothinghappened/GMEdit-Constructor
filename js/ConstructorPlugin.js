@@ -176,6 +176,7 @@ export class ConstructorPlugin {
 
 		GMEdit.off('projectOpen', this.onProjectOpen);
 		GMEdit.off('projectClose', this.onProjectClose);
+		GMEdit.off('preferencesBuilt', this.onPreferencesBuilt);
 		GMEdit.off('projectPropertiesBuilt', this.onProjectPropertiesBuilt);
 
 		if (this.currentProjectComponents !== undefined) {
