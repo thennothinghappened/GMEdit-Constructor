@@ -265,18 +265,18 @@ export class Preferences {
 		return {
 
 			/**
-			 * @type {TPreferences.LocalProjectPropertiesStore['loadProjectLocalProps']}
+			 * @type {TPreferences.LocalProjectPropertiesStore['load']}
 			 */
-			loadProjectLocalProps() {
+			load() {
 				// We store the data for convenience, but its ownership is managed by the
 				// `ProjectProperties` instance, so we clone it to avoid any possible pass-by-ref trouble.
 				return structuredClone(preferences.prefs.projectLocalData[project.path] ?? {});
 			},
 
 			/**
-			 * @type {TPreferences.LocalProjectPropertiesStore['saveProjectLocalProps']}
+			 * @type {TPreferences.LocalProjectPropertiesStore['save']}
 			 */
-			saveProjectLocalProps(localProps) {
+			save(localProps) {
 				preferences.prefs.projectLocalData[project.path] = localProps;
 				preferences.save();
 			}

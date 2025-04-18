@@ -14,14 +14,14 @@ export declare global {
 			/**
 			 * Load the local properties of the given project.
 			 */
-			loadProjectLocalProps(): Partial<TPreferences.Project.LocalData>;
+			load(): Partial<TPreferences.Project.LocalData>;
 
 			/**
 			 * Save the local properties of the given project to disk.
 			 * 
 			 * @param localProps
 			 */
-			saveProjectLocalProps(localProps: Partial<TPreferences.Project.LocalData>);
+			save(localProps: Partial<TPreferences.Project.LocalData>);
 
 		};
 

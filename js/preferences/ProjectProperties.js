@@ -91,7 +91,7 @@ export class ProjectProperties {
 		this.preferences = preferences;
 		this.localProjectPropertiesStore = localProjectPropertiesStore;
 		this.portable = project.properties['GMEdit-Constructor'] ?? {};
-		this.local = this.localProjectPropertiesStore.loadProjectLocalProps();
+		this.local = this.localProjectPropertiesStore.load();
 
 		this.events.on('setRuntimeChannel', this.onChangeRuntimeChannel);
 		
@@ -410,7 +410,7 @@ export class ProjectProperties {
 	 * @private
 	 */
 	saveLocalProps() {
-		this.localProjectPropertiesStore.saveProjectLocalProps(this.local);
+		this.localProjectPropertiesStore.save(this.local);
 	}
 
 	/**
