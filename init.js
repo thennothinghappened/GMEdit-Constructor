@@ -28,8 +28,8 @@
 
 		if (!res.ok) {
 			
-			alert('Failed to launch Constructor, see the JavaScript console for details.');
 			console.error('Failed to launch Constructor!', res.err);
+			alert('Failed to launch Constructor, see the JavaScript console for details.');
 
 			return;
 		}
