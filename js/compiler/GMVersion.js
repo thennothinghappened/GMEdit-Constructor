@@ -202,15 +202,6 @@ export class GMRuntimeVersion {
 		return this.version.equals(other.version);
 	}
 
-	/**
-	 * Returns whether this runtime version is supported by Constructor.
-	 * 
-	 * @returns {Result<void>}
-	 */
-	supported() {
-		return { ok: true };
-	}
-
 	toString() {
 		return `runtime-${this.version}`;
 	}

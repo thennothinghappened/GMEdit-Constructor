@@ -21,6 +21,48 @@ export declare global {
 	namespace GMS2 {
 
 		/**
+		 * A method of indexing GMS2 runtimes for use in compilation.
+		 */
+		interface RuntimeIndexer {
+			/**
+			 * Get the list of runtimes at the given location.
+			 * @param path Path to the directory where the runtime list can be found.
+			 */
+			async getRuntimes(path: string): Promise<Result<RuntimeIndexer.GetData, RuntimeIndexer.GetError>>;
+		};
+
+		namespace RuntimeIndexer {
+
+			type GetError =
+				{ code: 'pathReadError', inner: Error };
+			
+			type GetData = {
+				runtimes: RuntimeInfo[];
+				invalidRuntimes: InvalidRuntimeInfo[];
+			};
+
+			type InvalidRuntimeInfo = {
+				path: string;
+				error: InvalidRuntimeInfoError;
+			};
+
+			type InvalidRuntimeInfoError = 
+				{ code: 'versionParseFailed', inner: Error };
+
+		};
+
+		/**
+		 * 
+		 */
+		interface UserIndexer {
+			/**
+			 * Get the list of users at the given location.
+			 * @param path Path to the directory where the users' directories can be found.
+			 */
+			async getUsers(path: string): Promise<Result<NonEmptyArray<UserInfo>>>;
+		};
+
+		/**
 		 * Information for a specific found runtime.
 		 */
 		type RuntimeInfo = {

@@ -39,6 +39,7 @@ export function readFileSync(path) {
 
 /**
  * Promise version of `Electron_FS.readdir`.
+ * 
  * @param {string} path 
  * @returns {Promise<Result<string[]>>}
  */

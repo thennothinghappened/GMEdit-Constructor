@@ -16,6 +16,7 @@ import { Err, Ok } from './utils/Result.js';
 import { ProjectPropertiesMenu } from './ui/preferences/ProjectPropertiesMenu.js';
 import { docString } from './utils/StringUtils.js';
 import { ControlPanelProblemLogger } from './ui/tabs/ControlPanelProblemReporter.js';
+import { GMS2RuntimeIndexerImpl } from './compiler/GMS2RuntimeIndexerImpl.js';
 
 /**
  * Name of the plugin 
@@ -93,7 +94,8 @@ export class GMConstructor {
 		// Setting up preferences //
 		const preferencesDataPath = nodeModulesProvider.path.join(Electron_App.getPath('userData'), 'GMEdit', 'config', `${PLUGIN_NAME}.json`);
 
-		const preferences = new Preferences(problemLogger);
+		const gms2RuntimeIndexer = new GMS2RuntimeIndexerImpl();
+		const preferences = new Preferences(problemLogger, gms2RuntimeIndexer);
 		const preferencesLoadResult = await preferences.load(preferencesDataPath);
 
 		if (!preferencesLoadResult.ok) {

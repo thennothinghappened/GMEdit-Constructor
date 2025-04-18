@@ -109,10 +109,18 @@ export class Preferences {
 	/**
 	 * Logger for displaying problems to the user.
 	 * 
+	 * @readonly
 	 * @private
 	 * @type {ProblemLogger}
 	 */
 	problemLogger;
+
+	/**
+	 * @readonly
+	 * @private
+	 * @type {GMS2.RuntimeIndexer}
+	 */
+	gms2RuntimeIndexer;
 
 	/**
 	 * List of runtimes for each type.
@@ -134,9 +142,11 @@ export class Preferences {
 
 	/**
 	 * @param {ProblemLogger} problemLogger
+	 * @param {GMS2.RuntimeIndexer} gms2RuntimeIndexer
 	 */
-	constructor(problemLogger) {
+	constructor(problemLogger, gms2RuntimeIndexer) {
 		this.problemLogger = problemLogger;
+		this.gms2RuntimeIndexer = gms2RuntimeIndexer;
 	}
 
 	/**
@@ -605,8 +615,65 @@ export class Preferences {
 	 * @param {GMChannelType} channel
 	 * @returns {Promise<Result<NonEmptyArray<GMS2.RuntimeInfo>>>}
 	 */
-	loadRuntimeList(channel) {
-		return this.loadRuntimeListFrom(this.getRuntimeOptions(channel).search_path);
+	async loadRuntimeList(channel) {
+
+		const path = this.getRuntimeOptions(channel).search_path;
+		const result = await this.gms2RuntimeIndexer.getRuntimes(path);
+
+		if (!result.ok) {
+			switch (result.err.code) {
+
+				case 'pathReadError': return Err(new SolvableError(
+					docString(`
+						Failed to read the list of runtimes from the path "${path}".
+					`),
+					docString(`
+						Check if this path is valid.
+					`),
+					result.err.inner
+				));
+
+				default: return Err(new BaseError(
+					docString(`
+						An unexpected error occurred while loading the runtime list from the path
+						"${path}"!
+					`),
+					result.err.inner
+				));
+
+			}
+		}
+
+		result.data.invalidRuntimes.forEach(invalidRuntime => {
+
+			/** @type {BaseError} */
+			let error;
+			
+			switch (invalidRuntime.error.code) {
+
+				case 'versionParseFailed':
+					error = new BaseError(
+						`Failed to parse runtime version name for runtime at '${invalidRuntime.path}'`,
+						invalidRuntime.error.inner	
+					);
+				break;
+
+				default: return;
+
+			}
+
+			this.problemLogger.debug('Invalid runtime found in search path', error);
+
+		});
+
+		const runtimes = asNonEmptyArray(result.data.runtimes);
+
+		if (runtimes === undefined) {
+			return Err(new BaseError(`No runtimes found at the path "${path}"`));
+		}
+
+		return Ok(runtimes);
+
 	}
 
 	/**
@@ -617,73 +684,6 @@ export class Preferences {
 	 */
 	loadUserList(type) {
 		return this.loadUserListFrom(this.getRuntimeOptions(type).users_path);
-	}
-
-	/**
-	 * Load the list of runtimes for the provided search path.
-	 * 
-	 * @param {String} search_path 
-	 * @returns {Promise<Result<NonEmptyArray<GMS2.RuntimeInfo>>>}
-	 */
-	async loadRuntimeListFrom(search_path) {
-
-		const runtimeVersionListRes = await readdir(search_path);
-
-		if (!runtimeVersionListRes.ok) {
-			return Err(new BaseError(
-				`Failed to read search path '${search_path}': ${runtimeVersionListRes.err}`
-			));
-		}
-
-		const runtimeVersionList = runtimeVersionListRes.data;
-		const runtimes = runtimeVersionList
-			.map(dirname => ({ dirname, path: node.path.join(search_path, dirname) }))
-			.filter(({ path }) => Electron_FS.lstatSync(path).isDirectory())
-			.map(({ dirname, path }) => {
-
-				const igorPath = node.path.join(path, igor_path_segment);
-				const version_res = GMRuntimeVersion.parse(dirname);
-
-				if (!version_res.ok) {
-
-					this.problemLogger.debug('Invalid runtime found in search path', new BaseError(
-						`Failed to parse runtime version name for runtime at '${path}'`, 
-						version_res.err
-					));
-
-					return undefined;
-
-				}
-
-				const runtime = version_res.data;
-				const supported_res = runtime.supported();
-
-				if (!supported_res.ok) {
-
-					this.problemLogger.debug('Excluding unsupported runtime', new BaseError(
-						`Excluding unsupported runtime ${runtime}`,
-						supported_res.err
-					));
-					
-					return undefined;
-
-				}
-
-				return { path, igorPath, version: runtime };
-
-			})
-			.filter(runtime => runtime !== undefined)
-			.filter(runtime => Electron_FS.existsSync(runtime.igorPath))
-			.sort((a, b) => b.version.compare(a.version));
-		
-		const nonEmptyRuntimesArray = asNonEmptyArray(runtimes);
-
-		if (nonEmptyRuntimesArray === undefined) {
-			return Err(new BaseError(`Runtimes list at path "${search_path}" is empty`));
-		}
-
-		return Ok(nonEmptyRuntimesArray);
-
 	}
 
 	/**
