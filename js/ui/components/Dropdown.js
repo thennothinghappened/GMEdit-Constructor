@@ -32,12 +32,27 @@ export class Dropdown {
 	onSelectChanged;
 
 	/**
+	 * A method of comparing two instances of `T`, if they are complex types.
+	 * 
+	 * @private
+	 * @param {NonNullable<T>} a 
+	 * @param {NonNullable<T>} b 
+	 * @returns {boolean}
+	 */
+	equals = (a, b) => a === b;
+
+	/**
 	 * @param {string} label Textual label for this dropdown.
 	 * @param {Option<T>} initialSelected The initial selection.
 	 * @param {(value: T) => void} onSelectedChanged Callback when the selected choice is changed.
 	 * @param {ReadonlyArray<Components.DropdownEntry<T>>} options The initial list of choices.
+	 * @param {(a: NonNullable<T>, b: NonNullable<T>) => boolean} [equals] A method of comparing two instances of `T`, if `T` is a complex type.
 	 */
-	constructor(label, initialSelected, onSelectedChanged, options) {
+	constructor(label, initialSelected, onSelectedChanged, options, equals) {
+
+		if (equals !== undefined) {
+			this.equals = equals;
+		}
 
 		this.label.textContent = label;
 
@@ -45,8 +60,8 @@ export class Dropdown {
 		this.element.appendChild(this.select);
 		this.element.classList.add('select');
 
-		this.setOptions(options);
-		
+		this.setOptionsInternal(options);
+
 		if (isSome(initialSelected)) {
 			this.setSelectedOption(initialSelected.data);
 		}
@@ -82,10 +97,21 @@ export class Dropdown {
 	setSelectedOption(choice) {
 
 		for (const [index, value] of this.choiceValuesByIds.entries()) {
-			if (value === choice) {
+			
+			if (choice == undefined || value == undefined) {
+				if (choice === value) {
+					this.select.selectedIndex = index;
+					return;
+				}
+				
+				continue;
+			}
+
+			if (this.equals(choice, value)) {
 				this.select.selectedIndex = index;
 				return;
 			}
+
 		}
 
 		throw new InvalidStateErr(`Choice '${choice}' is not a valid option in the list [${this.choiceValuesByIds.join(', ')}]`);
@@ -94,19 +120,18 @@ export class Dropdown {
 
 	/**
 	 * @param {ReadonlyArray<Components.DropdownEntry<T>>} choices The new list of choices. The list must be non-empty.
+	 * @param {T} selectedChoice
 	 */
-	setOptions(choices) {
+	setOptions(choices, selectedChoice) {
+		this.setOptionsInternal(choices);
+		this.setSelectedOption(selectedChoice);
+	}
 
-		// Preserve the current choice, if it is applicable still.
-		/** @type {T|undefined} */
-		let currentChoice = undefined;
-
-		const currentChoiceIndex = this.select.selectedIndex;
-		this.select.selectedIndex = -1;
-
-		if (currentChoiceIndex >= 0) {
-			currentChoice = this.choiceValuesByIds[currentChoiceIndex];
-		}
+	/**
+	 * @private
+	 * @param {ReadonlyArray<Components.DropdownEntry<T>>} choices The new list of choices.
+	 */
+	setOptionsInternal(choices) {
 
 		// Remove the existing entries from the list.
 		while (this.select.lastChild !== null) {
@@ -114,7 +139,7 @@ export class Dropdown {
 		}
 
 		this.choiceValuesByIds.length = 0;
-		
+
 		// The HTML select element uses strings for values. We don't want to enforce `T` to be a
 		// `string`, so we use an intermediary mapping (integer IDs).
 		let nextChoiceId = 0;
@@ -127,23 +152,13 @@ export class Dropdown {
 		for (const { label, value } of normalizedChoices) {
 
 			this.choiceValuesByIds[nextChoiceId] = value;
-
+			
 			const option = document.createElement('option');
 			option.textContent = label;
-
-			if (value === currentChoice) {
-				this.select.selectedIndex = currentChoiceIndex;
-			}
 
 			this.select.appendChild(option);
 			nextChoiceId++;
 
-		}
-
-		if (this.select.selectedIndex < 0 && this.choiceValuesByIds.length > 0) {
-			// No choices matched, so fallback to the first option.
-			this.select.selectedIndex = 0;
-			this.onSelectChanged(this.choiceValuesByIds[0]);
 		}
 
 	}

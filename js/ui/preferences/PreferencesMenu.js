@@ -156,7 +156,8 @@ export class PreferencesMenu {
 							label: runtime.version.toString(),
 							value: runtime
 						})) ?? []
-					]
+					],
+					(a, b) => a.version.equals(b.version)
 				);
 
 				if (runtimes === undefined) {
@@ -185,7 +186,8 @@ export class PreferencesMenu {
 				widgets.userDropdown = new Dropdown('User',
 					mapToOption(this.preferences.getUser(channel)),
 					(user) => this.preferences.setUser(channel, user.name),
-					users?.map(user => ({ label: user.name, value: user })) ?? []
+					users?.map(user => ({ label: user.name, value: user })) ?? [],
+					(a, b) => a.name === b.name
 				);
 
 				if (users === undefined) {

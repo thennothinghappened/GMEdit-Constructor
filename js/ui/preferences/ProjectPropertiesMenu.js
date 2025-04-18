@@ -149,7 +149,8 @@ export class ProjectPropertiesMenu {
 		this.runtimeVersionDropdown = new Dropdown('Runtime Version',
 			Some(this.properties.runtimeVersion),
 			(value) => { this.properties.runtimeVersion = value?.version; },
-			[USE_DEFAULT, ...this.mapRuntimesInChannelToList() ?? []]
+			[USE_DEFAULT, ...this.mapRuntimesInChannelToEntries() ?? []],
+			(a, b) => a.version.equals(b.version)
 		);
 		
 		this.runtimeVersionDropdown.element.classList.add('singleline');
@@ -194,7 +195,7 @@ export class ProjectPropertiesMenu {
 	 * @private
 	 * @returns {Components.NormalizedDropdownEntry<Zeus.RuntimeInfo>[]|undefined}
 	 */
-	mapRuntimesInChannelToList() {
+	mapRuntimesInChannelToEntries() {
 		
 		const channel = this.properties.runtimeChannelType;
 
@@ -264,7 +265,7 @@ export class ProjectPropertiesMenu {
 	updateRuntimeVersionList() {
 		this.runtimeVersionDropdown.setOptions([
 			USE_DEFAULT,
-			...this.mapRuntimesInChannelToList() ?? []
+			...this.mapRuntimesInChannelToEntries() ?? []
 		], this.properties.runtimeVersion);
 	}
 
