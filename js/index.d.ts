@@ -1,4 +1,4 @@
-import { GMConstructor } from './GMConstructor';
+import { ConstructorPlugin } from './ConstructorPlugin';
 import { ProjectProperties } from './preferences/ProjectProperties';
 import { ConfigTreeUi } from './ui/ConfigTreeUi';
 import { ProjectPropertiesMenu } from './ui/preferences/ProjectPropertiesMenu';
@@ -62,7 +62,7 @@ export declare global {
 	} & HTMLFieldSetElement;
 
 	interface Window {
-		GMConstructor?: GMConstructor;
+		ConstructorPlugin?: ConstructorPlugin;
 	}
 
 };

@@ -1,5 +1,5 @@
 import { SemVer } from './SemVer.js';
-import { PLUGIN_VERSION } from '../GMConstructor.js';
+import { PLUGIN_VERSION } from '../ConstructorPlugin.js';
 import { BaseError } from '../utils/Err.js';
 import { Err, Ok } from '../utils/Result.js';
 

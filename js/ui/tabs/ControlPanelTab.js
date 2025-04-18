@@ -1,7 +1,7 @@
 
 import { ConstructorTab, ConstructorTabFileKind } from './ConstructorTab.js';
 import * as ui from '../ui-wrappers.js';
-import { PLUGIN_NAME, PLUGIN_VERSION } from '../../GMConstructor.js';
+import { PLUGIN_NAME, PLUGIN_VERSION } from '../../ConstructorPlugin.js';
 import { ProjectPropertiesMenu } from '../preferences/ProjectPropertiesMenu.js';
 import { BaseError, InvalidStateErr } from '../../utils/Err.js';
 import { PreferencesMenu } from '../preferences/PreferencesMenu.js';

@@ -15,13 +15,13 @@
 
 	const load = (async () => {
 
-		if ('GMConstructor' in window && window.GMConstructor !== undefined) {
-			window.GMConstructor.destroy();
+		if (window.ConstructorPlugin !== undefined) {
+			window.ConstructorPlugin.destroy();
 		}
 
-		const res = await import('./js/GMConstructor.js')
-			.then(({ GMConstructor }) => GMConstructor.initialize(PLUGIN_NAME, PLUGIN_VERSION, nodeModules))
-			.catch(err => /** @type {Result<import('js/GMConstructor.js').GMConstructor>} */ ({
+		const res = await import('./js/ConstructorPlugin.js')
+			.then(({ ConstructorPlugin }) => ConstructorPlugin.initialize(PLUGIN_NAME, PLUGIN_VERSION, nodeModules))
+			.catch(err => /** @type {Result<import('./js/ConstructorPlugin.js').ConstructorPlugin>} */ ({
 				ok: false,
 				err: err
 			}));
@@ -34,7 +34,7 @@
 			return;
 		}
 
-		window.GMConstructor = res.data;
+		window.ConstructorPlugin = res.data;
 
 	});
 
@@ -43,7 +43,7 @@
 			await load();
 		},
 		cleanup: () => {
-			window.GMConstructor?.destroy();
+			window.ConstructorPlugin?.destroy();
 		}
 	});
 

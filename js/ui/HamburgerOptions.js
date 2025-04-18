@@ -80,32 +80,32 @@ export function __cleanup__() {
 }
 
 function showControlPanel() {
-	if (window.GMConstructor !== undefined) {
-		window.GMConstructor.showControlPanel();
+	if (window.ConstructorPlugin !== undefined) {
+		window.ConstructorPlugin.showControlPanel();
 	}
 }
 
 function packageCurrentProject() {
-	if (window.GMConstructor !== undefined) {
-		window.GMConstructor.packageCurrent();
+	if (window.ConstructorPlugin !== undefined) {
+		window.ConstructorPlugin.packageCurrent();
 	}
 }
 
 function stopCurrentProject() {
-	if (window.GMConstructor !== undefined) {
-		window.GMConstructor.stopCurrent();
+	if (window.ConstructorPlugin !== undefined) {
+		window.ConstructorPlugin.stopCurrent();
 	}
 }
 
 function cleanCurrentProject() {
-	if (window.GMConstructor !== undefined) {
-		window.GMConstructor.cleanCurrent();
+	if (window.ConstructorPlugin !== undefined) {
+		window.ConstructorPlugin.cleanCurrent();
 	}
 }
 
 function runCurrentProject() {
-	if (window.GMConstructor !== undefined) {
-		window.GMConstructor.runCurrent();
+	if (window.ConstructorPlugin !== undefined) {
+		window.ConstructorPlugin.runCurrent();
 	}
 }
 
@@ -190,7 +190,7 @@ function commands_deregister() {
 
 function updateItemEnabledState() {
 
-	const pluginInstance = window.GMConstructor;
+	const pluginInstance = window.ConstructorPlugin;
 
 	if (pluginInstance === undefined) {
 		return;

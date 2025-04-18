@@ -32,7 +32,7 @@ export let PLUGIN_VERSION;
 /**
  * Main controller instance for the plugin!
  */
-export class GMConstructor {
+export class ConstructorPlugin {
 
 	/**
 	 * @private
@@ -63,7 +63,7 @@ export class GMConstructor {
 	 * @param {string} pluginName Name of the plugin.
 	 * @param {string} pluginVersion Current version of the plugin.
 	 * @param {NodeModules} nodeModules References to various NodeJS modules we need.
-	 * @returns {Promise<Result<GMConstructor>>}
+	 * @returns {Promise<Result<ConstructorPlugin>>}
 	 */
 	static async initialize(pluginName, pluginVersion, nodeModules) {
 
@@ -111,7 +111,7 @@ export class GMConstructor {
 
 		hamburgerOptions.__setup__();
 
-		return Ok(new GMConstructor(preferences, problemLogger));
+		return Ok(new ConstructorPlugin(preferences, problemLogger));
 
 	}
 
@@ -196,7 +196,7 @@ export class GMConstructor {
 			this.preferencesMenu.destroy();
 		}
 
-		delete window.GMConstructor;
+		delete window.ConstructorPlugin;
 		
 	}
 
