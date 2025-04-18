@@ -80,8 +80,6 @@ export class ConstructorPlugin {
 				native Arm64 build found at https://yellowafterlife.itch.io/gmedit
 			`));
 
-			console.error(err);
-
 			Electron_Dialog.showMessageBox({
 				title: 'GMEdit-Constructor cannot load on Rosetta!',
 				message: err.message,
