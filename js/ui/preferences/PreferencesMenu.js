@@ -148,7 +148,7 @@ export class PreferencesMenu {
 				const runtimes = this.preferences.getInstalledRuntimeVersions(channel);
 		
 				widgets.versionDropdown = new Dropdown('Version',
-					mapToOption(this.preferences.getPreferredRuntimeVersion(channel)),
+					Some(this.preferences.getPreferredRuntimeVersion(channel)),
 					(runtime) => this.preferences.setPreferredRuntimeVersion(channel, runtime?.version),
 					[
 						USE_NEWEST,
