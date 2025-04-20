@@ -23,28 +23,6 @@ const FileKind = $gmedit['file.FileKind'];
  */
 
 /**
- * 'File type' for our general-purpose editor view thingo.
- * 
- * @abstract
- * @class
- */
-export class ConstructorTabFileKind extends FileKind {
-
-	constructor() {
-		super();
-		this.checkSelfForChanges = false;
-	}
-	
-	/** 
-	 * @type {GMEdit.FileKind['init']} 
-	 */
-	init(file, data) {
-		abstract(file, data);
-	}
-	
-}
-
-/**
  * 'Editor' for viewing a compile log all fancy.
  */
 export class ConstructorTab extends Editor {

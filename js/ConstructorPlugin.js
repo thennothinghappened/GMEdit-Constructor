@@ -5,7 +5,6 @@ import { ProjectProperties } from './preferences/ProjectProperties.js';
 import * as igorPaths from './compiler/igor-paths.js';
 import { PreferencesMenu } from './ui/preferences/PreferencesMenu.js';
 import { BaseError, InvalidStateErr, SolvableError } from './utils/Err.js';
-import { ControlPanelTab } from './ui/tabs/ControlPanelTab.js';
 import { plugin_update_check } from './update-checker/UpdateChecker.js';
 import { mkdir, readdir } from './utils/node/file.js';
 import * as nodeModulesProvider from './utils/node/node-import.js';
@@ -16,6 +15,7 @@ import { Err, Ok } from './utils/Result.js';
 import { ProjectPropertiesMenu } from './ui/preferences/ProjectPropertiesMenu.js';
 import { docString } from './utils/StringUtils.js';
 import { GMS2RuntimeIndexerImpl } from './compiler/GMS2RuntimeIndexerImpl.js';
+import { ControlPanelImpl } from './ui/controlpanel/ControlPanelImpl.js';
 
 /**
  * Name of the plugin 
@@ -36,9 +36,9 @@ export class ConstructorPlugin {
 
 	/**
 	 * @private
-	 * @type {ProblemLogger}
+	 * @type {ControlPanel}
 	 */
-	problemLogger;
+	controlPanel;
 
 	/**
 	 * @private
@@ -91,22 +91,23 @@ export class ConstructorPlugin {
 
 		}
 
-		const problemLogger = new ControlPanelProblemLogger();
+		const controlPanel = new ControlPanelImpl();
 		igorPaths.__setup__();
 
-		const preferences = new Preferences(problemLogger, new GMS2RuntimeIndexerImpl());
+		const preferences = new Preferences(controlPanel, new GMS2RuntimeIndexerImpl());
 		const preferencesDataPath = nodeModulesProvider.path.join(Electron_App.getPath('userData'), 'GMEdit', 'config', `${PLUGIN_NAME}.json`);
 		const preferencesLoadResult = await preferences.load(preferencesDataPath);
 
 		if (!preferencesLoadResult.ok) {
-			problemLogger.warn('Failed to load your preferences!', new BaseError(docString(`
+			controlPanel.warn('Failed to load your preferences!', new BaseError(docString(`
 				An error occurred in loading your preferences. The default values are being used.
 			`), preferencesLoadResult.err))
 		}
 
+		controlPanel.setPreferencesMenu(new PreferencesMenu(preferences));
 		hamburgerOptions.__setup__();
 
-		return Ok(new ConstructorPlugin(preferences, problemLogger));
+		return Ok(new ConstructorPlugin(preferences, controlPanel));
 
 	}
 
@@ -116,14 +117,12 @@ export class ConstructorPlugin {
 	 * 
 	 * @private
 	 * @param {Preferences} preferences 
-	 * @param {ControlPanelProblemLogger} problemLogger
+	 * @param {ControlPanel} controlPanel
 	 */
-	constructor(preferences, problemLogger) {
+	constructor(preferences, controlPanel) {
 		
 		this.preferences = preferences;
-
-		this.problemLogger = problemLogger;
-		problemLogger.showControlPanel = this.showControlPanel;
+		this.controlPanel = controlPanel;
 
 		const currentOpenProject = project_current_get();
 
@@ -135,7 +134,7 @@ export class ConstructorPlugin {
 			plugin_update_check().then(res => {
 					
 				if (!res.ok) {
-					return this.problemLogger.warn('Failed to check for plugin updates.', res.err);
+					return this.controlPanel.warn('Failed to check for plugin updates.', res.err);
 				}
 
 				if (!res.data.update_available) {
@@ -143,7 +142,7 @@ export class ConstructorPlugin {
 				}
 
 				// Bit silly to use an error message for this but it works :P
-				this.problemLogger.warn('An update is available for Constructor!',
+				this.controlPanel.warn('An update is available for Constructor!',
 					new SolvableError('There is an update available.', docString(`
 						${PLUGIN_NAME} ${res.data.version} is available on GitHub!
 						
@@ -159,8 +158,6 @@ export class ConstructorPlugin {
 		if (UIPreferences.menuMain != undefined) {
 			this.onPreferencesBuilt({ target: UIPreferences.menuMain });
 		}
-
-		ControlPanelTab.find()?.setupPreferencesMenu(new PreferencesMenu(this.preferences));
 		
 		GMEdit.on('projectOpen', this.onProjectOpen);
 		GMEdit.on('projectClose', this.onProjectClose);
@@ -185,7 +182,7 @@ export class ConstructorPlugin {
 
 		compileController.__cleanup__();
 		hamburgerOptions.__cleanup__();
-		ControlPanelTab.cleanup();
+		this.controlPanel.destroy();
 
 		if (this.preferencesMenu !== undefined) {
 			this.preferencesMenu.element.remove();
@@ -219,8 +216,6 @@ export class ConstructorPlugin {
 		}
 
 		configTreeUi.destroy();
-		ControlPanelTab.find()?.closeProject();
-
 		delete this.currentProjectComponents;
 
 	};
@@ -245,7 +240,7 @@ export class ConstructorPlugin {
 
 		if (!projectFormat.ok) {
 
-			this.problemLogger.error('Plugin Internal Error!', new BaseError(docString(`
+			this.controlPanel.error('Plugin Internal Error!', new BaseError(docString(`
 				Failed to parse project format of project "${project.name}".
 				Constructor will be disabled on this project!
 			`), projectFormat.err));
@@ -263,13 +258,15 @@ export class ConstructorPlugin {
 			projectFormat.data,
 			this.preferences,
 			this.preferences.getLocalProjectPropertiesStore(project),
-			this.problemLogger
+			this.controlPanel
 		);
 
 		const configTreeUi = new ConfigTreeUi(projectProperties);
 
-		const controlPanel = ControlPanelTab.find();
-		controlPanel?.openProject(new ProjectPropertiesMenu(projectProperties, this.preferences));
+		this.controlPanel.setProjectPropertiesMenu(new ProjectPropertiesMenu(
+			projectProperties,
+			this.preferences
+		));
 
 		this.currentProjectComponents = {
 			project,
@@ -294,13 +291,14 @@ export class ConstructorPlugin {
 		}
 
 		if (components.project !== project) {
-			this.problemLogger.error('Plugin Internal Error!', new InvalidStateErr(docString(`
+			this.controlPanel.error('Plugin Internal Error!', new InvalidStateErr(docString(`
 				Somehow the project being closed (${project.name}) is not the project that
 				Constructor tracked opening???
 			`)));
 			return;
 		}
 
+		this.controlPanel.clearProjectPropertiesMenu();
 		this.destroyCurrentProjectComponents();
 		
 	};
@@ -368,7 +366,7 @@ export class ConstructorPlugin {
 		const runtime = this.findRuntime(components);
 
 		if (!runtime.ok) {
-			this.problemLogger.error('Couldn\'t find a runtime to use!', runtime.err);
+			this.controlPanel.error('Couldn\'t find a runtime to use!', runtime.err);
 			return;
 		}
 
@@ -401,7 +399,7 @@ export class ConstructorPlugin {
 					res.err
 				);
 
-				this.problemLogger.error(res.err.message, err);
+				this.controlPanel.error(res.err.message, err);
 				return;
 				
 			}
@@ -437,7 +435,7 @@ export class ConstructorPlugin {
 		);
 
 		if (!jobResult.ok) {
-			this.problemLogger.error('Failed to run Igor job!', jobResult.err);
+			this.controlPanel.error('Failed to run Igor job!', jobResult.err);
 			return;
 		}
 
@@ -545,24 +543,7 @@ export class ConstructorPlugin {
 
 	}
 
-	showControlPanel = () => {
-
-		let controlPanel = ControlPanelTab.find();
-		if (controlPanel !== undefined) {
-			return;
-		}
-
-		controlPanel = ControlPanelTab.show();
-		controlPanel.setupPreferencesMenu(new PreferencesMenu(this.preferences));
-
-		if (this.currentProjectComponents !== undefined) {
-			controlPanel.openProject(new ProjectPropertiesMenu(
-				this.currentProjectComponents.projectProperties,
-				this.preferences
-			));
-		}
-
-	}
+	showControlPanel = () => this.controlPanel.open();
 
 	runCurrent = () => {
 		if (this.currentProjectComponents !== undefined) {
@@ -615,7 +596,7 @@ export class ConstructorPlugin {
 			try {
 				Electron_FS.rmSync(build_dir, { recursive: true });
 			} catch (err) {
-				this.problemLogger.error('Failed to clean project!', new SolvableError(
+				this.controlPanel.error('Failed to clean project!', new SolvableError(
 					`An unexpected error occurred while removing the build directory '${build_dir}'.`,
 					'Do you have this directory open somewhere?',
 					err
@@ -639,53 +620,6 @@ export class ConstructorPlugin {
 	 */
 	supportsProjectFormat(project) {
 		return project.isGMS23;
-	}
-
-}
-
-/**
- * Implementation of the error reporter which uses the {@link ControlPanelTab} to show messages, but
- * avoids the dependency on the control panel, should we want to run the plugin headless.
- * 
- * @implements {ProblemLogger}
- */
-export class ControlPanelProblemLogger {
-
-	/**
-	 * A method of showing the control panel.
-	 * Overridden later in the loading process.
-	 * 
-	 * @returns {void}
-	 */
-	showControlPanel = () => { ControlPanelTab.show() };
-
-	/**
-	 * @param {string} title
-	 * @param {BaseError} err
-	 */
-	error(title, err) {
-		ControlPanelTab.error(title, err);
-		this.showControlPanel();
-
-		return this;
-	}
-
-	/**
-	 * @param {string} title
-	 * @param {BaseError} err
-	 */
-	warn(title, err) {
-		ControlPanelTab.warn(title, err);
-		return this;
-	}
-	
-	/**
-	 * @param {string} title
-	 * @param {BaseError} err
-	 */
-	debug(title, err) {
-		ControlPanelTab.debug(title, err);
-		return this;
 	}
 
 }

@@ -2,7 +2,6 @@
  * Controller for the Preferences configuration on the menu.
  */
 
-import { PLUGIN_NAME, PLUGIN_VERSION } from '../../ConstructorPlugin.js';
 import * as ui from '../../ui/ui-wrappers.js';
 import { GM_CHANNEL_TYPES, Preferences, ZEUS_RUNTIME_TYPES } from '../../preferences/Preferences.js';
 import { use } from '../../utils/scope-extensions/use.js';

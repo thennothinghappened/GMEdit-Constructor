@@ -6,6 +6,21 @@ import { ProjectPropertiesMenu } from './ui/preferences/ProjectPropertiesMenu';
 export declare global {
 
 	/**
+	 * Some object which requires special logic to be properly destroyed when it is no longer
+	 * required.
+	 */
+	interface Destroyable {
+
+		/**
+		 * Destroy this object.
+		 * 
+		 * This method is safe to call more than once.
+		 */
+		destroy();
+
+	};
+
+	/**
 	 * Components held by the plugin singleton for the currently open project.
 	 */
 	type ProjectComponents = {
