@@ -692,6 +692,7 @@ export class Preferences {
 	 */
 	async loadUserListFrom(users_path) {
 
+		const FALLBACK_USER_NAME = 'unknownUser_unknownUserID';
 		const userNameListRes = await readdir(users_path);
 		
 		if (!userNameListRes.ok) {
@@ -710,7 +711,17 @@ export class Preferences {
 				Electron_FS.existsSync(node.path.join(user.path, 'license.plist')) ||
 				Electron_FS.existsSync(node.path.join(user.path, 'local_settings.json')
 			)))
-			.sort((a, b) => +(a.name > b.name));
+			.sort((a, b) => {
+				if (a.name === FALLBACK_USER_NAME) {
+					return 1;
+				}
+
+				if (b.name === FALLBACK_USER_NAME) {
+					return -1;
+				}
+
+				return Number(a.name > b.name);
+			});
 		
 		const nonEmptyUsersList = asNonEmptyArray(users);
 
