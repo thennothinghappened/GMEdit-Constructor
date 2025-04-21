@@ -7,8 +7,9 @@ import { GM_CHANNEL_TYPES, Preferences, ZEUS_RUNTIME_TYPES } from '../../prefere
 import { use } from '../../utils/scope-extensions/use.js';
 import { Dropdown } from '../components/Dropdown.js';
 import { mapToOption, Some } from '../../utils/Option.js';
-
-const UIPreferences = $gmedit['ui.Preferences'];
+import { Input as TextField } from '../components/TextField.js';
+import { docString } from '../../utils/StringUtils.js';
+import { Checkbox } from '../components/Checkbox.js';
 
 export class PreferencesMenu {
 
@@ -25,7 +26,7 @@ export class PreferencesMenu {
 
 	/**
 	 * @private
-	 * @type {{ [key in GMChannelType]: { userDropdown: Components.IDropdown<UserInfo> } }}
+	 * @type {{ [key in GMChannelType]: { userDropdown: UI.Dropdown<UserInfo>, runtimesDirInput: TextField, installDataDirInput: TextField } }}
 	 */
 	channelWidgets = {
 		// @ts-expect-error Filled in during the constructor.
@@ -47,52 +48,54 @@ export class PreferencesMenu {
 
 			section.appendChild(ui.h3('Plugin Behaviour'));
 
-			UIPreferences.addCheckbox(
-				section,
-				'Automatically check for updates',
-				this.preferences.checkForUpdates,
-				(update_check) => (this.preferences.checkForUpdates = update_check)
-			).title = 'Whether to check for updates on startup via GitHub.';
-		
-			UIPreferences.addCheckbox(
-				section,
-				'Auto-save open files when running tasks',
-				this.preferences.saveOnRun,
-				(saveOnRun) => (this.preferences.saveOnRun = saveOnRun)
-			).title = 'Whether to automatically save when you run a project task.';
-		
-			UIPreferences.addCheckbox(
-				section,
-				'Reuse existing compiler tab',
-				this.preferences.saveOnRun,
-				(reuseOutputTab) => { this.preferences.reuseOutputTab = reuseOutputTab; }
-			).title = 'Whether to reuse an existing compiler output tab for re-running. This may be useful to disable if you intentionally want to run multiple at a time, e.g. for multiplayer.';
+			this.checkForUpdatesCheckbox = new Checkbox('Automatically check for updates',
+					this.preferences.checkForUpdates,
+					(value) => { this.preferences.checkForUpdates = value }
+				)
+				.tooltip('Whether to check for updates on startup via GitHub.')
+				.appendTo(section);
 
+			this.saveOnRunCheckbox = new Checkbox('Auto-save open files when running tasks',
+					this.preferences.saveOnRun,
+					(value) => { this.preferences.saveOnRun = value }
+				)
+				.tooltip('Whether to automatically save when you run a project task.')
+				.appendTo(section);
+
+			this.reuseOutputTabCheckbox = new Checkbox('Reuse existing compiler tab',
+					this.preferences.reuseOutputTab,
+					(value) => { this.preferences.reuseOutputTab = value }
+				)
+				.tooltip(docString(`
+					Whether to reuse an existing compiler output tab for re-running. This may be
+					useful to disable if you intentionally want to run multiple at a time, e.g. for
+					multiplayer.
+				`))
+				.appendTo(section);
+		
 		}).also(it => this.element.appendChild(it));
 
 		use(document.createElement('section')).also(section => {
 
 			section.appendChild(ui.h3('Build Settings'));
 
-			use(new Dropdown('Runtime Type',
-				Some(this.preferences.runtimeBuildType),
-				(runtimeBuildType) => { this.preferences.runtimeBuildType = runtimeBuildType; },
-				ZEUS_RUNTIME_TYPES
-			)).let(it => it.element).also(element => {
-				element.classList.add('singleline');
-				element.title = 'The type of runtime to use.';
-				section.appendChild(element);
-			});
-		
-			this.runtimeReleaseChannelDropdown = use(new Dropdown('Runtime Release Channel',
-				Some(this.preferences.defaultRuntimeChannel),
-				(defaultRuntimeChannel) => { this.preferences.defaultRuntimeChannel = defaultRuntimeChannel; },
-				GM_CHANNEL_TYPES
-			)).also(it => {
-				it.element.classList.add('singleline');
-				it.element.title = 'The GameMaker update channel from which to pick the runtime version from.';
-				section.appendChild(it.element);
-			}).value;
+			this.runtimeBuildTypeDropdown = new Dropdown('Runtime Type',
+					Some(this.preferences.runtimeBuildType),
+					(value) => { this.preferences.runtimeBuildType = value },
+					ZEUS_RUNTIME_TYPES
+				)
+				.singleline()
+				.tooltip('The type of runtime to use.')
+				.appendTo(section);
+
+			this.runtimeReleaseChannelDropdown = new Dropdown('Runtime Release Channel',
+					Some(this.preferences.defaultRuntimeChannel),
+					(value) => { this.preferences.defaultRuntimeChannel = value },
+					GM_CHANNEL_TYPES
+				)
+				.singleline()
+				.tooltip('The GameMaker update channel from which to pick the runtime version from.')
+				.appendTo(section);
 			
 		}).also(it => this.element.appendChild(it));
 
@@ -100,65 +103,55 @@ export class PreferencesMenu {
 
 			section.appendChild(ui.h3('Paths'));
 
-			UIPreferences.addInput(section, 'Global Builds Path',
-				this.preferences.globalBuildPath,
-				(globalBuildPath) => { this.preferences.globalBuildPath = globalBuildPath; }
-			).title = 'Path to a central builds directory, which Constructor manages for you. Stops your project\'s directory being clogged by build files.';
-		
-			UIPreferences.addCheckbox(section, 'Use the global builds directory',
-				this.preferences.useGlobalBuildPath,
-				(useGlobalBuildPath) => { this.preferences.useGlobalBuildPath = useGlobalBuildPath; }
-			).title = 'Whether to use the global builds directory, or instead to place build files in the project\'s own directory.';
+			this.globalBuildsPathInput = new TextField('Global Builds Path',
+					this.preferences.globalBuildPath,
+					(value) => { this.preferences.globalBuildPath = value }
+				)
+				.tooltip(docString(`
+					Path to a central builds directory, which Constructor manages for you. Stops
+					your project's directory being clogged by build files.
+				`))
+				.appendTo(section);
+
+			this.useGlobalBuildPathCheckbox = new Checkbox('Use the global builds directory',
+					this.preferences.useGlobalBuildPath,
+					(value) => { this.preferences.useGlobalBuildPath = value }
+				)
+				.tooltip(docString(`
+					Whether to use the global builds directory, or instead to place build files in
+					the project's own directory.
+				`))
+				.appendTo(section);
 
 			for (const channel of GM_CHANNEL_TYPES) {
 
 				const widgets = this.channelWidgets[channel];
 				const group = ui.group(section, channel);
 
-				UIPreferences.addInput(group, 'Runtimes Directory',
+				widgets.runtimesDirInput = new TextField('Runtimes Directory',
 					this.preferences.getRuntimeSearchPath(channel),
-					(path) => {
-						
-						// Workaround for being called twice for some reason?
-						if (path === this.preferences.getRuntimeSearchPath(channel)) {
-							return;
-						}
-						
-						// FIXME: UI can spam call this and cause an invalid state!
-						this.preferences.setRuntimeSearchPath(channel, path);
-
+					async (path) => {
+						await this.preferences.setRuntimeSearchPath(channel, path)
 					}
-				);
+				).appendTo(group);
 
-				UIPreferences.addInput(group, 'Installation Data Directory',
+				widgets.installDataDirInput = new TextField('Installation Data Directory',
 					this.preferences.getUserSearchPath(channel),
-					(path) => {
-
-						// Workaround for being called twice for some reason?
-						if (path === this.preferences.getUserSearchPath(channel)) {
-							return;
-						}
-		
-						// FIXME: UI can spam call this and cause an invalid state!
-						this.preferences.setUserSearchPath(channel, path);
-
+					async (path) => {
+						await this.preferences.setUserSearchPath(channel, path);
 					}
-				);
+				).appendTo(group);
 
 				const users = this.preferences.getUsers(channel);
 		
 				widgets.userDropdown = new Dropdown('User',
-					mapToOption(this.preferences.getUser(channel)),
-					(user) => this.preferences.setUser(channel, user.name),
-					users?.map(user => ({ label: user.name, value: user })) ?? [],
-					(a, b) => a.name === b.name
-				);
-
-				if (users === undefined) {
-					widgets.userDropdown.element.hidden = true;
-				}
-
-				group.appendChild(widgets.userDropdown.element);
+						mapToOption(this.preferences.getUser(channel)),
+						(value) => this.preferences.setUser(channel, value.name),
+						users?.map(user => ({ label: user.name, value: user })) ?? [],
+						(a, b) => a.name === b.name
+					)
+					.visible(users !== undefined)
+					.appendTo(group);
 
 				// Presumably not-installed groups can start collapsed, since the user probably
 				// doesn't care about them unless they specifically want to set them up.
@@ -210,7 +203,7 @@ export class PreferencesMenu {
 	 * @param {TPreferences.PreferencesEventMap['setCheckForUpdates']} event
 	 */
 	onSetCheckForUpdates = ({ checkForUpdates }) => {
-		console.warn('TODO: implement onSetCheckForUpdates');
+		this.checkForUpdatesCheckbox.value = checkForUpdates;
 	}
 
 	/**
@@ -218,7 +211,7 @@ export class PreferencesMenu {
 	 * @param {TPreferences.PreferencesEventMap['setSaveOnRun']} event
 	 */
 	onSetSaveOnRun = ({ saveOnRun }) => {
-		console.warn('TODO: implement onSetSaveOnRun');
+		this.saveOnRunCheckbox.value = saveOnRun;
 	}
 
 	/**
@@ -226,7 +219,7 @@ export class PreferencesMenu {
 	 * @param {TPreferences.PreferencesEventMap['setReuseOutputTab']} event
 	 */
 	onSetReuseOutputTab = ({ reuseOutputTab }) => {
-		console.warn('TODO: implement onSetReuseOutputTab');
+		this.reuseOutputTabCheckbox.value = reuseOutputTab;
 	}
 
 	/**
@@ -234,7 +227,7 @@ export class PreferencesMenu {
 	 * @param {TPreferences.PreferencesEventMap['setUseGlobalBuildPath']} event
 	 */
 	onSetUseGlobalBuildPath = ({ useGlobalBuildPath }) => {
-		console.warn('TODO: implement onSetUseGlobalBuildPath');
+		this.useGlobalBuildPathCheckbox.value = useGlobalBuildPath;
 	}
 
 	/**
@@ -242,7 +235,7 @@ export class PreferencesMenu {
 	 * @param {TPreferences.PreferencesEventMap['setGlobalBuildPath']} event
 	 */
 	onSetGlobalBuildPath = ({ globalBuildPath }) => {
-		console.warn('TODO: implement onSetGlobalBuildPath');
+		this.globalBuildsPathInput.value = globalBuildPath;
 	}
 
 	/**
@@ -256,7 +249,7 @@ export class PreferencesMenu {
 		const userDropdown = this.channelWidgets[channel].userDropdown;
 
 		if (usersInfo === undefined) {
-			userDropdown.element.hidden = true;
+			userDropdown.visible(false);
 			return;
 		}
 
@@ -265,7 +258,7 @@ export class PreferencesMenu {
 			value: user
 		})), usersInfo.defaultUser);
 
-		userDropdown.element.hidden = false;
+		userDropdown.visible(true);
 
 	}
 

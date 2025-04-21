@@ -125,7 +125,6 @@ export declare global {
 		interface PreferencesEventMap {
 
 			setDefaultRuntimeChannel: GMChannelType;
-
 			setCheckForUpdates: { checkForUpdates: boolean };
 			setSaveOnRun: { saveOnRun: boolean };
 			setReuseOutputTab: { reuseOutputTab: boolean };

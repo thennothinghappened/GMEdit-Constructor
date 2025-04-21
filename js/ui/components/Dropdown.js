@@ -3,7 +3,7 @@ import { isSome, None, Some } from '../../utils/Option.js';
 
 /**
  * @template T The element type held in the dropdown.
- * @implements {Components.IDropdown<T>}
+ * @implements {UI.Dropdown<T>}
  */
 export class Dropdown {
 
@@ -45,7 +45,7 @@ export class Dropdown {
 	 * @param {string} label Textual label for this dropdown.
 	 * @param {Option<T>} initialSelected The initial selection.
 	 * @param {(value: T) => void} onSelectedChanged Callback when the selected choice is changed.
-	 * @param {ReadonlyArray<Components.DropdownEntry<T>>} options The initial list of choices.
+	 * @param {ReadonlyArray<UI.Dropdown.Entry<T>>} options The initial list of choices.
 	 * @param {(a: NonNullable<T>, b: NonNullable<T>) => boolean} [equals] A method of comparing two instances of `T`, if `T` is a complex type.
 	 */
 	constructor(label, initialSelected, onSelectedChanged, options, equals) {
@@ -77,6 +77,29 @@ export class Dropdown {
 
 		});
 
+	}
+
+	/**
+	 * @param {string} text 
+	 * @returns {this}
+	 */
+	tooltip(text) {
+		this.element.title = text;
+		return this;
+	}
+
+	/**
+	 * @param {HTMLElement} parent
+	 * @returns {this}
+	 */
+	appendTo(parent) {
+		parent.appendChild(this.element);
+		return this;
+	}
+
+	singleline() {
+		this.element.classList.add('singleline');
+		return this;
 	}
 
 	getSelectedOption() {
@@ -119,7 +142,7 @@ export class Dropdown {
 	}
 
 	/**
-	 * @param {ReadonlyArray<Components.DropdownEntry<T>>} choices The new list of choices. The list must be non-empty.
+	 * @param {ReadonlyArray<UI.Dropdown.Entry<T>>} choices The new list of choices. The list must be non-empty.
 	 * @param {T} selectedChoice
 	 */
 	setOptions(choices, selectedChoice) {
@@ -128,8 +151,24 @@ export class Dropdown {
 	}
 
 	/**
+	 * @param {boolean} enabled 
+	 */
+	enable(enabled) {
+		this.select.disabled = !enabled;
+		return this;
+	}
+
+	/**
+	 * @param {boolean} visible
+	 */
+	visible(visible) {
+		this.element.hidden = !visible;
+		return this;
+	}
+
+	/**
 	 * @private
-	 * @param {ReadonlyArray<Components.DropdownEntry<T>>} choices The new list of choices.
+	 * @param {ReadonlyArray<UI.Dropdown.Entry<T>>} choices The new list of choices.
 	 */
 	setOptionsInternal(choices) {
 
@@ -145,7 +184,7 @@ export class Dropdown {
 		let nextChoiceId = 0;
 
 		const normalizedChoices = choices.map(choice => 
-			/** @type {Components.NormalizedDropdownEntry<T>} */
+			/** @type {UI.Dropdown.NormalizedEntry<T>} */
 			((typeof choice === 'string') ? { label: choice, value: choice } : choice)
 		);
 

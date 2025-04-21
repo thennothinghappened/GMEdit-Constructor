@@ -10,7 +10,7 @@ import { GMRuntimeVersion } from '../../compiler/GMVersion.js';
  * Used for runtime/user select dropdowns, to default to the global settings.
  * Corresponds to `undefined` in the actual preferences files.
  * 
- * @type {Components.NormalizedDropdownEntry<undefined>}
+ * @type {UI.Dropdown.NormalizedEntry<undefined>}
  */
 const USE_DEFAULT = {
 	label: 'Use Default',
@@ -18,7 +18,7 @@ const USE_DEFAULT = {
 };
 
 /**
- * @type {Components.NormalizedDropdownEntry<undefined>}
+ * @type {UI.Dropdown.NormalizedEntry<undefined>}
  */
 const USE_COMPATIBLE_RUNTIME = {
 	label: 'Pick a compatible runtime',
@@ -55,37 +55,37 @@ export class ProjectPropertiesMenu {
 
 	/**
 	 * @private
-	 * @type {Components.IDropdown<string>}
+	 * @type {UI.Dropdown<string>}
 	 */
 	buildConfigDropdown;
 
 	/**
 	 * @private
-	 * @type {Components.IDropdown<GMS2.Platform|undefined>}
+	 * @type {UI.Dropdown<GMS2.Platform|undefined>}
 	 */
 	platformDropdown;
 
 	/**
 	 * @private
-	 * @type {Components.IDropdown<GMS2.RuntimeType|undefined>}
+	 * @type {UI.Dropdown<GMS2.RuntimeType|undefined>}
 	 */
 	zeusRuntimeTypeDropdown;
 
 	/**
 	 * @private
-	 * @type {Components.IDropdown<GMChannelType|undefined>}
+	 * @type {UI.Dropdown<GMChannelType|undefined>}
 	 */
 	zeusReleaseChannelDropdown;
 
 	/**
 	 * @private
-	 * @type {Components.IDropdown<GMRuntimeVersion|undefined>}
+	 * @type {UI.Dropdown<GMRuntimeVersion|undefined>}
 	 */
 	runtimeVersionDropdown;
 
 	/**
 	 * @private
-	 * @type {Components.IDropdown<boolean|undefined>}
+	 * @type {UI.Dropdown<boolean|undefined>}
 	 */
 	reuseOutputTabDropdown;
 
@@ -104,78 +104,72 @@ export class ProjectPropertiesMenu {
 		// ------------------------------------------------------------------------------
 
 		this.buildConfigDropdown = new Dropdown('Build Configuration',
-			Some(this.properties.buildConfigName),
-			(config_name) => { this.properties.buildConfigName = config_name; },
-			project_config_tree_flatten(this.properties.rootBuildConfig)
-		);
-
-		this.buildConfigDropdown.element.classList.add('singleline');
-		this.element.appendChild(this.buildConfigDropdown.element);
+				Some(this.properties.buildConfigName),
+				(config_name) => { this.properties.buildConfigName = config_name },
+				project_config_tree_flatten(this.properties.rootBuildConfig)
+			)
+			.singleline()
+			.appendTo(this.element);
 
 		// ------------------------------------------------------------------------------
 
 		this.platformDropdown = new Dropdown('Runner Platform',
-			Some(this.properties.zeusPlatform),
-			(value) => { this.properties.zeusPlatform = value; },
-			[
-				{ label: 'Current Platform', value: undefined },
-				'HTML5',
-				'OperaGX',
-			]
-		);
-		
-		this.platformDropdown.element.classList.add('singleline');
-		this.element.appendChild(this.platformDropdown.element);
+				Some(this.properties.zeusPlatform),
+				(value) => { this.properties.zeusPlatform = value; },
+				[
+					{ label: 'Current Platform', value: undefined },
+					'HTML5',
+					'OperaGX',
+				]
+			)
+			.singleline()
+			.appendTo(this.element);
 
 		// ------------------------------------------------------------------------------
 
 		this.zeusRuntimeTypeDropdown = new Dropdown('Runtime Type',
-			Some(this.properties.runtimeBuildType),
-			(value) => { this.properties.runtimeBuildType = value; },
-			[USE_DEFAULT, ...ZEUS_RUNTIME_TYPES]
-		);
-		
-		this.zeusRuntimeTypeDropdown.element.classList.add('singleline');
-		this.element.appendChild(this.zeusRuntimeTypeDropdown.element);
+				Some(this.properties.runtimeBuildType),
+				(value) => { this.properties.runtimeBuildType = value; },
+				[USE_DEFAULT, ...ZEUS_RUNTIME_TYPES]
+			)
+			.singleline()
+			.appendTo(this.element);
 
 		// ------------------------------------------------------------------------------
 
 		this.zeusReleaseChannelDropdown = new Dropdown('Runtime Release Channel',
-			Some(this.properties.runtimeChannelType),
-			(value) => { this.properties.runtimeChannelType = value; },
-			[USE_DEFAULT, ...GM_CHANNEL_TYPES]
-		);
-		
-		this.zeusReleaseChannelDropdown.element.classList.add('singleline');
-		this.element.appendChild(this.zeusReleaseChannelDropdown.element);
+				Some(this.properties.runtimeChannelType),
+				(value) => { this.properties.runtimeChannelType = value; },
+				[USE_DEFAULT, ...GM_CHANNEL_TYPES]
+			)
+			.singleline()
+			.appendTo(this.element);
 
 		// ------------------------------------------------------------------------------
 
 		this.runtimeVersionDropdown = new Dropdown('Runtime Version',
-			Some(this.properties.runtimeVersion),
-			(value) => { this.properties.runtimeVersion = value; },
-			[USE_COMPATIBLE_RUNTIME, ...this.mapRuntimesInChannelToEntries() ?? []],
-			(a, b) => a.equals(b)
-		);
-		
-		this.runtimeVersionDropdown.element.classList.add('singleline');
-		this.runtimeVersionDropdown.element.hidden = (this.properties.runtimeChannelType === undefined);
-		this.element.appendChild(this.runtimeVersionDropdown.element);
+				Some(this.properties.runtimeVersion),
+				(value) => { this.properties.runtimeVersion = value; },
+				[USE_COMPATIBLE_RUNTIME, ...this.mapRuntimesInChannelToEntries() ?? []],
+				(a, b) => a.equals(b)
+			)
+			.singleline()
+			.visible(this.properties.runtimeChannelType !== undefined)
+			.appendTo(this.element);
 
 		// ------------------------------------------------------------------------------
 		
-		this.reuseOutputTabDropdown = use(new Dropdown('Reuse existing compiler tab',
-			Some(this.properties.reuseOutputTab),
-			(value) => { this.properties.reuseOutputTab = value; },
-			[
-				USE_DEFAULT,
-				{ label: 'Yes', value: true },
-				{ label: 'No', value: false }
-			],
-		)).also(it => {
-			it.element.classList.add('singleline');
-			this.element.appendChild(it.element);
-		}).value;
+		this.reuseOutputTabDropdown = new Dropdown('Reuse existing compiler tab',
+				Some(this.properties.reuseOutputTab),
+				(value) => { this.properties.reuseOutputTab = value; },
+				[
+					USE_DEFAULT,
+					{ label: 'Yes', value: true },
+					{ label: 'No', value: false }
+				],
+			)
+			.singleline()
+			.appendTo(this.element);
 
 		// ------------------------------------------------------------------------------
 
@@ -198,7 +192,7 @@ export class ProjectPropertiesMenu {
 
 	/**
 	 * @private
-	 * @returns {Components.NormalizedDropdownEntry<GMRuntimeVersion>[]|undefined}
+	 * @returns {UI.Dropdown.NormalizedEntry<GMRuntimeVersion>[]|undefined}
 	 */
 	mapRuntimesInChannelToEntries() {
 		
@@ -230,7 +224,7 @@ export class ProjectPropertiesMenu {
 	onChangeRuntimeChannel = ({ channel }) => {
 
 		this.updateChannel(channel);
-		this.runtimeVersionDropdown.element.hidden = (channel === undefined);
+		this.runtimeVersionDropdown.visible(channel !== undefined);
 
 		if (channel !== undefined) {
 			this.updateRuntimeVersionList();

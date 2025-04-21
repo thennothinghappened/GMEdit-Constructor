@@ -2,17 +2,33 @@ import { InvalidStateErr } from '../../utils/Err';
 import { DropdownEntry } from './Dropdown';
 
 export declare global {
-	namespace Components {
+	namespace UI {
 
-		type NormalizedDropdownEntry<T> =  {
-			label: string;
-			value: T;
+		interface Widget {
+
+			/**
+			 * Set whether this widget should be enabled.
+			 */
+			enable(enabled: boolean): this;
+
+			/**
+			 * Set whether this widget should be visible.
+			 */
+			visible(visible: boolean): this;
+
+			/**
+			 * Specify a tooltip for the user when hovering this widget.
+			 * @param text The tooltip text for the widget.
+			 */
+			tooltip(text: string): this;
+
+			/**
+			 * Append this widget to the given element.
+			 * @param parent The parent element to be appended to.
+			 */
+			appendTo(parent: HTMLElement): this;
+
 		};
-
-		type DropdownEntry<T> = (T extends string 
-			? (T | NormalizedDropdownEntry<T>)
-			: (NormalizedDropdownEntry<T>)
-		);
 		
 		/**
 		 * A dropdown from which one element can be selected.
@@ -20,12 +36,7 @@ export declare global {
 		 * FIXME: the TS LSP refuses to narrow types when I used the `@template` JSDoc tag, so I had
 		 * to chuck this interface in here. I don't really know why!
 		 */
-		interface IDropdown<T> {
-
-			/**
-			 * The root element of this dropdown, to be attached to the document.
-			 */
-			element: HTMLElement;
+		interface Dropdown<T> extends Widget {
 
 			/**
 			 * Get the currently selected option.
@@ -46,11 +57,25 @@ export declare global {
 			 * @param selectedChoice The new selected choice.
 			 */
 			setOptions(
-				choices: ReadonlyArray<DropdownEntry<T>>,
+				choices: ReadonlyArray<Dropdown.Entry<T>>,
 				selectedChoice: T
 			);
 
-		}
+		};
+
+		namespace Dropdown {
+	
+			type Entry<T> = (T extends string 
+				? (T | NormalizedDropdownEntry<T>)
+				: (NormalizedDropdownEntry<T>)
+			);
+
+			type NormalizedEntry<T> =  {
+				label: string;
+				value: T;
+			};
+
+		};
 
 	}
 }
