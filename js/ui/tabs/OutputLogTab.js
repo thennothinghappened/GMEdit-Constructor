@@ -3,7 +3,6 @@ import { ConstructorTab } from './ConstructorTab.js';
 import * as ui from '../ui-wrappers.js';
 import { use } from '../../utils/scope-extensions/use.js';
 import { GmlFileUtils } from '../../utils/gmedit/GmlFileUtils.js';
-import { ProjectProperties } from '../../preferences/ProjectProperties.js';
 
 const FileKind = $gmedit['file.FileKind'];
 const GmlFile = $gmedit['gml.file.GmlFile'];
