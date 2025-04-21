@@ -1,0 +1,9 @@
+{
+  "name": "constructor-cli",
+  "version": "0.0.1",
+  "description": "CLI for building GameMaker via GMEdit's Constructor plugin",
+  "main": "index.js",
+  "type": "module",
+  "author": "orca",
+  "license": "MIT"
+}
