@@ -21,7 +21,7 @@ const USE_DEFAULT = {
  * @type {UI.Dropdown.NormalizedEntry<undefined>}
  */
 const USE_COMPATIBLE_RUNTIME = {
-	label: 'Pick a compatible runtime',
+	label: 'Latest compatible',
 	value: undefined
 };
 
