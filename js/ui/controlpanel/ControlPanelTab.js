@@ -106,6 +106,8 @@ export class ControlPanelTab extends ConstructorTab {
 			ui.text_button('Dismiss', () => this.controlPanel.clearProblem(problem))
 		]);
 
+		this.problemElementMap.set(problem, element);
+
 		element.classList.add(...css_classes);
 		element.appendChild(ui.p(problem.err.message));
 
@@ -130,10 +132,12 @@ export class ControlPanelTab extends ConstructorTab {
 
 		const element = this.problemElementMap.get(problem);
 
-		if (element !== undefined) {
-			element.remove();
+		if (element === undefined) {
+			console.error(`Element ${element} does not exist in the map!!`);
+			return;
 		}
 
+		element.remove();
 		this.problemElementMap.delete(problem);
 
 		if (this.problemElementMap.size === 0) {
