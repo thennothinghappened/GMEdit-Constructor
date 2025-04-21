@@ -64,6 +64,11 @@
 	margin-bottom: 0;
 }
 
+.gm-constructor-control-panel-errors:not([hidden]) {
+	display: flex;
+	flex-direction: column-reverse;
+}
+
 .gm-constructor-control-panel-errors > fieldset > p {
 	white-space: pre-wrap;
 }
