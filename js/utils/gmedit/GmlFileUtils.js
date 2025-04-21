@@ -1,6 +1,8 @@
 
 export class GmlFileUtils {
 
+	// TODO: Remove this helper once https://github.com/YellowAfterlife/GMEdit/pull/235 is in a
+	// public Stable build.
 	/**
 	 * Properly rename the given GML file. GMEdit does this weird manual updating of things via
 	 * heaps of inline properties internally.
