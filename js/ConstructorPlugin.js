@@ -395,7 +395,7 @@ export class ConstructorPlugin {
 
 		if (projectProperties.runtimeVersion !== undefined) {
 
-			channel = /** @type {GM.ReleaseChannel} */ (projectProperties.runtimeChannelType);
+			channel = /** @type {GM.ReleaseChannel} */ (projectProperties.runtimeReleaseChannel);
 			const result = this.preferences.getRuntimeInfo(channel, projectProperties.runtimeVersion);
 	
 			if (!result.ok) {
@@ -425,7 +425,7 @@ export class ConstructorPlugin {
 			const result = compileController.findCompatibleRuntime(
 				this.preferences,
 				projectProperties.projectVersion,
-				projectProperties.runtimeChannelType
+				projectProperties.runtimeReleaseChannel
 			);
 
 			if (!result.ok) {
@@ -506,7 +506,7 @@ export class ConstructorPlugin {
 		const settings = {
 			verb: taskVerb,
 			buildPath: this.getBuildDir(project),
-			platform: projectProperties.zeusPlatform ?? igorPaths.igor_user_platform,
+			platform: projectProperties.gms2Platform ?? igorPaths.igor_user_platform,
 			runner: projectProperties.runtimeBuildTypeOrDef,
 			configName: projectProperties.buildConfigName
 		};

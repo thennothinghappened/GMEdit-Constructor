@@ -1,5 +1,5 @@
 import { use } from '../../utils/scope-extensions/use.js';
-import { GM_CHANNEL_TYPES, Preferences, ZEUS_RUNTIME_TYPES } from '../../preferences/Preferences.js';
+import { GM_RELEASE_CHANNELS, Preferences, GMS2_RUNTIME_TYPES } from '../../preferences/Preferences.js';
 import { project_config_tree_flatten } from '../../utils/project.js';
 import { ProjectProperties } from '../../preferences/ProjectProperties.js';
 import { Dropdown } from '../components/Dropdown.js';
@@ -79,13 +79,13 @@ export class ProjectPropertiesMenu {
 	 * @private
 	 * @type {UI.Dropdown<GMS2.RuntimeType|undefined>}
 	 */
-	zeusRuntimeTypeDropdown;
+	gms2RuntimeTypeDropdown;
 
 	/**
 	 * @private
 	 * @type {UI.Dropdown<GM.ReleaseChannel|undefined>}
 	 */
-	zeusReleaseChannelDropdown;
+	gms2ReleaseChannelDropdown;
 
 	/**
 	 * @private
@@ -124,8 +124,8 @@ export class ProjectPropertiesMenu {
 		// ------------------------------------------------------------------------------
 
 		this.platformDropdown = new Dropdown('Runner Platform',
-				Some(this.properties.zeusPlatform),
-				(value) => { this.properties.zeusPlatform = value; },
+				Some(this.properties.gms2Platform),
+				(value) => { this.properties.gms2Platform = value; },
 				[
 					{ label: 'Current Platform', value: undefined },
 					'HTML5',
@@ -137,20 +137,20 @@ export class ProjectPropertiesMenu {
 
 		// ------------------------------------------------------------------------------
 
-		this.zeusRuntimeTypeDropdown = new Dropdown('Runtime Type',
+		this.gms2RuntimeTypeDropdown = new Dropdown('Runtime Type',
 				Some(this.properties.runtimeBuildType),
 				(value) => { this.properties.runtimeBuildType = value; },
-				[USE_DEFAULT, ...ZEUS_RUNTIME_TYPES]
+				[USE_DEFAULT, ...GMS2_RUNTIME_TYPES]
 			)
 			.singleline()
 			.appendTo(this.element);
 
 		// ------------------------------------------------------------------------------
 
-		this.zeusReleaseChannelDropdown = new Dropdown('Runtime Release Channel',
-				Some(this.properties.runtimeChannelType),
-				(value) => { this.properties.runtimeChannelType = value; },
-				[USE_COMPATIBLE_CHANNEL, ...GM_CHANNEL_TYPES]
+		this.gms2ReleaseChannelDropdown = new Dropdown('Runtime Release Channel',
+				Some(this.properties.runtimeReleaseChannel),
+				(value) => { this.properties.runtimeReleaseChannel = value; },
+				[USE_COMPATIBLE_CHANNEL, ...GM_RELEASE_CHANNELS]
 			)
 			.singleline()
 			.appendTo(this.element);
@@ -164,7 +164,7 @@ export class ProjectPropertiesMenu {
 				(a, b) => a.equals(b)
 			)
 			.singleline()
-			.visible(this.properties.runtimeChannelType !== undefined)
+			.visible(this.properties.runtimeReleaseChannel !== undefined)
 			.appendTo(this.element);
 
 		// ------------------------------------------------------------------------------
@@ -206,7 +206,7 @@ export class ProjectPropertiesMenu {
 	 */
 	mapRuntimesInChannelToEntries() {
 		
-		const channel = this.properties.runtimeChannelType;
+		const channel = this.properties.runtimeReleaseChannel;
 
 		if (channel === undefined) {
 			return undefined;
@@ -255,7 +255,7 @@ export class ProjectPropertiesMenu {
 	 * @param {TPreferences.PreferencesEventMap['runtimeListChanged']} event
 	 */
 	onRuntimeListChanged = ({ channel }) => {
-		if (this.properties.runtimeChannelType === channel) {
+		if (this.properties.runtimeReleaseChannel === channel) {
 			this.updateRuntimeVersionList();
 		}
 	};
@@ -265,7 +265,7 @@ export class ProjectPropertiesMenu {
 	 * @param {GM.ReleaseChannel|undefined} channel
 	 */
 	updateChannel(channel) {
-		this.zeusReleaseChannelDropdown.setSelectedOption(channel);
+		this.gms2ReleaseChannelDropdown.setSelectedOption(channel);
 	}
 
 	/**

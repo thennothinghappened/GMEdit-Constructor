@@ -199,7 +199,7 @@ export class ProjectProperties {
 	 * Get the desired runtime channel type for this project (without falling back to the global option).
 	 * @returns {GM.ReleaseChannel|undefined}
 	 */
-	get runtimeChannelType() {
+	get runtimeReleaseChannel() {
 		return this.portable.runtime_type ?? undefined;
 	}
 
@@ -207,9 +207,9 @@ export class ProjectProperties {
 	 * Set the desired runtime channel type.
 	 * @param {GM.ReleaseChannel|undefined} channel 
 	 */
-	set runtimeChannelType(channel) {
+	set runtimeReleaseChannel(channel) {
 
-		if (this.runtimeChannelType === channel) {
+		if (this.runtimeReleaseChannel === channel) {
 			return;
 		}
 
@@ -226,15 +226,15 @@ export class ProjectProperties {
 	 * 
 	 * @returns {GMS2.Platform|undefined}
 	 */
-	get zeusPlatform() {
+	get gms2Platform() {
 		return this.local.platform;
 	}
 
 	/**
-	 * @param {GMS2.Platform|undefined} zeusPlatform 
+	 * @param {GMS2.Platform|undefined} platform 
 	 */
-	set zeusPlatform(zeusPlatform) {
-		this.local.platform = zeusPlatform;
+	set gms2Platform(platform) {
+		this.local.platform = platform;
 		this.saveLocalProps();
 	}
 
@@ -245,7 +245,7 @@ export class ProjectProperties {
 	 */
 	get runtimeVersion() {
 
-		const channel = this.runtimeChannelType;
+		const channel = this.runtimeReleaseChannel;
 
 		// If no channel is specified, this value is meaningless.
 		if (channel === undefined) {

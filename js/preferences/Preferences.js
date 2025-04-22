@@ -18,10 +18,10 @@ import { asNonEmptyArray } from '../utils/ArrayUtils.js';
  * List of recognised GameMaker IDE/Runtime channel types.
  * @type {NonEmptyArray<GM.ReleaseChannel>} 
  */
-export const GM_CHANNEL_TYPES = ['Stable', 'Beta', 'LTS'];
+export const GM_RELEASE_CHANNELS = ['Stable', 'Beta', 'LTS'];
 
 /** @type {NonEmptyArray<GMS2.RuntimeType>} */
-export const ZEUS_RUNTIME_TYPES = ['VM', 'YYC'];
+export const GMS2_RUNTIME_TYPES = ['VM', 'YYC'];
 
 /** @type {Readonly<TPreferences.Data>} */
 const PREFS_DEFAULT = {
@@ -220,7 +220,7 @@ export class Preferences {
 		this.dataPath = dataPath;
 		deep_assign(this.prefs, loadedPrefs);
 
-		const loadRequests = GM_CHANNEL_TYPES.map(async channel => {
+		const loadRequests = GM_RELEASE_CHANNELS.map(async channel => {
 
 			const runtimesRequest = this.loadRuntimeList(channel);
 			const usersRequest = this.loadUserList(channel);
@@ -440,30 +440,30 @@ export class Preferences {
 	/**
 	 * Set the global choice for default runtime for a given type.
 	 * 
-	 * @param {GM.ReleaseChannel} type 
+	 * @param {GM.ReleaseChannel} channel 
 	 * @param {string|undefined} user 
 	 */
-	setUser(type, user) {
-		this.prefs.runtime_opts.type_opts[type].user = user ?? undefined;
+	setUser(channel, user) {
+		this.prefs.runtime_opts.type_opts[channel].user = user ?? undefined;
 		this.save();
 	}
 
 	/**
 	 * Get the search path for runtime of a given type.
 	 * 
-	 *  @param {GM.ReleaseChannel} type 
+	 *  @param {GM.ReleaseChannel} channel 
 	 */
-	getRuntimeSearchPath(type) {
-		return this.prefs.runtime_opts.type_opts[type].search_path;
+	getRuntimeSearchPath(channel) {
+		return this.prefs.runtime_opts.type_opts[channel].search_path;
 	}
 
 	/**
 	 * Get the users path for runtime of a given type.
 	 * 
-	 *  @param {GM.ReleaseChannel} type 
+	 *  @param {GM.ReleaseChannel} channel 
 	 */
-	getUserSearchPath(type) {
-		return this.prefs.runtime_opts.type_opts[type].users_path;
+	getUserSearchPath(channel) {
+		return this.prefs.runtime_opts.type_opts[channel].users_path;
 	}
 
 	/**
@@ -479,11 +479,11 @@ export class Preferences {
 	/**
 	 * Get the list of users for a given runtime type.
 	 * 
-	 * @param {GM.ReleaseChannel} type
+	 * @param {GM.ReleaseChannel} channel
 	 * @returns {NonEmptyArray<GM.User>|undefined}
 	 */
-	getUsers(type) {
-		return this.usersInChannels[type] ?? undefined;
+	getUsers(channel) {
+		return this.usersInChannels[channel] ?? undefined;
 	};
 
 	/**
@@ -576,10 +576,10 @@ export class Preferences {
 	 * Get the global runtime options for a given runtime type.
 	 * 
 	 * @private
-	 * @param {GM.ReleaseChannel} type 
+	 * @param {GM.ReleaseChannel} channel 
 	 */
-	getRuntimeOptions(type) {
-		return this.prefs.runtime_opts.type_opts[type];
+	getRuntimeOptions(channel) {
+		return this.prefs.runtime_opts.type_opts[channel];
 	}
 
 	/**
@@ -652,11 +652,11 @@ export class Preferences {
 	/**
 	 * Load the list of users for the provided users path for a type.
 	 * 
-	 * @param {GM.ReleaseChannel} type
+	 * @param {GM.ReleaseChannel} channel
 	 * @returns {Promise<Result<NonEmptyArray<GM.User>>>}
 	 */
-	loadUserList(type) {
-		return this.loadUserListFrom(this.getRuntimeOptions(type).users_path);
+	loadUserList(channel) {
+		return this.loadUserListFrom(this.getRuntimeOptions(channel).users_path);
 	}
 
 	/**

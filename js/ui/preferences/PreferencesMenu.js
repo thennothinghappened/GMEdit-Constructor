@@ -3,7 +3,7 @@
  */
 
 import * as ui from '../../ui/ui-wrappers.js';
-import { GM_CHANNEL_TYPES, Preferences, ZEUS_RUNTIME_TYPES } from '../../preferences/Preferences.js';
+import { GM_RELEASE_CHANNELS, Preferences, GMS2_RUNTIME_TYPES } from '../../preferences/Preferences.js';
 import { use } from '../../utils/scope-extensions/use.js';
 import { Dropdown } from '../components/Dropdown.js';
 import { mapToOption, Some } from '../../utils/Option.js';
@@ -85,7 +85,7 @@ export class PreferencesMenu {
 			this.runtimeBuildTypeDropdown = new Dropdown('Runtime Type',
 					Some(this.preferences.runtimeBuildType),
 					(value) => { this.preferences.runtimeBuildType = value },
-					ZEUS_RUNTIME_TYPES
+					GMS2_RUNTIME_TYPES
 				)
 				.singleline()
 				.tooltip('The type of runtime to use.')
@@ -117,7 +117,7 @@ export class PreferencesMenu {
 				`))
 				.appendTo(section);
 
-			for (const channel of GM_CHANNEL_TYPES) {
+			for (const channel of GM_RELEASE_CHANNELS) {
 
 				const widgets = this.channelWidgets[channel];
 				const group = ui.group(section, channel);
