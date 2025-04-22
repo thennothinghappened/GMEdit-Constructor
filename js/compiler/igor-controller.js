@@ -112,6 +112,10 @@ function job_flags_get(project, runtime_path, user_path, settings) {
 		flags.push('/ic');
 	}
 
+	if (settings.threads !== undefined) {
+		flags.push(`/j=${settings.threads}`);
+	}
+
 	switch (settings.verb) {
 
 		case 'Package':
