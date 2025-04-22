@@ -29,7 +29,7 @@ export class PreferencesMenu {
 
 	/**
 	 * @private
-	 * @type {{ [key in GMChannelType]: { userDropdown: UI.Dropdown<UserInfo>, runtimesDirInput: TextField, installDataDirInput: TextField } }}
+	 * @type {{ [key in GM.ReleaseChannel]: { userDropdown: UI.Dropdown<GM.User>, runtimesDirInput: TextField, installDataDirInput: TextField } }}
 	 */
 	channelWidgets = {
 		// @ts-expect-error Filled in during the constructor.

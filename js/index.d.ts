@@ -33,26 +33,6 @@ export declare global {
 		configTreeUi: ConfigTreeUi;
 	};
 
-	type ProjectYY = {
-
-		configs: ProjectYYConfig;
-
-		MetaData: {
-			IDEVersion: string
-		};
-
-	} & YYFile;
-
-	type YYFile = {
-		resourceVersion?: string;
-		resourceType: string;
-	};
-
-	type ProjectYYConfig = {
-		children: ProjectYYConfig[];
-		name: string;
-	}
-
 	type UIGroup = { 
 		legend: HTMLLegendElement;
 	} & HTMLFieldSetElement;

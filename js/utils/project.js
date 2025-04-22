@@ -46,7 +46,7 @@ export function tab_current_get() {
  * Get the config tree for a project.
  * 
  * @param {GMEdit.Project} project 
- * @returns {ProjectYYConfig}
+ * @returns {GM.YY.BuildConfig}
  */
 export function project_config_tree_get(project) {
 	return project_read_yy(project).configs;
@@ -55,7 +55,7 @@ export function project_config_tree_get(project) {
 /**
  * Returns the config tree as an array of config names.
  * 
- * @param {ProjectYYConfig} config 
+ * @param {GM.YY.BuildConfig} config 
  * @returns {NonEmptyArray<string>}
  */
 export function project_config_tree_flatten(config) {
@@ -101,8 +101,9 @@ export function project_format_get(project) {
  * Code is by YAL's suggestion.
  * 
  * @param {GMEdit.Project} project 
- * @returns {ProjectYY}
+ * @returns {GM.YY.Project}
  */
 function project_read_yy(project) {
+	// @ts-expect-error Down-casting to a YYP file.
 	return project.readYyFileSync(project.name);
 }

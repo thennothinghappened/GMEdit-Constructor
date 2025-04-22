@@ -32,7 +32,7 @@ export declare global {
 				runner: GMS2.RuntimeType;
 	
 				type_opts: {
-					[key in GMChannelType]: RuntimePerChannelPrefs;
+					[key in GM.ReleaseChannel]: RuntimePerChannelPrefs;
 				};
 			};
 
@@ -72,7 +72,7 @@ export declare global {
 				/**
 				 * Chosen runtime type to use.
 				 */
-				runtime_type: GMChannelType;
+				runtime_type: GM.ReleaseChannel;
 		
 				/**
 				 * Chosen runtime version to use.
@@ -137,7 +137,7 @@ export declare global {
 				/**
 				 * The channel in question.
 				 */
-				channel: GMChannelType;
+				channel: GM.ReleaseChannel;
 
 				/**
 				 * Information about the new configuration, or `undefined` if the channel is no
@@ -162,7 +162,7 @@ export declare global {
 				/**
 				 * The channel in question.
 				 */
-				channel: GMChannelType;
+				channel: GM.ReleaseChannel;
 
 				/**
 				 * Information about the new configuration, or `undefined` if the channel is no
@@ -173,12 +173,12 @@ export declare global {
 					/**
 					 * The new list of users.
 					 */
-					users: NonEmptyArray<UserInfo>;
+					users: NonEmptyArray<GM.User>;
 
 					/**
 					 * The default selected user.
 					 */
-					defaultUser: UserInfo;
+					defaultUser: GM.User;
 
 				};
 
@@ -194,7 +194,7 @@ export declare global {
 			};
 
 			setRuntimeChannel: {
-				channel?: GMChannelType;
+				channel?: GM.ReleaseChannel;
 			};
 
 			setRuntimeVersion: {

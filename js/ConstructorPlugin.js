@@ -390,12 +390,12 @@ export class ConstructorPlugin {
 		/** @type {GMS2.RuntimeInfo|undefined} */
 		let runtime = undefined;
 
-		/** @type {GMChannelType} */
+		/** @type {GM.ReleaseChannel} */
 		let channel;
 
 		if (projectProperties.runtimeVersion !== undefined) {
 
-			channel = /** @type {GMChannelType} */ (projectProperties.runtimeChannelType);
+			channel = /** @type {GM.ReleaseChannel} */ (projectProperties.runtimeChannelType);
 			const result = this.preferences.getRuntimeInfo(channel, projectProperties.runtimeVersion);
 	
 			if (!result.ok) {

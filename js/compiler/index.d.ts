@@ -2,17 +2,42 @@ import { GMRuntimeVersion } from './GMVersion';
 
 export declare global {
 
-	type GMChannelType = 
-		'Stable'	|
-		'Beta'		|
-		'LTS'		;
+	namespace GM {
+
+		type ReleaseChannel = 
+			'Stable'	|
+			'Beta'		|
+			'LTS'		;
+			
+		/**
+		 * Information for a specific found user.
+		 */
+		type User = {
+			path: string;
+			name: string;
+		};
+
+		namespace YY {
+
+			type File = {
+				resourceVersion?: string;
+				resourceType: string;
+			};
+
+			type Project = File & {
+				configs: BuildConfig;
+				MetaData: {
+					IDEVersion: string;
+				};
+			};
 		
-	/**
-	 * Information for a specific found user.
-	 */
-	type UserInfo = {
-		path: string;
-		name: string;
+			type BuildConfig = {
+				children: BuildConfig[];
+				name: string;
+			};
+
+		};
+
 	};
 
 	/**
@@ -22,12 +47,12 @@ export declare global {
 
 		type FindCompatibleRuntimeData = {
 			runtime: RuntimeInfo;
-			channel: GMChannelType;
+			channel: GM.ReleaseChannel;
 		};
 
 		type FindCompatibleRuntimeError =
-			{ type: 'none-compatible', channel?: GMChannelType }	|
-			{ type: 'channel-empty', channel: GMChannelType }		;
+			{ type: 'none-compatible', channel?: GM.ReleaseChannel }	|
+			{ type: 'channel-empty', channel: GM.ReleaseChannel }		;
 
 		interface RuntimeProvider {
 
@@ -35,7 +60,7 @@ export declare global {
 			 * Get the list of available runtimes in the given channel.
 			 * @param channel The runtime channel to query for.
 			 */
-			getRuntimes(channel: GMChannelType): NonEmptyArray<RuntimeInfo> | undefined;
+			getRuntimes(channel: GM.ReleaseChannel): NonEmptyArray<RuntimeInfo> | undefined;
 
 		};
 
@@ -78,7 +103,7 @@ export declare global {
 			 * Get the list of users at the given location.
 			 * @param path Path to the directory where the users' directories can be found.
 			 */
-			async getUsers(path: string): Promise<Result<NonEmptyArray<UserInfo>>>;
+			async getUsers(path: string): Promise<Result<NonEmptyArray<GM.User>>>;
 		};
 
 		/**
@@ -182,7 +207,7 @@ export declare global {
 			 * as I don't know where the location is for Linux.
 			 */
 			default_runtime_paths: {
-				[key in GMChannelType]: string
+				[key in GM.ReleaseChannel]: string
 			};
 
 			/**
@@ -193,7 +218,7 @@ export declare global {
 			 * as I don't know where the location is for Linux.
 			 */
 			default_user_paths: {
-				[key in GMChannelType]: string
+				[key in GM.ReleaseChannel]: string
 			};
 
 			/** Default path to the global build directory. */

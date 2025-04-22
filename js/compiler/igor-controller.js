@@ -20,7 +20,7 @@ export const jobs = [];
  * 
  * @param {GMEdit.Project} project
  * @param {GMS2.RuntimeInfo} runtime
- * @param {UserInfo|undefined} user
+ * @param {GM.User|undefined} user
  * @param {GMS2.IgorSettings} settings
  * @param {number|undefined} [id] Specific ID to use for this job, for stealing from an existing one.
  * @returns {Promise<Result<IgorJob>>}
@@ -77,7 +77,7 @@ export async function job_run(project, runtime, user, settings, id = job_create_
  * 
  * @param {GMS2.RuntimeProvider} runtimeProvider Method of listing available runtimes.
  * @param {GMVersion} projectVersion Version of the project we are tasked with matching against.
- * @param {GMChannelType | undefined} [channel] The channel to query. If unspecified, all channels will be queried in order of specificity.
+ * @param {GM.ReleaseChannel | undefined} [channel] The channel to query. If unspecified, all channels will be queried in order of specificity.
  * @returns {Result<GMS2.FindCompatibleRuntimeData, GMS2.FindCompatibleRuntimeError>}
  */
 export function findCompatibleRuntime(runtimeProvider, projectVersion, channel) {
@@ -111,7 +111,7 @@ export function findCompatibleRuntime(runtimeProvider, projectVersion, channel) 
 	 * also matches with their stability. We want to ideally pick the most-stable option, if there
 	 * are multiple possible matches.
 	 * 
-	 * @type {GMChannelType[]}
+	 * @type {GM.ReleaseChannel[]}
 	 */
 	const CHANNEL_QUERY_ORDER = ['LTS', 'Stable', 'Beta'];
 

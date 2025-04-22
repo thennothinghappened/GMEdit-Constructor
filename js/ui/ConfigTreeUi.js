@@ -63,7 +63,7 @@ export class ConfigTreeUi {
 	 * 
 	 * @private
 	 * @param {HTMLDivElement} parentElement 
-	 * @param {ProjectYYConfig} config 
+	 * @param {GM.YY.BuildConfig} config 
 	 */
 	addConfigInTree(parentElement, config) {
 

@@ -298,7 +298,7 @@ export declare global {
 			 * @param path The path of the YY file to read.
 			 * @returns YY file as JSON.
 			 */
-			readYyFileSync: (path: string) => ProjectYY;
+			readYyFileSync: (path: string) => GM.YY.File;
 	
 		}
 

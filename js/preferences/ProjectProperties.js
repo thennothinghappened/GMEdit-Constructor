@@ -120,7 +120,7 @@ export class ProjectProperties {
 
 	/**
 	 * The root build configuration of the project.
-	 * @returns {ProjectYYConfig}
+	 * @returns {GM.YY.BuildConfig}
 	 */
 	get rootBuildConfig() {
 		return project_config_tree_get(this.project);
@@ -197,7 +197,7 @@ export class ProjectProperties {
 
 	/**
 	 * Get the desired runtime channel type for this project (without falling back to the global option).
-	 * @returns {GMChannelType|undefined}
+	 * @returns {GM.ReleaseChannel|undefined}
 	 */
 	get runtimeChannelType() {
 		return this.portable.runtime_type ?? undefined;
@@ -205,7 +205,7 @@ export class ProjectProperties {
 
 	/**
 	 * Set the desired runtime channel type.
-	 * @param {GMChannelType|undefined} channel 
+	 * @param {GM.ReleaseChannel|undefined} channel 
 	 */
 	set runtimeChannelType(channel) {
 

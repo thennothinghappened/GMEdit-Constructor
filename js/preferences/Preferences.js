@@ -16,7 +16,7 @@ import { asNonEmptyArray } from '../utils/ArrayUtils.js';
 
 /**
  * List of recognised GameMaker IDE/Runtime channel types.
- * @type {NonEmptyArray<GMChannelType>} 
+ * @type {NonEmptyArray<GM.ReleaseChannel>} 
  */
 export const GM_CHANNEL_TYPES = ['Stable', 'Beta', 'LTS'];
 
@@ -125,7 +125,7 @@ export class Preferences {
 	 * Populated after loading the list.
 	 * 
 	 * @private
-	 * @type {{ [key in GMChannelType]?: NonEmptyArray<GMS2.RuntimeInfo> }}
+	 * @type {{ [key in GM.ReleaseChannel]?: NonEmptyArray<GMS2.RuntimeInfo> }}
 	 */
 	runtimesInChannels = {};
 
@@ -134,7 +134,7 @@ export class Preferences {
 	 * Populated after loading the list.
 	 * 
 	 * @private
-	 * @type {{ [key in GMChannelType]?: NonEmptyArray<UserInfo> }}
+	 * @type {{ [key in GM.ReleaseChannel]?: NonEmptyArray<GM.User> }}
 	 */
 	usersInChannels = {};
 
@@ -378,7 +378,7 @@ export class Preferences {
 	 * If the given runtime version string is invalid, is not installed, or the given channel has no
 	 * loaded list, an error is returned.
 	 * 
-	 * @param {GMChannelType} channel The channel the runtime version was released in.
+	 * @param {GM.ReleaseChannel} channel The channel the runtime version was released in.
 	 * @param {GMRuntimeVersion|string} versionOrVersionString The version.
 	 * @returns {Result<GMS2.RuntimeInfo>}
 	 */
@@ -421,8 +421,8 @@ export class Preferences {
 	 * Get the global choice for default user for a given type. This may be `undefined` in the case
 	 * that no users are found for the given channel.
 	 * 
-	 * @param {GMChannelType} channel
-	 * @returns {UserInfo|undefined}
+	 * @param {GM.ReleaseChannel} channel
+	 * @returns {GM.User|undefined}
 	 */
 	getUser(channel) {
 
@@ -440,7 +440,7 @@ export class Preferences {
 	/**
 	 * Set the global choice for default runtime for a given type.
 	 * 
-	 * @param {GMChannelType} type 
+	 * @param {GM.ReleaseChannel} type 
 	 * @param {string|undefined} user 
 	 */
 	setUser(type, user) {
@@ -451,7 +451,7 @@ export class Preferences {
 	/**
 	 * Get the search path for runtime of a given type.
 	 * 
-	 *  @param {GMChannelType} type 
+	 *  @param {GM.ReleaseChannel} type 
 	 */
 	getRuntimeSearchPath(type) {
 		return this.prefs.runtime_opts.type_opts[type].search_path;
@@ -460,7 +460,7 @@ export class Preferences {
 	/**
 	 * Get the users path for runtime of a given type.
 	 * 
-	 *  @param {GMChannelType} type 
+	 *  @param {GM.ReleaseChannel} type 
 	 */
 	getUserSearchPath(type) {
 		return this.prefs.runtime_opts.type_opts[type].users_path;
@@ -469,7 +469,7 @@ export class Preferences {
 	/**
 	 * Get the list of runtime version names for a given runtime type.
 	 * 
-	 * @param {GMChannelType} channel
+	 * @param {GM.ReleaseChannel} channel
 	 * @returns {NonEmptyArray<GMS2.RuntimeInfo>|undefined}
 	 */
 	getRuntimes(channel) {
@@ -479,8 +479,8 @@ export class Preferences {
 	/**
 	 * Get the list of users for a given runtime type.
 	 * 
-	 * @param {GMChannelType} type
-	 * @returns {NonEmptyArray<UserInfo>|undefined}
+	 * @param {GM.ReleaseChannel} type
+	 * @returns {NonEmptyArray<GM.User>|undefined}
 	 */
 	getUsers(type) {
 		return this.usersInChannels[type] ?? undefined;
@@ -489,7 +489,7 @@ export class Preferences {
 	/**
 	 * Set the search path for runtime of a given type.
 	 * 
-	 * @param {GMChannelType} channel 
+	 * @param {GM.ReleaseChannel} channel 
 	 * @param {string} search_path 
 	 */
 	async setRuntimeSearchPath(channel, search_path) {
@@ -530,7 +530,7 @@ export class Preferences {
 	/**
 	 * Set the users path for runtime of a given type.
 	 * 
-	 * @param {GMChannelType} channel 
+	 * @param {GM.ReleaseChannel} channel 
 	 * @param {string} users_path 
 	 */
 	async setUserSearchPath(channel, users_path) {
@@ -576,7 +576,7 @@ export class Preferences {
 	 * Get the global runtime options for a given runtime type.
 	 * 
 	 * @private
-	 * @param {GMChannelType} type 
+	 * @param {GM.ReleaseChannel} type 
 	 */
 	getRuntimeOptions(type) {
 		return this.prefs.runtime_opts.type_opts[type];
@@ -585,7 +585,7 @@ export class Preferences {
 	/**
 	 * Load the list of runtimes for the provided search path for a type.
 	 * 
-	 * @param {GMChannelType} channel
+	 * @param {GM.ReleaseChannel} channel
 	 * @returns {Promise<Result<NonEmptyArray<GMS2.RuntimeInfo>>>}
 	 */
 	async loadRuntimeList(channel) {
@@ -652,8 +652,8 @@ export class Preferences {
 	/**
 	 * Load the list of users for the provided users path for a type.
 	 * 
-	 * @param {GMChannelType} type
-	 * @returns {Promise<Result<NonEmptyArray<UserInfo>>>}
+	 * @param {GM.ReleaseChannel} type
+	 * @returns {Promise<Result<NonEmptyArray<GM.User>>>}
 	 */
 	loadUserList(type) {
 		return this.loadUserListFrom(this.getRuntimeOptions(type).users_path);
@@ -663,7 +663,7 @@ export class Preferences {
 	 * Load the list of users for the provided search path.
 	 *  
 	 * @param {String} users_path 
-	 * @returns {Promise<Result<NonEmptyArray<UserInfo>>>}
+	 * @returns {Promise<Result<NonEmptyArray<GM.User>>>}
 	 */
 	async loadUserListFrom(users_path) {
 

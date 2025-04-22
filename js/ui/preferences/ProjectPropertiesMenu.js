@@ -83,7 +83,7 @@ export class ProjectPropertiesMenu {
 
 	/**
 	 * @private
-	 * @type {UI.Dropdown<GMChannelType|undefined>}
+	 * @type {UI.Dropdown<GM.ReleaseChannel|undefined>}
 	 */
 	zeusReleaseChannelDropdown;
 
@@ -262,7 +262,7 @@ export class ProjectPropertiesMenu {
 
 	/**
 	 * @private
-	 * @param {GMChannelType|undefined} channel
+	 * @param {GM.ReleaseChannel|undefined} channel
 	 */
 	updateChannel(channel) {
 		this.zeusReleaseChannelDropdown.setSelectedOption(channel);
