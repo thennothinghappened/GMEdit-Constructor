@@ -80,33 +80,23 @@ export function __cleanup__() {
 }
 
 function showControlPanel() {
-	if (window.ConstructorPlugin !== undefined) {
-		window.ConstructorPlugin.showControlPanel();
-	}
+	window.ConstructorPlugin?.showControlPanel();
 }
 
 function packageCurrentProject() {
-	if (window.ConstructorPlugin !== undefined) {
-		window.ConstructorPlugin.packageCurrent();
-	}
+	window.ConstructorPlugin?.packageCurrent();
 }
 
 function stopCurrentProject() {
-	if (window.ConstructorPlugin !== undefined) {
-		window.ConstructorPlugin.stopCurrent();
-	}
+	window.ConstructorPlugin?.stopCurrent();
 }
 
 function cleanCurrentProject() {
-	if (window.ConstructorPlugin !== undefined) {
-		window.ConstructorPlugin.cleanCurrent();
-	}
+	window.ConstructorPlugin?.cleanCurrent();
 }
 
 function runCurrentProject() {
-	if (window.ConstructorPlugin !== undefined) {
-		window.ConstructorPlugin.runCurrent();
-	}
+	window.ConstructorPlugin?.runCurrent();
 }
 
 function onProjectOpen() {
