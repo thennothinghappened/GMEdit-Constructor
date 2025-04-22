@@ -5,9 +5,13 @@ declare global {
 
 	namespace Electron {
 
-		interface Menu {
+		class Menu {
+
+			static buildFromTemplate(template: (MenuItemOptions|MenuItem)[]): Menu;
 
 			items: MenuItem[];
+
+			constructor();
 
 			clear();
 			append(item: MenuItem);
@@ -17,38 +21,35 @@ declare global {
 
 		class MenuItem {
 
+			constructor(props: MenuItemOptions);
+
 			id: string;
+			type: MenuItemType;
 			enabled: boolean;
 			visible: boolean;
 			checked: boolean;
 			label: string;
-			click();
-			submenu:Menu;
-			
-			constructor(props: MenuItemOptions);
-		
-			id: string;
-			enabled: boolean;
-			visible?: boolean;
 			submenu?: Menu;
-		
+			
+			click();
+
 		}
 
-		type MenuItemOptions = Partial<{
-			click(),
-			role: string,
-			type: MenuItemType,
-			label: string,
-			sublabel: string,
-			accelerator: unknown,
-			icon: unknown,
-			enabled: boolean,
-			visible: boolean,
-			checked: boolean,
-			submenu: MenuItem[] | Menu,
+		type MenuItemOptions = {
 			id: string,
-			position: string,
-		}>;
+			type?: MenuItemType,
+			label: string,
+			enabled?: boolean,
+			click?: () => void,
+			accelerator?: unknown,
+			role?: string,
+			icon?: unknown,
+			visible?: boolean,
+			checked?: boolean,
+			submenu?: MenuItem[] | Menu,
+			sublabel?: string,
+			position?: string,
+		};
 
 		type MenuItemType =
 			'normal'	|
@@ -130,7 +131,7 @@ declare global {
 
 	};
 	
-	const Electron_Menu: Electron.Menu;
+	const Electron_Menu: typeof Electron.Menu;
 	const Electron_MenuItem: typeof Electron.MenuItem;
 	const Electron_App: Electron.App;
 	const Electron_FS: typeof fs;

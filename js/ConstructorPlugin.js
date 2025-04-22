@@ -1,5 +1,5 @@
 import * as compileController from './compiler/igor-controller.js';
-import * as hamburgerOptions from './ui/HamburgerOptions.js';
+import { HamburgerOptions } from './ui/HamburgerOptions.js';
 import { project_current_get, open_files_save, project_format_get, tab_current_get } from './utils/project.js';
 import { ProjectProperties } from './preferences/ProjectProperties.js';
 import * as igorPaths from './compiler/igor-paths.js';
@@ -58,6 +58,12 @@ export class ConstructorPlugin {
 	currentProjectComponents = undefined;
 
 	/**
+	 * @private
+	 * @type {HamburgerOptions}
+	 */
+	hamburgerOptions;
+
+	/**
 	 * Initialise an instance of the plugin!
 	 * 
 	 * @param {string} pluginName Name of the plugin.
@@ -105,7 +111,6 @@ export class ConstructorPlugin {
 		}
 
 		controlPanel.setPreferencesMenu(new PreferencesMenu(preferences));
-		hamburgerOptions.__setup__();
 
 		return Ok(new ConstructorPlugin(preferences, controlPanel));
 
@@ -123,6 +128,14 @@ export class ConstructorPlugin {
 		
 		this.preferences = preferences;
 		this.controlPanel = controlPanel;
+		
+		this.hamburgerOptions = new HamburgerOptions({
+			showControlPanel: this.showControlPanel,
+			stopCurrentProject: this.stopCurrent,
+			runCurrentProject: this.runCurrent,
+			cleanCurrentProject: this.cleanCurrent,
+			packageCurrentProject: this.packageCurrent
+		});
 
 		const currentOpenProject = project_current_get();
 
@@ -181,7 +194,7 @@ export class ConstructorPlugin {
 		}
 
 		compileController.__cleanup__();
-		hamburgerOptions.__cleanup__();
+		this.hamburgerOptions.destroy();
 		this.controlPanel.destroy();
 
 		if (this.preferencesMenu !== undefined) {
@@ -274,6 +287,8 @@ export class ConstructorPlugin {
 			configTreeUi,
 		};
 
+		this.hamburgerOptions.enableProjectActionItems(true);
+
 	};
 
 	/**
@@ -299,6 +314,7 @@ export class ConstructorPlugin {
 		}
 
 		this.controlPanel.clearProjectPropertiesMenu();
+		this.hamburgerOptions.enableProjectActionItems(false);
 		this.destroyCurrentProjectComponents();
 		
 	};

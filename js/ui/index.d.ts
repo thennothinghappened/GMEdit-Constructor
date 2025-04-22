@@ -43,4 +43,15 @@ export declare global {
 
 	};
 
+	/**
+	 * Global actions that may be ran by the user.
+	 */
+	interface PluginCommands {
+		showControlPanel(): void;
+		stopCurrentProject(): void;
+		runCurrentProject(): void;
+		cleanCurrentProject(): void;
+		packageCurrentProject(): void;
+	};
+
 }
