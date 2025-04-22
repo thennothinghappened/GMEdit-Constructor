@@ -95,7 +95,6 @@ export class ProjectProperties {
 
 	/**
 	 * Clean up this properties instance.
-	 * @private
 	 */
 	destroy() {
 		this.events.off('setRuntimeChannel', this.onChangeRuntimeChannel);

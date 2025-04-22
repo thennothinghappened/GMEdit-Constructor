@@ -220,7 +220,8 @@ export class ConstructorPlugin {
 
 		const {
 			configTreeUi,
-			projectPropertiesMenuComponents
+			projectPropertiesMenuComponents,
+			projectProperties
 		} = this.currentProjectComponents;
 
 		if (projectPropertiesMenuComponents !== undefined) {
@@ -229,6 +230,8 @@ export class ConstructorPlugin {
 		}
 
 		configTreeUi.destroy();
+		projectProperties.destroy();
+
 		delete this.currentProjectComponents;
 
 	};
