@@ -262,13 +262,13 @@ export class ConstructorPlugin {
 
 		}
 
-		if (projectFormat.data === '[Unsupported]') {
+		if (!projectFormat.data.supported) {
 			return;
 		}
 
 		const projectProperties = new ProjectProperties(
 			project,
-			projectFormat.data,
+			projectFormat.data.version,
 			this.preferences,
 			this.preferences.getLocalProjectPropertiesStore(project),
 			this.controlPanel
@@ -378,11 +378,115 @@ export class ConstructorPlugin {
 	 */
 	async executeTask(taskVerb, { project, projectProperties }) {
 
-		const runtime = this.findRuntime(projectProperties);
+		/** @type {GMS2.RuntimeInfo|undefined} */
+		let runtime = undefined;
 
-		if (!runtime.ok) {
-			this.controlPanel.error('Couldn\'t find a runtime to use!', runtime.err);
-			return;
+		/** @type {GMChannelType} */
+		let channel;
+
+		if (projectProperties.runtimeVersion !== undefined) {
+
+			channel = /** @type {GMChannelType} */ (projectProperties.runtimeChannelType);
+			const result = this.preferences.getRuntimeInfo(channel, projectProperties.runtimeVersion);
+	
+			if (!result.ok) {
+				this.controlPanel.error('Project\'s selected Runtime is not installed.', new SolvableError(
+					docString(`
+						This project specifies the runtime version
+						'${projectProperties.runtimeVersion}', but this version doesn't appear to be
+						installed!
+					`),
+					docString(`
+						Install the specified runtime in the IDE and reload GMEdit if this is the
+						intended runtime version, otherwise you may change the value to an installed
+						runtime.
+					`),
+					result.err
+				));
+
+				return;
+			}
+
+			runtime = result.data;
+
+		}
+
+		if (runtime === undefined) {
+
+			const result = compileController.findCompatibleRuntime(
+				this.preferences,
+				projectProperties.projectVersion,
+				projectProperties.runtimeChannelType
+			);
+
+			if (!result.ok) {
+				switch (result.err.type) {
+
+					case 'none-compatible':
+
+						/** @type {SolvableError} */
+						let error;
+
+						if (result.err.channel !== undefined) {
+							error = new SolvableError(
+								docString(`
+									None of your installed runtimes in the ${result.err.channel}
+									channel are compatible with its version
+									(${projectProperties.projectVersion}), to Constructor's
+									knowledge.
+								`),
+								docString(`
+									a) Install a runtime that's compatible with the project via the
+									IDE and reload Constructor.
+
+									b) Choose a different channel, or clear the channel preference
+									for this project.
+
+									c) Manually pick a runtime you know to be compatible. Feel free
+									to make a bug report about this too! :D
+								`)
+							);
+						} else {
+							error = new SolvableError(
+								docString(`
+									None of your installed runtimes are compatible with its version
+									(${projectProperties.projectVersion}), to Constructor's
+									knowledge.
+								`),
+								docString(`
+									a) Install a runtime that's compatible with the project via the
+									IDE and reload Constructor.
+
+									b) Manually pick a runtime you know to be compatible. Feel free
+									to make a bug report about this too! :D
+								`)
+							);
+						}
+
+						this.controlPanel.error('No compatible runtimes found!', error);
+
+					return;
+
+					case 'channel-empty':
+						this.controlPanel.error('No runtimes installed in this channel.', new SolvableError(
+							docString(`
+								There don't seem to be any ${result.err.channel} runtimes installed
+								at your chosen installation path, or that path is otherwise
+								incorrect.
+							`),
+							docString(`
+								Try specifying a different runtime channel type below, or check the
+								runtime search path for ${result.err.channel} runtimes.
+							`)
+						));
+					return;
+
+				}
+			}
+
+			runtime = result.data.runtime;
+			channel = result.data.channel;
+			
 		}
 
 		if (this.preferences.saveOnRun) {
@@ -397,8 +501,6 @@ export class ConstructorPlugin {
 			runner: projectProperties.runtimeBuildTypeOrDef,
 			configName: projectProperties.buildConfigName
 		};
-		
-		const userInfo = this.preferences.getUser(projectProperties.runtimeChannelTypeOrDef);
 
 		/** @type {OutputLogTab|undefined} */
 		let outputTab = undefined;
@@ -416,13 +518,9 @@ export class ConstructorPlugin {
 
 		}
 
-		const job = await compileController.job_run(
-			project,
-			runtime.data,
-			userInfo,
-			settings,
-			jobIdToReuse
-		);
+		// @ts-expect-error Channel is not used before assignment. Both cases set it.
+		const user = this.preferences.getUser(channel);
+		const job = await compileController.job_run(project, runtime, user, settings, jobIdToReuse);
 
 		if (!job.ok) {
 			this.controlPanel.error('Failed to run Igor job!', job.err);
@@ -433,88 +531,6 @@ export class ConstructorPlugin {
 		outputTab.attach(job.data);
 		outputTab.focus();
 
-	}
-
-	/**
-	 * 
-	 * @private
-	 * @param {ProjectProperties} projectProperties
-	 * @returns {Result<GMS2.RuntimeInfo, SolvableError>}
-	 */
-	findRuntime(projectProperties) {
-		
-		const preferredRuntimeVersion = projectProperties.runtimeVersion;
-
-		if (preferredRuntimeVersion !== undefined) {
-
-			const result = this.preferences.getRuntimeInfo(
-				projectProperties.runtimeChannelTypeOrDef,
-				preferredRuntimeVersion
-			);
-
-			if (result.ok) {
-				return Ok(result.data);
-			}
-
-			// FIXME: we don't know for certain what the issue is! Stolen from a removed ProjectProperties getter.
-			return Err(new SolvableError(
-				docString(`
-					Project\'s selected Runtime is not installed.
-
-					This project specifies the runtime version '${preferredRuntimeVersion}', but
-					this version doesn't appear to be installed.
-					
-					The default runtime will be used, though the value in the config will not be
-					modified unless you do so.
-				`),
-				docString(`
-					Install the runtime in the IDE and reload GMEdit if this is the correct
-					runtime, otherwise you may change the value to an installed runtime.
-				`),
-				result.err
-			));
-
-		}
-
-		// Choose a runtime from the full list.
-		const runtimes = this.preferences.getInstalledRuntimeVersions(projectProperties.runtimeChannelTypeOrDef);
-
-		if (runtimes === undefined) {
-			return Err(new SolvableError(
-				docString(`
-					No runtimes installed in this release channel.
-
-					There don't seem to be any ${projectProperties.runtimeChannelTypeOrDef}
-					runtimes installed at your chosen installation path, or that path is
-					otherwise incorrect.
-				`),
-				docString(`
-					Try specifying a different runtime channel type below, or check the runtime
-					search path for ${projectProperties.runtimeChannelTypeOrDef} runtimes.
-				`)
-			));
-		}
-
-		// Pick the first (newest) compatible runtime.
-		const runtime = runtimes.find(it => it.version.format === projectProperties.projectFormat);
-
-		if (runtime !== undefined) {
-			return Ok(runtime);
-		}
-
-		return Err(new SolvableError(
-			docString(`
-				Constructor couldn't find any installed runtimes that it thinks are
-				compatible with the format of your project
-				(${projectProperties.projectFormat}).
-			`),
-			docString(`
-				Install a runtime that uses this format, or if you know that you have a
-				compatible runtime that Constructor missed, you can manually override the
-				choice through the project's preferences below.
-			`)
-		));
-		
 	}
 
 	/**

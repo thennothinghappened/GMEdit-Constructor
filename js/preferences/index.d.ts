@@ -29,7 +29,6 @@ export declare global {
 
 			/** Globally selected runtime options that may be overriden by projects. */
 			runtime_opts: {
-				type: GMChannelType;
 				runner: GMS2.RuntimeType;
 	
 				type_opts: {
@@ -124,7 +123,6 @@ export declare global {
 
 		interface PreferencesEventMap {
 
-			setDefaultRuntimeChannel: GMChannelType;
 			setCheckForUpdates: { checkForUpdates: boolean };
 			setSaveOnRun: { saveOnRun: boolean };
 			setReuseOutputTab: { reuseOutputTab: boolean };

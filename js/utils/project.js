@@ -69,16 +69,12 @@ export function project_config_tree_flatten(config) {
  * Returns what kind of project YY format we're running.
  * 
  * @param {GMEdit.Project} project 
- * @returns {Result<ProjectFormat>}
+ * @returns {Result<{ supported: true; version: GMVersion } | { supported: false }>}
  */
 export function project_format_get(project) {
 	
 	if (!project.isGMS23) {
-		return Ok('[Unsupported]');
-	}
-
-	if (!project.isGM2024) {
-		return Ok('2023.11');
+		return Ok({ supported: false });
 	}
 
 	const yyp = project_read_yy(project);
@@ -96,65 +92,8 @@ export function project_format_get(project) {
 		));
 	}
 
-	return Ok(ide_get_format(ideVersionRes.data));
+	return Ok({ supported: true, version: ideVersionRes.data });
 	
-}
-
-/**
- * @param {GMVersion} ideVersion 
- * @returns {ProjectFormat}
- */
-function ide_get_format(ideVersion) {
-
-	// All 2023 or lower are YYv1.
-	if (ideVersion.year < 2024) {
-		return '2023.11';
-	}
-
-	if (ideVersion.year === 2024) {
-
-		if (ideVersion.month === 200) {
-
-			// TODO: IDE version was different to the runtime version when this change happened.
-			// YYG have removed the relevant release notes page so this will require digging on
-			// GitHub.
-			if (ideVersion.build < 490) {
-				return '2023.11';
-			} else {
-				return '2024.2';
-			}
-
-		}
-
-		// 2024.2 is incompatible with 2024.4+.
-		if (ideVersion.month === 2) {
-			return '2024.2';
-		}
-
-		// 2024.4 is incompatible with 2024.6+.
-		if (ideVersion.month === 4 || ideVersion.month === 400) {
-			return '2024.4';
-		}
-
-		// 2024.6 is incompatible with 2024.8+.
-		if (ideVersion.month === 6 || ideVersion.month === 600) {
-			return '2024.6';
-		}
-
-		// 2024.8 is incompatible with 2024.11+.
-		if (ideVersion.month === 8 || ideVersion.month === 800) {
-			return '2024.8';
-		}
-
-		// 2024.11 is incompatible with 2024.13+.
-		if (ideVersion.month === 11 || ideVersion.month === 1100) {
-			return '2024.11';
-		}
-		
-	}
-
-	return '2024.13+';
-
 }
 
 /**

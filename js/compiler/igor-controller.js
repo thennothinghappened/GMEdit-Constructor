@@ -10,6 +10,7 @@ import { child_process, path } from '../utils/node/node-import.js';
 import { Err, Ok } from '../utils/Result.js';
 import { mkdir, readdir } from '../utils/node/file.js';
 import { docString } from '../utils/StringUtils.js';
+import { GMRuntimeVersion, GMVersion } from './GMVersion.js';
 
 /** @type {IgorJob[]} */
 export const jobs = [];
@@ -68,6 +69,93 @@ export async function job_run(project, runtime, user, settings, id = job_create_
 	job.events.once('stop', () => job_remove(job));
 
 	return Ok(job);
+
+}
+
+/**
+ * Find an available runtime compatible with the given project version.
+ * 
+ * @param {GMS2.RuntimeProvider} runtimeProvider Method of listing available runtimes.
+ * @param {GMVersion} projectVersion Version of the project we are tasked with matching against.
+ * @param {GMChannelType | undefined} [channel] The channel to query. If unspecified, all channels will be queried in order of specificity.
+ * @returns {Result<GMS2.FindCompatibleRuntimeData, GMS2.FindCompatibleRuntimeError>}
+ */
+export function findCompatibleRuntime(runtimeProvider, projectVersion, channel) {
+
+	if (channel !== undefined) {
+		
+		const runtimes = runtimeProvider.getRuntimes(channel);
+
+		if (runtimes === undefined) {
+			return Err({ type: 'channel-empty', channel });
+		}
+
+		const runtime = findCompatibleRuntimeInChannel(projectVersion, runtimes);
+
+		if (runtime === undefined) {
+			return Err({ type: 'none-compatible', channel });
+		}
+
+		return Ok({ runtime, channel });
+
+	}
+
+	// Beta runtimes use major versions of months, multiplied by 100. Thus, encountering this, we
+	// know the project is on a beta build.
+	if (projectVersion.month >= 100) {
+		return findCompatibleRuntime(runtimeProvider, projectVersion, 'Beta');
+	}
+
+	/**
+	 * The order to check in. Our order is based on the release frequency of the channels, as this
+	 * also matches with their stability. We want to ideally pick the most-stable option, if there
+	 * are multiple possible matches.
+	 * 
+	 * @type {GMChannelType[]}
+	 */
+	const CHANNEL_QUERY_ORDER = ['LTS', 'Stable', 'Beta'];
+
+	for (const channel of CHANNEL_QUERY_ORDER) {
+
+		const result = findCompatibleRuntime(runtimeProvider, projectVersion, channel);
+
+		if (result.ok) {
+			return result;
+		}
+
+	}
+
+	return Err({ type: 'none-compatible' });
+	
+}
+/**
+ * Find an available runtime compatible with the given project version in the given channel.
+ * 
+ * @param {GMVersion} projectVersion Version of the project we are tasked with matching against.
+ * @param {NonEmptyArray<GMS2.RuntimeInfo>} runtimes List of runtimes in the channel.
+ * @returns {GMS2.RuntimeInfo|undefined}
+ */
+function findCompatibleRuntimeInChannel(projectVersion, runtimes) {
+
+	for (const runtime of runtimes.toSorted((a, b) => a.version.compare(b.version))) {
+		
+		if (runtime.version.year !== projectVersion.year) {
+			continue;
+		}
+
+		if (runtime.version.month !== projectVersion.month) {
+			continue;
+		}
+
+		if (runtime.version.revision !== projectVersion.revision) {
+			continue;
+		}
+
+		return runtime;
+
+	}
+
+	return undefined;
 
 }
 

@@ -33,25 +33,6 @@ export declare global {
 		configTreeUi: ConfigTreeUi;
 	};
 
-	/**
-	 * Project format type for the loaded project.
-	 */
-	type ProjectFormat =
-		'[Unsupported]'			|
-		SupportedProjectFormat	;
-
-	/**
-	 * Project format type for a loaded project which is supported by the plugin.
-	 */
-	type SupportedProjectFormat =
-		'2023.11'		|
-		'2024.2'		|
-		'2024.4'		|
-		'2024.6'		|
-		'2024.8'		|
-		'2024.11'		|
-		'2024.13+'		;
-
 	type ProjectYY = {
 
 		configs: ProjectYYConfig;

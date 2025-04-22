@@ -26,6 +26,14 @@ const USE_COMPATIBLE_RUNTIME = {
 };
 
 /**
+ * @type {UI.Dropdown.NormalizedEntry<undefined>}
+ */
+const USE_COMPATIBLE_CHANNEL = {
+	label: 'Automatic',
+	value: undefined
+};
+
+/**
  * User interface for managing project-specific properties.
  */
 export class ProjectPropertiesMenu {
@@ -140,7 +148,7 @@ export class ProjectPropertiesMenu {
 		this.zeusReleaseChannelDropdown = new Dropdown('Runtime Release Channel',
 				Some(this.properties.runtimeChannelType),
 				(value) => { this.properties.runtimeChannelType = value; },
-				[USE_DEFAULT, ...GM_CHANNEL_TYPES]
+				[USE_COMPATIBLE_CHANNEL, ...GM_CHANNEL_TYPES]
 			)
 			.singleline()
 			.appendTo(this.element);
@@ -202,7 +210,7 @@ export class ProjectPropertiesMenu {
 			return undefined;
 		}
 
-		return this.preferences.getInstalledRuntimeVersions(channel)?.map(runtime => ({
+		return this.preferences.getRuntimes(channel)?.map(runtime => ({
 			label: runtime.version.toString(),
 			value: runtime.version
 		}));

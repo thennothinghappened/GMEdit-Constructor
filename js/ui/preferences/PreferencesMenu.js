@@ -87,15 +87,6 @@ export class PreferencesMenu {
 				.singleline()
 				.tooltip('The type of runtime to use.')
 				.appendTo(section);
-
-			this.runtimeReleaseChannelDropdown = new Dropdown('Runtime Release Channel',
-					Some(this.preferences.defaultRuntimeChannel),
-					(value) => { this.preferences.defaultRuntimeChannel = value },
-					GM_CHANNEL_TYPES
-				)
-				.singleline()
-				.tooltip('The GameMaker update channel from which to pick the runtime version from.')
-				.appendTo(section);
 			
 		}).also(it => this.element.appendChild(it));
 
@@ -155,7 +146,7 @@ export class PreferencesMenu {
 
 				// Presumably not-installed groups can start collapsed, since the user probably
 				// doesn't care about them unless they specifically want to set them up.
-				const runtimes = this.preferences.getInstalledRuntimeVersions(channel);
+				const runtimes = this.preferences.getRuntimes(channel);
 
 				if ((runtimes === undefined) && (users === undefined)) {
 					group.classList.add('collapsed');
@@ -165,7 +156,6 @@ export class PreferencesMenu {
 		
 		}).also(it => this.element.appendChild(it));
 
-		this.preferences.events.on('setDefaultRuntimeChannel', this.onSetDefaultRuntimeChannel);
 		this.preferences.events.on('setCheckForUpdates', this.onSetCheckForUpdates);
 		this.preferences.events.on('setSaveOnRun', this.onSetSaveOnRun);
 		this.preferences.events.on('setReuseOutputTab', this.onSetReuseOutputTab);
@@ -179,23 +169,12 @@ export class PreferencesMenu {
 	 * Clean up this preferences menu instance.
 	 */
 	destroy() {
-		this.preferences.events.off('setDefaultRuntimeChannel', this.onSetDefaultRuntimeChannel);
 		this.preferences.events.off('setCheckForUpdates', this.onSetCheckForUpdates);
 		this.preferences.events.off('setSaveOnRun', this.onSetSaveOnRun);
 		this.preferences.events.off('setReuseOutputTab', this.onSetReuseOutputTab);
 		this.preferences.events.off('setUseGlobalBuildPath', this.onSetUseGlobalBuildPath);
 		this.preferences.events.off('setGlobalBuildPath', this.onSetGlobalBuildPath);
 		this.preferences.events.off('userListChanged', this.onUserListChanged);
-	}
-
-	/**
-	 * Update the default runtime channel selection upon modification.
-	 * 
-	 * @private
-	 * @param {TPreferences.PreferencesEventMap['setDefaultRuntimeChannel']} channel
-	 */
-	onSetDefaultRuntimeChannel = (channel) => {
-		this.runtimeReleaseChannelDropdown.setSelectedOption(channel);
 	}
 
 	/**

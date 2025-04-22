@@ -26,8 +26,6 @@ export const ZEUS_RUNTIME_TYPES = ['VM', 'YYC'];
 /** @type {Readonly<TPreferences.Data>} */
 const PREFS_DEFAULT = {
 	runtime_opts: {
-		// Default runtime to use is probably going to be stable.
-		type: 'Stable',
 		runner: 'VM',
 
 		type_opts: {
@@ -58,6 +56,8 @@ const MAX_LOAD_TRIES = 3;
 /**
  * Global preferences for Constructor's behaviour. Much of this behaviour can be over-ridden on a
  * per-project basis.
+ * 
+ * @implements {GMS2.RuntimeProvider}
  */
 export class Preferences {
 
@@ -66,7 +66,6 @@ export class Preferences {
 	 * @type {EventEmitterImpl<TPreferences.PreferencesEventMap>}
 	 */
 	eventEmitter = new EventEmitterImpl([
-		'setDefaultRuntimeChannel',
 		'runtimeListChanged',
 		'userListChanged',
 		'setCheckForUpdates',
@@ -219,14 +218,6 @@ export class Preferences {
 		}
 
 		this.dataPath = dataPath;
-
-		if (loadedPrefs.runtime_opts?.type != undefined) {
-			if (!GM_CHANNEL_TYPES.includes(loadedPrefs.runtime_opts.type)) {
-				// Fix invalid channel choice.
-				loadedPrefs.runtime_opts.type = this.prefs.runtime_opts.type;
-			}
-		}
-
 		deep_assign(this.prefs, loadedPrefs);
 
 		const loadRequests = GM_CHANNEL_TYPES.map(async channel => {
@@ -382,22 +373,6 @@ export class Preferences {
 	}
 
 	/**
-	 * The default runtime type used globally.
-	 */
-	get defaultRuntimeChannel() {
-		return this.prefs.runtime_opts.type;
-	}
-
-	set defaultRuntimeChannel(type) {
-		
-		this.prefs.runtime_opts.type = type;
-		this.save();
-
-		this.eventEmitter.emit('setDefaultRuntimeChannel', type);
-
-	}
-
-	/**
 	 * Get information regarding a particular runtime version.
 	 * 
 	 * If the given runtime version string is invalid, is not installed, or the given channel has no
@@ -409,7 +384,7 @@ export class Preferences {
 	 */
 	getRuntimeInfo(channel, versionOrVersionString) {
 
-		const runtimes = this.getInstalledRuntimeVersions(channel);
+		const runtimes = this.getRuntimes(channel);
 
 		if (runtimes === undefined) {
 			return Err(new BaseError(`No runtime list is loaded for the channel "${channel}"`));
@@ -497,7 +472,7 @@ export class Preferences {
 	 * @param {GMChannelType} channel
 	 * @returns {NonEmptyArray<GMS2.RuntimeInfo>|undefined}
 	 */
-	getInstalledRuntimeVersions(channel) {
+	getRuntimes(channel) {
 		return this.runtimesInChannels[channel];
 	};
 

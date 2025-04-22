@@ -2,7 +2,7 @@
  * Handler for project-specific preferences.
  */
 
-import { GMRuntimeVersion } from '../compiler/GMVersion.js';
+import { GMRuntimeVersion, GMVersion } from '../compiler/GMVersion.js';
 import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
 import { project_config_tree_get } from '../utils/project.js';
 import { Preferences } from './Preferences.js';
@@ -23,9 +23,9 @@ export class ProjectProperties {
 	 * The GM metadata format of this project, which determines what runtimes are compatible.
 	 * 
 	 * @readonly
-	 * @type {SupportedProjectFormat}
+	 * @type {GMVersion}
 	 */
-	projectFormat;
+	projectVersion;
 
 	/**
 	 * The global preferences handler.
@@ -74,16 +74,16 @@ export class ProjectProperties {
 	/**
 	 * 
 	 * @param {GMEdit.Project} project The project this properties instance is for.
-	 * @param {SupportedProjectFormat} projectFormat The format of this project.
+	 * @param {GMVersion} projectVersion The format of this project.
 	 * @param {Preferences} preferences The global preferences object to reference.
 	 * @param {TPreferences.LocalProjectPropertiesStore} localProjectPropertiesStore
 	 * @param {ProblemLogger} problemLogger Method of logging problems.
 	 */
-	constructor(project, projectFormat, preferences, localProjectPropertiesStore, problemLogger) {
+	constructor(project, projectVersion, preferences, localProjectPropertiesStore, problemLogger) {
 
 		this.problemLogger = problemLogger;
 		this.project = project;
-		this.projectFormat = projectFormat;
+		this.projectVersion = projectVersion;
 		this.preferences = preferences;
 		this.localProjectPropertiesStore = localProjectPropertiesStore;
 		this.portable = project.properties['GMEdit-Constructor'] ?? {};
@@ -191,14 +191,6 @@ export class ProjectProperties {
 
 		this.eventEmitter.emit('setReuseOutputTab', { reuseOutputTab: value });
 		
-	}
-
-	/**
-	 * Get the desired runtime channel type.
-	 * @returns {GMChannelType}
-	 */
-	get runtimeChannelTypeOrDef() {
-		return this.portable.runtime_type ?? this.preferences.defaultRuntimeChannel;
 	}
 
 	/**

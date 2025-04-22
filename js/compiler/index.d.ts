@@ -20,6 +20,25 @@ export declare global {
 	 */
 	namespace GMS2 {
 
+		type FindCompatibleRuntimeData = {
+			runtime: RuntimeInfo;
+			channel: GMChannelType;
+		};
+
+		type FindCompatibleRuntimeError =
+			{ type: 'none-compatible', channel?: GMChannelType }	|
+			{ type: 'channel-empty', channel: GMChannelType }		;
+
+		interface RuntimeProvider {
+
+			/**
+			 * Get the list of available runtimes in the given channel.
+			 * @param channel The runtime channel to query for.
+			 */
+			getRuntimes(channel: GMChannelType): NonEmptyArray<RuntimeInfo> | undefined;
+
+		};
+
 		/**
 		 * A method of indexing GMS2 runtimes for use in compilation.
 		 */

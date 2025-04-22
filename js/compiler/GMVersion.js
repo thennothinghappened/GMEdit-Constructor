@@ -1,5 +1,4 @@
 import { BaseError } from '../utils/Err.js';
-import { project_format_get } from '../utils/project.js';
 import { Err, Ok } from '../utils/Result.js';
 import { docString } from '../utils/StringUtils.js';
 
@@ -51,7 +50,7 @@ export class GMVersion {
 	constructor(year, month, major, build) {
 		this.year = year;
 		this.month = month;
-		this.major = major;
+		this.revision = major;
 		this.build = build;
 	}
 
@@ -75,7 +74,7 @@ export class GMVersion {
 			return Math.sign(month_diff);
 		}
 
-		const major_diff = this.major - other.major;
+		const major_diff = this.revision - other.revision;
 
 		if (major_diff !== 0) {
 			return Math.sign(major_diff);
@@ -102,109 +101,12 @@ export class GMVersion {
 	}
 
 	toString() {
-		return `${this.year}.${this.month}.${this.major}.${this.build}`;
+		return `${this.year}.${this.month}.${this.revision}.${this.build}`;
 	}
 
 }
 
-/**
- * @implements {Eq<GMRuntimeVersion>}
- */
-export class GMRuntimeVersion {
-
-	/**
-	 * The underlying version data of this runtime.
-	 * 
-	 * @private
-	 * @type {GMVersion}
-	 */
-	version;
-
-	/**
-	 * @param {GMVersion} version
-	 */
-	constructor(version) {
-		this.version = version;
-	}
-
-	/**
-	 * The expected YY format this runtime requires.
-	 * @returns {ProjectFormat}
-	 */
-	get format() {
-
-		// All 2023 or lower are YYv1.
-		if (this.version.year < 2024) {
-			return '2023.11';
-		}
-
-		// The turmoil of 2024's many project formats!
-		if (this.version.year === 2024) {
-
-			// Runtime 2024.200.0.490 was first to YYv2.
-			if (this.version.month === 200) {
-				if (this.version.build < 490) {
-					return '2023.11';
-				} else {
-					return '2024.2';
-				}
-			}
-
-			// 2024.2 is incompatible with 2024.4+.
-			if (this.version.month === 2) {
-				return '2024.2';
-			}
-
-			// 2024.4 is incompatible with 2024.6+.
-			if (this.version.month === 4 || this.version.month === 400) {
-				return '2024.4';
-			}
-
-			// 2024.6 is incompatible with 2024.8+.
-			if (this.version.month === 6 || this.version.month === 600) {
-				return '2024.6';
-			}
-
-			// 2024.8 is incompatible with 2024.11+.
-			if (this.version.month === 8 || this.version.month === 800) {
-				return '2024.8';
-			}
-
-			// 2024.8 is incompatible with 2024.11+.
-			if (this.version.month === 11 || this.version.month === 1100) {
-				return '2024.11';
-			}
-			
-		}
-
-		return '2024.13+';
-
-	}
-
-	/**
-	 * Returns a negative number if this runtime is older than `other`, 0 for same, or positive for
-	 * newer.
-	 * 
-	 * @param {GMRuntimeVersion} other 
-	 * @returns {number}
-	 */
-	compare(other) {
-		return this.version.compare(other.version);
-	}
-
-	/**
-	 * Determine whether this version is equivalent to `other`.
-	 * 
-	 * @param {GMRuntimeVersion} other
-	 * @returns {boolean}
-	 */
-	equals(other) {
-		return this.version.equals(other.version);
-	}
-
-	toString() {
-		return `runtime-${this.version}`;
-	}
+export class GMRuntimeVersion extends GMVersion {
 
 	/**
 	 * Try to parse a runtime version from a string.
@@ -232,8 +134,17 @@ export class GMRuntimeVersion {
 			));
 		}
 
-		return Ok(new GMRuntimeVersion(versionRes.data));
+		return Ok(new GMRuntimeVersion(
+			versionRes.data.year,
+			versionRes.data.month,
+			versionRes.data.revision,
+			versionRes.data.build
+		));
 
+	}
+
+	toString() {
+		return `runtime-${super.toString()}`;
 	}
 
 }
