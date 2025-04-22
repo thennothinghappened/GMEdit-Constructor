@@ -8,13 +8,7 @@ export class Checkbox {
 	/**
 	 * @readonly
 	 */
-	element = document.createElement('div');
-
-	/**
-	 * @private
-	 * @readonly
-	 */
-	label = document.createElement('label');
+	element = document.createElement('label');
 
 	/**
 	 * @private
@@ -29,10 +23,12 @@ export class Checkbox {
 	 */
 	constructor(label, initialValue, onValueChanged) {
 
-		this.label.appendChild(this.input);
-		this.label.append(label);
-
-		this.element.appendChild(this.label);
+		
+		const labelSpan = document.createElement('span');
+		labelSpan.textContent = label;
+		
+		this.element.appendChild(this.input);
+		this.element.appendChild(labelSpan);
 		this.element.classList.add('checkbox');
 
 		this.value = initialValue;

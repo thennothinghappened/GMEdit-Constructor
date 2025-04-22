@@ -46,7 +46,7 @@
 	font-family: monospace, monospace;
 }
 
-.gm-constructor-tab div.select[hidden] {
+.gm-constructor-tab .select[hidden] {
 	display: none !important;
 }
 
@@ -86,11 +86,22 @@ fieldset.gm-constructor-debug {
 }
 
 .gm-constructor-control-panel fieldset {
-	padding: 1em;
+	padding: 0.5em 1em 1em 1em;
 }
 
 .gm-constructor-control-panel p {
 	margin: 8px 0;
+}
+
+.gm-constructor-control-panel .select,
+.gm-constructor-control-panel .checkbox,
+.gm-constructor-control-panel .input {
+	margin: 0.4em 0 0.4em 0;
+}
+
+.gm-constructor-control-panel .select,
+.gm-constructor-control-panel .input {
+	display: block;
 }
 
 .gm-constructor-control-panel-errors > fieldset > pre {
@@ -110,32 +121,27 @@ fieldset.gm-constructor-debug {
 	margin: 0;
 }
 
-.gm-constructor-control-panel div.select {
-	padding: 0.25em 0;
-}
-
-.gm-constructor-control-panel div.select.singleline {
+.gm-constructor-control-panel .select.singleline {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
 	justify-content: space-between;
 	align-items: stretch;
 	vertical-align: middle;
-	padding: 0.25em 0;
 }
 
-.gm-constructor-control-panel div.select.singleline > label {
+.gm-constructor-control-panel .select.singleline > span {
 	flex-grow: 1;
 	flex-basis: 30%;
 }
 
-.gm-constructor-control-panel div.select.singleline > select {
+.gm-constructor-control-panel .select.singleline > select {
 	flex-grow: 1;
 	flex-basis: 70%;
 	width: auto;
 }
 
-.gm-constructor-control-panel div.checkbox > label {
+.gm-constructor-control-panel .checkbox {
 	display: flex;
 	column-gap: 0.25em;
 	align-items: center;

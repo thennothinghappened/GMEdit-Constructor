@@ -8,13 +8,7 @@ export class Input {
 	/**
 	 * @readonly
 	 */
-	element = document.createElement('div');
-
-	/**
-	 * @private
-	 * @readonly
-	 */
-	label = document.createElement('label');
+	element = document.createElement('label');
 
 	/**
 	 * @private
@@ -28,11 +22,12 @@ export class Input {
 	 * @param {(value: string) => void} onValueChanged 
 	 */
 	constructor(label, initialValue, onValueChanged) {
-		
-		this.label.textContent = label;
 
-		this.label.appendChild(this.input);
-		this.element.appendChild(this.label);
+		const labelSpan = document.createElement('span');
+		labelSpan.textContent = label;
+		
+		this.element.appendChild(labelSpan);
+		this.element.appendChild(this.input);
 		this.element.classList.add('input');
 
 		this.value = initialValue;

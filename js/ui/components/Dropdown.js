@@ -7,12 +7,7 @@ import { isSome, None, Some } from '../../utils/Option.js';
  */
 export class Dropdown {
 
-	element = document.createElement('div');
-
-	/**
-	 * @private
-	 */
-	label = document.createElement('label');
+	element = document.createElement('label');
 
 	/**
 	 * @private
@@ -54,9 +49,10 @@ export class Dropdown {
 			this.equals = equals;
 		}
 
-		this.label.textContent = label;
+		const labelSpan = document.createElement('span');
+		labelSpan.textContent = label;
 
-		this.element.appendChild(this.label);
+		this.element.appendChild(labelSpan);
 		this.element.appendChild(this.select);
 		this.element.classList.add('select');
 
