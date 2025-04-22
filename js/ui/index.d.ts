@@ -23,7 +23,7 @@ export declare global {
 		 * @param title
 		 * @param err
 		 */
-		error(title: string, err): ProblemLogger;
+		error(title: string, err: BaseError): ProblemLogger;
 
 		/**
 		 * Write a warning message in the UI.
@@ -31,7 +31,7 @@ export declare global {
 		 * @param title
 		 * @param err
 		 */
-		warn(title: string, err): ProblemLogger;
+		warn(title: string, err: BaseError): ProblemLogger;
 
 		/**
 		 * Write a debug message in the UI.
