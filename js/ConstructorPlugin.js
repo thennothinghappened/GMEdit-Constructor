@@ -105,9 +105,10 @@ export class ConstructorPlugin {
 		const preferencesLoadResult = await preferences.load(preferencesDataPath);
 
 		if (!preferencesLoadResult.ok) {
-			controlPanel.warn('Failed to load your preferences!', new BaseError(docString(`
-				An error occurred in loading your preferences. The default values are being used.
-			`), preferencesLoadResult.err))
+			controlPanel.warn('Failed to load your preferences!', new BaseError(
+				`An error occurred in loading your preferences. The default values are being used.`,
+				preferencesLoadResult.err
+			))
 		}
 
 		controlPanel.setPreferencesMenu(new PreferencesMenu(preferences));
