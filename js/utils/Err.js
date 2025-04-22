@@ -6,11 +6,17 @@ import { docString } from './StringUtils.js';
 export class BaseError extends Error {
 
 	/**
+	 * @type {unknown}
+	 */
+	cause;
+
+	/**
 	 * @param {string} message 
 	 * @param {unknown} [cause]
 	 */
 	constructor(message, cause) {
-		super(message, { cause });
+		super(message);
+		this.cause = cause;
 	}
 
 	/**

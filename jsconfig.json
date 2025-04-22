@@ -5,7 +5,7 @@
 		"strict": true,
 		"checkJs": true,
 		"lib": [
-			"ESNext",
+			"ES2021",
 			"DOM"
 		],
 		"types": [

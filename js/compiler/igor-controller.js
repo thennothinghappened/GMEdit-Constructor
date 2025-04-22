@@ -137,7 +137,7 @@ export function findCompatibleRuntime(runtimeProvider, projectVersion, channel) 
  */
 function findCompatibleRuntimeInChannel(projectVersion, runtimes) {
 
-	for (const runtime of runtimes.toSorted((a, b) => a.version.compare(b.version))) {
+	for (const runtime of [...runtimes].sort((a, b) => a.version.compare(b.version))) {
 		
 		if (runtime.version.year !== projectVersion.year) {
 			continue;
