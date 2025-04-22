@@ -104,6 +104,14 @@ fieldset.gm-constructor-debug {
 	display: block;
 }
 
+.gm-constructor-control-panel label.error {
+	color: rgb(189, 98, 98);
+}
+
+.gm-constructor-control-panel label.input.error > input {
+	border: 1px solid rgb(189, 98, 98);
+}
+
 .gm-constructor-control-panel-errors > fieldset > pre {
 	word-break: break-all;
 	white-space: pre-wrap;

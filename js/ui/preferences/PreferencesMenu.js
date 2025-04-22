@@ -148,6 +148,9 @@ export class PreferencesMenu {
 				// doesn't care about them unless they specifically want to set them up.
 				const runtimes = this.preferences.getRuntimes(channel);
 
+				widgets.runtimesDirInput.hasError(runtimes === undefined);
+				widgets.installDataDirInput.hasError(users === undefined);
+
 				if ((runtimes === undefined) && (users === undefined)) {
 					group.classList.add('collapsed');
 				}
@@ -162,6 +165,7 @@ export class PreferencesMenu {
 		this.preferences.events.on('setUseGlobalBuildPath', this.onSetUseGlobalBuildPath);
 		this.preferences.events.on('setGlobalBuildPath', this.onSetGlobalBuildPath);
 		this.preferences.events.on('userListChanged', this.onUserListChanged);
+		this.preferences.events.on('runtimeListChanged', this.onRuntimeListChanged);
 
 	}
 
@@ -175,6 +179,7 @@ export class PreferencesMenu {
 		this.preferences.events.off('setUseGlobalBuildPath', this.onSetUseGlobalBuildPath);
 		this.preferences.events.off('setGlobalBuildPath', this.onSetGlobalBuildPath);
 		this.preferences.events.off('userListChanged', this.onUserListChanged);
+		this.preferences.events.off('runtimeListChanged', this.onRuntimeListChanged);
 	}
 
 	/**
@@ -225,10 +230,12 @@ export class PreferencesMenu {
 	 */
 	onUserListChanged = ({ channel, usersInfo }) => {
 		
-		const userDropdown = this.channelWidgets[channel].userDropdown;
+		const { userDropdown, installDataDirInput } = this.channelWidgets[channel];
 
 		if (usersInfo === undefined) {
 			userDropdown.visible(false);
+			installDataDirInput.hasError(true);
+
 			return;
 		}
 
@@ -238,7 +245,19 @@ export class PreferencesMenu {
 		})), usersInfo.defaultUser);
 
 		userDropdown.visible(true);
+		installDataDirInput.hasError(false);
 
+	}
+
+	/**
+	 * Update whether to show an error for the runtimes path.
+	 * 
+	 * @private
+	 * @param {TPreferences.PreferencesEventMap['runtimeListChanged']} event
+	 */
+	onRuntimeListChanged = ({ channel, runtimesInfo }) => {
+		const { runtimesDirInput } = this.channelWidgets[channel];
+		runtimesDirInput.hasError(runtimesInfo === undefined);
 	}
 
 }

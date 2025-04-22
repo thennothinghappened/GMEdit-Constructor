@@ -23,6 +23,11 @@ export declare global {
 			tooltip(text: string): this;
 
 			/**
+			 * Set whether this widget is in an error condition.
+			 */
+			hasError(hasError: boolean): this;
+
+			/**
 			 * Append this widget to the given element.
 			 * @param parent The parent element to be appended to.
 			 */
