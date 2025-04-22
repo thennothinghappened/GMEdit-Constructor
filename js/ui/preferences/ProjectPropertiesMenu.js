@@ -35,6 +35,8 @@ const USE_COMPATIBLE_CHANNEL = {
 
 /**
  * User interface for managing project-specific properties.
+ * 
+ * @implements {Destroyable}
  */
 export class ProjectPropertiesMenu {
 

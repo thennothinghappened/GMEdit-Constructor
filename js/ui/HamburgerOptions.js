@@ -15,6 +15,8 @@ const DEFAULT_BINDS = {
 
 /**
  * Handler for the hamburger menu options.
+ * 
+ * @implements {Destroyable}
  */
 export class HamburgerOptions {
 

@@ -30,6 +30,8 @@ export let PLUGIN_VERSION;
 
 /**
  * Main controller instance for the plugin!
+ * 
+ * @implements {Destroyable}
  */
 export class ConstructorPlugin {
 

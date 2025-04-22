@@ -9,6 +9,9 @@ import { Preferences } from './Preferences.js';
 
 const GMEditProjectProperties = $gmedit['ui.project.ProjectProperties'];
 
+/**
+ * @implements {Destroyable}
+ */
 export class ProjectProperties {
 
 	/**

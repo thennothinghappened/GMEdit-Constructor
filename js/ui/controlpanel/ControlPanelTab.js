@@ -16,6 +16,8 @@ import { ControlPanelImpl } from './ControlPanelImpl.js';
  * The latter two tasks are also possible through GMEdit's own UI for the respective functions, but
  * the first task is most important to provide feedback for configuration issues, or plugin logic
  * errors.
+ * 
+ * @implements {Destroyable}
  */
 export class ControlPanelTab extends ConstructorTab {
 

@@ -11,6 +11,9 @@ import { Input as TextField } from '../components/TextField.js';
 import { docString } from '../../utils/StringUtils.js';
 import { Checkbox } from '../components/Checkbox.js';
 
+/**
+ * @implements {Destroyable}
+ */
 export class PreferencesMenu {
 
 	/**

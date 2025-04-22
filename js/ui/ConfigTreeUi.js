@@ -1,9 +1,12 @@
 import { ProjectProperties } from '../preferences/ProjectProperties.js';
 
 const TreeView = $gmedit['ui.treeview.TreeView'];
+
 /**
  * Sidebar folder that visually shows the project build configs to select from more easily than via
  * the control panel.
+ * 
+ * @implements {Destroyable}
  */
 export class ConfigTreeUi {
 
