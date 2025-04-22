@@ -165,7 +165,7 @@ export class ProjectProperties {
 	}
 
 	/**
-	 * Get whether to reuse a compiler tab.
+	 * Whether to reuse a compiler tab.
 	 * @returns {Boolean}
 	 */
 	get reuseOutputTabOrDef() {
@@ -173,7 +173,7 @@ export class ProjectProperties {
 	}
 
 	/**
-	 * Get whether to reuse a compiler tab.
+	 * This project's specified preference for reusing output tabs.
 	 * @returns {Boolean|undefined}
 	 */
 	get reuseOutputTab() {

@@ -98,7 +98,7 @@ export declare global {
 			/**
 			 * How many threads to use for this compilation.
 			 */
-			threads: number;
+			threads?: number;
 
 			/**
 			 * Name of the Build Config to use for this compilation.

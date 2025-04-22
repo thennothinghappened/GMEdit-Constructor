@@ -6,7 +6,6 @@ import * as igorPaths from './compiler/igor-paths.js';
 import { PreferencesMenu } from './ui/preferences/PreferencesMenu.js';
 import { BaseError, InvalidStateErr, SolvableError } from './utils/Err.js';
 import { plugin_update_check } from './update-checker/UpdateChecker.js';
-import { mkdir, readdir } from './utils/node/file.js';
 import * as nodeModulesProvider from './utils/node/node-import.js';
 import { OutputLogTab } from './ui/tabs/OutputLogTab.js';
 import { Preferences } from './preferences/Preferences.js';
@@ -129,7 +128,7 @@ export class ConstructorPlugin {
 		
 		this.preferences = preferences;
 		this.controlPanel = controlPanel;
-		
+
 		this.hamburgerOptions = new HamburgerOptions({
 			showControlPanel: this.showControlPanel,
 			stopCurrentProject: this.stopCurrent,
@@ -246,7 +245,7 @@ export class ConstructorPlugin {
 			this.destroyCurrentProjectComponents();
 		}
 
-		if (!this.supportsProjectFormat(project)) {
+		if (!project.isGMS23) {
 			return;
 		}
 
@@ -372,102 +371,77 @@ export class ConstructorPlugin {
 	};
 
 	/**
-	 * Run a task on our current project.
+	 * Execute the given task on the given project.
 	 * 
+	 * @param {GMS2.IgorVerb} taskVerb
 	 * @param {ProjectComponents} components
-	 * @param {AtLeast<GMS2.IgorSettings, 'verb'>} partialSettings
 	 */
-	async #runTask(components, partialSettings) {
+	async executeTask(taskVerb, { project, projectProperties }) {
 
-		const projectProperties = components.projectProperties;
-		const runtime = this.findRuntime(components);
+		const runtime = this.findRuntime(projectProperties);
 
 		if (!runtime.ok) {
 			this.controlPanel.error('Couldn\'t find a runtime to use!', runtime.err);
 			return;
 		}
 
-		/** @type {GMS2.IgorSettings} */
-		const settings = {
-			verb: partialSettings.verb,
-			buildPath: partialSettings.buildPath ?? this.getBuildDir(components.project),
-			platform: partialSettings.platform ?? projectProperties.zeusPlatform ?? igorPaths.igor_user_platform,
-			runner: partialSettings.runner ?? projectProperties.runtimeBuildTypeOrDef,
-			threads: partialSettings.threads ?? 8,
-			configName: partialSettings.configName ?? projectProperties.buildConfigName
-		};
-
 		if (this.preferences.saveOnRun) {
 			open_files_save();
 		}
 
-		if (!(await readdir(settings.buildPath)).ok) {
-			
-			const res = await mkdir(settings.buildPath, true);
-			
-			if (!res.ok) {
-
-				const err = new SolvableError(
-					'Failed to create the build directory for project output!',
-					docString(`
-						Ensure the path '${settings.buildPath}' is valid, and that GMEdit would have
-						permission to edit files and directories there.
-					`),
-					res.err
-				);
-
-				this.controlPanel.error(res.err.message, err);
-				return;
-				
-			}
-
-		}
+		/** @type {GMS2.IgorSettings} */
+		const settings = {
+			verb: taskVerb,
+			buildPath: this.getBuildDir(project),
+			platform: projectProperties.zeusPlatform ?? igorPaths.igor_user_platform,
+			runner: projectProperties.runtimeBuildTypeOrDef,
+			configName: projectProperties.buildConfigName
+		};
 		
 		const userInfo = this.preferences.getUser(projectProperties.runtimeChannelTypeOrDef);
 
 		/** @type {OutputLogTab|undefined} */
-		let tab = undefined;
+		let outputTab = undefined;
 
 		/** @type {number|undefined} */
 		let jobIdToReuse = undefined;
 
 		if (projectProperties.reuseOutputTabOrDef) {
 
-			tab = OutputLogTab.findUnusedOrSteal();
+			outputTab = OutputLogTab.find();
 			
-			if (tab?.inUse) {
-				jobIdToReuse = tab.job?.id;
+			if (outputTab?.inUse) {
+				jobIdToReuse = outputTab.job?.id;
 			}
 
 		}
 
-		tab ??= OutputLogTab.openNew();
-
-		const jobResult = await compileController.job_run(
-			components.project,
+		const job = await compileController.job_run(
+			project,
 			runtime.data,
 			userInfo,
 			settings,
 			jobIdToReuse
 		);
 
-		if (!jobResult.ok) {
-			this.controlPanel.error('Failed to run Igor job!', jobResult.err);
+		if (!job.ok) {
+			this.controlPanel.error('Failed to run Igor job!', job.err);
 			return;
 		}
 
-		tab.attach(jobResult.data);
-		tab.focus();
+		outputTab ??= OutputLogTab.openNew();
+		outputTab.attach(job.data);
+		outputTab.focus();
 
 	}
 
 	/**
 	 * 
 	 * @private
-	 * @param {ProjectComponents} components
+	 * @param {ProjectProperties} projectProperties
 	 * @returns {Result<GMS2.RuntimeInfo, SolvableError>}
 	 */
-	findRuntime({ projectProperties }) {
+	findRuntime(projectProperties) {
 		
 		const preferredRuntimeVersion = projectProperties.runtimeVersion;
 
@@ -564,13 +538,13 @@ export class ConstructorPlugin {
 
 	runCurrent = () => {
 		if (this.currentProjectComponents !== undefined) {
-			this.#runTask(this.currentProjectComponents, { verb: 'Run' });
+			this.executeTask('Run', this.currentProjectComponents);
 		}
 	}
 
 	packageCurrent = () => {
 		if (this.currentProjectComponents !== undefined) {
-			this.#runTask(this.currentProjectComponents, { verb: 'Package' });
+			this.executeTask('Package', this.currentProjectComponents);
 		}
 	}
 
@@ -627,16 +601,6 @@ export class ConstructorPlugin {
 			buttons: ['Ok']
 		});
 
-	}
-
-	/**
-	 * Check whether Constructor supports the given project's format at all.
-	 * 
-	 * @param {GMEdit.Project} project 
-	 * @returns {boolean}
-	 */
-	supportsProjectFormat(project) {
-		return project.isGMS23;
 	}
 
 }

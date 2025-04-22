@@ -5,9 +5,11 @@
 
 import { IgorJob } from './job/IgorJob.js';
 import { output_blob_exts } from './igor-paths.js';
-import { BaseError } from '../utils/Err.js';
+import { BaseError, SolvableError } from '../utils/Err.js';
 import { child_process, path } from '../utils/node/node-import.js';
 import { Err, Ok } from '../utils/Result.js';
+import { mkdir, readdir } from '../utils/node/file.js';
+import { docString } from '../utils/StringUtils.js';
 
 /** @type {IgorJob[]} */
 export const jobs = [];
@@ -26,6 +28,23 @@ export async function job_run(project, runtime, user, settings, id = job_create_
 
 	const id_string = id.toString();
 	settings.buildPath = path.join(settings.buildPath, settings.platform, id_string);
+
+	if (!(await readdir(settings.buildPath)).ok) {
+				
+		const res = await mkdir(settings.buildPath, true);
+		
+		if (!res.ok) {
+			return Err(new SolvableError(
+				'Failed to create the build directory for project output!',
+				docString(`
+					Ensure the path '${settings.buildPath}' is valid, and that GMEdit would have
+					permission to edit files and directories there.
+				`),
+				res.err
+			));
+		}
+
+	}
 
 	const flags_res = job_flags_get(project, runtime.path, user?.path, settings);
 

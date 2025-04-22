@@ -236,7 +236,7 @@ export class OutputLogTab extends ConstructorTab {
 	 * Find an unused tab instance, or steal an existing running one to be repurposed.
 	 * @returns {OutputLogTab|undefined}
 	 */
-	static findUnusedOrSteal() {
+	static find() {
 		
 		const tabs = this.getOpenTabs();
 
@@ -244,13 +244,7 @@ export class OutputLogTab extends ConstructorTab {
 			return undefined;
 		}
 
-		const unused = tabs.find(tab => !tab.inUse);
-
-		if (unused !== undefined) {
-			return unused;
-		}
-
-		return tabs[0];
+		return tabs.find(tab => !tab.inUse) ?? tabs[0];
 		
 	}
 
