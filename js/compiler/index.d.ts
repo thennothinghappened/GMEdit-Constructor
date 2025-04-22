@@ -1,4 +1,3 @@
-import { GMRuntimeVersion } from './GMVersion';
 
 export declare global {
 
