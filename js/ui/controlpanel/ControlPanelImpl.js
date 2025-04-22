@@ -116,6 +116,10 @@ export class ControlPanelImpl {
 
 		this._tab = /** @type {ControlPanelTab} */ (file.editor);
 
+		for (const problem of this.problems) {
+			this._tab.addProblemInUI(problem);
+		}
+
 		if (this.preferencesMenu !== undefined) {
 			this._tab.setupPreferencesMenu(this.preferencesMenu.element);
 		}
