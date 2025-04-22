@@ -126,8 +126,6 @@ export class HamburgerOptions {
 			previousMenu.enabled = true;
 			this.menu = previousMenu;
 
-			return;
-
 		} else {
 
 			this.menu = new Electron_MenuItem({
