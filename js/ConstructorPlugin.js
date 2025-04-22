@@ -229,6 +229,10 @@ export class ConstructorPlugin {
 			projectPropertiesMenuComponents.group.remove();
 		}
 
+		for (const tab of OutputLogTab.getOpenTabs()) {
+			tab.close();
+		}
+		
 		configTreeUi.destroy();
 		projectProperties.destroy();
 
