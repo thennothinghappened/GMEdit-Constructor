@@ -1,8 +1,10 @@
 
 export declare global {
+	namespace UI {
 
-	type UIGroup = HTMLFieldSetElement & {
-		legend: HTMLLegendElement;
+		type Group = HTMLFieldSetElement & {
+			legend: HTMLLegendElement;
+		};
+
 	};
-
 }

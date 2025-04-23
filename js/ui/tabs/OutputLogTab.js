@@ -59,7 +59,7 @@ export class OutputLogTab extends ConstructorTab {
 
 	/**
 	 * @private
-	 * @type {UIGroup}
+	 * @type {UI.Group}
 	 */
 	errorsGroup;
 

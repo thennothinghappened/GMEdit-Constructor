@@ -10,11 +10,11 @@ const UIPreferences = $gmedit['ui.Preferences'];
  * @param {ParentNode} parent 
  * @param {string} label
  * @param {HTMLAnchorElement[]|undefined} [buttons]
- * @returns {UIGroup}
+ * @returns {UI.Group}
  */
 export function group(parent, label, buttons = undefined) {
 
-	/** @type {UIGroup} */
+	/** @type {UI.Group} */
 	// @ts-expect-error Not yet valid, but soon.
 	const group = UIPreferences.addGroup(parent, label);
 

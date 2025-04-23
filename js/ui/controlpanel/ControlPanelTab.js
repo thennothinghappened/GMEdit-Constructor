@@ -30,7 +30,7 @@ export class ControlPanelTab extends ConstructorTab {
 
 	/**
 	 * @private
-	 * @type {UIGroup}
+	 * @type {UI.Group}
 	 */
 	preferencesGroupElement;
 
@@ -42,7 +42,7 @@ export class ControlPanelTab extends ConstructorTab {
 
 	/**
 	 * @private
-	 * @type {UIGroup}
+	 * @type {UI.Group}
 	 */
 	projectPropertiesGroupElement;
 
