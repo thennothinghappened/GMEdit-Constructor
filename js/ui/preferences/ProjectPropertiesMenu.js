@@ -238,7 +238,7 @@ export class ProjectPropertiesMenu {
 		if (channel === undefined) {
 			
 			this.runtimeVersionDropdown.setOptions([{
-				label: 'Latest compatible (Pick a release channel to override)',
+				label: 'Pick a release channel to override',
 				value: undefined
 			}], undefined);
 
