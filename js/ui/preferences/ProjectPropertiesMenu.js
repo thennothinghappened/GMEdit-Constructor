@@ -3,7 +3,7 @@ import { GM_RELEASE_CHANNELS, Preferences, GMS2_RUNTIME_TYPES } from '../../pref
 import { project_config_tree_flatten } from '../../utils/project.js';
 import { ProjectProperties } from '../../preferences/ProjectProperties.js';
 import { Dropdown } from '../components/Dropdown.js';
-import { Some } from '../../utils/Option.js';
+import { None, Some } from '../../utils/Option.js';
 import { GMRuntimeVersion } from '../../compiler/GMVersion.js';
 
 /**
@@ -14,14 +14,6 @@ import { GMRuntimeVersion } from '../../compiler/GMVersion.js';
  */
 const USE_DEFAULT = {
 	label: 'Use Default',
-	value: undefined
-};
-
-/**
- * @type {UI.Dropdown.NormalizedEntry<undefined>}
- */
-const USE_COMPATIBLE_RUNTIME = {
-	label: 'Latest compatible',
 	value: undefined
 };
 
@@ -158,14 +150,15 @@ export class ProjectPropertiesMenu {
 		// ------------------------------------------------------------------------------
 
 		this.runtimeVersionDropdown = new Dropdown('Runtime Version',
-				Some(this.properties.runtimeVersion),
+				None,
 				(value) => { this.properties.runtimeVersion = value; },
-				[USE_COMPATIBLE_RUNTIME, ...this.mapRuntimesInChannelToEntries() ?? []],
+				[],
 				(a, b) => a.equals(b)
 			)
 			.singleline()
-			.visible(this.properties.runtimeReleaseChannel !== undefined)
 			.appendTo(this.element);
+
+		this.updateRuntimeVersionList(this.properties.runtimeReleaseChannel);
 
 		// ------------------------------------------------------------------------------
 		
@@ -202,25 +195,6 @@ export class ProjectPropertiesMenu {
 
 	/**
 	 * @private
-	 * @returns {UI.Dropdown.NormalizedEntry<GMRuntimeVersion>[]|undefined}
-	 */
-	mapRuntimesInChannelToEntries() {
-		
-		const channel = this.properties.runtimeReleaseChannel;
-
-		if (channel === undefined) {
-			return undefined;
-		}
-
-		return this.preferences.getRuntimes(channel)?.map(runtime => ({
-			label: runtime.version.toString(),
-			value: runtime.version
-		}));
-
-	}
-
-	/**
-	 * @private
 	 * @param {TPreferences.ProjectPropertiesEventMap['setBuildConfig']} event
 	 */
 	onChangeBuildConfig = ({ current }) => {
@@ -232,14 +206,7 @@ export class ProjectPropertiesMenu {
 	 * @param {TPreferences.ProjectPropertiesEventMap['setRuntimeChannel']} event
 	 */
 	onChangeRuntimeChannel = ({ channel }) => {
-
-		this.updateChannel(channel);
-		this.runtimeVersionDropdown.visible(channel !== undefined);
-
-		if (channel !== undefined) {
-			this.updateRuntimeVersionList();
-		}
-
+		this.updateRuntimeVersionList(channel);
 	};
 
 	/**
@@ -256,26 +223,60 @@ export class ProjectPropertiesMenu {
 	 */
 	onRuntimeListChanged = ({ channel }) => {
 		if (this.properties.runtimeReleaseChannel === channel) {
-			this.updateRuntimeVersionList();
+			this.updateRuntimeVersionList(channel);
 		}
 	};
 
 	/**
 	 * @private
-	 * @param {GM.ReleaseChannel|undefined} channel
+	 * @param {GM.ReleaseChannel|undefined} channel 
 	 */
-	updateChannel(channel) {
-		this.gms2ReleaseChannelDropdown.setSelectedOption(channel);
-	}
+	updateRuntimeVersionList(channel) {
 
-	/**
-	 * @private
-	 */
-	updateRuntimeVersionList() {
-		this.runtimeVersionDropdown.setOptions([
-			USE_COMPATIBLE_RUNTIME,
-			...this.mapRuntimesInChannelToEntries() ?? []
-		], this.properties.runtimeVersion);
+		this.gms2ReleaseChannelDropdown.setSelectedOption(channel);
+
+		if (channel === undefined) {
+			
+			this.runtimeVersionDropdown.setOptions([{
+				label: 'Latest compatible (Pick a release channel to override)',
+				value: undefined
+			}], undefined);
+
+			this.runtimeVersionDropdown.enable(false);
+			return;
+
+		}
+
+		const entries = this.preferences.getRuntimes(channel)?.map(runtime => ({
+			label: runtime.version.toString(),
+			value: runtime.version
+		}));
+
+		if (entries === undefined) {
+
+			this.runtimeVersionDropdown.setOptions([{
+				label: 'None installed',
+				value: undefined
+			}], undefined);
+
+			this.runtimeVersionDropdown.enable(false);
+			return;
+
+		}
+		
+		this.runtimeVersionDropdown.setOptions(
+			[
+				{
+					label: 'Latest compatible',
+					value: undefined
+				},
+				...entries
+			],
+			this.properties.runtimeVersion
+		);
+
+		this.runtimeVersionDropdown.enable(true);
+
 	}
 
 }
