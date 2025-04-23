@@ -200,7 +200,7 @@ export class ProjectProperties {
 	 * @returns {GM.ReleaseChannel|undefined}
 	 */
 	get runtimeReleaseChannel() {
-		return this.portable.runtime_type ?? undefined;
+		return this.portable.runtimeReleaseChannel ?? undefined;
 	}
 
 	/**
@@ -213,7 +213,7 @@ export class ProjectProperties {
 			return;
 		}
 
-		this.portable.runtime_type = channel;
+		this.portable.runtimeReleaseChannel = channel;
 		this.savePortableProps();
 		
 		this.eventEmitter.emit('setRuntimeChannel', { channel });
@@ -252,7 +252,7 @@ export class ProjectProperties {
 			return undefined;
 		}
 
-		const versionString = this.portable.runtime_version;
+		const versionString = this.portable.runtimeVersion;
 
 		if (versionString == undefined) {
 			return undefined;
@@ -274,7 +274,7 @@ export class ProjectProperties {
 	 */
 	set runtimeVersion(version) {
 
-		this.portable.runtime_version = version?.toString();
+		this.portable.runtimeVersion = version?.toString();
 
 		this.savePortableProps();
 		this.eventEmitter.emit('setRuntimeVersion', { version });

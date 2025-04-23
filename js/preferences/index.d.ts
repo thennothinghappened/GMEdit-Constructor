@@ -70,14 +70,14 @@ export declare global {
 			type PortableData = {
 		
 				/**
-				 * Chosen runtime type to use.
+				 * Release channel to use, if specified.
 				 */
-				runtime_type: GM.ReleaseChannel;
+				runtimeReleaseChannel?: GM.ReleaseChannel;
 		
 				/**
-				 * Chosen runtime version to use.
+				 * Chosen runtime version to use in that channel, if specified.
 				 */
-				runtime_version: string;
+				runtimeVersion?: string;
 		
 			};
 
@@ -86,7 +86,7 @@ export declare global {
 			 */
 			type LocalData = {
 
-				/** 
+				/**
 				 * Name of the active config to compile with.
 				 */
 				buildConfig: string;
