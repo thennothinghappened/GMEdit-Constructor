@@ -1,10 +1,9 @@
-import { use } from '../../utils/scope-extensions/use.js';
-import { GM_RELEASE_CHANNELS, Preferences, GMS2_RUNTIME_TYPES } from '../../preferences/Preferences.js';
-import { project_config_tree_flatten } from '../../utils/project.js';
-import { ProjectProperties } from '../../preferences/ProjectProperties.js';
-import { Dropdown } from '../components/Dropdown.js';
-import { None, Some } from '../../utils/Option.js';
-import { GMRuntimeVersion } from '../../compiler/GMVersion.js';
+import { GM_RELEASE_CHANNELS, Preferences, GMS2_RUNTIME_TYPES } from '../preferences/Preferences.js';
+import { project_config_tree_flatten } from '../utils/project.js';
+import { ProjectProperties } from '../preferences/ProjectProperties.js';
+import { Dropdown } from './components/Dropdown.js';
+import { None, Some } from '../utils/Option.js';
+import { GMRuntimeVersion } from '../compiler/GMVersion.js';
 
 /**
  * Used for runtime/user select dropdowns, to default to the global settings.

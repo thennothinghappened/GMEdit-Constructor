@@ -1,7 +1,7 @@
 import { ConstructorPlugin } from './ConstructorPlugin';
 import { ProjectProperties } from './preferences/ProjectProperties';
 import { ConfigTreeUi } from './ui/ConfigTreeUi';
-import { ProjectPropertiesMenu } from './ui/preferences/ProjectPropertiesMenu';
+import { ProjectPropertiesMenu } from './ui/ProjectPropertiesMenu';
 
 export declare global {
 

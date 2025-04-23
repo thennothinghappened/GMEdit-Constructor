@@ -1,6 +1,6 @@
 import { BaseError } from '../../utils/Err.js';
-import { PreferencesMenu } from '../preferences/PreferencesMenu.js';
-import { ProjectPropertiesMenu } from '../preferences/ProjectPropertiesMenu.js';
+import { PreferencesMenu } from '../PreferencesMenu.js';
+import { ProjectPropertiesMenu } from '../ProjectPropertiesMenu.js';
 import { ControlPanelTab } from './ControlPanelTab.js';
 
 /**

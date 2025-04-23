@@ -2,14 +2,14 @@
  * Controller for the Preferences configuration on the menu.
  */
 
-import * as ui from '../../ui/ui-wrappers.js';
-import { GM_RELEASE_CHANNELS, Preferences, GMS2_RUNTIME_TYPES } from '../../preferences/Preferences.js';
-import { use } from '../../utils/scope-extensions/use.js';
-import { Dropdown } from '../components/Dropdown.js';
-import { mapToOption, Some } from '../../utils/Option.js';
-import { Input as TextField } from '../components/TextField.js';
-import { docString } from '../../utils/StringUtils.js';
-import { Checkbox } from '../components/Checkbox.js';
+import * as ui from '../ui/ui-wrappers.js';
+import { GM_RELEASE_CHANNELS, Preferences, GMS2_RUNTIME_TYPES } from '../preferences/Preferences.js';
+import { use } from '../utils/scope-extensions/use.js';
+import { Dropdown } from './components/Dropdown.js';
+import { mapToOption, Some } from '../utils/Option.js';
+import { Input as TextField } from './components/TextField.js';
+import { docString } from '../utils/StringUtils.js';
+import { Checkbox } from './components/Checkbox.js';
 
 /**
  * @implements {Destroyable}

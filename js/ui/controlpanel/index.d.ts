@@ -1,6 +1,6 @@
 import { BaseError } from '../../utils/Err';
-import { PreferencesMenu } from '../preferences/PreferencesMenu';
-import { ProjectPropertiesMenu } from '../preferences/ProjectPropertiesMenu';
+import { PreferencesMenu } from '../PreferencesMenu';
+import { ProjectPropertiesMenu } from '../ProjectPropertiesMenu';
 
 export declare global {
 
