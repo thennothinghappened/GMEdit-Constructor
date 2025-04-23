@@ -93,6 +93,18 @@ fieldset.gm-constructor-debug {
 	margin: 8px 0;
 }
 
+.gm-constructor-control-panel [title] > span {
+	cursor: help;
+}
+
+.gm-constructor-control-panel [title] > span::after {
+	content: '(?)';
+	color: #8fc1ff;
+	display: inline-block;
+	scale: 0.75;
+	margin-left: 0.5em;
+}
+
 .gm-constructor-control-panel .select,
 .gm-constructor-control-panel .checkbox,
 .gm-constructor-control-panel .input {
