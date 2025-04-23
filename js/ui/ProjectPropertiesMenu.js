@@ -4,6 +4,9 @@ import { ProjectProperties } from '../preferences/ProjectProperties.js';
 import { Dropdown } from './components/Dropdown.js';
 import { None, Some } from '../utils/Option.js';
 import { GMRuntimeVersion } from '../compiler/GMVersion.js';
+import * as ui from './ui-wrappers.js';
+import { use } from '../utils/scope-extensions/use.js';
+import { docString } from '../utils/StringUtils.js';
 
 /**
  * Used for runtime/user select dropdowns, to default to the global settings.
@@ -51,11 +54,6 @@ export class ProjectPropertiesMenu {
 
 	/**
 	 * @private
-	 */
-	subtitle = document.createElement('em');
-
-	/**
-	 * @private
 	 * @type {UI.Dropdown<string>}
 	 */
 	buildConfigDropdown;
@@ -99,8 +97,9 @@ export class ProjectPropertiesMenu {
 		this.properties = properties;
 		this.preferences = preferences;
 
-		this.subtitle.textContent = `Configure behaviour for ${properties.project.displayName}.`;
-		this.element.appendChild(this.subtitle);
+		this.element.appendChild(ui.em(
+			`Configure behaviour for ${properties.project.displayName}.`
+		));
 
 		// ------------------------------------------------------------------------------
 
@@ -155,6 +154,20 @@ export class ProjectPropertiesMenu {
 				(a, b) => a.equals(b)
 			)
 			.singleline()
+			.tooltip(docString(`
+				
+				Project Format: ${properties.projectVersion}.
+
+				Constructor uses the IDE version written in the project's YYP file to determine
+				which runtimes are compatible with it. This value is sometimes wrong if you
+				import a project into a new GameMaker version and don't do anything that would
+				modify the YYP (create/remove/rename/move an asset or build config.)
+
+				If the detected version is incorrect, open the GameMaker IDE and perform one of
+				those actions to update it, or you can override Constructor's automatically chosen
+				runtime by selecting a runtime channel and runtime version using these options.
+
+			`))
 			.appendTo(this.element);
 
 		this.updateRuntimeVersionList(this.properties.runtimeReleaseChannel);
