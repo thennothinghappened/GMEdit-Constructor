@@ -285,6 +285,7 @@ export declare global {
 			dir: string;
 			path: string;
 			properties: ProjectData;
+			propertiesElement: HaxeNull<HTMLDivElement>;
 
 			isGMS23: boolean;
 			isGM2022: boolean;

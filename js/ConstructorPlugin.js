@@ -142,7 +142,16 @@ export class ConstructorPlugin {
 		const currentOpenProject = project_current_get();
 
 		if (currentOpenProject !== undefined) {
+
 			this.onProjectOpen({ project: currentOpenProject });
+
+			if (currentOpenProject.propertiesElement != undefined) {
+				this.onProjectPropertiesBuilt({
+					project: currentOpenProject,
+					target: currentOpenProject.propertiesElement
+				});
+			}
+
 		}
 
 		if (this.preferences.checkForUpdates) {
@@ -362,7 +371,15 @@ export class ConstructorPlugin {
 
 		const UIPreferences = $gmedit['ui.Preferences'];
 
-		if (this.currentProjectComponents?.project !== project) {
+		if (this.currentProjectComponents === undefined) {
+			return;
+		}
+
+		if (this.currentProjectComponents.project !== project) {
+			return;
+		}
+
+		if (this.currentProjectComponents.projectPropertiesMenuComponents !== undefined) {
 			return;
 		}
 
