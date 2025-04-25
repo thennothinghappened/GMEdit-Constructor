@@ -188,9 +188,12 @@ export class ProjectPropertiesMenu {
 
 		// ------------------------------------------------------------------------------
 
+		this.onSetShowTooltipHints({ showTooltipHints: this.preferences.showTooltipHints });
+
 		this.properties.events.on('setBuildConfig', this.onChangeBuildConfig);
 		this.properties.events.on('setRuntimeChannel', this.onChangeRuntimeChannel);
 		this.properties.events.on('setReuseOutputTab', this.onSetReuseOutputTab);
+		this.preferences.events.on('setShowTooltipHints', this.onSetShowTooltipHints);
 		this.preferences.events.on('runtimeListChanged', this.onRuntimeListChanged);
 
 	}
@@ -202,6 +205,7 @@ export class ProjectPropertiesMenu {
 		this.properties.events.off('setBuildConfig', this.onChangeBuildConfig);
 		this.properties.events.off('setRuntimeChannel', this.onChangeRuntimeChannel);
 		this.properties.events.off('setReuseOutputTab', this.onSetReuseOutputTab);
+		this.preferences.events.off('setShowTooltipHints', this.onSetShowTooltipHints);
 		this.preferences.events.off('runtimeListChanged', this.onRuntimeListChanged);
 	};
 
@@ -228,6 +232,18 @@ export class ProjectPropertiesMenu {
 	onSetReuseOutputTab = ({ reuseOutputTab }) => {
 		this.reuseOutputTabDropdown.setSelectedOption(reuseOutputTab);
 	};
+
+	/**
+	 * @private
+	 * @param {TPreferences.PreferencesEventMap['setShowTooltipHints']} event
+	 */
+	onSetShowTooltipHints = ({ showTooltipHints }) => {
+		if (showTooltipHints) {
+			this.element.classList.add('gm-constructor-show-tooltip-indicators')
+		} else {
+			this.element.classList.remove('gm-constructor-show-tooltip-indicators');
+		}
+	}
 
 	/**
 	 * @private

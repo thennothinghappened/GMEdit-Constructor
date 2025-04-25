@@ -56,6 +56,11 @@ export declare global {
 	
 			/** Global build directory path. */
 			global_build_path: string;
+
+			/**
+			 * Whether to show visual hints on options that have tooltips.
+			 */
+			showTooltipHints: boolean;
 			
 		}
 
@@ -128,6 +133,7 @@ export declare global {
 			setReuseOutputTab: { reuseOutputTab: boolean };
 			setUseGlobalBuildPath: { useGlobalBuildPath: boolean };
 			setGlobalBuildPath: { globalBuildPath: string };
+			setShowTooltipHints: { showTooltipHints: boolean };
 
 			/**
 			 * Fires when the list of runtimes is modified for a given release channel.

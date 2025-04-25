@@ -48,7 +48,8 @@ const PREFS_DEFAULT = {
 	reuse_compiler_tab: true,
 	check_for_updates: true,
 	use_global_build: true,
-	global_build_path: def_global_build_path
+	global_build_path: def_global_build_path,
+	showTooltipHints: true
 };
 
 const MAX_LOAD_TRIES = 3;
@@ -72,7 +73,8 @@ export class Preferences {
 		'setSaveOnRun',
 		'setReuseOutputTab',
 		'setUseGlobalBuildPath',
-		'setGlobalBuildPath'
+		'setGlobalBuildPath',
+		'setShowTooltipHints'
 	]);
 
 	/**
@@ -370,6 +372,20 @@ export class Preferences {
 	set runtimeBuildType(runner) {
 		this.prefs.runtime_opts.runner = runner;
 		this.save();
+	}
+
+	/**
+	 * Whether to show visual hints on options that have tooltips.
+	 */
+	get showTooltipHints() {
+		return this.prefs.showTooltipHints;
+	}
+
+	set showTooltipHints(value) {
+		this.prefs.showTooltipHints = value;
+		this.save();
+		
+		this.eventEmitter.emit('setShowTooltipHints', { showTooltipHints: value });
 	}
 
 	/**

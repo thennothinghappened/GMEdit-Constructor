@@ -75,6 +75,16 @@ export class PreferencesMenu {
 					multiplayer.
 				`))
 				.appendTo(section);
+
+			this.showTooltipHintsCheckbox = new Checkbox('Show hints for options have help text',
+					this.preferences.showTooltipHints,
+					(value) => { this.preferences.showTooltipHints = value }
+				)
+				.tooltip(docString(`
+					Whether to show visual indicators beside options on this page that have tooltip
+					text you can view by hovering over them.
+				`))
+				.appendTo(section);
 		
 		}).also(it => this.element.appendChild(it));
 
@@ -162,9 +172,12 @@ export class PreferencesMenu {
 		
 		}).also(it => this.element.appendChild(it));
 
+		this.onSetShowTooltipHints({ showTooltipHints: this.preferences.showTooltipHints });
+
 		this.preferences.events.on('setCheckForUpdates', this.onSetCheckForUpdates);
 		this.preferences.events.on('setSaveOnRun', this.onSetSaveOnRun);
 		this.preferences.events.on('setReuseOutputTab', this.onSetReuseOutputTab);
+		this.preferences.events.on('setShowTooltipHints', this.onSetShowTooltipHints);
 		this.preferences.events.on('setUseGlobalBuildPath', this.onSetUseGlobalBuildPath);
 		this.preferences.events.on('setGlobalBuildPath', this.onSetGlobalBuildPath);
 		this.preferences.events.on('userListChanged', this.onUserListChanged);
@@ -179,6 +192,7 @@ export class PreferencesMenu {
 		this.preferences.events.off('setCheckForUpdates', this.onSetCheckForUpdates);
 		this.preferences.events.off('setSaveOnRun', this.onSetSaveOnRun);
 		this.preferences.events.off('setReuseOutputTab', this.onSetReuseOutputTab);
+		this.preferences.events.off('setShowTooltipHints', this.onSetShowTooltipHints);
 		this.preferences.events.off('setUseGlobalBuildPath', this.onSetUseGlobalBuildPath);
 		this.preferences.events.off('setGlobalBuildPath', this.onSetGlobalBuildPath);
 		this.preferences.events.off('userListChanged', this.onUserListChanged);
@@ -207,6 +221,22 @@ export class PreferencesMenu {
 	 */
 	onSetReuseOutputTab = ({ reuseOutputTab }) => {
 		this.reuseOutputTabCheckbox.value = reuseOutputTab;
+	}
+
+	/**
+	 * @private
+	 * @param {TPreferences.PreferencesEventMap['setShowTooltipHints']} event
+	 */
+	onSetShowTooltipHints = ({ showTooltipHints }) => {
+
+		this.showTooltipHintsCheckbox.value = showTooltipHints;
+
+		if (showTooltipHints) {
+			this.element.classList.add('gm-constructor-show-tooltip-indicators')
+		} else {
+			this.element.classList.remove('gm-constructor-show-tooltip-indicators');
+		}
+
 	}
 
 	/**
