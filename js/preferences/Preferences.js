@@ -4,17 +4,15 @@
  */
 
 import { def_global_build_path, def_runtime_paths, def_user_paths, igor_path_segment } from '../compiler/igor-paths.js';
-import { readFile, readdir } from '../utils/node/file.js';
+import { readFile } from '../utils/node/file.js';
 import { BaseError, SolvableError } from '../utils/Err.js';
 import { deep_assign } from '../utils/object.js';
-import * as node from '../utils/node/node-import.js';
 import { GMRuntimeVersion } from '../compiler/GMVersion.js';
 import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
-import { Err, Ok, okOrUndefined } from '../utils/Result.js';
+import { Err, Ok } from '../utils/Result.js';
 import { docString } from '../utils/StringUtils.js';
 import { asNonEmptyArray } from '../utils/ArrayUtils.js';
-import { use } from '../utils/scope-extensions/use.js';
-import { isSome, None } from '../utils/Option.js';
+import { flattenOptionArray, None, Some } from '../utils/Option.js';
 
 /**
  * List of recognised GameMaker IDE/Runtime channel types.
@@ -445,13 +443,24 @@ export class Preferences {
 	}
 
 	/**
+	 * Get information about a user in a given channel by their username.
+	 * 
+	 * @param {GM.ReleaseChannel} channel 
+	 * @param {string} userName 
+	 * @returns {GM.User|undefined}
+	 */
+	getUser(channel, userName) {
+		return this.getUsers(channel)?.find(it => it.name === userName);
+	}
+
+	/**
 	 * Get the global choice for default user for a given type. This may be `undefined` in the case
 	 * that no users are found for the given channel.
 	 * 
 	 * @param {GM.ReleaseChannel} channel
 	 * @returns {GM.User|undefined}
 	 */
-	getUser(channel) {
+	getDefaultUser(channel) {
 
 		const userDirectoryName = this.prefs.runtime_opts.type_opts[channel].user;
 		const usersInChannel = this.usersInChannels[channel];
@@ -471,9 +480,29 @@ export class Preferences {
 	 * @param {GM.ReleaseChannel} channel 
 	 * @param {GM.User|undefined} user
 	 */
-	setUser(channel, user) {
+	setDefaultUser(channel, user) {
 		this.prefs.runtime_opts.type_opts[channel].user = user?.directoryName ?? undefined;
 		this.save();
+	}
+
+	/**
+	 * Get the list of known remote build devices for the given target platform.
+	 * 
+	 * @param {GMS2.SupportedPlatform} platform
+	 * @returns {GMS2.RemoteDevice[]}
+	 */
+	getRemoteDevices(platform) {
+		return GM_RELEASE_CHANNELS.flatMap(channel =>
+			this.getUsers(channel)?.flatMap(user =>
+				
+				user.devices.forPlatform[platform]?.map(name => Some({
+					channel,
+					name,
+					filePath: user.devices.path
+				})) ?? None
+
+			)?.flatMap(flattenOptionArray) ?? []
+		);
 	}
 
 	/**
@@ -594,7 +623,7 @@ export class Preferences {
 			channel,
 			usersInfo: {
 				users,
-				defaultUser: this.getUser(channel) ?? users[0]
+				defaultUser: this.getDefaultUser(channel) ?? users[0]
 			}
 		});
 

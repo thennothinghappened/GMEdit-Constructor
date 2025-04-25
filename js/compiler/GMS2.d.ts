@@ -70,6 +70,12 @@ export declare global {
 			'VM'	|
 			'YYC'	;
 
+		type RemoteDevice = {
+			name: string;
+			channel: GM.ReleaseChannel;
+			filePath: string;
+		};
+
 		/**
 		 * Settings for running an Igor Job.
 		 */
@@ -78,7 +84,12 @@ export declare global {
 			/**
 			 * Which platform the action will run for.
 			 */
-			platform: Platform;
+			platform: SupportedPlatform;
+
+			/**
+			 * A remote device to build on.
+			 */
+			device?: RemoteDevice;
 
 			/**
 			 * The Igor action to run.
@@ -101,11 +112,6 @@ export declare global {
 			configName: string;
 
 			/**
-			 * Path to the user folder. Required for packaging.
-			 */
-			userFolder?: string;
-
-			/**
 			 * The path to the directory to output build files to.
 			 */
 			buildPath: string;
@@ -118,24 +124,20 @@ export declare global {
 
 		};
 
+		type HostPlatform =
+			'Windows'			|
+			'Mac'				|
+			'Linux'				;
+
 		/**
 		 * A supported platform for Igor to target.
 		 */
-		type Platform =
+		type SupportedPlatform =
+			HostPlatform		|
 			'OperaGX'			|
-			'Windows'			|
-			'Mac'				|
-			'Linux'				|
 			'HTML5'				|
-			'ios'				|
-			'Android'			|
-			'tvos'				|
-			'ps4'				|
-			'ps5'				|
-			'XBoxOne'			|
-			'XBoxOneSeriesXS'	|
-			'Switch'			;
-		
+			'Android'			;
+
 		/**
 		 * Host (OS) platform information for Igor.
 		 */
@@ -147,8 +149,8 @@ export declare global {
 			/** Platform-specific path segment of the `Igor` executable. */
 			platform_path_name: string;
 
-			/** {@link Platform} to native build for the host OS. */
-			user_platform: Platform;
+			/** {@link HostPlatform} to native build for the host OS. */
+			user_platform: HostPlatform;
 
 			/**
 			 * Default directories as per https://manual-en.yoyogames.com/Settings/Building_via_Command_Line.htm

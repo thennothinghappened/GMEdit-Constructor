@@ -76,7 +76,7 @@ export class PreferencesMenu {
 				`))
 				.appendTo(section);
 
-			this.showTooltipHintsCheckbox = new Checkbox('Show hints for options have help text',
+			this.showTooltipHintsCheckbox = new Checkbox('Show hints for options with help text',
 					this.preferences.showTooltipHints,
 					(value) => { this.preferences.showTooltipHints = value }
 				)
@@ -149,8 +149,8 @@ export class PreferencesMenu {
 				const users = this.preferences.getUsers(channel);
 		
 				widgets.userDropdown = new Dropdown('User',
-						mapToOption(this.preferences.getUser(channel)),
-						(value) => this.preferences.setUser(channel, value),
+						mapToOption(this.preferences.getDefaultUser(channel)),
+						(value) => this.preferences.setDefaultUser(channel, value),
 						users?.map(user => ({ label: user.name, value: user })) ?? [],
 						(a, b) => a.fullPath === b.fullPath
 					)

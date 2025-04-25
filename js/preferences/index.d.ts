@@ -1,6 +1,7 @@
 import { GMRuntimeVersion } from "../compiler/GMVersion";
 import { BaseError, InvalidStateErr } from "../utils/Err";
 import { Preferences } from "./Preferences";
+import { ProjectProperties } from './ProjectProperties';
 
 export declare global {
 
@@ -104,7 +105,17 @@ export declare global {
 				/**
 				 * The platform to target when building for the current runtime.
 				 */
-				platform: GMS2.Platform;
+				platform: GMS2.SupportedPlatform;
+
+				/**
+				 * The device on that platform to build to.
+				 */
+				device?: string;
+
+				/**
+				 * The release channel for which the given device is in.
+				 */
+				deviceChannel?: GM.ReleaseChannel;
 
 				/** 
 				 * Whether to reuse the compile viewer tab between runs. 
@@ -207,15 +218,19 @@ export declare global {
 				version?: GMRuntimeVersion;
 			};
 
+			setPlatform: {
+				platform?: GMS2.SupportedPlatform;
+			};
+
+			setDevice: {
+				device?: GMS2.RemoteDevice;
+			};
+
 			setReuseOutputTab: {
 				reuseOutputTab?: boolean;
 			};
 
 		}
-
-		type ProjectPropertiesGetError =
-			{ isPluginError: false, error: BaseError }		|
-			{ isPluginError: true, error: InvalidStateErr }	;
 
 	};
 

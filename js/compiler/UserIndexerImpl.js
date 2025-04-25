@@ -1,6 +1,7 @@
-import { readdir } from '../utils/node/file.js';
-import * as nodeModulesProvider from '../utils/node/node-import.js';
-import { flatMapOk as flattenOptionArray, isSome, None, Some } from '../utils/Option.js';
+import { BaseError } from '../utils/Err.js';
+import { readdir, readFile } from '../utils/node/file.js';
+import * as node from '../utils/node/node-import.js';
+import { flattenOptionArray, isSome, None, Some } from '../utils/Option.js';
 import { Err, Ok } from '../utils/Result.js';
 
 /**
@@ -14,9 +15,12 @@ export class UserIndexerImpl {
 	async getUsers(path) {
 
 		const FALLBACK_USER_NAME = 'unknownUser_unknownUserID';
-		const ANY_OF_THESE_MUST_EXIST = [
+		const DEVICES_JSON_FILENAME = 'devices.json';
+
+		const MAYBE_USER_DIR_CONTENTS = [
 			'license.plist',
-			'local_settings.json'
+			'local_settings.json',
+			DEVICES_JSON_FILENAME
 		];
 
 		const dirNameList = await readdir(path);
@@ -25,41 +29,105 @@ export class UserIndexerImpl {
 			return Err({ code: 'pathReadError', inner: dirNameList.err });
 		}
 
+		/** @type {GM.UserIndexer.InvalidUserInfo[]} */
+		const invalidUsers = [];
+
 		/** @type {GM.User[]} */
-		const users = dirNameList.data.map(directoryName => {
+		const users = (await Promise.all(dirNameList.data.map(async directoryName => {
 
-				const fullPath = nodeModulesProvider.path.join(path, directoryName);
-				let isValid = false;
+				const fullPath = node.path.join(path, directoryName);
+				let discardEntry = true;
 
-				for (const fileName of ANY_OF_THESE_MUST_EXIST) {
-					if (Electron_FS.existsSync(nodeModulesProvider.path.join(fullPath, fileName))) {
-						isValid = true;
+				for (const fileName of MAYBE_USER_DIR_CONTENTS) {
+					if (Electron_FS.existsSync(node.path.join(fullPath, fileName))) {
+						discardEntry = false;
 						break;
 					}
 				}
 
-				if (!isValid) {
+				if (discardEntry) {
 					return None;
 				}
 
-				/** @type {string} */
-				let name;
 				const nameSplitIndex = directoryName.lastIndexOf('_');
 
-				if (nameSplitIndex > 0) {
-					name = directoryName.substring(0, nameSplitIndex);
-				} else {
-					// TODO: report error - user name format is different to expectation.
-					name = directoryName;
+				if (nameSplitIndex <= 0) {
+					invalidUsers.push({
+						path: fullPath,
+						error: {
+							code: 'nameInvalidFormat',
+							inner: new BaseError(`Expected user name to follow the format "name_id". Found "${directoryName}".`)
+						}
+					});
+					
+					return None;
+				}
+
+				const name = directoryName.substring(0, nameSplitIndex);
+
+				/** @type {GM.DevicesData} */
+				const devices = {
+					path: node.path.join(fullPath, DEVICES_JSON_FILENAME),
+					forPlatform: {}
+				};
+
+				const devicesFile = await readFile(devices.path);
+
+				if (devicesFile.ok) {
+					try {
+
+						/** @type {GM.DevicesJson} */
+						const devicesJson = JSON.parse(devicesFile.data.toString());
+
+						/** @type {string[]} */
+						const androidDevices = [];
+						devices.forPlatform['Android'] = androidDevices;
+
+						if (devicesJson.android?.Auto !== undefined) {
+							androidDevices.push(...Object.keys(devicesJson.android.Auto));
+						}
+
+						if (devicesJson.android?.User !== undefined) {
+							androidDevices.push(...Object.keys(devicesJson.android.User));
+						}
+
+						/** @type {string[]} */
+						const macDevices = [];
+						devices.forPlatform['Mac'] = macDevices;
+
+						if (devicesJson.mac !== undefined) {
+							macDevices.push(...Object.keys(devicesJson.mac));
+						}
+
+						/** @type {string[]} */
+						const linuxDevices = [];
+						devices.forPlatform['Linux'] = linuxDevices;
+
+						if (devicesJson.linux !== undefined) {
+							linuxDevices.push(...Object.keys(devicesJson.linux));
+						}
+
+					} catch (err) {
+						invalidUsers.push({
+							path: fullPath,
+							error: {
+								code: 'devicesJsonParseFailed',
+								inner: new BaseError('Failed to parse devices.json', err)
+							}
+						});
+
+						return None;
+					}
 				}
 
 				return Some({
 					name,
 					directoryName,
-					fullPath
+					fullPath,
+					devices
 				});
 
-			})
+			})))
 			.flatMap(flattenOptionArray)
 			.sort((a, b) => {
 				if (a.name === FALLBACK_USER_NAME) {
@@ -73,7 +141,7 @@ export class UserIndexerImpl {
 				return Number(a.name > b.name);
 			});
 		
-		return Ok({ users });
+		return Ok({ users, invalidUsers });
 
 	}
 

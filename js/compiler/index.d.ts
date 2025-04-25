@@ -15,6 +15,43 @@ export declare global {
 			name: string;
 			directoryName: string;
 			fullPath: string;
+			devices: DevicesData;
+		};
+
+		type DevicesData = {
+
+			/**
+			 * Path to the devices file for building with Igor.
+			 */
+			path: string;
+
+			forPlatform: {
+				[platform in GMS2.SupportedPlatform]?: string[];
+			};
+
+		};
+
+		/**
+		 * Data describing various external devices to build to.
+		 */
+		type DevicesJson = {
+
+			android?: {
+				/**
+				 * User-added devices.
+				 */
+				User?: Record<string, unknown>;
+
+				/**
+				 * Automatically detected devices.
+				 */
+				Auto?: Record<string, unknown>;
+			};
+
+			mac?: Record<string, unknown>;
+
+			linux?: Record<string, unknown>;
+			
 		};
 
 		/**
@@ -35,7 +72,17 @@ export declare global {
 			
 			type GetData = {
 				users: User[];
+				invalidUsers: InvalidUserInfo[];
 			};
+
+			type InvalidUserInfo = {
+				path: string;
+				error: InvalidUserInfoError;
+			};
+
+			type InvalidUserInfoError = 
+				{ code: 'nameInvalidFormat', inner: Error }			|
+				{ code: 'devicesJsonParseFailed', inner: Error }	;
 
 		};
 

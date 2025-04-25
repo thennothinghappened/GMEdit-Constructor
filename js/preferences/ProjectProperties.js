@@ -3,6 +3,7 @@
  */
 
 import { GMRuntimeVersion, GMVersion } from '../compiler/GMVersion.js';
+import { igor_user_platform } from '../compiler/igor-paths.js';
 import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
 import { project_config_tree_get } from '../utils/project.js';
 import { Preferences } from './Preferences.js';
@@ -71,6 +72,8 @@ export class ProjectProperties {
 		'setBuildConfig',
 		'setRuntimeChannel',
 		'setRuntimeVersion',
+		'setPlatform',
+		'setDevice',
 		'setReuseOutputTab'
 	]);
 
@@ -224,18 +227,65 @@ export class ProjectProperties {
 	 * The target platform for this project when using the current runtime. If undefined, the host
 	 * platform is assumed.
 	 * 
-	 * @returns {GMS2.Platform|undefined}
+	 * @returns {GMS2.SupportedPlatform|undefined}
 	 */
 	get gms2Platform() {
 		return this.local.platform;
 	}
 
 	/**
-	 * @param {GMS2.Platform|undefined} platform 
+	 * @param {GMS2.SupportedPlatform|undefined} platform 
 	 */
 	set gms2Platform(platform) {
+		
 		this.local.platform = platform;
 		this.saveLocalProps();
+
+		this.eventEmitter.emit('setPlatform', { platform });
+
+	}
+
+	/**
+	 * The target device to build to.
+	 * @returns {GMS2.RemoteDevice|undefined}
+	 */
+	get device() {
+		
+		const platform = this.gms2Platform;
+		const deviceChannel = this.local.deviceChannel;
+		let deviceName = this.local.device;
+
+		if (platform === undefined) {
+			return undefined;
+		}
+
+		const devices = this.preferences.getRemoteDevices(platform);
+		const device = devices.find(it => it.channel === deviceChannel && it.name === deviceName);
+
+		if (device !== undefined) {
+			return device;
+		}
+
+		if (platform !== igor_user_platform) {
+			// We can't build without a device on a different platform!
+			return devices[0];
+		}
+
+		return undefined;
+
+	}
+
+	/**
+	 * @param {GMS2.RemoteDevice|undefined} device
+	 */
+	set device(device) {
+		
+		this.local.device = device?.name;
+		this.local.deviceChannel = device?.channel;
+
+		this.saveLocalProps();
+		this.eventEmitter.emit('setDevice', { device });
+
 	}
 
 	/**

@@ -16,6 +16,7 @@ import { docString } from './utils/StringUtils.js';
 import { GMS2RuntimeIndexerImpl } from './compiler/GMS2RuntimeIndexerImpl.js';
 import { ControlPanelImpl } from './ui/controlpanel/ControlPanelImpl.js';
 import { UserIndexerImpl } from './compiler/UserIndexerImpl.js';
+import { use } from './utils/scope-extensions/use.js';
 
 /**
  * Name of the plugin 
@@ -524,6 +525,28 @@ export class ConstructorPlugin {
 			
 		}
 
+		// @ts-expect-error Channel is not used before assignment. Both cases set it.
+		const user = this.preferences.getDefaultUser(channel);
+
+		if (user === undefined) {
+			this.controlPanel.error('No user found to compile with.', new SolvableError(
+				docString(`
+					Constructor couldn't find any users at the data path specified for the ${
+						// @ts-expect-error Channel is not used before assignment. Both cases set it.
+						channel
+					} installation.
+				`),
+				docString(`
+					Try specifying a different runtime channel type below, or check that the
+					installation data path for ${
+						// @ts-expect-error Channel is not used before assignment. Both cases set it.
+						channel
+					} is correct.
+				`)
+			));
+			return;
+		}
+
 		if (this.preferences.saveOnRun) {
 			open_files_save();
 		}
@@ -533,6 +556,7 @@ export class ConstructorPlugin {
 			verb: taskVerb,
 			buildPath: this.getBuildDir(project),
 			platform: projectProperties.gms2Platform ?? igorPaths.igor_user_platform,
+			device: projectProperties.device,
 			runner: projectProperties.runtimeBuildTypeOrDef,
 			configName: projectProperties.buildConfigName
 		};
@@ -553,8 +577,6 @@ export class ConstructorPlugin {
 
 		}
 
-		// @ts-expect-error Channel is not used before assignment. Both cases set it.
-		const user = this.preferences.getUser(channel);
 		const job = await compileController.job_run(project, runtime, user, settings, jobIdToReuse);
 
 		if (!job.ok) {

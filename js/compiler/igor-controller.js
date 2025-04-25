@@ -20,7 +20,7 @@ export const jobs = [];
  * 
  * @param {GMEdit.Project} project
  * @param {GMS2.RuntimeInfo} runtime
- * @param {GM.User|undefined} user
+ * @param {GM.User} user
  * @param {GMS2.IgorSettings} settings
  * @param {number|undefined} [id] Specific ID to use for this job, for stealing from an existing one.
  * @returns {Promise<Result<IgorJob>>}
@@ -46,8 +46,8 @@ export async function job_run(project, runtime, user, settings, id = job_create_
 		}
 
 	}
-
-	const flags_res = job_flags_get(project, runtime.path, user?.fullPath, settings);
+	
+	const flags_res = job_flags_get(project, runtime.path, user, settings);
 
 	if (!flags_res.ok) {
 		return Err(new BaseError('Failed to get Igor flags for this job!', flags_res.err));
@@ -172,11 +172,11 @@ function job_remove(job) {
  * 
  * @param {GMEdit.Project} project
  * @param {string} runtime_path
- * @param {string|undefined} user_path
+ * @param {GM.User} user
  * @param {GMS2.IgorSettings} settings
  * @returns {Result<string[]>}
  */
-function job_flags_get(project, runtime_path, user_path, settings) {
+function job_flags_get(project, runtime_path, user, settings) {
 
 	const projectName = project.displayName;
 	const blob_extension = output_blob_exts[settings.platform];
@@ -188,12 +188,9 @@ function job_flags_get(project, runtime_path, user_path, settings) {
 		'/runtime=' + settings.runner,
 		'/cache=' + path.join(settings.buildPath, 'cache'),
 		'/of=' + path.join(settings.buildPath, 'output', `${projectName}.${blob_extension}`),
+		`/uf=${user.fullPath}`,
 		'/v'
 	];
-
-	if (user_path !== undefined) {
-		flags.push(`/uf=${user_path}`);
-	}
 
 	// ignore cache, this fixes changes not applying in yyc
 	if (settings.runner === 'YYC') {
@@ -202,6 +199,13 @@ function job_flags_get(project, runtime_path, user_path, settings) {
 
 	if (settings.threads !== undefined) {
 		flags.push(`/j=${settings.threads}`);
+	}
+
+	if (settings.device !== undefined) {
+		flags.push(
+			`/df=${settings.device.filePath}`,
+			`/device=${settings.device.name}`
+		);
 	}
 
 	switch (settings.verb) {

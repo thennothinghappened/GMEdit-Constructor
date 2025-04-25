@@ -7,6 +7,7 @@ import { GMRuntimeVersion } from '../compiler/GMVersion.js';
 import * as ui from './ui-wrappers.js';
 import { use } from '../utils/scope-extensions/use.js';
 import { docString } from '../utils/StringUtils.js';
+import { igor_user_platform } from '../compiler/igor-paths.js';
 
 /**
  * Used for runtime/user select dropdowns, to default to the global settings.
@@ -60,9 +61,15 @@ export class ProjectPropertiesMenu {
 
 	/**
 	 * @private
-	 * @type {UI.Dropdown<GMS2.Platform|undefined>}
+	 * @type {UI.Dropdown<GMS2.SupportedPlatform|undefined>}
 	 */
 	platformDropdown;
+
+	/**
+	 * @private
+	 * @type {UI.Dropdown<GMS2.RemoteDevice|undefined>}
+	 */
+	deviceDropdown;
 
 	/**
 	 * @private
@@ -113,17 +120,35 @@ export class ProjectPropertiesMenu {
 
 		// ------------------------------------------------------------------------------
 
-		this.platformDropdown = new Dropdown('Runner Platform',
+		this.platformDropdown = new Dropdown('Platform',
 				Some(this.properties.gms2Platform),
 				(value) => { this.properties.gms2Platform = value; },
 				[
 					{ label: 'Current Platform', value: undefined },
-					'HTML5',
-					'OperaGX',
+					...[
+						'HTML5',
+						'OperaGX',
+						'Mac',
+						'Linux',
+						'Android'
+					].filter(entry => entry !== igor_user_platform)
 				]
 			)
 			.singleline()
 			.appendTo(this.element);
+
+		this.deviceDropdown = 
+			/** @type {Dropdown<GMS2.RemoteDevice|undefined>} */ 
+			(new Dropdown('Remote Device',
+				None,
+				(value) => { this.properties.device = value },
+				[],
+				(a, b) => (a.channel === b.channel) && (a.name === b.name)
+			))
+			.singleline()
+			.appendTo(this.element);
+
+		this.updatePlatformDeviceCombo();
 
 		// ------------------------------------------------------------------------------
 
@@ -190,8 +215,10 @@ export class ProjectPropertiesMenu {
 
 		this.onSetShowTooltipHints({ showTooltipHints: this.preferences.showTooltipHints });
 
-		this.properties.events.on('setBuildConfig', this.onChangeBuildConfig);
-		this.properties.events.on('setRuntimeChannel', this.onChangeRuntimeChannel);
+		this.properties.events.on('setBuildConfig', this.onSetBuildConfig);
+		this.properties.events.on('setRuntimeChannel', this.onSetRuntimeChannel);
+		this.properties.events.on('setPlatform', this.onSetPlatform);
+		this.properties.events.on('setDevice', this.onSetDevice);
 		this.properties.events.on('setReuseOutputTab', this.onSetReuseOutputTab);
 		this.preferences.events.on('setShowTooltipHints', this.onSetShowTooltipHints);
 		this.preferences.events.on('runtimeListChanged', this.onRuntimeListChanged);
@@ -202,8 +229,10 @@ export class ProjectPropertiesMenu {
 	 * Clean up our event listens.
 	 */
 	destroy() {
-		this.properties.events.off('setBuildConfig', this.onChangeBuildConfig);
-		this.properties.events.off('setRuntimeChannel', this.onChangeRuntimeChannel);
+		this.properties.events.off('setBuildConfig', this.onSetBuildConfig);
+		this.properties.events.off('setRuntimeChannel', this.onSetRuntimeChannel);
+		this.properties.events.off('setPlatform', this.onSetPlatform);
+		this.properties.events.off('setDevice', this.onSetDevice);
 		this.properties.events.off('setReuseOutputTab', this.onSetReuseOutputTab);
 		this.preferences.events.off('setShowTooltipHints', this.onSetShowTooltipHints);
 		this.preferences.events.off('runtimeListChanged', this.onRuntimeListChanged);
@@ -213,7 +242,7 @@ export class ProjectPropertiesMenu {
 	 * @private
 	 * @param {TPreferences.ProjectPropertiesEventMap['setBuildConfig']} event
 	 */
-	onChangeBuildConfig = ({ current }) => {
+	onSetBuildConfig = ({ current }) => {
 		this.buildConfigDropdown.setSelectedOption(current);
 	};
 
@@ -221,8 +250,22 @@ export class ProjectPropertiesMenu {
 	 * @private
 	 * @param {TPreferences.ProjectPropertiesEventMap['setRuntimeChannel']} event
 	 */
-	onChangeRuntimeChannel = ({ channel }) => {
+	onSetRuntimeChannel = ({ channel }) => {
 		this.updateRuntimeVersionList(channel);
+	};
+
+	/**
+	 * @private
+	 */
+	onSetPlatform = () => {
+		this.updatePlatformDeviceCombo();
+	};
+
+	/**
+	 * @private
+	 */
+	onSetDevice = () => {
+		this.updatePlatformDeviceCombo();
 	};
 
 	/**
@@ -304,6 +347,49 @@ export class ProjectPropertiesMenu {
 		);
 
 		this.runtimeVersionDropdown.enable(true);
+
+	}
+
+	/**
+	 * @private
+	 */
+	updatePlatformDeviceCombo() {
+
+		/** 
+		 * Platforms which do not support remote devices, so we shouldn't bother showing the remote
+		 * device dropdown for them.
+		 * 
+		 * @type {GMS2.SupportedPlatform[]} 
+		 */
+		const NON_REMOTE_PLATFORMS = ['OperaGX', 'HTML5', 'Windows'];
+
+		const platform = this.properties.gms2Platform;
+		this.platformDropdown.setSelectedOption(platform);
+
+		if (platform === undefined || NON_REMOTE_PLATFORMS.includes(platform)) {
+			this.deviceDropdown.visible(false);
+			return;
+		}
+
+		/** @type {UI.Dropdown.NormalizedEntry<GMS2.RemoteDevice>[]} */
+		const deviceDropdownEntries = this.preferences.getRemoteDevices(platform).map(it => ({
+			label: `${it.channel} / ${it.name}`,
+			value: it
+		}));
+
+		if (deviceDropdownEntries.length === 0) {
+			this.deviceDropdown
+				.enable(false)
+				.visible(true)
+				.setOptions([{ label: 'No devices found' }], undefined);
+				
+			return;
+		}
+
+		this.deviceDropdown
+			.enable(true)
+			.visible(true)
+			.setOptions(deviceDropdownEntries, this.properties.device);
 
 	}
 

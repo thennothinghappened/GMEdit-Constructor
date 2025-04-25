@@ -1,3 +1,4 @@
+import { ProjectPropertiesMenu } from './ProjectPropertiesMenu';
 
 export declare global {
 	namespace UI {

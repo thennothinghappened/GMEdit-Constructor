@@ -64,7 +64,7 @@ const igor_platform_map = {
 
 /**
  * Mappings of Igor targets to output file extensions. TODO: other targets
- * @type {{[K in GMS2.Platform]?: string}}
+ * @type {{[K in GMS2.SupportedPlatform]?: string}}
 */
 export const output_package_exts = {
 	Windows: '.zip',
@@ -74,7 +74,7 @@ export const output_package_exts = {
 
 /**
  * Mappings of Igor targets to respective file extensions for output data blobs. TODO: other targets
- * @type {{[K in GMS2.Platform]?: string}}
+ * @type {{[K in GMS2.SupportedPlatform]?: string}}
 */
 export const output_blob_exts = {
 	Windows: 'win',

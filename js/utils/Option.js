@@ -35,7 +35,7 @@ export function mapToOption(maybeData) {
  * @param {Option<T>} option
  * @returns {[T]|[]}
  */
-export function flatMapOk(option) {
+export function flattenOptionArray(option) {
 	if (isSome(option)) {
 		return [option.data];
 	}
