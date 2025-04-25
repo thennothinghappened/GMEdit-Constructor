@@ -344,6 +344,8 @@ export class ConstructorPlugin {
 			this.preferencesMenu ??= new PreferencesMenu(this.preferences);
 			
 			group.appendChild(this.preferencesMenu.element);
+			group.classList.add('gm-constructor-control-panel');
+
 			UIPreferences.addText(group, `Version: ${PLUGIN_VERSION}`);
 
 		}
@@ -371,6 +373,7 @@ export class ConstructorPlugin {
 
 		const group = UIPreferences.addGroup(target, PLUGIN_NAME);
 		group.appendChild(projectPropertiesMenu.element);
+		group.classList.add('gm-constructor-control-panel');
 
 		this.currentProjectComponents.projectPropertiesMenuComponents = {
 			group,
