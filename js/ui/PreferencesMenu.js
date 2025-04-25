@@ -150,9 +150,9 @@ export class PreferencesMenu {
 		
 				widgets.userDropdown = new Dropdown('User',
 						mapToOption(this.preferences.getUser(channel)),
-						(value) => this.preferences.setUser(channel, value.name),
+						(value) => this.preferences.setUser(channel, value),
 						users?.map(user => ({ label: user.name, value: user })) ?? [],
-						(a, b) => a.name === b.name
+						(a, b) => a.fullPath === b.fullPath
 					)
 					.visible(users !== undefined)
 					.appendTo(group);

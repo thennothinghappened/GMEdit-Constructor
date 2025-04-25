@@ -28,6 +28,22 @@ export function mapToOption(maybeData) {
 }
 
 /**
+ * Flatten Ok option values, and discard None values. To be used with `Array#flatMap()` to convert
+ * `Option<T>[]` into `T[]`.
+ * 
+ * @template T
+ * @param {Option<T>} option
+ * @returns {[T]|[]}
+ */
+export function flatMapOk(option) {
+	if (isSome(option)) {
+		return [option.data];
+	}
+
+	return [];
+}
+
+/**
  * Check whether the given option contains a value.
  * 
  * @template T

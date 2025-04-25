@@ -13,6 +13,8 @@ import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
 import { Err, Ok, okOrUndefined } from '../utils/Result.js';
 import { docString } from '../utils/StringUtils.js';
 import { asNonEmptyArray } from '../utils/ArrayUtils.js';
+import { use } from '../utils/scope-extensions/use.js';
+import { isSome, None } from '../utils/Option.js';
 
 /**
  * List of recognised GameMaker IDE/Runtime channel types.
@@ -123,6 +125,13 @@ export class Preferences {
 	gms2RuntimeIndexer;
 
 	/**
+	 * @readonly
+	 * @private
+	 * @type {GM.UserIndexer}
+	 */
+	userIndexer;
+
+	/**
 	 * List of runtimes for each type.
 	 * Populated after loading the list.
 	 * 
@@ -143,10 +152,12 @@ export class Preferences {
 	/**
 	 * @param {ProblemLogger} problemLogger
 	 * @param {GMS2.RuntimeIndexer} gms2RuntimeIndexer
+	 * @param {GM.UserIndexer} userIndexer
 	 */
-	constructor(problemLogger, gms2RuntimeIndexer) {
+	constructor(problemLogger, gms2RuntimeIndexer, userIndexer) {
 		this.problemLogger = problemLogger;
 		this.gms2RuntimeIndexer = gms2RuntimeIndexer;
+		this.userIndexer = userIndexer;
 	}
 
 	/**
@@ -442,14 +453,15 @@ export class Preferences {
 	 */
 	getUser(channel) {
 
-		const userName = this.prefs.runtime_opts.type_opts[channel].user;
+		const userDirectoryName = this.prefs.runtime_opts.type_opts[channel].user;
 		const usersInChannel = this.usersInChannels[channel];
 
-		if (userName == undefined || usersInChannel === undefined) {
+		if (userDirectoryName == undefined || usersInChannel === undefined) {
 			return undefined;
 		}
 
-		return usersInChannel.find(it => it.name === userName);
+		return usersInChannel.find(it => it.directoryName === userDirectoryName)
+			?? usersInChannel[0];
 
 	}
 
@@ -457,10 +469,10 @@ export class Preferences {
 	 * Set the global choice for default runtime for a given type.
 	 * 
 	 * @param {GM.ReleaseChannel} channel 
-	 * @param {string|undefined} user 
+	 * @param {GM.User|undefined} user
 	 */
 	setUser(channel, user) {
-		this.prefs.runtime_opts.type_opts[channel].user = user ?? undefined;
+		this.prefs.runtime_opts.type_opts[channel].user = user?.directoryName ?? undefined;
 		this.save();
 	}
 
@@ -576,14 +588,14 @@ export class Preferences {
 		}
 
 		const users = userListRes.data;
-		const defaultUser = users[0];
-
 		this.usersInChannels[channel] = users;
-		this.setUser(channel, defaultUser.name);
 
 		this.eventEmitter.emit('userListChanged', {
 			channel,
-			usersInfo: { users, defaultUser }
+			usersInfo: {
+				users,
+				defaultUser: this.getUser(channel) ?? users[0]
+			}
 		});
 
 	}
@@ -671,56 +683,38 @@ export class Preferences {
 	 * @param {GM.ReleaseChannel} channel
 	 * @returns {Promise<Result<NonEmptyArray<GM.User>>>}
 	 */
-	loadUserList(channel) {
-		return this.loadUserListFrom(this.getRuntimeOptions(channel).users_path);
-	}
-
-	/**
-	 * Load the list of users for the provided search path.
-	 *  
-	 * @param {String} users_path 
-	 * @returns {Promise<Result<NonEmptyArray<GM.User>>>}
-	 */
-	async loadUserListFrom(users_path) {
-
-		const FALLBACK_USER_NAME = 'unknownUser_unknownUserID';
-		const userNameListRes = await readdir(users_path);
+	async loadUserList(channel) {
 		
-		if (!userNameListRes.ok) {
-			return Err(new BaseError(
-				`Failed to read users path '${users_path}': ${userNameListRes.err}`
-			));
+		const path = this.getRuntimeOptions(channel).users_path;
+		const result = await this.userIndexer.getUsers(path);
+
+		if (!result.ok) {
+			switch (result.err.code) {
+
+				case 'pathReadError': return Err(new SolvableError(
+					`Failed to read the list of users from the path "${path}".`,
+					'Check if this path is valid.',
+					result.err.inner
+				));
+
+				default: return Err(new BaseError(
+					docString(`
+						An unexpected error occurred while loading the user list from the path
+						"${path}"!
+					`),
+					result.err.inner
+				));
+
+			}
 		}
 
-		const userNameList = userNameListRes.data;
+		const users = asNonEmptyArray(result.data.users);
 
-		const users = userNameList.map(dirname => ({
-				path: node.path.join(users_path, dirname),
-				name: dirname
-			}))
-			.filter(user => (
-				Electron_FS.existsSync(node.path.join(user.path, 'license.plist')) ||
-				Electron_FS.existsSync(node.path.join(user.path, 'local_settings.json')
-			)))
-			.sort((a, b) => {
-				if (a.name === FALLBACK_USER_NAME) {
-					return 1;
-				}
-
-				if (b.name === FALLBACK_USER_NAME) {
-					return -1;
-				}
-
-				return Number(a.name > b.name);
-			});
-		
-		const nonEmptyUsersList = asNonEmptyArray(users);
-
-		if (nonEmptyUsersList === undefined) {
-			return Err(new BaseError(`No users found at path "${users_path}"`));
+		if (users === undefined) {
+			return Err(new BaseError(`No users found at the path "${path}"`));
 		}
 
-		return Ok(nonEmptyUsersList);
+		return Ok(users);
 
 	}
 

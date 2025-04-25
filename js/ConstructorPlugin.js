@@ -15,6 +15,7 @@ import { ProjectPropertiesMenu } from './ui/ProjectPropertiesMenu.js';
 import { docString } from './utils/StringUtils.js';
 import { GMS2RuntimeIndexerImpl } from './compiler/GMS2RuntimeIndexerImpl.js';
 import { ControlPanelImpl } from './ui/controlpanel/ControlPanelImpl.js';
+import { UserIndexerImpl } from './compiler/UserIndexerImpl.js';
 
 /**
  * Name of the plugin 
@@ -101,7 +102,12 @@ export class ConstructorPlugin {
 		const controlPanel = new ControlPanelImpl();
 		igorPaths.__setup__();
 
-		const preferences = new Preferences(controlPanel, new GMS2RuntimeIndexerImpl());
+		const preferences = new Preferences(
+			controlPanel,
+			new GMS2RuntimeIndexerImpl(),
+			new UserIndexerImpl()
+		);
+
 		const preferencesDataPath = nodeModulesProvider.path.join(Electron_App.getPath('userData'), 'GMEdit', 'config', `${PLUGIN_NAME}.json`);
 		const preferencesLoadResult = await preferences.load(preferencesDataPath);
 

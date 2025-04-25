@@ -12,8 +12,31 @@ export declare global {
 		 * Information for a specific found user.
 		 */
 		type User = {
-			path: string;
 			name: string;
+			directoryName: string;
+			fullPath: string;
+		};
+
+		/**
+		 * 
+		 */
+		interface UserIndexer {
+			/**
+			 * Get the list of users at the given location.
+			 * @param path Path to the directory where the users' directories can be found.
+			 */
+			async getUsers(path: string): Promise<Result<UserIndexer.GetData, UserIndexer.GetError>>;
+		};
+
+		namespace UserIndexer {
+
+			type GetError =
+				{ code: 'pathReadError', inner: Error };
+			
+			type GetData = {
+				users: User[];
+			};
+
 		};
 
 		namespace YY {

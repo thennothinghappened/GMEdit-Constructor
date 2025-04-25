@@ -58,17 +58,6 @@ export declare global {
 		};
 
 		/**
-		 * 
-		 */
-		interface UserIndexer {
-			/**
-			 * Get the list of users at the given location.
-			 * @param path Path to the directory where the users' directories can be found.
-			 */
-			async getUsers(path: string): Promise<Result<NonEmptyArray<GM.User>>>;
-		};
-
-		/**
 		 * Information for a specific found runtime.
 		 */
 		type RuntimeInfo = {

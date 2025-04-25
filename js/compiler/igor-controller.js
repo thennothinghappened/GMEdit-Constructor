@@ -47,7 +47,7 @@ export async function job_run(project, runtime, user, settings, id = job_create_
 
 	}
 
-	const flags_res = job_flags_get(project, runtime.path, user?.path, settings);
+	const flags_res = job_flags_get(project, runtime.path, user?.fullPath, settings);
 
 	if (!flags_res.ok) {
 		return Err(new BaseError('Failed to get Igor flags for this job!', flags_res.err));
