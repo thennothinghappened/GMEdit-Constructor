@@ -168,7 +168,7 @@ export declare global {
 			handleItemCtxMenu(e: MouseEvent);
 			
 			makeDir(name: string): TreeViewDir;
-			makeAssetDir(name: string, rel: string, filter: string?): TreeViewDir;
+			makeAssetDir(name: string, rel: string, filter: HaxeNull<string>): TreeViewDir;
 			
 			makeItem(name: string): TreeViewItem;
 			handleItemClick(e: MouseEvent, element: HTMLElement?, nav: GmlFileNav?): GmlFile;

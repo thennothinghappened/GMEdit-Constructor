@@ -36,7 +36,11 @@ export class ConfigTreeUi {
 		this.projectProperties = projectProperties;
 
 		const rootConfig = this.projectProperties.rootBuildConfig;
-		this.configsTreeDir = TreeView.makeAssetDir('Build Configs', '', null);
+
+		// Build Configs are stored in the YYP, GMEdit seems to conventionally follow that the `rel`
+		// argument is a relative path to the file on disk related to this data, so this is our best
+		// choice in that regard.
+		this.configsTreeDir = TreeView.makeAssetDir('Build Configs', projectProperties.project.name, null);
 		
 		this.addConfigInTree(this.configsTreeDir.treeItems, rootConfig);
 		this.updateConfigTree(this.projectProperties.buildConfigName);
@@ -68,6 +72,11 @@ export class ConfigTreeUi {
 	addConfigInTree(parentElement, config) {
 
 		const dir = TreeView.makeDir(config.name);
+
+		// GMEdit provides no way to create nodes in the tree view that aren't corresponding to
+		// "real" files on disk without hacks and as such throws an error if you don't specify this
+		// attribute when it tries to serialize the tree state for reloading.
+		dir.setAttribute('data-rel-path', config.name);
 
 		dir.treeHeader.title = 'Right-click to select.';
 		dir.treeHeader.addEventListener('click', TreeView.handleDirClick);
