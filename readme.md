@@ -59,6 +59,7 @@ The above are the defaults provided. You can rebind these through GMEdit's
 **Edit Keyboard Shortcuts** option in Preferences!
 
 ## Planned features include:
+- GMRT support, once the toolchain is better documented and the kinks are worked out. Especially once CI usecases start being considered by YYG, that will mark GMRT being stable enough for uses like Constructor.
 - Option for docked console as opposed to full-window
 
 ## Issues
