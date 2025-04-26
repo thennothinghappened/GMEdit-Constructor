@@ -46,10 +46,6 @@
 	font-family: monospace, monospace;
 }
 
-.gm-constructor-tab .select[hidden] {
-	display: none !important;
-}
-
 .gm-constructor-show-tooltip-indicators [title] > span::after {
 	content: '(?)';
 	color: #8fc1ff;
@@ -103,6 +99,10 @@ fieldset.gm-constructor-debug {
 
 .gm-constructor-control-panel [title] > span {
 	cursor: help;
+}
+
+.gm-constructor-control-panel .select[hidden] {
+	display: none !important;
 }
 
 .gm-constructor-control-panel .select,
