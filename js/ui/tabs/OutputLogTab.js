@@ -137,6 +137,7 @@ export class OutputLogTab extends ConstructorTab {
 
 		job.events.on('stdout', this.onJobStdout);
 		job.events.on('stop', this.onJobStop);
+		job.events.on('stopping', this.updateTitle);
 
 		this.tickIntervalId = setTimeout(this.updateTitle, 1000);
 
@@ -164,6 +165,7 @@ export class OutputLogTab extends ConstructorTab {
 
 		this.job.events.off('stdout', this.onJobStdout);
 		this.job.events.off('stop', this.onJobStop);
+		this.job.events.off('stopping', this.updateTitle);
 
 		this.job = undefined;
 		clearInterval(this.tickIntervalId);
@@ -195,9 +197,9 @@ export class OutputLogTab extends ConstructorTab {
 	 * Callback on the completion of the attached Job.
 	 * 
 	 * @private
-	 * @param {Array<JobError>} errors List of errors produced by the Job.
+	 * @param {JobEventMap['stop']} event
 	 */
-	onJobStop = (errors) => {
+	onJobStop = ({ errors }) => {
 
 		if (this.job === undefined) {
 			return;

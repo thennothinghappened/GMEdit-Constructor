@@ -4,7 +4,12 @@ export declare global {
 	interface JobEventMap {
 		stdout: string;
 		output: string;
-		stop: Array<JobError>;
+		stopping: void;
+		stop: {
+			stopType: JobStopType;
+			exitCode?: number;
+			errors: JobError[];
+		};
 	};
 
 	type JobStopType =
