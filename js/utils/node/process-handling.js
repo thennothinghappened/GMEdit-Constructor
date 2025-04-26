@@ -9,17 +9,26 @@ import { child_process } from './node-import.js';
  * @author [Almenon](https://gist.github.com/Almenon/e32f9b418057ea738687c176816070d6) for core method.
  * 
  * @param {number} pid The PID of the root process in the tree we want to end.
- * @param {string|number} [signal] The signal sent to the processes. (*NIX-only)
+ * @param {boolean} force Whether to forcefully kill the processes.
  * @returns {Result<void>}
  */
-export function killRecursive(pid, signal = 'SIGTERM'){
+export function killRecursive(pid, force) {
+
+	const signal = (force
+		? 'SIGKILL'
+		: 'SIGTERM'
+	);
 
 	try {
 
 		switch (process.platform) {
 			
 			case 'win32':
-				child_process.execSync(`taskkill /PID ${pid} /T /F`);
+				child_process.spawnSync('taskkill', [
+					'/PID', pid.toString(),
+					'/T',
+					...(force ? ['/F'] : [])
+				]);
 			break;
 
 			case 'darwin':
@@ -37,7 +46,7 @@ export function killRecursive(pid, signal = 'SIGTERM'){
 					.split('\n')
 					.map(parseInt)
 					.filter(it => !isNaN(it))
-					.forEach(it => killRecursive(it, signal));
+					.forEach(it => killRecursive(it, force));
 
 				process.kill(pid, signal);
 

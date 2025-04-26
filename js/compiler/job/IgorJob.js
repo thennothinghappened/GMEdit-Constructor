@@ -131,7 +131,7 @@ export class IgorJob {
 			this.events.once('stop', () => resolve({ ok: true }));
 		});
 
-		const res = killRecursive(this.process.pid);
+		const res = killRecursive(this.process.pid, false);
 		
 		if (!res.ok) {
 			return Promise.resolve(Err(new BaseError(
@@ -168,7 +168,7 @@ export class IgorJob {
 				.split('\n')
 				.map(parseInt)
 				.filter(it => !isNaN(it))
-				.forEach(it => killRecursive(it));
+				.forEach(it => killRecursive(it, false));
 
 		} catch (err) {
 			return Promise.resolve(Err(new BaseError(
