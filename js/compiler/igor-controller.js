@@ -31,7 +31,7 @@ export async function job_run(project, runtime, user, settings, id = job_create_
 	settings.buildPath = path.join(settings.buildPath, settings.platform, id_string);
 
 	if (!(await readdir(settings.buildPath)).ok) {
-				
+		
 		const res = await mkdir(settings.buildPath, true);
 		
 		if (!res.ok) {
@@ -248,7 +248,7 @@ function job_create_id() {
 	
 	let id = 0;
 
-	while (jobs.find(it => it.id === id) !== undefined) {
+	while (jobs.some(job => job.id === id)) {
 		id ++;
 	}
 
