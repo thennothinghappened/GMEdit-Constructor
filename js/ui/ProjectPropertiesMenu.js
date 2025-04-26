@@ -7,7 +7,7 @@ import { GMRuntimeVersion } from '../compiler/GMVersion.js';
 import * as ui from './ui-wrappers.js';
 import { use } from '../utils/scope-extensions/use.js';
 import { docString } from '../utils/StringUtils.js';
-import { igor_user_platform } from '../compiler/igor-paths.js';
+import { HOST_PLATFORM } from '../compiler/igor-paths.js';
 
 /**
  * Used for runtime/user select dropdowns, to default to the global settings.
@@ -61,7 +61,7 @@ export class ProjectPropertiesMenu {
 
 	/**
 	 * @private
-	 * @type {UI.Dropdown<GMS2.SupportedPlatform|undefined>}
+	 * @type {UI.Dropdown<GM.SupportedPlatform|undefined>}
 	 */
 	platformDropdown;
 
@@ -121,8 +121,8 @@ export class ProjectPropertiesMenu {
 		// ------------------------------------------------------------------------------
 
 		this.platformDropdown = new Dropdown('Platform',
-				Some(this.properties.gms2Platform),
-				(value) => { this.properties.gms2Platform = value; },
+				Some(this.properties.platform),
+				(value) => { this.properties.platform = value; },
 				[
 					{ label: 'Current Platform', value: undefined },
 					...[
@@ -131,7 +131,7 @@ export class ProjectPropertiesMenu {
 						'Mac',
 						'Linux',
 						'Android'
-					].filter(entry => entry !== igor_user_platform)
+					].filter(entry => entry !== HOST_PLATFORM)
 				]
 			)
 			.singleline()
@@ -359,11 +359,11 @@ export class ProjectPropertiesMenu {
 		 * Platforms which do not support remote devices, so we shouldn't bother showing the remote
 		 * device dropdown for them.
 		 * 
-		 * @type {GMS2.SupportedPlatform[]} 
+		 * @type {GM.SupportedPlatform[]} 
 		 */
 		const NON_REMOTE_PLATFORMS = ['OperaGX', 'HTML5', 'Windows'];
 
-		const platform = this.properties.gms2Platform;
+		const platform = this.properties.platform;
 		this.platformDropdown.setSelectedOption(platform);
 
 		if (platform === undefined || NON_REMOTE_PLATFORMS.includes(platform)) {

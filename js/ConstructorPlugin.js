@@ -409,10 +409,10 @@ export class ConstructorPlugin {
 	/**
 	 * Execute the given task on the given project.
 	 * 
-	 * @param {GMS2.IgorVerb} taskVerb
+	 * @param {GM.Task} task
 	 * @param {ProjectComponents} components
 	 */
-	async executeTask(taskVerb, { project, projectProperties }) {
+	async executeTask(task, { project, projectProperties }) {
 
 		/** @type {GMS2.RuntimeInfo|undefined} */
 		let runtime = undefined;
@@ -547,17 +547,13 @@ export class ConstructorPlugin {
 			return;
 		}
 
-		if (this.preferences.saveOnRun) {
-			open_files_save();
-		}
-
 		/** @type {GMS2.IgorSettings} */
 		const settings = {
-			verb: taskVerb,
+			task: task,
 			buildPath: this.getBuildDir(project),
-			platform: projectProperties.gms2Platform ?? igorPaths.igor_user_platform,
+			platform: projectProperties.platform ?? igorPaths.HOST_PLATFORM,
 			device: projectProperties.device,
-			runner: projectProperties.runtimeBuildTypeOrDef,
+			runtimeType: projectProperties.runtimeBuildTypeOrDef,
 			configName: projectProperties.buildConfigName
 		};
 
@@ -575,6 +571,10 @@ export class ConstructorPlugin {
 				jobIdToReuse = outputTab.job?.id;
 			}
 
+		}
+
+		if (this.preferences.saveOnRun) {
+			open_files_save();
 		}
 
 		const job = await compileController.job_run(project, runtime, user, settings, jobIdToReuse);

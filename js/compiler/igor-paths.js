@@ -64,7 +64,7 @@ const igor_platform_map = {
 
 /**
  * Mappings of Igor targets to output file extensions. TODO: other targets
- * @type {{[K in GMS2.SupportedPlatform]?: string}}
+ * @type {{[K in GM.SupportedPlatform]?: string}}
 */
 export const output_package_exts = {
 	Windows: '.zip',
@@ -74,7 +74,7 @@ export const output_package_exts = {
 
 /**
  * Mappings of Igor targets to respective file extensions for output data blobs. TODO: other targets
- * @type {{[K in GMS2.SupportedPlatform]?: string}}
+ * @type {{[K in GM.SupportedPlatform]?: string}}
 */
 export const output_blob_exts = {
 	Windows: 'win',
@@ -103,7 +103,7 @@ export const def_global_build_path = igor_platform_map[process.platform].default
 /**
  * {@link IgorPlatform} to native build for the host OS. 
  */
-export const igor_user_platform = igor_platform_map[process.platform].user_platform;
+export const HOST_PLATFORM = igor_platform_map[process.platform].user_platform;
 
 /**
  * The local-to-runtime Igor path for the current platform & architecture.

@@ -325,7 +325,7 @@ export class OutputLogTab extends ConstructorTab {
 			return 'No attached job.';
 		}
 
-		let prefix = `${this.job.settings.platform} - ${this.job.settings.verb}`;
+		let prefix = `${this.job.settings.platform} - ${this.job.settings.task}`;
 
 		if (OutputLogTab.getOpenTabs().length > 1) {
 			prefix += ` #${this.job.id}`;

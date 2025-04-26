@@ -4,7 +4,7 @@
  */
 
 import { IgorJob } from './job/IgorJob.js';
-import { output_blob_exts } from './igor-paths.js';
+import { HOST_PLATFORM, output_blob_exts } from './igor-paths.js';
 import { BaseError, SolvableError } from '../utils/Err.js';
 import { child_process, path } from '../utils/node/node-import.js';
 import { Err, Ok } from '../utils/Result.js';
@@ -27,8 +27,22 @@ export const jobs = [];
  */
 export async function job_run(project, runtime, user, settings, id = job_create_id()) {
 
-	const id_string = id.toString();
-	settings.buildPath = path.join(settings.buildPath, settings.platform, id_string);
+	if (settings.device === undefined && requiresRemoteDevice(settings.task, settings.platform)) {
+		// TODO: use a union error type for passing this upwards to show the user a better message.
+		// Error descriptiveness isn't as good at this level.
+		return Err(new SolvableError(
+			docString(`
+				To build for ${settings.platform}, you need to pick a remote device to
+				execute the process on. 
+			`),
+			docString(`
+				Add a remote device in the IDE, and reload Constructor to pick it up.
+			`)
+		));
+	}
+
+	const idString = id.toString();
+	settings.buildPath = path.join(settings.buildPath, settings.platform, idString);
 
 	if (!(await readdir(settings.buildPath)).ok) {
 		
@@ -69,6 +83,29 @@ export async function job_run(project, runtime, user, settings, id = job_create_
 	job.events.once('stop', () => job_remove(job));
 
 	return Ok(job);
+
+}
+
+/**
+ * Check whether the given target platform requires a remote device to build to for the given task.
+ * 
+ * @param {GM.SupportedPlatform} platform 
+ * @param {GM.Task} task 
+ * @returns {boolean}
+ */
+function requiresRemoteDevice(task, platform) {
+	
+	if (platform === HOST_PLATFORM) {
+		return false;
+	}
+
+	switch (platform) {
+		case 'Mac': return true;
+		case 'Linux': return true;
+		case 'Android': return task !== 'Package';
+	}
+
+	return false;
 
 }
 
@@ -185,7 +222,7 @@ function job_flags_get(project, runtime_path, user, settings) {
 		'/project=' + project.path,
 		'/config=' + settings.configName,
 		'/rp=' + runtime_path,
-		'/runtime=' + settings.runner,
+		'/runtime=' + settings.runtimeType,
 		'/cache=' + path.join(settings.buildPath, 'cache'),
 		'/of=' + path.join(settings.buildPath, 'output', `${projectName}.${blob_extension}`),
 		`/uf=${user.fullPath}`,
@@ -193,7 +230,7 @@ function job_flags_get(project, runtime_path, user, settings) {
 	];
 
 	// ignore cache, this fixes changes not applying in yyc
-	if (settings.runner === 'YYC') {
+	if (settings.runtimeType === 'YYC') {
 		flags.push('/ic');
 	}
 
@@ -208,27 +245,26 @@ function job_flags_get(project, runtime_path, user, settings) {
 		);
 	}
 
-	switch (settings.verb) {
+	/** @type {string} */
+	let igorVerb = settings.task;
 
-		case 'Package':
-
-			if (['Windows', 'Mac'].includes(settings.platform)) {
-				settings.verb = 'PackageZip';
+	switch (settings.platform) {
+		case 'HTML5':
+			if (settings.task === 'Package') {
+				igorVerb = 'folder';
 			}
-
 		break;
 
-		case 'Run':
+		case 'Windows':
+		case 'Mac':
+			if (settings.task === 'Package') {
+				igorVerb = 'PackageZip';
+			}
 		break;
-
-		default:
-			return Err(new BaseError(
-				`Unhandled command case for flags: ${settings.verb}`
-			));
 	}
 
 	flags.push('--');
-	flags.push(settings.platform, settings.verb);
+	flags.push(settings.platform, igorVerb);
 
 	return Ok(flags);
 }

@@ -135,7 +135,7 @@ export class IgorJob {
 		
 		if (!res.ok) {
 			return Promise.resolve(Err(new BaseError(
-				`Failed to stop the job ${this.settings.verb}`,
+				`Failed to stop the job ${this.settings.task}`,
 				res.err
 			)));
 		}

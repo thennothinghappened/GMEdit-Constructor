@@ -3,10 +3,34 @@ export declare global {
 
 	namespace GM {
 
+		/**
+		 * A platform that Constructor might be running on.
+		 */
+		type HostPlatform =
+			'Windows'			|
+			'Mac'				|
+			'Linux'				;
+
+		/**
+		 * A platform that Constructor can build to.
+		 */
+		type SupportedPlatform =
+			HostPlatform		|
+			'OperaGX'			|
+			'HTML5'				|
+			'Android'			;
+
 		type ReleaseChannel = 
 			'Stable'	|
 			'Beta'		|
 			'LTS'		;
+
+		/**
+		 * A build task to execute.
+		 */
+		type Task =
+			'Run'		|
+			'Package'	;
 			
 		/**
 		 * Information for a specific found user.
@@ -26,7 +50,7 @@ export declare global {
 			path: string;
 
 			forPlatform: {
-				[platform in GMS2.SupportedPlatform]?: string[];
+				[platform in GM.SupportedPlatform]?: string[];
 			};
 
 		};

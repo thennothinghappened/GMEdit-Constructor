@@ -84,7 +84,7 @@ export declare global {
 			/**
 			 * Which platform the action will run for.
 			 */
-			platform: SupportedPlatform;
+			platform: GM.SupportedPlatform;
 
 			/**
 			 * A remote device to build on.
@@ -94,12 +94,12 @@ export declare global {
 			/**
 			 * The Igor action to run.
 			 */
-			verb: IgorVerb;
+			task: GM.Task;
 
 			/**
 			 * Which runner to use - default is VM.
 			 */
-			runner: RuntimeType;
+			runtimeType: RuntimeType;
 
 			/**
 			 * How many threads to use for this compilation.
@@ -124,20 +124,6 @@ export declare global {
 
 		};
 
-		type HostPlatform =
-			'Windows'			|
-			'Mac'				|
-			'Linux'				;
-
-		/**
-		 * A supported platform for Igor to target.
-		 */
-		type SupportedPlatform =
-			HostPlatform		|
-			'OperaGX'			|
-			'HTML5'				|
-			'Android'			;
-
 		/**
 		 * Host (OS) platform information for Igor.
 		 */
@@ -149,8 +135,8 @@ export declare global {
 			/** Platform-specific path segment of the `Igor` executable. */
 			platform_path_name: string;
 
-			/** {@link HostPlatform} to native build for the host OS. */
-			user_platform: HostPlatform;
+			/** {@link GM.HostPlatform} to native build for the host OS. */
+			user_platform: GM.HostPlatform;
 
 			/**
 			 * Default directories as per https://manual-en.yoyogames.com/Settings/Building_via_Command_Line.htm
@@ -178,12 +164,6 @@ export declare global {
 			default_global_build_path: string;
 
 		}
-
-		type IgorVerb = 
-			'Run'			|
-			'Package'		|
-			'PackageZip'	;
-
 
 	};
 

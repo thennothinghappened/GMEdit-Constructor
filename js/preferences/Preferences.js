@@ -488,7 +488,7 @@ export class Preferences {
 	/**
 	 * Get the list of known remote build devices for the given target platform.
 	 * 
-	 * @param {GMS2.SupportedPlatform} platform
+	 * @param {GM.SupportedPlatform} platform
 	 * @returns {GMS2.RemoteDevice[]}
 	 */
 	getRemoteDevices(platform) {

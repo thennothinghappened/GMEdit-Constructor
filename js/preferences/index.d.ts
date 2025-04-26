@@ -105,7 +105,7 @@ export declare global {
 				/**
 				 * The platform to target when building for the current runtime.
 				 */
-				platform: GMS2.SupportedPlatform;
+				platform: GM.SupportedPlatform;
 
 				/**
 				 * The device on that platform to build to.
@@ -219,7 +219,7 @@ export declare global {
 			};
 
 			setPlatform: {
-				platform?: GMS2.SupportedPlatform;
+				platform?: GM.SupportedPlatform;
 			};
 
 			setDevice: {

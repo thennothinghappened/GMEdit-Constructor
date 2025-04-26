@@ -3,7 +3,7 @@
  */
 
 import { GMRuntimeVersion, GMVersion } from '../compiler/GMVersion.js';
-import { igor_user_platform } from '../compiler/igor-paths.js';
+import { HOST_PLATFORM } from '../compiler/igor-paths.js';
 import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
 import { project_config_tree_get } from '../utils/project.js';
 import { Preferences } from './Preferences.js';
@@ -224,19 +224,18 @@ export class ProjectProperties {
 	}
 
 	/**
-	 * The target platform for this project when using the current runtime. If undefined, the host
-	 * platform is assumed.
+	 * The target platform for this project. If undefined, the host platform is assumed.
 	 * 
-	 * @returns {GMS2.SupportedPlatform|undefined}
+	 * @returns {GM.SupportedPlatform|undefined}
 	 */
-	get gms2Platform() {
+	get platform() {
 		return this.local.platform;
 	}
 
 	/**
-	 * @param {GMS2.SupportedPlatform|undefined} platform 
+	 * @param {GM.SupportedPlatform|undefined} platform 
 	 */
-	set gms2Platform(platform) {
+	set platform(platform) {
 		
 		this.local.platform = platform;
 		this.saveLocalProps();
@@ -251,7 +250,7 @@ export class ProjectProperties {
 	 */
 	get device() {
 		
-		const platform = this.gms2Platform;
+		const platform = this.platform;
 		const deviceChannel = this.local.deviceChannel;
 		let deviceName = this.local.device;
 
@@ -266,7 +265,7 @@ export class ProjectProperties {
 			return device;
 		}
 
-		if (platform !== igor_user_platform) {
+		if (platform !== HOST_PLATFORM) {
 			// We can't build without a device on a different platform!
 			return devices[0];
 		}
