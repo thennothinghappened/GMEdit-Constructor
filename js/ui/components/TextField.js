@@ -78,13 +78,7 @@ export class Input {
 	 * @param {boolean} hasError
 	 */
 	hasError(hasError) {
-		
-		if (hasError) {
-			this.element.classList.add('error');
-		} else {
-			this.element.classList.remove('error');
-		}
-
+		this.element.classList.toggle('error', hasError);
 		return this;
 	}
 

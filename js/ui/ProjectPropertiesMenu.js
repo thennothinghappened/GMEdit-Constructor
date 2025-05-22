@@ -281,11 +281,7 @@ export class ProjectPropertiesMenu {
 	 * @param {TPreferences.PreferencesEventMap['setShowTooltipHints']} event
 	 */
 	onSetShowTooltipHints = ({ showTooltipHints }) => {
-		if (showTooltipHints) {
-			this.element.classList.add('gm-constructor-show-tooltip-indicators')
-		} else {
-			this.element.classList.remove('gm-constructor-show-tooltip-indicators');
-		}
+		this.element.classList.toggle('gm-constructor-show-tooltip-indicators', showTooltipHints);
 	}
 
 	/**
