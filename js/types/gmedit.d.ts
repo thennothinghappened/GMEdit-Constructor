@@ -149,6 +149,44 @@ export declare global {
 			dispatchEvent: boolean,
 		}>;
 
+		/**
+		 * Handles logic for middle-clicking identifiers or pressing F1 when your cursor is at one.
+		 * @author YellowAfterlife
+		 */
+		class OpenDeclaration {
+			static openLink(meta: string, pos: HaxeNull<AceAjax.Position>): boolean;
+			static openLookup(lookup: GmlLookup, nav: HaxeNull<GmlFileNav>): boolean;
+			static openLocal(name: string, pos: HaxeNull<AceAjax.Position>, nav: HaxeNull<GmlFileNav>): boolean;
+			static openImportFile(rel: string): boolean;
+			static proc(session: AceAjax.IEditSession, pos: AceAjax.Position, token: HaxeNull<AceAjax.TokenInfo>): boolean;
+		}
+
+		/**
+		 * Handles general-purpose event name encoding/decoding,
+		 * as well as splitting combined code back into individual events.
+		 * @author YellowAfterlife
+		 */
+		class GmlEvent {
+			/** Type IDs to lowercase event names. */
+			static t2s: string[];
+			/** Type IDs to capitalized event names. */
+			static t2sc: string[];
+			/** Lowercase event names to type IDs. */
+			static s2t: Record<string, number>;
+			/** Capitalized event names to type IDs. */
+			static sc2t: Record<string, number>;
+			/** Event IDs to sub-event IDs to lowercase full event names. */
+			static i2s: string[][];
+		}
+
+		/**
+		 * Maps keyboard key names for use in events.
+		 * @author YellowAfterlife
+		 */
+		class GmlKeycode {
+			static toName(k: number): string;
+		}
+
 		interface TreeView {
 			
 			element: HTMLDivElement;
@@ -499,7 +537,10 @@ export declare global {
 		'ui.project.ProjectProperties': GMEdit.ProjectProperties;
 		'ui.ChromeTabs': GMEdit.ChromeTabs;
 		'ui.KeyboardShortcuts': GMEdit.KeyboardShortcuts;
+		'ui.OpenDeclaration': typeof GMEdit.OpenDeclaration;
 		'ui.treeview.TreeView': GMEdit.TreeView;
+		'parsers.GmlEvent': typeof GMEdit.GmlEvent;
+		'parsers.GmlKeycode': typeof GMEdit.GmlKeycode;
 		'gml.Project': typeof GMEdit.Project;
 		'editors.Editor': typeof GMEdit.Editor;
 		'file.FileKind': typeof GMEdit.FileKind;

@@ -30,8 +30,6 @@ export const JobPermissionsError = {
 
 		return fragment;
 
-	},
-
-	asString: ({ error }) => `Igor Permissions Error: ${error}`
+	}
 
 };

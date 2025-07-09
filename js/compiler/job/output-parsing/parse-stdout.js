@@ -1,3 +1,4 @@
+import { GMS2SyntaxError } from '../errors/GMS2SyntaxError.js';
 import { JobCompilationError } from '../errors/JobCompilationError.js';
 import { JobPermissionsError } from '../errors/JobPermissionsError.js';
 import { JobRunnerError } from '../errors/JobRunnerError.js';
@@ -17,6 +18,7 @@ import { JobRunnerError } from '../errors/JobRunnerError.js';
 const errorDescriptors = [
 	JobRunnerError,
 	JobPermissionsError,
+	GMS2SyntaxError,
 	JobCompilationError
 ];
 
@@ -75,8 +77,7 @@ function parseJobError(string, errorDescriptor) {
 	return {
 		offset: match.index,
 		length: match[0].length,
-		asHTML: () => errorDescriptor.asHTML(groups),
-		toString: () => errorDescriptor.asString(groups)
+		asHTML: () => errorDescriptor.asHTML(groups)
 	};
 
 }

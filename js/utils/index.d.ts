@@ -1,5 +1,5 @@
 import { None } from './Option';
-import { BaseError } from './utils/Err';
+import { BaseError } from './Err';
 
 export declare global {
 

@@ -38,11 +38,6 @@ export declare global {
 		 */
 		asHTML(groups: Record<string, string>): Node;
 
-		/**
-		 * Get a meaningful string representation of the given error.
-		 */
-		asString(groups: Record<string, string>): string;
-
 	};
 
 	/**
@@ -65,11 +60,6 @@ export declare global {
 		 * somewhere we want to display it.
 		 */
 		asHTML(): Node;
-
-		/**
-		 * Get a meaningful string representation of this error.
-		 */
-		toString(): string;
 
 	}
 

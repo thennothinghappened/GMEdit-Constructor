@@ -46,12 +46,14 @@
 	font-family: monospace, monospace;
 }
 
-.gm-constructor-show-tooltip-indicators [title] > span::after {
+.gm-constructor-show-tooltip-indicators [title] > span::after,
+.gm-constructor-give-tooltip-indicator::after {
 	content: '(?)';
 	color: #8fc1ff;
 	display: inline-block;
 	scale: 0.75;
 	margin-left: 0.5em;
+	cursor: help;
 }
 
 /************************

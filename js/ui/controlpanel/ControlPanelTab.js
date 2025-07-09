@@ -72,7 +72,7 @@ export class ControlPanelTab extends ConstructorTab {
 		this.element.appendChild(ui.h1(ControlPanelTab.tabName));
 		this.element.appendChild(ui.p(`Version: ${PLUGIN_VERSION}`));
 
-		this.problems = ui.group(this.element, 'Problems', [ui.text_button(
+		this.problems = ui.group(this.element, 'Problems', [ui.textButton(
 			'Dismiss All', 
 			() => this.controlPanel.clearAllProblems()
 		)]);
@@ -105,7 +105,7 @@ export class ControlPanelTab extends ConstructorTab {
 		const css_classes = severity_classes[problem.severity];
 
 		const element = ui.group(this.problems, problem.title, [
-			ui.text_button('Dismiss', () => this.controlPanel.clearProblem(problem))
+			ui.textButton('Dismiss', () => this.controlPanel.clearProblem(problem))
 		]);
 
 		this.problemElementMap.set(problem, element);

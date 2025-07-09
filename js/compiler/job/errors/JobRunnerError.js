@@ -31,13 +31,6 @@ export const JobRunnerError = {
 
 		return fragment;
 
-	},
-
-	asString: ({ event, object, line_number, script, exception }) => `Runner Error:
-
-On line ${line_number} of script ${script},
-In ${event} of object ${object}:
-
-${exception}`
+	}
 
 };

@@ -49,7 +49,7 @@ export function group(parent, label, buttons = undefined) {
  * @param {(ev: MouseEvent) => void} callback
  * @returns {HTMLAnchorElement}
  */
-export function text_button(label, callback) {
+export function textButton(label, callback) {
 
 	const anchor = document.createElement('a');
 	anchor.textContent = label;

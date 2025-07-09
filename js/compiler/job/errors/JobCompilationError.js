@@ -26,8 +26,6 @@ export const JobCompilationError = {
 
 		return fragment;
 
-	},
-
-	asString: ({ error }) => `Job Compiler Error: ${error}`
+	}
 
 };
