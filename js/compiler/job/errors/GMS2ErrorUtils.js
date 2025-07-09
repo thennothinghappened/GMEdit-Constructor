@@ -40,7 +40,7 @@ export class GMS2ErrorUtils {
 				let parentName;
 
 				if (rest.startsWith('anon@')) {
-					rest = rest.substring('anon@'.length + 1);
+					rest = rest.substring('anon@'.length);
 					const parentSplitPos = rest.indexOf('@');
 
 					if (parentSplitPos < 0) {
