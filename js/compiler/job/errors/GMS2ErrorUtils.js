@@ -37,7 +37,7 @@ export class GMS2ErrorUtils {
 				let name;
 
 				/** @type {string} */
-				let parentFullName;
+				let parentName;
 
 				if (rest.startsWith('anon@')) {
 					rest = rest.substring('anon@'.length + 1);
@@ -50,7 +50,7 @@ export class GMS2ErrorUtils {
 					const anonIndex = rest.substring(0, parentSplitPos);
 
 					name = `<anon function ${anonIndex}>`;
-					parentFullName = rest.substring(parentSplitPos + 1);
+					parentName = rest.substring(parentSplitPos + 1);
 				} else {
 					const parentSplitPos = rest.indexOf('@');
 
@@ -59,19 +59,40 @@ export class GMS2ErrorUtils {
 					}
 
 					name = rest.substring(0, parentSplitPos);
-					parentFullName = rest.substring(parentSplitPos + 1);
+					parentName = rest.substring(parentSplitPos + 1);
 				}
 
-				const parentInfo = this.parseScriptName(parentFullName);
+				if (!parentName.startsWith('gml_') && parentName.includes('@')) {
+					// Nested methods/constructors!
+					const parentStack = parentName.split('@');
+					parentName = parentStack[parentStack.length - 1];
+				}
 
-				if (!parentInfo.ok) {
-					return Err(new BaseError(`Failed to parse function \`${name}\`'s parent script name`, parentInfo.err));
+				/** @type {GMS2.ErrorUtils.ScriptInfo} */
+				let parent;
+
+				if (parentName.startsWith('gml_')) {
+					const parentRes = this.parseScriptName(parentName);
+
+					if (!parentRes.ok) {
+						return Err(new BaseError(`Failed to parse function \`${name}\`'s parent script name`, parent.err));
+					}
+
+					parent = parentRes.data;
+				} else {
+					// For some reason, newish runtimes have started using script readable names in
+					// this *one* spot. I don't know why! It means we have to treat them differently
+					// though!
+					parent = {
+						type: 'GlobalScript',
+						name: parentName
+					};
 				}
 
 				return Ok({
 					type: 'Script',
 					name: name,
-					definedIn: parentInfo.data
+					definedIn: parent
 				});
 
 			case 'Object':
