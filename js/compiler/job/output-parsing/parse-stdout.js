@@ -1,7 +1,7 @@
 import { GMS2SyntaxError } from '../errors/GMS2SyntaxError.js';
 import { JobCompilationError } from '../errors/JobCompilationError.js';
 import { JobPermissionsError } from '../errors/JobPermissionsError.js';
-import { JobRunnerError } from '../errors/JobRunnerError.js';
+import { GMS2RuntimeError } from '../errors/GMS2RuntimeError.js';
 
 /**
  * List of recognised error types to iterate over discovering.
@@ -16,7 +16,7 @@ import { JobRunnerError } from '../errors/JobRunnerError.js';
  * @type {JobErrorDescriptor[]}
  */
 const errorDescriptors = [
-	JobRunnerError,
+	GMS2RuntimeError,
 	JobPermissionsError,
 	GMS2SyntaxError,
 	JobCompilationError
