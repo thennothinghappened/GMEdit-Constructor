@@ -18,7 +18,7 @@ export function errorPositionAsHTML(group, scriptString, lineNumber) {
 
 		switch (info.type) {
 			case 'GlobalScript':
-				group.appendChild(ui.textButton(`${scriptString}, line ${lineNumber}`, () =>
+				group.appendChild(ui.textButton(`${info.name}, line ${lineNumber}`, () =>
 					OpenDeclaration.openLink(`${info.name}:${lineNumber}`, null)
 				));
 			break;
