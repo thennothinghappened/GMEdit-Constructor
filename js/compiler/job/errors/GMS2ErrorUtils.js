@@ -75,7 +75,7 @@ export class GMS2ErrorUtils {
 					const parentRes = this.parseScriptName(parentName);
 
 					if (!parentRes.ok) {
-						return Err(new BaseError(`Failed to parse function \`${name}\`'s parent script name`, parent.err));
+						return Err(new BaseError(`Failed to parse function \`${name}\`'s parent script name`, parentRes.err));
 					}
 
 					parent = parentRes.data;
