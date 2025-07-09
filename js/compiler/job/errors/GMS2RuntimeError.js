@@ -19,21 +19,16 @@ export const GMS2RuntimeError = {
 
 	asHTML: ({ event, object, stackTrace, exception }) => {
 
-		const fragment = new DocumentFragment();
+		const group = document.createElement('div');
 		
 		if (object !== '<undefined>') {
-			const blurb = document.createElement('div');
-
-			blurb.append(ui.b(event), ' of object ', ui.code(object), ':');
-			blurb.appendChild(document.createElement('br'));
-
-			fragment.appendChild(blurb);
+			group.append(ui.b(event), ' of object ', ui.code(object), ':');
 		}
 
 		const exceptionElement = document.createElement('pre');
 		exceptionElement.textContent = exception;
 
-		fragment.appendChild(exceptionElement);
+		group.appendChild(exceptionElement);
 
 		const stackTraceInfo = stackTrace
 			.split('\n')
@@ -47,7 +42,7 @@ export const GMS2RuntimeError = {
 				sourceLine: groups.sourceLine ?? undefined
 			}));
 
-		fragment.appendChild(document.createElement('hr'));
+		group.appendChild(document.createElement('hr'));
 
 		for (const info of stackTraceInfo) {
 			const element = document.createElement('div');
@@ -58,10 +53,10 @@ export const GMS2RuntimeError = {
 				element.appendChild(ui.code(info.sourceLine));
 			}
 
-			fragment.appendChild(element);
+			group.appendChild(element);
 		}
 
-		return fragment;
+		return group;
 
 	}
 
