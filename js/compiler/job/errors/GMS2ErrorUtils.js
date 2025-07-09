@@ -49,7 +49,7 @@ export class GMS2ErrorUtils {
 
 					const anonIndex = rest.substring(0, parentSplitPos);
 
-					name = `anon function ${anonIndex}`;
+					name = `<anon function ${anonIndex}>`;
 					parentFullName = rest.substring(parentSplitPos + 1);
 				} else {
 					const parentSplitPos = rest.indexOf('@');

@@ -32,14 +32,14 @@ export function errorPositionAsHTML(group, scriptString, lineNumber) {
 
 				switch (rootParent.type) {
 					case 'GlobalScript':
-						group.appendChild(ui.textButton(`${info.name} (defined in ${rootParent.name}), line ${lineNumber}`, () =>
+						group.appendChild(ui.textButton(`Method ${info.name} (defined in ${rootParent.name}), line ${lineNumber}`, () =>
 							OpenDeclaration.openLink(`${rootParent.name}:${lineNumber}`, null)
 						));
 					break;
 
 					case 'Object':
 						// FIXME: mysteriously we're getting off-by-one line numbers but only sometimes??? Is GMEdit doing this???
-						group.appendChild(ui.textButton(`${info.name} (defined in ${rootParent.objectName} ${rootParent.formattedEventName} Event), line ${lineNumber}`, () =>
+						group.appendChild(ui.textButton(`Method ${info.name} (defined in ${rootParent.objectName}'s ${rootParent.formattedEventName} Event), line ${lineNumber}`, () =>
 							OpenDeclaration.openLink(`${rootParent.objectName}(${rootParent.internalEventName}):${lineNumber}`, null)
 						));
 					break;
@@ -48,7 +48,7 @@ export function errorPositionAsHTML(group, scriptString, lineNumber) {
 
 			case 'Object':
 				// FIXME: mysteriously we're getting off-by-one line numbers but only sometimes??? Is GMEdit doing this???
-				group.appendChild(ui.textButton(`${info.objectName} ${info.formattedEventName} Event, line ${lineNumber}`, () =>
+				group.appendChild(ui.textButton(`${info.objectName}'s ${info.formattedEventName} Event, line ${lineNumber}`, () =>
 					OpenDeclaration.openLink(`${info.objectName}(${info.internalEventName}):${lineNumber}`, null)
 				));
 			break;
