@@ -13,37 +13,33 @@
 		child_process: require('node:child_process')
 	};
 
-	const load = (async () => {
-
-		if (window.ConstructorPlugin !== undefined) {
-			window.ConstructorPlugin.destroy();
-		}
-
-		const res = await import('./js/ConstructorPlugin.js')
-			.then(({ ConstructorPlugin }) => ConstructorPlugin.initialize(PLUGIN_NAME, PLUGIN_VERSION, nodeModules))
-			.catch(err => /** @type {Result<import('./js/ConstructorPlugin.js').ConstructorPlugin>} */ ({
-				ok: false,
-				err: err
-			}));
-
-		if (!res.ok) {
-			
-			console.error('Failed to launch Constructor!', res.err);
-			alert('Failed to launch Constructor, see the JavaScript console for details.');
-
-			return;
-		}
-
-		window.ConstructorPlugin = res.data;
-
-	});
-
 	GMEdit.register(PLUGIN_NAME, {
 		init: async () => {
-			await load();
+			if (window.ConstructorPlugin !== undefined) {
+				window.ConstructorPlugin.destroy();
+			}
+
+			const res = await import('./js/ConstructorPlugin.js')
+				.then(({ ConstructorPlugin }) => ConstructorPlugin.initialize(PLUGIN_NAME, PLUGIN_VERSION, nodeModules))
+				.catch(err => /** @type {Result<import('./js/ConstructorPlugin.js').ConstructorPlugin>} */ ({
+					ok: false,
+					err: err
+				}));
+
+			if (!res.ok) {
+				console.error('Failed to launch Constructor!', res.err);
+				alert('Failed to launch Constructor, see the JavaScript console for details.');
+
+				return;
+			}
+
+			window.ConstructorPlugin = res.data;
 		},
 		cleanup: () => {
-			window.ConstructorPlugin?.destroy();
+			if (window.ConstructorPlugin !== undefined) {
+				window.ConstructorPlugin?.destroy();
+				delete window.ConstructorPlugin;
+			}
 		}
 	});
 

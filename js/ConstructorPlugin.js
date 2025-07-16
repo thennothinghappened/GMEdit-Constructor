@@ -219,8 +219,6 @@ export class ConstructorPlugin {
 			this.preferencesMenu.element.remove();
 			this.preferencesMenu.destroy();
 		}
-
-		delete window.ConstructorPlugin;
 		
 	}
 
