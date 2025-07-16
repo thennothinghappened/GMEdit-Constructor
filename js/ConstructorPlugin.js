@@ -600,22 +600,25 @@ export class ConstructorPlugin {
 		}
 	}
 
+	/**
+	 * Stop the currently viewed job, or the first running job if none are currently in view.
+	 */
 	stopCurrent = () => {
-		
-		const tab = tab_current_get();
+		const currentTab = tab_current_get();
 
-		if (tab === undefined) {
-			return;
+		if (currentTab?.gmlFile.editor instanceof OutputLogTab) {
+			if (currentTab.gmlFile.editor.inUse) {
+				currentTab.gmlFile.editor.stopJob();
+				return;
+			}
 		}
 
-		const editor = tab.gmlFile.editor;
-
-		if (!(editor instanceof OutputLogTab)) {
-			return;
+		for (const job of compileController.jobs) {
+			if (job.state.status === 'running') {
+				job.stop();
+				return;
+			}
 		}
-
-		editor.stopJob();
-
 	}
 
 	cleanCurrent = async () => {
