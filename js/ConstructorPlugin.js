@@ -80,25 +80,6 @@ export class ConstructorPlugin {
 		PLUGIN_VERSION = pluginVersion;
 
 		nodeModulesProvider.inject(nodeModules);
-		
-		// Prevent Constructor loading when running on Rosetta, since it has a bunch of issues there.
-		if (rosetta_check(nodeModulesProvider.child_process.execSync)) {
-
-			const err = new BaseError(docString(`
-				${PLUGIN_NAME} does not work correctly on Rosetta - please consider using GMEdit's
-				native Arm64 build found at https://yellowafterlife.itch.io/gmedit
-			`));
-
-			Electron_Dialog.showMessageBox({
-				title: 'GMEdit-Constructor cannot load on Rosetta!',
-				message: err.message,
-				buttons: ['Dismiss'],
-				type: 'error'
-			});
-
-			return Err(err);
-
-		}
 
 		const controlPanel = new ControlPanelImpl();
 		igorPaths.__setup__();
@@ -673,29 +654,5 @@ export class ConstructorPlugin {
 		});
 
 	}
-
-}
-
-/**
- * Make sure we aren't running on rosetta, since GMEdit has
- * a native build and Rosetta seems to cause some weirdness!
- * 
- * @param {import('node:child_process').execSync} execSync
- */
-function rosetta_check(execSync) {
-
-	if (process.platform !== 'darwin') {
-		return false;
-	}
-
-	if (process.arch !== 'x64') {
-		return false;
-	}
-
-	const cmd = 'sysctl -in sysctl.proc_translated';
-	const output = execSync(cmd).toString('utf-8');
-
-	// If the return of this command is 1, we are running in Rosetta.
-	return output.includes('1');
 
 }
