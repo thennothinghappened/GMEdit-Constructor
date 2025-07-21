@@ -68,14 +68,13 @@ export class ConstructorPlugin {
 
 	/**
 	 * Initialise an instance of the plugin!
-	 * 
 	 * @param {string} pluginName Name of the plugin.
 	 * @param {string} pluginVersion Current version of the plugin.
 	 * @param {NodeModules} nodeModules References to various NodeJS modules we need.
+	 * @param {string} pluginPath Directory that this plugin loaded from.
 	 * @returns {Promise<Result<ConstructorPlugin>>}
 	 */
-	static async initialize(pluginName, pluginVersion, nodeModules) {
-
+	static async initialize(pluginName, pluginVersion, nodeModules, pluginPath) {
 		PLUGIN_NAME = pluginName;
 		PLUGIN_VERSION = pluginVersion;
 
@@ -102,8 +101,7 @@ export class ConstructorPlugin {
 
 		controlPanel.setPreferencesMenu(new PreferencesMenu(preferences));
 
-		return Ok(new ConstructorPlugin(preferences, controlPanel));
-
+		return Ok(new ConstructorPlugin(preferences, controlPanel, pluginPath));
 	}
 
 	/**
@@ -113,9 +111,9 @@ export class ConstructorPlugin {
 	 * @private
 	 * @param {Preferences} preferences 
 	 * @param {ControlPanel} controlPanel
+	 * @param {string} pluginPath Directory that this plugin loaded from.
 	 */
-	constructor(preferences, controlPanel) {
-		
+	constructor(preferences, controlPanel, pluginPath) {
 		this.preferences = preferences;
 		this.controlPanel = controlPanel;
 
@@ -125,12 +123,11 @@ export class ConstructorPlugin {
 			runCurrentProject: this.runCurrent,
 			cleanCurrentProject: this.cleanCurrent,
 			packageCurrentProject: this.packageCurrent
-		});
+		}, pluginPath);
 
 		const currentOpenProject = project_current_get();
 
 		if (currentOpenProject !== undefined) {
-
 			this.onProjectOpen({ project: currentOpenProject });
 
 			if (currentOpenProject.propertiesElement != undefined) {
@@ -139,7 +136,6 @@ export class ConstructorPlugin {
 					target: currentOpenProject.propertiesElement
 				});
 			}
-
 		}
 
 		if (this.preferences.checkForUpdates) {
@@ -175,7 +171,6 @@ export class ConstructorPlugin {
 		GMEdit.on('projectClose', this.onProjectClose);
 		GMEdit.on('preferencesBuilt', this.onPreferencesBuilt);
 		GMEdit.on('projectPropertiesBuilt', this.onProjectPropertiesBuilt);
-
 	}
 
 	/**

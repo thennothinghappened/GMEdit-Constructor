@@ -1,3 +1,4 @@
+import { path } from '../utils/node/node-import.js';
 
 const KeyboardShortcutsHandler = $gmedit['ui.KeyboardShortcuts'].hashHandler;
 const MainMenu = $gmedit['ui.MainMenu'];
@@ -34,8 +35,9 @@ export class HamburgerOptions {
 
 	/**
 	 * @param {PluginCommands} commands
+	 * @param {string} pluginPath Directory that this plugin loaded from.
 	 */
-	constructor(commands) {
+	constructor(commands, pluginPath) {
 
 		this.shortcuts = [
 			{
@@ -70,25 +72,27 @@ export class HamburgerOptions {
 			}
 		];
 
+		const iconsPath = path.join(pluginPath, 'assets', 'icons');
+
 		/** @type {Electron.MenuItemOptions[]} */
 		const menuItems = [
 			{
 				id: 'constructor-control_panel',
 				label: 'Control Panel',
+				icon: path.join(iconsPath, 'control-panel.png'),
 				accelerator: DEFAULT_BINDS.controlPanel,
 				click: commands.showControlPanel,
 				enabled: true
 			},
 			{
-				id: 'constructor-project-package',
-				label: 'Package',
-				accelerator: DEFAULT_BINDS.package,
-				click: commands.packageCurrentProject,
-				enabled: false
+				id: 'constructor-separator',
+				type: 'separator',
+				label: ''
 			},
 			{
 				id: 'constructor-project-clean',
 				label: 'Clean',
+				icon: path.join(iconsPath, 'clean.png'),
 				accelerator: DEFAULT_BINDS.clean,
 				click: commands.cleanCurrentProject,
 				enabled: false
@@ -96,13 +100,23 @@ export class HamburgerOptions {
 			{
 				id: 'constructor-project-stop',
 				label: 'Stop',
+				icon: path.join(iconsPath, 'stop.png'),
 				accelerator: DEFAULT_BINDS.stop,
 				click: commands.stopCurrentProject,
 				enabled: false
 			},
 			{
+				id: 'constructor-project-package',
+				label: 'Package',
+				icon: path.join(iconsPath, 'package.png'),
+				accelerator: DEFAULT_BINDS.package,
+				click: commands.packageCurrentProject,
+				enabled: false
+			},
+			{
 				id: 'constructor-project-run',
 				label: 'Run',
+				icon: path.join(iconsPath, 'run.png'),
 				accelerator: DEFAULT_BINDS.run,
 				click: commands.runCurrentProject,
 				enabled: false
@@ -133,6 +147,7 @@ export class HamburgerOptions {
 			this.menu = new Electron_MenuItem({
 				id: 'constructor',
 				label: 'Constructor',
+				icon: path.join(iconsPath, 'main-menu-entry.png'),
 				type: 'submenu',
 				submenu: Electron_Menu.buildFromTemplate(menuItems)
 			});

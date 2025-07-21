@@ -35,7 +35,7 @@
 	}
 
 	GMEdit.register(PLUGIN_NAME, {
-		init: async function() {
+		init: async function(state) {
 			if (isRunningInRosetta()) {
 				return Electron_Dialog.showMessageBox({
 					title: 'GMEdit-Constructor cannot load on Rosetta!',
@@ -50,7 +50,7 @@
 			}
 
 			const res = await import('./js/ConstructorPlugin.js')
-				.then(({ ConstructorPlugin }) => ConstructorPlugin.initialize(PLUGIN_NAME, PLUGIN_VERSION, nodeModules))
+				.then(({ ConstructorPlugin }) => ConstructorPlugin.initialize(PLUGIN_NAME, PLUGIN_VERSION, nodeModules, state.dir))
 				.catch(err => /** @type {Result<import('./js/ConstructorPlugin').ConstructorPlugin>} */ ({ ok: false, err }));
 
 			if (!res.ok) {
