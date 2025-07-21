@@ -21,7 +21,7 @@ import { ControlPanelImpl } from './ControlPanelImpl.js';
  */
 export class ControlPanelTab extends ConstructorTab {
 
-	static tabName = 'GMEdit-Constructor Control Panel';
+	static tabName = 'Constructor Control Panel';
 
 	/**
 	 * Whether this tab instance has been invalidated (destroyed).
