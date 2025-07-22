@@ -49,7 +49,8 @@ const PREFS_DEFAULT = {
 	check_for_updates: true,
 	use_global_build: true,
 	global_build_path: def_global_build_path,
-	showTooltipHints: true
+	showTooltipHints: true,
+	fullscreenOutput: false
 };
 
 const MAX_LOAD_TRIES = 3;
@@ -395,6 +396,20 @@ export class Preferences {
 		this.save();
 		
 		this.eventEmitter.emit('setShowTooltipHints', { showTooltipHints: value });
+	}
+
+	/**
+	 * Whether compilation output should be a full tab, or use the bottom pane.
+	 */
+	get fullscreenOutput() {
+		return this.prefs.fullscreenOutput;
+	}
+
+	set fullscreenOutput(value) {
+		this.prefs.fullscreenOutput = value;
+		this.save();
+		
+		this.eventEmitter.emit('setFullscreenOutput', value);
 	}
 
 	/**

@@ -62,7 +62,11 @@ export declare global {
 			 * Whether to show visual hints on options that have tooltips.
 			 */
 			showTooltipHints: boolean;
-			
+
+			/**
+			 * Whether compilation output should be a full tab, or use the bottom pane.
+			 */
+			fullscreenOutput: boolean;
 		}
 
 		/**
@@ -145,6 +149,7 @@ export declare global {
 			setUseGlobalBuildPath: { useGlobalBuildPath: boolean };
 			setGlobalBuildPath: { globalBuildPath: string };
 			setShowTooltipHints: { showTooltipHints: boolean };
+			setFullscreenOutput: boolean;
 
 			/**
 			 * Fires when the list of runtimes is modified for a given release channel.

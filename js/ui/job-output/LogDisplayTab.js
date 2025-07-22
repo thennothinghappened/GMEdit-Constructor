@@ -1,0 +1,137 @@
+import { ConstructorTab } from '../tabs/ConstructorTab.js';
+import * as ui from '../ui-wrappers.js';
+import { GmlFileUtils } from '../../utils/gmedit/GmlFileUtils.js';
+
+const FileKind = $gmedit['file.FileKind'];
+const GmlFile = $gmedit['gml.file.GmlFile'];
+
+/**
+ * 'Editor' for viewing a compile log all fancy.
+ * @implements {UI.OutputLogDisplay}
+ */
+export class OutputLogTab extends ConstructorTab {
+	/**
+	 * @private
+	 * @type {UI.Group}
+	 */
+	errorsGroup;
+
+	/**
+	 * @private
+	 * @type {UI.OutputLogDisplay.Client|undefined}
+	 */
+	client = undefined;
+
+	/**
+	 * @private
+	 * @param {GMEdit.GmlFile} file
+	 */
+	constructor(file) {
+		super(file);
+
+		this.element.classList.add('gm-constructor-viewer', 'popout-window');
+
+		this.errorsGroup = ui.group(this.element, 'Errors')
+		this.errorsGroup.classList.add('gm-constructor-viewer-errors');
+		this.errorsGroup.legend.addEventListener('click', () => this.client?.displayResized());
+		this.errorsGroup.hidden = true;
+	}
+
+	destroy() {
+		this.client?.displayClosed();
+	}
+
+	/**
+	 * @type {UI.OutputLogDisplay['getClient']}
+	 */
+	getClient() {
+		return this.client;
+	}
+
+	/**
+	 * @type {UI.OutputLogDisplay['connect']}
+	 */
+	connect(client) {
+		if (this.client !== undefined) {
+			this.disconnect();
+		}
+
+		this.client = client;
+		this.element.prepend(client.getContent());
+		
+		this.errorsGroup
+			.querySelectorAll(':scope > :not(legend)')
+			.forEach(error => error.remove());
+
+		this.errorsGroup.hidden = true;
+	}
+
+	/**
+	 * @type {UI.OutputLogDisplay['disconnect']}
+	 */
+	disconnect() {
+		if (this.client === undefined) {
+			return;
+		}
+
+		this.client.displayClosed();
+
+		for (const child of Array.from(this.element.children)) {
+			if (child !== this.errorsGroup) {
+				child.remove();
+			}
+		}
+
+		this.client = undefined;
+	}
+
+	/**
+	 * @type {UI.OutputLogDisplay['bringToForeground']}
+	 */
+	bringToForeground() {
+		this.focus();
+	}
+
+	/**
+	 * @type {UI.OutputLogDisplay['setStatusLine']}
+	 */
+	setStatusLine(statusLine) {
+		GmlFileUtils.rename(this.file, statusLine);
+	}
+
+	/**
+	 * @type {UI.OutputLogDisplay['addError']}
+	 */
+	addError(error) {
+		this.errorsGroup.prepend(error.asHTML());
+		this.errorsGroup.hidden = false;
+	}
+
+	/**
+	 * Create and open a new tab.
+	 * @returns {OutputLogTab}
+	 */
+	static create() {
+		const file = new GmlFile('Constructor Job', null, this.fileKind);
+		GmlFile.openTab(file);
+
+		return /** @type {OutputLogTab} */ (file.editor);
+	}
+	
+	/**
+	 * @private
+	 */
+	static fileKind = new class extends FileKind {
+		constructor() {
+			super();
+			this.checkSelfForChanges = false;
+		}
+
+		/**
+		 * @param {GMEdit.GmlFile} file
+		 */
+		init(file) {
+			file.editor = new OutputLogTab(file);
+		}
+	};
+}
