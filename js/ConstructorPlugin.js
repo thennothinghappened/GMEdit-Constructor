@@ -7,7 +7,7 @@ import { PreferencesMenu } from './ui/PreferencesMenu.js';
 import { BaseError, InvalidStateErr, SolvableError } from './utils/Err.js';
 import { plugin_update_check } from './update-checker/UpdateChecker.js';
 import * as nodeModulesProvider from './utils/node/node-import.js';
-import { OutputLogTab } from './ui/tabs/OutputLogTab.js';
+import { OutputLogTab } from './ui/job-output/LogDisplayTab.js';
 import { Preferences } from './preferences/Preferences.js';
 import { ConfigTreeUi } from './ui/ConfigTreeUi.js';
 import { Err, Ok } from './utils/Result.js';
@@ -16,7 +16,9 @@ import { docString } from './utils/StringUtils.js';
 import { GMS2RuntimeIndexerImpl } from './compiler/GMS2RuntimeIndexerImpl.js';
 import { ControlPanelImpl } from './ui/controlpanel/ControlPanelImpl.js';
 import { UserIndexerImpl } from './compiler/UserIndexerImpl.js';
-import { use } from './utils/scope-extensions/use.js';
+import { BottomPane } from './ui/BottomPane.js';
+import { JobOutputLog } from './ui/job-output/OutputLog.js';
+import { BottomPaneLogDisplay } from './ui/job-output/BottomPaneLogDisplay.js';
 
 /**
  * Name of the plugin 
@@ -67,7 +69,16 @@ export class ConstructorPlugin {
 	hamburgerOptions;
 
 	/**
+	 * Bottom pane for showing 
+	 * 
+	 * @private
+	 * @type {BottomPane}
+	 */
+	bottomPane;
+
+	/**
 	 * Initialise an instance of the plugin!
+	 * 
 	 * @param {string} pluginName Name of the plugin.
 	 * @param {string} pluginVersion Current version of the plugin.
 	 * @param {NodeModules} nodeModules References to various NodeJS modules we need.
@@ -166,6 +177,8 @@ export class ConstructorPlugin {
 		if (UIPreferences.menuMain != undefined) {
 			this.onPreferencesBuilt({ target: UIPreferences.menuMain });
 		}
+
+		this.bottomPane = new BottomPane();
 		
 		GMEdit.on('projectOpen', this.onProjectOpen);
 		GMEdit.on('projectClose', this.onProjectClose);
@@ -182,6 +195,8 @@ export class ConstructorPlugin {
 		GMEdit.off('projectClose', this.onProjectClose);
 		GMEdit.off('preferencesBuilt', this.onPreferencesBuilt);
 		GMEdit.off('projectPropertiesBuilt', this.onProjectPropertiesBuilt);
+
+		this.bottomPane.destroy();
 
 		if (this.currentProjectComponents !== undefined) {
 			this.destroyCurrentProjectComponents();
@@ -221,8 +236,13 @@ export class ConstructorPlugin {
 			projectPropertiesMenuComponents.group.remove();
 		}
 
-		for (const tab of OutputLogTab.getOpenTabs()) {
-			tab.close();
+		if (this.preferences.fullscreenOutput) {
+
+		} else {
+
+		}
+		for (const log of JobOutputLog.instances) {
+			log.display?.destroy();
 		}
 		
 		configTreeUi.destroy();
@@ -531,20 +551,19 @@ export class ConstructorPlugin {
 			configName: projectProperties.buildConfigName
 		};
 
-		/** @type {OutputLogTab|undefined} */
-		let outputTab = undefined;
+		/** @type {UI.OutputLogDisplay|undefined} */
+		let display = undefined;
 
 		/** @type {number|undefined} */
 		let jobIdToReuse = undefined;
 
 		if (projectProperties.reuseOutputTabOrDef) {
-
-			outputTab = OutputLogTab.find();
+			const idleOutput = JobOutputLog.findIdle();
 			
-			if (outputTab?.inUse) {
-				jobIdToReuse = outputTab.job?.id;
+			if (idleOutput !== undefined) {
+				jobIdToReuse = idleOutput.job.id;
+				display = idleOutput.display;
 			}
-
 		}
 
 		if (this.preferences.saveOnRun) {
@@ -558,10 +577,14 @@ export class ConstructorPlugin {
 			return;
 		}
 
-		outputTab ??= OutputLogTab.openNew();
-		outputTab.attach(job.data);
-		outputTab.focus();
+		if (this.preferences.fullscreenOutput) {
+			display ??= OutputLogTab.create();
+		} else {
+			display ??= new BottomPaneLogDisplay(this.bottomPane);
+		}
 
+		JobOutputLog.create(job.data, display);
+		display.bringToForeground();
 	}
 
 	/**
@@ -602,8 +625,10 @@ export class ConstructorPlugin {
 		const currentTab = tab_current_get();
 
 		if (currentTab?.gmlFile.editor instanceof OutputLogTab) {
-			if (currentTab.gmlFile.editor.inUse) {
-				currentTab.gmlFile.editor.stopJob();
+			const outputLog = /** @type {JobOutputLog|undefined} */ (currentTab.gmlFile.editor.getClient());
+
+			if (outputLog?.isRunning) {
+				outputLog.stopJob();
 				return;
 			}
 		}

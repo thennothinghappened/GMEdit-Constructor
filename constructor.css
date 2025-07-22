@@ -7,6 +7,7 @@
 
 	display: flex;
 	flex-direction: column;
+	position: static;
 
 	width: 100%;
 	height: 100%;
@@ -173,7 +174,7 @@ fieldset.gm-constructor-debug {
 *     Compile Window    *
 *************************/
 
-.gm-constructor-viewer fieldset {
+.gm-constructor-viewer fieldset, .gm-constructor-viewer-bottom-pane {
 	padding: 0.5em;
 	transition: 0.25s ease;
 }
