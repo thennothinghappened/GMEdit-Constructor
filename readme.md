@@ -12,15 +12,15 @@ and can switch between build configs.
 ## Features
 - **Easily run, package releases, or clean projects from GMEdit!**
   - **Execute multiple builds side-by-side** in managed separate directories (disable reusing tabs for this.)
-  - **Build and Runtime error parsing** (view them nice and neat rather than scrolling the log!)
+  - **Build and Runtime error parsing** (view them nice and neat rather than scrolling the log, and view the lines they happened at!)
   - **Close a build tab to stop it** (or use the hotkey.)
-- **Switch between VM or YYC**. (Building for other systems is planned, eventually.)
+- **VM and YYC support**.
 - **Switch build configurations** (`#macro Config:SOMETHING ...`) via the Control Panel, or by right-clicking a config in the project sidebar.
-- **Support for Beta, Monthly, and LTS runtimes**, with a per-project switch, and warnings for project-incompatible selections.
+- **Support for Beta, Monthly, and LTS runtimes**, including an automatic selection based on the project, and a manual override.
 - **Support for HTML5 and GX.Games targets**. Note that the "Package" option for both of these is currently not working YYG have not documented its usage for these targets, and the IDE uses a proprietary extra-undocumented method.
+- **Android support and remote build targets** - you can compile for an Android device, or an external Linux or MacOS device by configuring the devices in the IDE and selecting them in Constructor.
 - **Automatic update-checking**. (This calls the GitHub API to check the latest release and can be toggled off.)
 - **Readable, central error messages** - the Control Panel shows any configuration issues, or internal errors. All errors display context, and most try to provide tips to resolve the issue where possible.
-- **Android support and remote build targets** - you can compile for an Android device, or an external Linux or MacOS device by configuring the devices in the IDE and selecting them in Constructor.
 
 ![image](https://github.com/user-attachments/assets/9a54d555-091b-42fc-a7cc-9f6c625712f5)
 
@@ -59,8 +59,8 @@ The above are the defaults provided. You can rebind these through GMEdit's
 **Edit Keyboard Shortcuts** option in Preferences!
 
 ## Planned features include:
-- GMRT support, once the toolchain is better documented and the kinks are worked out. Especially once CI usecases start being considered by YYG, that will mark GMRT being stable enough for uses like Constructor.
-- Option for docked console as opposed to full-window
+- GMRT support, once the toolchain is better documented and the kinks are worked out. Once doing CI with GMRT is stable, that opens the door for external tools, like Constructor.
+- Option for a docked output log as opposed to a fullscreen tab.
 
 ## Issues
 If you have any issues with Constructor, feel free to either ask on Discord (below), or make a post on the [GitHub Issues](<https://github.com/thennothinghappened/GMEdit-Constructor/issues>) page. I'll try to get back to you when I can, but no guarantees.
