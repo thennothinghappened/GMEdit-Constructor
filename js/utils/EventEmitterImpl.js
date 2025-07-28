@@ -49,6 +49,35 @@ export class EventEmitterImpl {
 	}
 
 	/**
+	 * @type {EventEmitter<EventType>['createGroup']}
+	 */
+	createGroup(listeners) {
+		let destroyed = false;
+
+		for (const eventName in listeners) {
+			if (listeners[eventName] !== undefined) {
+				this.on(eventName, listeners[eventName]);
+			}
+		}
+
+		const destroy = () => {
+			if (destroyed) {
+				return;
+			}
+
+			for (const eventName in listeners) {
+				if (listeners[eventName] !== undefined) {
+					this.off(eventName, listeners[eventName]);
+				}
+			}
+
+			destroyed = true;
+		}
+
+		return { destroy };
+	}
+
+	/**
 	 * Emit the given event.
 	 * 
 	 * @template {keyof EventType} T

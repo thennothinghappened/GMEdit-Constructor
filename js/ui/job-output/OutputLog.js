@@ -52,12 +52,6 @@ export class JobOutputLog {
 		.also(it => it.renderer.setShowGutter(false))
 		.also(it => it.renderer.setShowPrintMargin(false))
 		.value;
-	
-	/**
-	 * @private
-	 * @type {NodeJS.Timeout|undefined}
-	 */
-	tickIntervalId = undefined;
 
 	/**
 	 * @type {UI.OutputLogDisplay}
@@ -89,10 +83,14 @@ export class JobOutputLog {
 		this.content.appendChild(header);
 		this.content.appendChild(this.logAceEditor.container);
 
-		job.events.on('stdout', this.onJobStdout);
-		job.events.on('stop', this.onJobStop);
-		job.events.on('stopping', this.updateTitle);
+		/** @private */
+		this.jobEventGroup = job.events.createGroup({
+			stdout: this.onJobStdout,
+			stop: this.onJobStop,
+			stopping: this.updateTitle
+		});
 
+		/** @private */
 		this.tickIntervalId = setTimeout(this.updateTitle, 1000);
 	}
 
@@ -100,9 +98,7 @@ export class JobOutputLog {
 		JobOutputLog.instances.splice(JobOutputLog.instances.indexOf(this), 1);
 		clearInterval(this.tickIntervalId);
 
-		this.job.events.off('stdout', this.onJobStdout);
-		this.job.events.off('stop', this.onJobStop);
-		this.job.events.off('stopping', this.updateTitle);
+		this.jobEventGroup.destroy();
 		this.job.stop();
 
 		this.logAceEditor.destroy();
