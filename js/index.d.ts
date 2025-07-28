@@ -17,7 +17,7 @@ export declare global {
 		 * 
 		 * This method is safe to call more than once.
 		 */
-		destroy();
+		destroy(): void;
 
 	};
 
