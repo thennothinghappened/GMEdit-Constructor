@@ -339,6 +339,22 @@ export declare global {
 
 		}
 
+		/**
+		 * The secondary sidebar for plugins.
+		 * If there's more than one panel shown, a dropdown appears.
+		 * @author YellowAfterlife
+		 */
+		class Sidebar {
+			static select: HTMLSelectElement;
+			static panel: HTMLDivElement;
+			static sizer: HTMLDivElement;
+			static outer: HTMLDivElement;
+
+			static set(name: string): void;
+			static add(name: string, el: HTMLElement): void;
+			static remove(name: string, el?: HaxeNull<HTMLElement>): boolean;
+		}
+
 		type ProjectData = Partial<{
 			
 			/** API override */
@@ -563,6 +579,7 @@ export declare global {
 		}
 
 		const aceTools: AceTools;
+		const sidebar: typeof Sidebar;
 	
 		const register: (pluginName: string, data: PluginData) => void;
 		const on: <K extends keyof PluginEventMap>(type: K, listener: (e: PluginEventMap[K]) => void) => void;

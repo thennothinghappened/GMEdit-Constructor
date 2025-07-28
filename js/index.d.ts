@@ -1,6 +1,7 @@
 import { ConstructorPlugin } from './ConstructorPlugin';
 import { ProjectProperties } from './preferences/ProjectProperties';
 import { ConfigTreeUi } from './ui/ConfigTreeUi';
+import { SidebarLogDisplay } from './ui/job-output/SidebarLogDisplay';
 import { ProjectPropertiesMenu } from './ui/ProjectPropertiesMenu';
 import { BaseError } from './utils/Err';
 
@@ -73,6 +74,7 @@ export declare global {
 			projectPropertiesMenu: ProjectPropertiesMenu;
 		};
 		configTreeUi: ConfigTreeUi;
+		sidebarLogDisplay?: SidebarLogDisplay;
 	};
 
 	/**
