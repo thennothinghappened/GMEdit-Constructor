@@ -85,7 +85,13 @@ export class JobOutputLog {
 	}
 
 	destroy() {
-		JobOutputLog.instances.splice(JobOutputLog.instances.indexOf(this), 1);
+		const instanceIndex = JobOutputLog.instances.indexOf(this);
+
+		if (instanceIndex < 0) {
+			return;
+		}
+
+		JobOutputLog.instances.splice(instanceIndex, 1);
 		clearInterval(this.tickIntervalId);
 
 		this.jobEventGroup.destroy();
