@@ -98,11 +98,11 @@ export class JobOutputLog {
 		return this.content;
 	}
 
-	displayResized = () => {
+	displayResized() {
 		this.logAceEditor.resize();
 	}
 
-	displayClosed = () => {
+	displayClosed() {
 		// Currently we can't move a client from one display to another, so display hang up means
 		// the job should end.
 		this.destroy();
