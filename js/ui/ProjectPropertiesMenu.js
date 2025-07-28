@@ -213,13 +213,20 @@ export class ProjectPropertiesMenu {
 
 		this.onSetShowTooltipHints({ showTooltipHints: this.preferences.showTooltipHints });
 
-		this.properties.events.on('setBuildConfig', this.onSetBuildConfig);
-		this.properties.events.on('setRuntimeChannel', this.onSetRuntimeChannel);
-		this.properties.events.on('setPlatform', this.onSetPlatform);
-		this.properties.events.on('setDevice', this.onSetDevice);
-		this.properties.events.on('setReuseOutputTab', this.onSetReuseOutputTab);
-		this.preferences.events.on('setShowTooltipHints', this.onSetShowTooltipHints);
-		this.preferences.events.on('runtimeListChanged', this.onRuntimeListChanged);
+		/** @private */
+		this.propertiesEventGroup = this.properties.events.createGroup({
+			setBuildConfig: this.onSetBuildConfig,
+			setRuntimeChannel: this.onSetRuntimeChannel,
+			setPlatform: this.onSetPlatform,
+			setDevice: this.onSetDevice,
+			setReuseOutputTab: this.onSetReuseOutputTab
+		});
+
+		/** @private */
+		this.preferencesEventGroup = this.preferences.events.createGroup({
+			setShowTooltipHints: this.onSetShowTooltipHints,
+			runtimeListChanged: this.onRuntimeListChanged
+		});
 
 	}
 
@@ -227,13 +234,8 @@ export class ProjectPropertiesMenu {
 	 * Clean up our event listens.
 	 */
 	destroy() {
-		this.properties.events.off('setBuildConfig', this.onSetBuildConfig);
-		this.properties.events.off('setRuntimeChannel', this.onSetRuntimeChannel);
-		this.properties.events.off('setPlatform', this.onSetPlatform);
-		this.properties.events.off('setDevice', this.onSetDevice);
-		this.properties.events.off('setReuseOutputTab', this.onSetReuseOutputTab);
-		this.preferences.events.off('setShowTooltipHints', this.onSetShowTooltipHints);
-		this.preferences.events.off('runtimeListChanged', this.onRuntimeListChanged);
+		this.propertiesEventGroup.destroy();
+		this.preferencesEventGroup.destroy();
 	};
 
 	/**

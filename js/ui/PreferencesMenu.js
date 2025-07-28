@@ -198,15 +198,18 @@ export class PreferencesMenu {
 
 		this.onSetShowTooltipHints({ showTooltipHints: this.preferences.showTooltipHints });
 
-		this.preferences.events.on('setCheckForUpdates', this.onSetCheckForUpdates);
-		this.preferences.events.on('setSaveOnRun', this.onSetSaveOnRun);
-		this.preferences.events.on('setReuseOutputTab', this.onSetReuseOutputTab);
-		this.preferences.events.on('setShowTooltipHints', this.onSetShowTooltipHints);
-		this.preferences.events.on('setOutputPosition', this.onSetOutputPosition);
-		this.preferences.events.on('setUseGlobalBuildPath', this.onSetUseGlobalBuildPath);
-		this.preferences.events.on('setGlobalBuildPath', this.onSetGlobalBuildPath);
-		this.preferences.events.on('userListChanged', this.onUserListChanged);
-		this.preferences.events.on('runtimeListChanged', this.onRuntimeListChanged);
+		/** @private */
+		this.preferencesEventGroup = this.preferences.events.createGroup({
+			setCheckForUpdates: this.onSetCheckForUpdates,
+			setSaveOnRun: this.onSetSaveOnRun,
+			setReuseOutputTab: this.onSetReuseOutputTab,
+			setShowTooltipHints: this.onSetShowTooltipHints,
+			setOutputPosition: this.onSetOutputPosition,
+			setUseGlobalBuildPath: this.onSetUseGlobalBuildPath,
+			setGlobalBuildPath: this.onSetGlobalBuildPath,
+			userListChanged: this.onUserListChanged,
+			runtimeListChanged: this.onRuntimeListChanged
+		});
 
 	}
 
@@ -214,15 +217,7 @@ export class PreferencesMenu {
 	 * Clean up this preferences menu instance.
 	 */
 	destroy() {
-		this.preferences.events.off('setCheckForUpdates', this.onSetCheckForUpdates);
-		this.preferences.events.off('setSaveOnRun', this.onSetSaveOnRun);
-		this.preferences.events.off('setReuseOutputTab', this.onSetReuseOutputTab);
-		this.preferences.events.off('setShowTooltipHints', this.onSetShowTooltipHints);
-		this.preferences.events.off('setOutputPosition', this.onSetOutputPosition);
-		this.preferences.events.off('setUseGlobalBuildPath', this.onSetUseGlobalBuildPath);
-		this.preferences.events.off('setGlobalBuildPath', this.onSetGlobalBuildPath);
-		this.preferences.events.off('userListChanged', this.onUserListChanged);
-		this.preferences.events.off('runtimeListChanged', this.onRuntimeListChanged);
+		this.preferencesEventGroup.destroy();
 	}
 
 	/**

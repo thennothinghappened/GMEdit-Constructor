@@ -62,6 +62,12 @@ export declare global {
 		on<K extends keyof EventMap>(type: K, listener: Listener<EventMap[K]>): void;
 		once<K extends keyof EventMap>(type: K, listener: Listener<EventMap[K]>): void;
 		off<K extends keyof EventMap>(type: K, listener: Listener<EventMap[K]>): void;
+
+		/**
+		 * Create a listening group, by supplying some number of callbacks in the same go. The
+		 * returned object may be `destroy`ed to remove the provided subscriptions in one shot.
+		 */
+		createGroup(listeners: { [key in keyof EventMap]?: Listener<EventMap[key]> }): Destroyable;
 	}
 
 };
