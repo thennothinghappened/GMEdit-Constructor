@@ -19,6 +19,7 @@ import { UserIndexerImpl } from './compiler/UserIndexerImpl.js';
 import { BottomPane } from './ui/BottomPane.js';
 import { JobOutputLog } from './ui/job-output/OutputLog.js';
 import { BottomPaneLogDisplay } from './ui/job-output/BottomPaneLogDisplay.js';
+import { SidebarLogDisplay } from './ui/job-output/SidebarLogDisplay.js';
 
 /**
  * Name of the plugin 
@@ -179,7 +180,7 @@ export class ConstructorPlugin {
 		}
 
 		this.bottomPane = new BottomPane();
-		this.preferences.events.on('setOutputPosition', this.onSetOutputPosition);
+		this.preferences.events.on('setOutputPosition', this.destroyAllDisplays);
 		
 		GMEdit.on('projectOpen', this.onProjectOpen);
 		GMEdit.on('projectClose', this.onProjectClose);
@@ -197,7 +198,7 @@ export class ConstructorPlugin {
 		GMEdit.off('preferencesBuilt', this.onPreferencesBuilt);
 		GMEdit.off('projectPropertiesBuilt', this.onProjectPropertiesBuilt);
 
-		this.preferences.events.off('setOutputPosition', this.onSetOutputPosition);
+		this.preferences.events.off('setOutputPosition', this.destroyAllDisplays);
 		this.bottomPane.destroy();
 
 		if (this.currentProjectComponents !== undefined) {
@@ -238,9 +239,7 @@ export class ConstructorPlugin {
 			projectPropertiesMenuComponents.group.remove();
 		}
 
-		for (const log of JobOutputLog.instances) {
-			log.display?.destroy();
-		}
+		this.destroyAllDisplays();
 		
 		configTreeUi.destroy();
 		projectProperties.destroy();
@@ -300,7 +299,7 @@ export class ConstructorPlugin {
 		this.currentProjectComponents = {
 			project,
 			projectProperties,
-			configTreeUi,
+			configTreeUi
 		};
 
 		this.hamburgerOptions.enableProjectActionItems(true);
@@ -403,7 +402,8 @@ export class ConstructorPlugin {
 	 * @param {GM.Task} task
 	 * @param {ProjectComponents} components
 	 */
-	async executeTask(task, { project, projectProperties }) {
+	async executeTask(task, components) {
+		const { project, projectProperties } = components;
 
 		/** @type {GMS2.RuntimeInfo|undefined} */
 		let runtime = undefined;
@@ -574,18 +574,21 @@ export class ConstructorPlugin {
 			return;
 		}
 
-		switch (this.preferences.outputPosition) {
-			case 'fullTab':
-				display ??= OutputLogTab.create();
-			break;
+		if (display === undefined) {
+			switch (this.preferences.outputPosition) {
+				case 'fullTab':
+					display = OutputLogTab.create();
+				break;
 
-			case 'bottomPane':
-				display ??= new BottomPaneLogDisplay(this.bottomPane);
-			break;
+				case 'bottomPane':
+					display = new BottomPaneLogDisplay(this.bottomPane);
+				break;
 
-			case 'rightPane':
-				throw 'todo';
-			break;
+				case 'rightPane':
+					components.sidebarLogDisplay ??= new SidebarLogDisplay();
+					display = components.sidebarLogDisplay;
+				break;
+			}
 		}
 
 		JobOutputLog.create(job.data, display);
@@ -686,9 +689,11 @@ export class ConstructorPlugin {
 	/**
 	 * @private
 	 */
-	onSetOutputPosition = () => {
+	destroyAllDisplays = () => {
 		for (const log of JobOutputLog.instances) {
 			log.display?.destroy();
 		}
+
+		delete this.currentProjectComponents?.sidebarLogDisplay;
 	}
 }
