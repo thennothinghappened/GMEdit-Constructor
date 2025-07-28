@@ -18,11 +18,6 @@ export class JobOutputLog {
 	static instances = [];
 
 	/**
-	 * @type {IgorJob}
-	 */
-	job;
-
-	/**
 	 * @private
 	 */
 	content = new DocumentFragment();
@@ -52,11 +47,6 @@ export class JobOutputLog {
 		.also(it => it.renderer.setShowGutter(false))
 		.also(it => it.renderer.setShowPrintMargin(false))
 		.value;
-
-	/**
-	 * @type {UI.OutputLogDisplay}
-	 */
-	display;
 
 	/**
 	 * @private
