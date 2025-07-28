@@ -71,8 +71,8 @@ export declare global {
 		namespace Dropdown {
 	
 			type Entry<T> = (T extends string 
-				? (T | NormalizedDropdownEntry<T>)
-				: (NormalizedDropdownEntry<T>)
+				? (T | NormalizedEntry<T>)
+				: (NormalizedEntry<T>)
 			);
 
 			type NormalizedEntry<T> =  {

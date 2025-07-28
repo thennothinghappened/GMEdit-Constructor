@@ -50,7 +50,7 @@ const PREFS_DEFAULT = {
 	use_global_build: true,
 	global_build_path: def_global_build_path,
 	showTooltipHints: true,
-	fullscreenOutput: false
+	outputPosition: 'fullTab'
 };
 
 const MAX_LOAD_TRIES = 3;
@@ -75,7 +75,8 @@ export class Preferences {
 		'setReuseOutputTab',
 		'setUseGlobalBuildPath',
 		'setGlobalBuildPath',
-		'setShowTooltipHints'
+		'setShowTooltipHints',
+		'setOutputPosition'
 	]);
 
 	/**
@@ -401,15 +402,15 @@ export class Preferences {
 	/**
 	 * Whether compilation output should be a full tab, or use the bottom pane.
 	 */
-	get fullscreenOutput() {
-		return this.prefs.fullscreenOutput;
+	get outputPosition() {
+		return this.prefs.outputPosition;
 	}
 
-	set fullscreenOutput(value) {
-		this.prefs.fullscreenOutput = value;
+	set outputPosition(value) {
+		this.prefs.outputPosition = value;
 		this.save();
 		
-		this.eventEmitter.emit('setFullscreenOutput', value);
+		this.eventEmitter.emit('setOutputPosition', value);
 	}
 
 	/**

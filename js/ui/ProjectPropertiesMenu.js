@@ -123,7 +123,7 @@ export class ProjectPropertiesMenu {
 		this.platformDropdown = new Dropdown('Platform',
 				Some(this.properties.platform),
 				(value) => { this.properties.platform = value; },
-				[
+				/** @type {ReadonlyArray<UI.Dropdown.Entry<GM.SupportedPlatform|undefined>>} */ ([
 					{ label: 'Current Platform', value: undefined },
 					...[
 						'HTML5',
@@ -132,19 +132,17 @@ export class ProjectPropertiesMenu {
 						'Linux',
 						'Android'
 					].filter(entry => entry !== HOST_PLATFORM)
-				]
+				])
 			)
 			.singleline()
 			.appendTo(this.element);
 
-		this.deviceDropdown = 
-			/** @type {Dropdown<GMS2.RemoteDevice|undefined>} */ 
-			(new Dropdown('Remote Device',
+		this.deviceDropdown = new Dropdown('Remote Device',
 				None,
 				(value) => { this.properties.device = value },
-				[],
+				/** @type {ReadonlyArray<UI.Dropdown.Entry<GMS2.RemoteDevice|undefined>>} */ ([]),
 				(a, b) => (a.channel === b.channel) && (a.name === b.name)
-			))
+			)
 			.singleline()
 			.appendTo(this.element);
 
@@ -175,7 +173,7 @@ export class ProjectPropertiesMenu {
 		this.runtimeVersionDropdown = new Dropdown('Runtime Version',
 				None,
 				(value) => { this.properties.runtimeVersion = value; },
-				[],
+				/** @type {ReadonlyArray<UI.Dropdown.Entry<GMRuntimeVersion|undefined>>} */ ([]),
 				(a, b) => a.equals(b)
 			)
 			.singleline()
@@ -377,7 +375,7 @@ export class ProjectPropertiesMenu {
 			this.deviceDropdown
 				.enable(false)
 				.visible(true)
-				.setOptions([{ label: 'No devices found' }], undefined);
+				.setOptions([{ label: 'No devices found', value: undefined }], undefined);
 				
 			return;
 		}
