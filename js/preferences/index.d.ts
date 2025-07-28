@@ -64,9 +64,9 @@ export declare global {
 			showTooltipHints: boolean;
 
 			/**
-			 * Whether compilation output should be a full tab, or use the bottom pane.
+			 * Where compiler output should be shown.
 			 */
-			fullscreenOutput: boolean;
+			outputPosition: OutputPosition;
 		}
 
 		/**
@@ -141,6 +141,14 @@ export declare global {
 			user?: string;
 		};
 
+		/**
+		 * Where Constructor should display job output to.
+		 */
+		type OutputPosition =
+			'fullTab'		|
+			'bottomPane'	|
+			'rightPane'		;
+
 		interface PreferencesEventMap {
 
 			setCheckForUpdates: { checkForUpdates: boolean };
@@ -149,7 +157,7 @@ export declare global {
 			setUseGlobalBuildPath: { useGlobalBuildPath: boolean };
 			setGlobalBuildPath: { globalBuildPath: string };
 			setShowTooltipHints: { showTooltipHints: boolean };
-			setFullscreenOutput: boolean;
+			setOutputPosition: OutputPosition;
 
 			/**
 			 * Fires when the list of runtimes is modified for a given release channel.

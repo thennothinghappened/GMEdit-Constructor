@@ -85,6 +85,30 @@ export class PreferencesMenu {
 					text you can view by hovering over them.
 				`))
 				.appendTo(section);
+			
+			this.outputPositionDropdown = new Dropdown('Output log position',
+					Some(this.preferences.outputPosition),
+					(value) => { this.preferences.outputPosition = value },
+					/** @type {ReadonlyArray<UI.Dropdown.Entry<TPreferences.OutputPosition>>} */ ([
+						{
+							label: 'Editor Tab',
+							value: 'fullTab'
+						},
+						{
+							label: 'Bottom Pane',
+							value: 'bottomPane'
+						},
+						{
+							label: 'Right Pane',
+							value: 'rightPane'
+						}
+					])
+				)
+				.tooltip(docString(`
+					Where output logs and errors should be displayed when compiling and running
+					projects.
+				`))
+				.appendTo(section);
 		
 		}).also(it => this.element.appendChild(it));
 
@@ -178,6 +202,7 @@ export class PreferencesMenu {
 		this.preferences.events.on('setSaveOnRun', this.onSetSaveOnRun);
 		this.preferences.events.on('setReuseOutputTab', this.onSetReuseOutputTab);
 		this.preferences.events.on('setShowTooltipHints', this.onSetShowTooltipHints);
+		this.preferences.events.on('setOutputPosition', this.onSetOutputPosition);
 		this.preferences.events.on('setUseGlobalBuildPath', this.onSetUseGlobalBuildPath);
 		this.preferences.events.on('setGlobalBuildPath', this.onSetGlobalBuildPath);
 		this.preferences.events.on('userListChanged', this.onUserListChanged);
@@ -193,6 +218,7 @@ export class PreferencesMenu {
 		this.preferences.events.off('setSaveOnRun', this.onSetSaveOnRun);
 		this.preferences.events.off('setReuseOutputTab', this.onSetReuseOutputTab);
 		this.preferences.events.off('setShowTooltipHints', this.onSetShowTooltipHints);
+		this.preferences.events.off('setOutputPosition', this.onSetOutputPosition);
 		this.preferences.events.off('setUseGlobalBuildPath', this.onSetUseGlobalBuildPath);
 		this.preferences.events.off('setGlobalBuildPath', this.onSetGlobalBuildPath);
 		this.preferences.events.off('userListChanged', this.onUserListChanged);
@@ -230,6 +256,14 @@ export class PreferencesMenu {
 	onSetShowTooltipHints = ({ showTooltipHints }) => {
 		this.showTooltipHintsCheckbox.value = showTooltipHints;
 		this.element.classList.toggle('gm-constructor-show-tooltip-indicators', showTooltipHints);
+	}
+
+	/**
+	 * @private
+	 * @param {TPreferences.PreferencesEventMap['setOutputPosition']} outputPosition
+	 */
+	onSetOutputPosition = (outputPosition) => {
+		this.outputPositionDropdown.setSelectedOption(outputPosition);
 	}
 
 	/**

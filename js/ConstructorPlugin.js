@@ -179,6 +179,7 @@ export class ConstructorPlugin {
 		}
 
 		this.bottomPane = new BottomPane();
+		this.preferences.events.on('setOutputPosition', this.onSetOutputPosition);
 		
 		GMEdit.on('projectOpen', this.onProjectOpen);
 		GMEdit.on('projectClose', this.onProjectClose);
@@ -196,6 +197,7 @@ export class ConstructorPlugin {
 		GMEdit.off('preferencesBuilt', this.onPreferencesBuilt);
 		GMEdit.off('projectPropertiesBuilt', this.onProjectPropertiesBuilt);
 
+		this.preferences.events.off('setOutputPosition', this.onSetOutputPosition);
 		this.bottomPane.destroy();
 
 		if (this.currentProjectComponents !== undefined) {
@@ -236,11 +238,6 @@ export class ConstructorPlugin {
 			projectPropertiesMenuComponents.group.remove();
 		}
 
-		if (this.preferences.fullscreenOutput) {
-
-		} else {
-
-		}
 		for (const log of JobOutputLog.instances) {
 			log.display?.destroy();
 		}
@@ -577,10 +574,18 @@ export class ConstructorPlugin {
 			return;
 		}
 
-		if (this.preferences.fullscreenOutput) {
-			display ??= OutputLogTab.create();
-		} else {
-			display ??= new BottomPaneLogDisplay(this.bottomPane);
+		switch (this.preferences.outputPosition) {
+			case 'fullTab':
+				display ??= OutputLogTab.create();
+			break;
+
+			case 'bottomPane':
+				display ??= new BottomPaneLogDisplay(this.bottomPane);
+			break;
+
+			case 'rightPane':
+				throw 'todo';
+			break;
 		}
 
 		JobOutputLog.create(job.data, display);
@@ -678,4 +683,12 @@ export class ConstructorPlugin {
 
 	}
 
+	/**
+	 * @private
+	 */
+	onSetOutputPosition = () => {
+		for (const log of JobOutputLog.instances) {
+			log.display?.destroy();
+		}
+	}
 }

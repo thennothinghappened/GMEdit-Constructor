@@ -23,6 +23,15 @@ export class OutputLogTab extends ConstructorTab {
 	client = undefined;
 
 	/**
+	 * GMEdit calls `stateSave` and then `destroy`. If `destroy` is called by us though, its meaning
+	 * is that of `Destroyable`, and should close the tab. GMEdit is calling it due to the tab
+	 * already being the process of closing, so if `false`, then we shouldn't trigger a file close.
+	 * 
+	 * @private
+	 */
+	shouldCloseGMEditFile = true;
+
+	/**
 	 * @private
 	 * @param {GMEdit.GmlFile} file
 	 */
@@ -37,8 +46,17 @@ export class OutputLogTab extends ConstructorTab {
 		this.errorsGroup.hidden = true;
 	}
 
+	stateSave() {
+		this.shouldCloseGMEditFile = false;
+	}
+
 	destroy() {
-		this.client?.displayClosed();
+		this.disconnect();
+
+		if (this.shouldCloseGMEditFile) {
+			this.shouldCloseGMEditFile = false;
+			this.close();
+		}
 	}
 
 	/**
