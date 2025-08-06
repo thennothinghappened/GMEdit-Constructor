@@ -1,4 +1,3 @@
-import { BottomPane } from '../BottomPane.js';
 
 const OUTPUT_TAB_NAME = 'Constructor Output';
 const ERRORS_TAB_NAME = 'Constructor Errors';
