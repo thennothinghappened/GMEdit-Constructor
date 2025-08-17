@@ -19,6 +19,7 @@ and can switch between build configs.
 - **Support for Beta, Monthly, and LTS runtimes**, including an automatic selection based on the project, and a manual override.
 - **Support for HTML5 and GX.Games targets**. Note that the "Package" option for both of these is currently not working YYG have not documented its usage for these targets, and the IDE uses a proprietary extra-undocumented method.
 - **Android support and remote build targets** - you can compile for an Android device, or an external Linux or MacOS device by configuring the devices in the IDE and selecting them in Constructor.
+- **Multiple places to view builds** - you can set Constructor to output to a GMEdit tab, use a custom bottom pane tab, or even the right-hand sidebar if you so desire.
 - **Automatic update-checking**. (This calls the GitHub API to check the latest release and can be toggled off.)
 - **Readable, central error messages** - the Control Panel shows any configuration issues, or internal errors. All errors display context, and most try to provide tips to resolve the issue where possible.
 
@@ -60,7 +61,6 @@ The above are the defaults provided. You can rebind these through GMEdit's
 
 ## Planned features include:
 - GMRT support, once the toolchain is better documented and the kinks are worked out. Once doing CI with GMRT is stable, that opens the door for external tools, like Constructor.
-- Option for a docked output log as opposed to a fullscreen tab.
 
 ## Issues
 If you have any issues with Constructor, feel free to either ask on Discord (below), or make a post on the [GitHub Issues](<https://github.com/thennothinghappened/GMEdit-Constructor/issues>) page. I'll try to get back to you when I can, but no guarantees.
