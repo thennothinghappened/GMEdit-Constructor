@@ -39,8 +39,26 @@ export class BottomPane {
 	/**
 	 * @private
 	 */
+	headerElement = document.createElement('nav');
+
+	/**
+	 * @private
+	 */
 	tabListElement = use(document.createElement('div'))
 		.also(it => { it.className = 'tab-list' })
+		.value;
+
+	/**
+	 * @private
+	 */
+	closeButton = use(document.createElement('div'))
+		.also(it => { it.className = 'close-button' })
+		.also(it => it.addEventListener('click', () => {
+			// Close all tabs!
+			while (this.activeTab !== undefined) {
+				this.closeTab(this.activeTab);
+			}
+		}))
 		.value;
 
 	/**
@@ -79,8 +97,11 @@ export class BottomPane {
 		document.body.addEventListener('mousemove', this.onMouseMove);
 		document.body.addEventListener('mouseup', this.onMouseUp);
 
+		this.headerElement.appendChild(this.tabListElement);
+		this.headerElement.appendChild(this.closeButton);
+
 		this.element.appendChild(this.divider);
-		this.element.appendChild(this.tabListElement);
+		this.element.appendChild(this.headerElement);
 
 		GMEdit.on('activeFileChange', this.onActiveFileChange);
 	}

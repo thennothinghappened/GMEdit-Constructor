@@ -30,14 +30,20 @@
 	height: 0.45em;
 }
 
-#bottom-panel > .tab-list {
+#bottom-panel > nav {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+}
+
+#bottom-panel > nav > .tab-list {
 	display: flex;
 	flex-direction: row;
 }
 
-#bottom-panel > .tab-list > .tab {
+#bottom-panel > nav > .tab-list > .tab {
 	display: flex;
-	column-gap: 0.25em;
 	height: 1em;
 	padding: 0.3em 0.5em;
 	box-sizing: content-box;
@@ -51,20 +57,27 @@
 	user-select: none;
 }
 
-#bottom-panel > .tab-list > .tab:hover {
+#bottom-panel > nav > .tab-list > .tab:hover {
 	background-color: var(--tab-hovered-background-colour);
 }
 
-#bottom-panel > .tab-list > .tab.active {
+#bottom-panel > nav > .tab-list > .tab.active {
 	background-color: var(--tab-active-background-colour);
 }
 
-#bottom-panel > .tab-list > .tab > .close-button {
+#bottom-panel > nav .close-button {
 	width: 1em;
+	height: 1em;
 	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'><path stroke='%23cfcfcf' stroke-linecap='round' stroke-width='1.125' d='M4 4 L10 10 M10 4 L4 10'></path></svg>");
 	border-radius: 50%;
 }
 
-#bottom-panel > .tab-list > .tab > .close-button:hover {
+#bottom-panel > nav .close-button:hover {
 	background-color: var(--tab-close-button-hovered-background-colour);
+}
+
+/* Specifically the close button for the whole panel. */
+#bottom-panel > nav > .close-button {
+	margin: 0 0.25em;
+	flex-shrink: 0;
 }
