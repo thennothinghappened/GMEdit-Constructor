@@ -108,6 +108,7 @@ export class PreferencesMenu {
 					Where output logs and errors should be displayed when compiling and running
 					projects.
 				`))
+				.singleline()
 				.appendTo(section);
 		
 		}).also(it => this.element.appendChild(it));
