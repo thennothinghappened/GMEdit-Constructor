@@ -44,6 +44,7 @@
 
 #bottom-panel > nav > .tab-list > .tab {
 	display: flex;
+	column-gap: 0.25em;
 	height: 1em;
 	padding: 0.3em 0.5em;
 	box-sizing: content-box;
