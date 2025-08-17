@@ -1,0 +1,75 @@
+/**
+ * GMEdit does not currently have a bottom panel, so I've added one as part of Constructor to bridge
+ * the gap until one can be implemented in GMEdit.
+ */
+
+.bottom.gml > .tabview:has(> #bottom-panel) {
+	flex-direction: column;
+}
+
+/* CSS specificity hijinks */
+#main #editor-td .bottom.gml > .tabview > #bottom-panel {
+	--tab-background-colour: #333333;
+	--tab-hovered-background-colour: #444444;
+	--tab-active-background-colour: #555555;
+	--tab-close-button-hovered-background-colour: #e25c4b;
+
+	display: flex;
+	flex-direction: column;
+	box-sizing: border-box;
+	flex-grow: 0;
+	flex-shrink: 0;
+	flex-basis: 30%;
+	min-height: 0.45em;
+	max-height: 90%;
+}
+
+#bottom-panel > .splitter-td {
+	cursor: n-resize;
+	width: 100%;
+	height: 0.45em;
+}
+
+#bottom-panel > .tab-list {
+	display: none;
+	flex-direction: row;
+}
+
+/* We only need to see the tab list if there's more than one tab! */
+#bottom-panel > .tab-list:has(> .tab:not(:only-child)) {
+	display: flex;
+}
+
+#bottom-panel > .tab-list > .tab {
+	display: flex;
+	column-gap: 0.25em;
+	height: 1em;
+	padding: 0.3em 0.5em;
+	box-sizing: content-box;
+
+	background-color: var(--tab-background-colour);
+
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+
+	user-select: none;
+}
+
+#bottom-panel > .tab-list > .tab:hover {
+	background-color: var(--tab-hovered-background-colour);
+}
+
+#bottom-panel > .tab-list > .tab.active {
+	background-color: var(--tab-active-background-colour);
+}
+
+#bottom-panel > .tab-list > .tab > .close-button {
+	width: 1em;
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'><path stroke='%23cfcfcf' stroke-linecap='round' stroke-width='1.125' d='M4 4 L10 10 M10 4 L4 10'></path></svg>");
+	border-radius: 50%;
+}
+
+#bottom-panel > .tab-list > .tab > .close-button:hover {
+	background-color: var(--tab-close-button-hovered-background-colour);
+}

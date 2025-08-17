@@ -33,8 +33,11 @@ export class BottomPaneLogDisplay {
 	 */
 	constructor(bottomPane) {
 		this.bottomPane = bottomPane;
-		this.logTab = bottomPane.openTab('Log Output', document.createElement('div'), () => this.client?.displayResized());
+
+		this.logTab = bottomPane.openTab('Log Output', document.createElement('div'));
 		this.logTab.content.classList.add('gm-constructor-tab', 'gm-constructor-viewer', 'popout-window');
+		this.logTab.events.on('contentResized', () => this.client?.displayResized());
+		this.logTab.events.on('close', () => this.destroy());
 	}
 
 	destroy() {
@@ -109,6 +112,10 @@ export class BottomPaneLogDisplay {
 		if (this.errorsTab === undefined) {
 			this.errorsTab = this.bottomPane.openTab(`${this.logTab.name} - Errors`, document.createElement('div'));
 			this.errorsTab.content.classList.add('gm-constructor-tab', 'gm-constructor-viewer-bottom-pane', 'gm-constructor-viewer-errors', 'popout-window');
+
+			this.errorsTab.events.on('close', () => {
+				this.errorsTab = undefined;
+			});
 		}
 
 		this.errorsTab.content.appendChild(error.asHTML());

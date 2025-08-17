@@ -1,9 +1,6 @@
 import { InvalidStateErr } from '../utils/Err.js';
+import { EventEmitterImpl } from '../utils/EventEmitterImpl.js';
 import { use } from '../utils/scope-extensions/use.js';
-
-const BOOKMARK_NORMAL_COLOUR = '#444444';
-const BOOKMARK_SELECT_COLOUR = '#333333';
-const BOOKMARK_HOVER_COLOUR = '#454545';
 
 /**
  * Custom bottom pane for GMEdit. This is effectively a pre-test using a plugin for functionality
@@ -33,36 +30,18 @@ export class BottomPane {
 	container = /** @type {HTMLDivElement} */ (document.querySelector('.bottom.gml > .tabview'));
 
 	/**
-	 * The old values of the container's properties when the pane is 
 	 * @private
 	 */
-	containerOldProps = {
-		flexDirection: ''
-	};
+	element = use(document.createElement('div'))
+		.also(it => { it.id = 'bottom-panel' })
+		.value;
 
 	/**
 	 * @private
 	 */
-	element = use(document.createElement('div')).also(it => {
-		it.style = `
-			box-sizing: border-box;
-			flex-grow: 0;
-			flex-shrink: 0;
-			flex-basis: 30%;
-			min-height: 0.45em;
-			max-height: 90%;
-		`;
-	}).value;
-
-	/**
-	 * @private
-	 */
-	tabListElement = use(document.createElement('div')).also(it => {
-		it.style = `
-			display: none;
-			flex-direction: row;
-		`;
-	}).value;
+	tabListElement = use(document.createElement('div'))
+		.also(it => { it.className = 'tab-list' })
+		.value;
 
 	/**
 	 * @private
@@ -73,14 +52,9 @@ export class BottomPane {
 	/**
 	 * @private
 	 */
-	divider = use(document.createElement('div')).also(it => {
-		it.classList.add('splitter-td');
-		it.style = `
-			cursor: n-resize;
-			width: 100%;
-			height: 0.45em;
-		`;
-	}).value;
+	divider = use(document.createElement('div'))
+		.also(it => { it.className = 'splitter-td' })
+		.value;
 
 	/**
 	 * @private
@@ -127,42 +101,48 @@ export class BottomPane {
 	 * 
 	 * @param {string} name 
 	 * @param {HTMLElement} content 
-	 * @param {() => void} [contentResized] 
 	 * @returns {UI.Tab} The tab that was created. This tab can be removed by supplying this tab structure to `remove`.
 	 */
-	openTab(name, content, contentResized) {
+	openTab(name, content) {
 		/** @type {UI.Tab} */
-		const tab = { name, content, contentResized };
+		const tab = {
+			name,
+			content,
+			events: new EventEmitterImpl(['contentResized', 'close'])
+		};
+
 		this.tabs.push(tab);
 
 		const bookmark = {
 			container: document.createElement('div'),
-			title: document.createElement('span')
+			title: document.createElement('span'),
+			closeButton: document.createElement('div')
 		};
 
-		bookmark.container.style.backgroundColor = BOOKMARK_NORMAL_COLOUR;
-		bookmark.container.style.height = '1em';
-		bookmark.container.style.padding = '0.3em 0.5em';
-		bookmark.container.style.textOverflow = 'ellipsis';
-		bookmark.container.style.overflow = 'hidden';
-		bookmark.container.style.whiteSpace = 'nowrap';
-		bookmark.container.style.boxSizing = 'content-box';
-		bookmark.container.style.userSelect = 'none';
-
-		bookmark.container.addEventListener('click', () => {
-			this.showTab(tab);
+		bookmark.container.className = 'tab';
+		bookmark.container.addEventListener('click', event => {
+			if (event.target !== bookmark.closeButton) {
+				event.preventDefault();
+				this.showTab(tab);
+			}
 		});
 
 		bookmark.title.textContent = tab.name;
+		bookmark.title.className = 'title';
 		bookmark.container.appendChild(bookmark.title);
+
+		bookmark.closeButton.className = 'close-button';
+		bookmark.closeButton.addEventListener('click', event => {
+			event.preventDefault();
+			this.closeTab(tab);
+		});
+
+		bookmark.container.appendChild(bookmark.closeButton);
 
 		this.tabBookmarkElements.set(tab, bookmark);
 		this.tabListElement.appendChild(bookmark.container);
 
-		if (this.tabs.length >= 2) {
-			this.tabListElement.style.display = 'flex';
-		} else {
-			this.tabListElement.style.display = 'none';
+		if (this.tabs.length === 1) {
 			this.show();
 		}
 		
@@ -175,30 +155,34 @@ export class BottomPane {
 	 */
 	closeTab(tab) {
 		const tabIndex = this.tabs.indexOf(tab);
+
+		if (tabIndex < 0) {
+			return;
+		}
+
 		this.tabs.splice(tabIndex, 1);
+
+		if (this.tabs.length === 0) {
+			this.hide();
+		}
 
 		const bookmark = this.tabBookmarkElements.get(tab);
 		this.tabBookmarkElements.delete(tab);
+
 		bookmark?.container.remove();
 
-		tab.content.remove();
-
 		if (tab === this.activeTab) {
-			let newActiveIndex = Math.min(tabIndex, this.tabs.length - 1);
 			this.activeTab = undefined;
+			tab.content.remove();
 
-			if (this.tabs[newActiveIndex] !== undefined) {
+			const newActiveIndex = Math.min(tabIndex, this.tabs.length - 1);
+
+			if (newActiveIndex >= 0) {
 				this.showTab(this.tabs[newActiveIndex]);
 			}
 		}
-		
-		if (this.tabs.length < 2) {
-			this.tabListElement.style.display = 'none';
 
-			if (this.tabs.length === 0) {
-				this.hide();
-			}
-		}
+		tab.events.emit('close', undefined);
 	}
 
 	/**
@@ -225,32 +209,23 @@ export class BottomPane {
 	showTab(tab) {
 		if (this.activeTab !== undefined) {
 			this.element.removeChild(this.activeTab.content);
-			this.tabBookmarkElements.get(this.activeTab).container.style.backgroundColor = BOOKMARK_NORMAL_COLOUR;
+			this.tabBookmarkElements.get(this.activeTab).container.classList.remove('active');
 		}
 
 		this.element.appendChild(tab.content);
-		this.tabBookmarkElements.get(tab).container.style.backgroundColor = BOOKMARK_SELECT_COLOUR;
-		this.activeTab = tab;
+		this.tabBookmarkElements.get(tab).container.classList.add('active');
 
-		if (this.activeTab?.contentResized !== undefined) {
-			this.activeTab.contentResized();
-		}
+		this.activeTab = tab;
+		this.activeTab.events.emit('contentResized', undefined);
 	}
 
 	show() {
 		this.container.appendChild(this.element);
-
-		this.containerOldProps.flexDirection = this.container.style.flexDirection;
-		this.container.style.flexDirection = 'column';
-
-		if (this.activeTab?.contentResized !== undefined) {
-			this.activeTab.contentResized();
-		}
+		this.activeTab?.events.emit('contentResized', undefined);
 	}
 
 	hide() {
 		this.element.remove();
-		this.container.style.flexDirection = this.containerOldProps.flexDirection;
 	}
 
 	/**
@@ -289,13 +264,10 @@ export class BottomPane {
 	 */
 	onMouseUp = (event) => {
 		if (this.isResizing) {
-			this.isResizing = false;
-
-			if (this.activeTab?.contentResized !== undefined) {
-				this.activeTab.contentResized();
-			}
-
 			event.preventDefault();
+
+			this.isResizing = false;
+			this.activeTab?.events.emit('contentResized', undefined);
 		}
 	}
 }

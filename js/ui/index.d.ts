@@ -1,3 +1,4 @@
+import { EventEmitterImpl } from '../utils/EventEmitterImpl';
 import { ProjectPropertiesMenu } from './ProjectPropertiesMenu';
 
 export declare global {
@@ -17,8 +18,16 @@ export declare global {
 			/** The tab's content element. */
 			content: HTMLElement;
 
-			/** The tab's content has been resized. Used to notify tab owners. */
-			contentResized?(): void;
+			/** Events that can happen to a tab, to notify the tab's owner. */
+			events: EventEmitterImpl<TabEventMap>;
+		};
+		
+		interface TabEventMap {
+			/** The tab's content has been resized. */
+			contentResized: void;
+
+			/** The tab has been closed. After this event, the tab is no longer valid. */
+			close: void;
 		};
 
 	};

@@ -2,5 +2,5 @@
 	"name": "GMEdit-Constructor",
 	"description": "Compile projects from GMEdit!",
 	"scripts": ["init.js"],
-	"stylesheets": ["constructor.css"]
+	"stylesheets": ["constructor.css", "bottom-panel.css"]
 }
