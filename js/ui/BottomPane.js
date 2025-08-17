@@ -148,6 +148,14 @@ export class BottomPane {
 			}
 		});
 
+		bookmark.container.addEventListener('auxclick', event => {
+			// Middle-click to close.
+			if (event.button === 1) {
+				event.preventDefault();
+				this.closeTab(tab);
+			}
+		});
+
 		bookmark.title.textContent = tab.name;
 		bookmark.title.className = 'title';
 		bookmark.container.appendChild(bookmark.title);
