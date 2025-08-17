@@ -481,7 +481,7 @@ export class Preferences {
 		const userDirectoryName = this.prefs.runtime_opts.type_opts[channel].user;
 		const usersInChannel = this.usersInChannels[channel];
 
-		if (userDirectoryName == undefined || usersInChannel === undefined) {
+		if (usersInChannel === undefined) {
 			return undefined;
 		}
 
