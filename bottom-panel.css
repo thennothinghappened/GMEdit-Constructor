@@ -31,13 +31,8 @@
 }
 
 #bottom-panel > .tab-list {
-	display: none;
-	flex-direction: row;
-}
-
-/* We only need to see the tab list if there's more than one tab! */
-#bottom-panel > .tab-list:has(> .tab:not(:only-child)) {
 	display: flex;
+	flex-direction: row;
 }
 
 #bottom-panel > .tab-list > .tab {
