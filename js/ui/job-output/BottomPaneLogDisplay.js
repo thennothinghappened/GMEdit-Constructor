@@ -79,7 +79,7 @@ export class BottomPaneLogDisplay {
 		this.logTab.content.textContent = '';
 
 		if (this.errorsTab !== undefined) {
-			this.errorsTab.content.textContent = '';
+			this.bottomPane.closeTab(this.errorsTab);
 		}
 
 		this.client.displayClosed();
