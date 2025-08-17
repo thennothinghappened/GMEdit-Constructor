@@ -229,6 +229,10 @@ export class BottomPane {
 	 */
 	showTab(tab) {
 		if (this.activeTab !== undefined) {
+			if (tab === this.activeTab) {
+				return;
+			}
+
 			this.element.removeChild(this.activeTab.content);
 			this.tabBookmarkElements.get(this.activeTab).container.classList.remove('active');
 		}
