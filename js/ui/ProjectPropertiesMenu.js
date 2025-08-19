@@ -5,20 +5,8 @@ import { Dropdown } from './components/Dropdown.js';
 import { None, Some } from '../utils/Option.js';
 import { GMRuntimeVersion } from '../compiler/GMVersion.js';
 import * as ui from './ui-wrappers.js';
-import { use } from '../utils/scope-extensions/use.js';
 import { docString } from '../utils/StringUtils.js';
 import { HOST_PLATFORM } from '../compiler/igor-paths.js';
-
-/**
- * Used for runtime/user select dropdowns, to default to the global settings.
- * Corresponds to `undefined` in the actual preferences files.
- * 
- * @type {UI.Dropdown.NormalizedEntry<undefined>}
- */
-const USE_DEFAULT = {
-	label: 'Use Default',
-	value: undefined
-};
 
 /**
  * @type {UI.Dropdown.NormalizedEntry<undefined>}
@@ -198,13 +186,9 @@ export class ProjectPropertiesMenu {
 		// ------------------------------------------------------------------------------
 		
 		this.reuseOutputTabDropdown = new Dropdown('Reuse existing compiler tab',
-				Some(this.properties.reuseOutputTab),
+				None,
 				(value) => { this.properties.reuseOutputTab = value; },
-				[
-					USE_DEFAULT,
-					{ label: 'Yes', value: true },
-					{ label: 'No', value: false }
-				],
+				/** @type {ReadonlyArray<UI.Dropdown.Entry<boolean|undefined>>} */ ([]),
 			)
 			.singleline()
 			.appendTo(this.element);
@@ -212,6 +196,7 @@ export class ProjectPropertiesMenu {
 		// ------------------------------------------------------------------------------
 
 		this.onSetShowTooltipHints({ showTooltipHints: this.preferences.showTooltipHints });
+		this.onGlobalSetReuseOutputTab({ reuseOutputTab: this.preferences.reuseOutputTab });
 
 		/** @private */
 		this.propertiesEventGroup = this.properties.events.createGroup({
@@ -225,9 +210,9 @@ export class ProjectPropertiesMenu {
 		/** @private */
 		this.preferencesEventGroup = this.preferences.events.createGroup({
 			setShowTooltipHints: this.onSetShowTooltipHints,
-			runtimeListChanged: this.onRuntimeListChanged
+			runtimeListChanged: this.onRuntimeListChanged,
+			setReuseOutputTab: this.onGlobalSetReuseOutputTab
 		});
-
 	}
 
 	/**
@@ -274,6 +259,18 @@ export class ProjectPropertiesMenu {
 	 */
 	onSetReuseOutputTab = ({ reuseOutputTab }) => {
 		this.reuseOutputTabDropdown.setSelectedOption(reuseOutputTab);
+	};
+
+	/**
+	 * @private
+	 * @param {TPreferences.PreferencesEventMap['setReuseOutputTab']} event
+	 */
+	onGlobalSetReuseOutputTab = ({ reuseOutputTab }) => {
+		this.reuseOutputTabDropdown.setOptions([
+			{ label: `Default (${yesOrNo(reuseOutputTab)})`, value: undefined },
+			{ label: yesOrNo(true), value: true },
+			{ label: yesOrNo(false), value: false }
+		], this.properties.reuseOutputTab);
 	};
 
 	/**
@@ -389,4 +386,12 @@ export class ProjectPropertiesMenu {
 
 	}
 
+}
+
+/**
+ * @param {boolean} bool 
+ * @returns {'Yes'|'No'}
+ */
+function yesOrNo(bool) {
+	return bool ? 'Yes' : 'No';
 }
