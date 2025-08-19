@@ -286,6 +286,7 @@ export class BottomPane {
 
 		if (delta !== 0) {
 			this.element.style.flexBasis = `${this.element.clientHeight - delta}px`;
+			this.activeTab?.events.emit('contentResized', undefined);
 		}
 
 		this.lastMouseY = event.clientY;
@@ -298,9 +299,7 @@ export class BottomPane {
 	onMouseUp = (event) => {
 		if (this.isResizing) {
 			event.preventDefault();
-
 			this.isResizing = false;
-			this.activeTab?.events.emit('contentResized', undefined);
 		}
 	}
 }
