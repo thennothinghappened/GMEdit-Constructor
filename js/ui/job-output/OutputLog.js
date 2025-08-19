@@ -57,9 +57,7 @@ export class JobOutputLog {
 		this.job = job;
 		this.display = display;
 
-		const statusLine = this.getStatusLine();
-		this.jobNameHeading.textContent = statusLine;
-		this.display.setStatusLine(statusLine);
+		this.updateTitle();
 
 		const header = document.createElement('header');
 		header.appendChild(this.jobNameHeading);
@@ -81,7 +79,7 @@ export class JobOutputLog {
 		});
 
 		/** @private */
-		this.tickIntervalId = setTimeout(this.updateTitle, 1000);
+		this.tickIntervalId = setInterval(this.updateTitle, 1000);
 	}
 
 	destroy() {
@@ -184,31 +182,31 @@ export class JobOutputLog {
 	 * @private
 	 */
 	updateTitle = () => {
-		const title = this.getStatusLine();
-		this.jobNameHeading.textContent = title;
-		this.display.setStatusLine(title);
+		let title = `${this.job.settings.platform} ${this.job.settings.task}`;
+
+		if (JobOutputLog.instances.length > 1) {
+			title += ` #${this.job.id}`;
+		}
+
+		switch (this.job.state.status) {
+			case 'running': break;
+			case 'stopping': title +=  ': Stopping'; break;
+			case 'stopped': title += `: ${this.job.state.stopType}`; break;
+		}
+
+		// TODO: Format time nicely here :)
+		const duration = ((Date.now() - this.job.startTime.getTime()) / 1000).toString();
+
+		if (this.display.supportsTitle()) {
+			this.display.setTitle(title);
+			this.jobNameHeading.textContent = `${duration} seconds`;
+		} else {
+			this.jobNameHeading.textContent = `${title} (${duration} seconds)`;
+		}
 	}
 
 	get isRunning() {
 		return this.job.state.status !== 'stopped';
-	}
-
-	/**
-	 * @private
-	 * @returns {string}
-	 */
-	getStatusLine() {
-		let prefix = `${this.job.settings.platform} - ${this.job.settings.task}`;
-
-		if (JobOutputLog.instances.length > 1) {
-			prefix += ` #${this.job.id}`;
-		}
-
-		switch (this.job.state.status) {
-			case 'running': return prefix;
-			case 'stopping': return `${prefix}: Stopping`;
-			case 'stopped': return `${prefix}: ${this.job.state.stopType}`;
-		}
 	}
 
 	/**

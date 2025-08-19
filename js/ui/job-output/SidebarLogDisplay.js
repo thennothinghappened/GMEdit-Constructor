@@ -80,9 +80,16 @@ export class SidebarLogDisplay {
 	}
 
 	/**
-	 * @type {UI.OutputLogDisplay['setStatusLine']}
+	 * @type {UI.OutputLogDisplay['supportsTitle']}
 	 */
-	setStatusLine(_statusLine) {}
+	supportsTitle() {
+		return false;
+	}
+
+	/**
+	 * @type {UI.OutputLogDisplay['setTitle']}
+	 */
+	setTitle(_title) {}
 
 	/**
 	 * @type {UI.OutputLogDisplay['addError']}

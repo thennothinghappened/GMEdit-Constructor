@@ -78,19 +78,21 @@ export async function job_run(project, runtime, user, settings, id = job_create_
 	
 	/** @type {import('node:child_process').ChildProcessWithoutNullStreams} */
 	let proc;
+	/** @type {Date} */
+	let startTime;
 
 	try {
 		proc = child_process.spawn(runtime.igorPath, flags_res.data, spawn_opts);
-
-		await new Promise((resolve, reject) => {
-			proc.once('spawn', resolve);
+		
+		startTime = await new Promise((resolve, reject) => {
+			proc.once('spawn', () => resolve(new Date()));
 			proc.once('error', reject);
 		});
 	} catch (err) {
 		return Err(new InvalidStateErr('While trying to create the Igor process, the spawn() call failed unexpectedly', err));
 	}
 	
-	const job = new IgorJob(id, settings, proc, project);
+	const job = new IgorJob(id, settings, proc, project, startTime);
 	
 	jobs.push(job);
 	job.events.once('stop', () => job_remove(job));

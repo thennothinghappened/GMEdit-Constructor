@@ -95,13 +95,20 @@ export class BottomPaneLogDisplay {
 	}
 
 	/**
-	 * @type {UI.OutputLogDisplay['setStatusLine']}
+	 * @type {UI.OutputLogDisplay['supportsTitle']}
 	 */
-	setStatusLine(statusLine) {
-		this.bottomPane.renameTab(this.logTab, statusLine);
+	supportsTitle() {
+		return true;
+	}
+
+	/**
+	 * @type {UI.OutputLogDisplay['setTitle']}
+	 */
+	setTitle(title) {
+		this.bottomPane.renameTab(this.logTab, title);
 
 		if (this.errorsTab !== undefined) {
-			this.bottomPane.renameTab(this.errorsTab, `${statusLine} - Errors`);
+			this.bottomPane.renameTab(this.errorsTab, `${title} - Errors`);
 		}
 	}
 

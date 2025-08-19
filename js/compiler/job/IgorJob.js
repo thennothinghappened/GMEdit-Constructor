@@ -28,6 +28,12 @@ export class IgorJob {
 	/** @type {GMEdit.Project} */
 	project;
 
+	/**
+	 * When the job was started.
+	 * @type {Date}
+	 */
+	startTime;
+
 	stdout = '';
 
 	/** @type {JobState} */
@@ -59,13 +65,15 @@ export class IgorJob {
 	 * @param {GMS2.IgorSettings} settings
 	 * @param {import('node:child_process').ChildProcess} process
 	 * @param {GMEdit.Project} project
+	 * @param {Date} startTime
 	 */
-	constructor(id, settings, process, project) {
+	constructor(id, settings, process, project, startTime) {
 		
 		this.id = id;
 		this.settings = settings;
 		this.process = process;
 		this.project = project;
+		this.startTime = startTime;
 
 		this.stdout += this.process.spawnargs.join(' ') + '\n\n';
 

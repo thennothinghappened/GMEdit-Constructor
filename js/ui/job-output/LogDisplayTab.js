@@ -111,10 +111,17 @@ export class OutputLogTab extends ConstructorTab {
 	}
 
 	/**
-	 * @type {UI.OutputLogDisplay['setStatusLine']}
+	 * @type {UI.OutputLogDisplay['supportsTitle']}
 	 */
-	setStatusLine(statusLine) {
-		GmlFileUtils.rename(this.file, statusLine);
+	supportsTitle() {
+		return true;
+	}
+
+	/**
+	 * @type {UI.OutputLogDisplay['setTitle']}
+	 */
+	setTitle(title) {
+		GmlFileUtils.rename(this.file, title);
 	}
 
 	/**
