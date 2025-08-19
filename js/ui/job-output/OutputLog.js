@@ -103,7 +103,12 @@ export class JobOutputLog {
 	}
 
 	displayResized() {
+		const followOutput = this.shouldFollowOutput();
 		this.logAceEditor.resize();
+
+		if (followOutput) {
+			this.goToBottom();
+		}
 	}
 
 	displayClosed() {
@@ -119,6 +124,17 @@ export class JobOutputLog {
 	goToBottom = () => {
 		this.logAceEditor.navigateFileEnd();
 		this.logAceEditor.scrollToLine(this.logAceEditor.session.getLength(), false, false, () => {});
+	}
+
+	/**
+	 * Check whether we should be following the output downwards.
+	 * 
+	 * @private
+	 * @returns {boolean}
+	 */
+	shouldFollowOutput() {
+		const endRow = this.logAceEditor.session.doc.getLength();
+		return (this.logAceEditor.renderer.getScrollBottomRow() >= (endRow - JobOutputLog.scrollGrabLines));
 	}
 
 	stopJob = () => {
@@ -138,14 +154,13 @@ export class JobOutputLog {
 	 * @param {string} content The content of the Job's STDOUT.
 	 */
 	onJobStdout = (content) => {
+		const followOutput = this.shouldFollowOutput();
 		const cursor = this.logAceEditor.getCursorPosition();
-		const endRow = this.logAceEditor.session.doc.getLength();
-		const shouldScroll = (this.logAceEditor.renderer.getScrollBottomRow() >= (endRow - JobOutputLog.scrollGrabLines));
 		
 		this.logAceEditor.session.setValue(content);
 		this.logAceEditor.moveCursorToPosition(cursor);
 
-		if (shouldScroll) {
+		if (followOutput) {
 			this.goToBottom();
 		}
 	}
