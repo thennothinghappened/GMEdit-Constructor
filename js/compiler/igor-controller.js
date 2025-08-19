@@ -5,7 +5,7 @@
 
 import { IgorJob } from './job/IgorJob.js';
 import { HOST_PLATFORM, output_blob_exts } from './igor-paths.js';
-import { BaseError, SolvableError } from '../utils/Err.js';
+import { BaseError, InvalidStateErr, SolvableError } from '../utils/Err.js';
 import { child_process, path } from '../utils/node/node-import.js';
 import { Err, Ok } from '../utils/Result.js';
 import { mkdir, readdir } from '../utils/node/file.js';
@@ -75,8 +75,21 @@ export async function job_run(project, runtime, user, settings, id = job_create_
 		cwd: project.dir,
 		detached: (process.platform !== 'win32')
 	};
+	
+	/** @type {import('node:child_process').ChildProcessWithoutNullStreams} */
+	let proc;
 
-	const proc = child_process.spawn(runtime.igorPath, flags_res.data, spawn_opts);
+	try {
+		proc = child_process.spawn(runtime.igorPath, flags_res.data, spawn_opts);
+
+		await new Promise((resolve, reject) => {
+			proc.once('spawn', resolve);
+			proc.once('error', reject);
+		});
+	} catch (err) {
+		return Err(new InvalidStateErr('While trying to create the Igor process, the spawn() call failed unexpectedly', err));
+	}
+	
 	const job = new IgorJob(id, settings, proc, project);
 	
 	jobs.push(job);
