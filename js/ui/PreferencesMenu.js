@@ -115,21 +115,6 @@ export class PreferencesMenu {
 
 		use(document.createElement('section')).also(section => {
 
-			section.appendChild(ui.h3('Build Settings'));
-
-			this.runtimeBuildTypeDropdown = new Dropdown('Runtime Type',
-					Some(this.preferences.runtimeBuildType),
-					(value) => { this.preferences.runtimeBuildType = value },
-					GMS2_RUNTIME_TYPES
-				)
-				.singleline()
-				.tooltip('The type of runtime to use.')
-				.appendTo(section);
-			
-		}).also(it => this.element.appendChild(it));
-
-		use(document.createElement('section')).also(section => {
-
 			section.appendChild(ui.h3('Paths'));
 
 			this.globalBuildsPathInput = new TextField('Global Builds Path',

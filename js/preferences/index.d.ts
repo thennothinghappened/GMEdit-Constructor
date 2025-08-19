@@ -30,8 +30,6 @@ export declare global {
 
 			/** Globally selected runtime options that may be overriden by projects. */
 			runtime_opts: {
-				runner: GMS2.RuntimeType;
-	
 				type_opts: {
 					[key in GM.ReleaseChannel]: RuntimePerChannelPrefs;
 				};

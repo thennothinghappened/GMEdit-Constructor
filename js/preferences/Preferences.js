@@ -26,8 +26,6 @@ export const GMS2_RUNTIME_TYPES = ['VM', 'YYC'];
 /** @type {Readonly<TPreferences.Data>} */
 const PREFS_DEFAULT = {
 	runtime_opts: {
-		runner: 'VM',
-
 		type_opts: {
 			Stable: {
 				search_path: def_runtime_paths.Stable,
@@ -370,19 +368,6 @@ export class Preferences {
 
 		this.eventEmitter.emit('setGlobalBuildPath', { globalBuildPath: value });
 
-	}
-
-	/**
-	 * The desired runner type.
-	 * @returns {GMS2.RuntimeType}
-	 */
-	get runtimeBuildType() {
-		return this.prefs.runtime_opts.runner;
-	}
-
-	set runtimeBuildType(runner) {
-		this.prefs.runtime_opts.runner = runner;
-		this.save();
 	}
 
 	/**

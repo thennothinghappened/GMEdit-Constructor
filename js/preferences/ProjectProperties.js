@@ -145,24 +145,16 @@ export class ProjectProperties {
 	}
 
 	/**
-	 * Get the desired runner type.
+	 * Get the desired runner type for this project.
 	 * @returns {GMS2.RuntimeType}
 	 */
-	get runtimeBuildTypeOrDef() {
-		return this.runtimeBuildType ?? this.preferences.runtimeBuildType;
-	}
-
-	/**
-	 * Get the desired runner type for this project (without falling back to the global option).
-	 * @returns {GMS2.RuntimeType|undefined}
-	 */
 	get runtimeBuildType() {
-		return this.local.runtimeType ?? undefined;
+		return this.local.runtimeType ?? 'VM';
 	}
 
 	/**
 	 * Set the desired runtime channel type.
-	 * @param {GMS2.RuntimeType|undefined} runner 
+	 * @param {GMS2.RuntimeType} runner 
 	 */
 	set runtimeBuildType(runner) {
 		this.local.runtimeType = runner;

@@ -544,7 +544,7 @@ export class ConstructorPlugin {
 			buildPath: this.getBuildDir(project),
 			platform: projectProperties.platform ?? igorPaths.HOST_PLATFORM,
 			device: projectProperties.device,
-			runtimeType: projectProperties.runtimeBuildTypeOrDef,
+			runtimeType: projectProperties.runtimeBuildType,
 			configName: projectProperties.buildConfigName
 		};
 

@@ -73,7 +73,7 @@ export class ProjectPropertiesMenu {
 
 	/**
 	 * @private
-	 * @type {UI.Dropdown<GMS2.RuntimeType|undefined>}
+	 * @type {UI.Dropdown<GMS2.RuntimeType>}
 	 */
 	gms2RuntimeTypeDropdown;
 
@@ -153,7 +153,7 @@ export class ProjectPropertiesMenu {
 		this.gms2RuntimeTypeDropdown = new Dropdown('Runtime Type',
 				Some(this.properties.runtimeBuildType),
 				(value) => { this.properties.runtimeBuildType = value; },
-				[USE_DEFAULT, ...GMS2_RUNTIME_TYPES]
+				GMS2_RUNTIME_TYPES
 			)
 			.singleline()
 			.appendTo(this.element);
