@@ -86,20 +86,20 @@ export class PreferencesMenu {
 				`))
 				.appendTo(section);
 			
-			this.outputPositionDropdown = new Dropdown('Output log position',
+			this.outputPositionDropdown = new Dropdown('Job Output Style',
 					Some(this.preferences.outputPosition),
 					(value) => { this.preferences.outputPosition = value },
 					/** @type {ReadonlyArray<UI.Dropdown.Entry<TPreferences.OutputPosition>>} */ ([
 						{
-							label: 'Editor Tab',
+							label: 'GMEdit Tab',
 							value: 'fullTab'
 						},
 						{
-							label: 'Bottom Pane',
+							label: 'Bottom Panel Tab (Official IDE\'s style)',
 							value: 'bottomPane'
 						},
 						{
-							label: 'Right Pane',
+							label: 'Right Panel',
 							value: 'rightPane'
 						}
 					])
