@@ -6,7 +6,7 @@ import * as ui from '../../../ui/ui-wrappers.js';
  * This is a rare one to see, so it's a bit difficult to document what format to expect
  * it in bar one or two times I have seen it personally.
  * 
- * @type {JobErrorDescriptor} 
+ * @type {GM.Job.ErrorDescriptor} 
  */
 export const JobPermissionsError = {
 

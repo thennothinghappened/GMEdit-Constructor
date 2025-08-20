@@ -1,10 +1,9 @@
 import * as ui from '../../../ui/ui-wrappers.js';
 import { errorPositionAsHTML } from './errorPositionAsHTML.js';
-import { GMS2ErrorUtils } from './GMS2ErrorUtils.js';
 
 /** 
  * A syntax error encountered by the GMS2 compiler.
- * @type {JobErrorDescriptor} 
+ * @type {GM.Job.ErrorDescriptor} 
  */
 export const GMS2SyntaxError = {
 

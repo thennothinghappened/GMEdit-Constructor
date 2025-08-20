@@ -2,7 +2,7 @@ import * as ui from '../../../ui/ui-wrappers.js';
 
 /** 
  * A generic error in compiling, such as a syntax error.
- * @type {JobErrorDescriptor} 
+ * @type {GM.Job.ErrorDescriptor} 
  */
 export const JobCompilationError = {
 

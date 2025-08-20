@@ -50,7 +50,7 @@ export class JobOutputLog {
 
 	/**
 	 * @private
-	 * @param {IgorJob} job 
+	 * @param {GM.Job} job 
 	 * @param {UI.OutputLogDisplay} display 
 	 */
 	constructor(job, display) {
@@ -142,7 +142,7 @@ export class JobOutputLog {
 			return;
 		}
 
-		if (this.job.state.status === 'running') {
+		if (this.job.getState().status === 'running') {
 			this.job.stop();
 		}
 	}
@@ -169,7 +169,7 @@ export class JobOutputLog {
 	 * Callback on the completion of the attached Job.
 	 * 
 	 * @private
-	 * @param {JobEventMap['stop']} event
+	 * @param {GM.Job.EventMap['stop']} event
 	 */
 	onJobStop = ({ errors }) => {
 		clearInterval(this.tickIntervalId);
@@ -187,7 +187,7 @@ export class JobOutputLog {
 	 * Visit the output directory of the task.
 	 */
 	showDirectory = () => {
-		Electron_Shell.showItemInFolder(this.job.settings.buildPath);
+		Electron_Shell.showItemInFolder(this.job.buildPath);
 	}
 
 	/**
@@ -197,16 +197,18 @@ export class JobOutputLog {
 	 * @private
 	 */
 	updateTitle = () => {
-		let title = `${this.job.settings.platform} ${this.job.settings.task}`;
+		let title = `${this.job.platform} ${this.job.task}`;
 
 		if (JobOutputLog.instances.length > 1) {
 			title += ` #${this.job.id}`;
 		}
 
-		switch (this.job.state.status) {
+		const state = this.job.getState();
+
+		switch (state.status) {
 			case 'running': break;
 			case 'stopping': title +=  ': Stopping'; break;
-			case 'stopped': title += `: ${this.job.state.stopType}`; break;
+			case 'stopped': title += `: ${state.stopType}`; break;
 		}
 
 		// TODO: Format time nicely here :)
@@ -221,12 +223,12 @@ export class JobOutputLog {
 	}
 
 	get isRunning() {
-		return this.job.state.status !== 'stopped';
+		return this.job.getState().status !== 'stopped';
 	}
 
 	/**
 	 * 
-	 * @param {IgorJob} job 
+	 * @param {GM.Job} job 
 	 * @param {UI.OutputLogDisplay} display 
 	 */
 	static create(job, display) {

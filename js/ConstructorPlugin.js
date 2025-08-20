@@ -1,4 +1,4 @@
-import * as compileController from './compiler/igor-controller.js';
+import { CompileControllerImpl } from './compiler/CompileControllerImpl.js';
 import { HamburgerOptions } from './ui/HamburgerOptions.js';
 import { project_current_get, open_files_save, project_format_get, tab_current_get } from './utils/project.js';
 import { ProjectProperties } from './preferences/ProjectProperties.js';
@@ -20,6 +20,7 @@ import { BottomPane } from './ui/BottomPane.js';
 import { JobOutputLog } from './ui/job-output/OutputLog.js';
 import { BottomPaneLogDisplay } from './ui/job-output/BottomPaneLogDisplay.js';
 import { SidebarLogDisplay } from './ui/job-output/SidebarLogDisplay.js';
+import { GMRuntimeVersion } from './compiler/GMVersion.js';
 
 /**
  * Name of the plugin 
@@ -205,7 +206,6 @@ export class ConstructorPlugin {
 			this.destroyCurrentProjectComponents();
 		}
 
-		compileController.__cleanup__();
 		this.hamburgerOptions.destroy();
 		this.controlPanel.destroy();
 
@@ -230,6 +230,7 @@ export class ConstructorPlugin {
 
 		const {
 			configTreeUi,
+			compileController,
 			projectPropertiesMenuComponents,
 			projectProperties
 		} = this.currentProjectComponents;
@@ -243,6 +244,9 @@ export class ConstructorPlugin {
 		
 		configTreeUi.destroy();
 		projectProperties.destroy();
+
+		// FIXME: respect async here!
+		compileController.destroyAsync();
 
 		delete this.currentProjectComponents;
 
@@ -296,10 +300,13 @@ export class ConstructorPlugin {
 			this.preferences
 		));
 
+		const compileController = new CompileControllerImpl(project);
+
 		this.currentProjectComponents = {
 			project,
 			projectProperties,
-			configTreeUi
+			configTreeUi,
+			compileController
 		};
 
 		this.hamburgerOptions.enableProjectActionItems(true);
@@ -403,7 +410,7 @@ export class ConstructorPlugin {
 	 * @param {ProjectComponents} components
 	 */
 	async executeTask(task, components) {
-		const { project, projectProperties } = components;
+		const { project, projectProperties, compileController } = components;
 
 		/** @type {GMS2.RuntimeInfo|undefined} */
 		let runtime = undefined;
@@ -440,7 +447,7 @@ export class ConstructorPlugin {
 
 		if (runtime === undefined) {
 
-			const result = compileController.findCompatibleRuntime(
+			const result = GMRuntimeVersion.findCompatibleRuntime(
 				this.preferences,
 				projectProperties.projectVersion,
 				projectProperties.runtimeReleaseChannel
@@ -567,7 +574,7 @@ export class ConstructorPlugin {
 			open_files_save();
 		}
 
-		const job = await compileController.job_run(project, runtime, user, settings, jobIdToReuse);
+		const job = await compileController.start(runtime, user, settings, jobIdToReuse);
 
 		if (!job.ok) {
 			this.controlPanel.error('Failed to run Igor job!', job.err);
@@ -630,6 +637,10 @@ export class ConstructorPlugin {
 	 * Stop the currently viewed job, or the first running job if none are currently in view.
 	 */
 	stopCurrent = () => {
+		if (this.currentProjectComponents === undefined) {
+			return;
+		}
+
 		const currentTab = tab_current_get();
 
 		if (currentTab?.gmlFile.editor instanceof OutputLogTab) {
@@ -640,10 +651,10 @@ export class ConstructorPlugin {
 				return;
 			}
 		}
-
-		for (const job of compileController.jobs) {
-			if (job.state.status === 'running') {
-				job.stop();
+		
+		for (const output of JobOutputLog.instances) {
+			if (output.job.getState().status === 'running') {
+				output.job.stop();
 				return;
 			}
 		}
@@ -657,21 +668,17 @@ export class ConstructorPlugin {
 			return;
 		}
 
+		const buildDir = this.getBuildDir(components.project);
+
 		// Stop existing running jobs, as they wouldn't be too happy about their directories being cleared!
-		const promises = compileController.jobs
-			.filter(it => it.project === components.project)
-			.map(it => it.stop());
+		await components.compileController.stopAll();
 
-		await Promise.all(promises);
-
-		const build_dir = this.getBuildDir(components.project);
-
-		if (Electron_FS.existsSync(build_dir)) {
+		if (Electron_FS.existsSync(buildDir)) {
 			try {
-				Electron_FS.rmSync(build_dir, { recursive: true });
+				Electron_FS.rmSync(buildDir, { recursive: true });
 			} catch (err) {
 				this.controlPanel.error('Failed to clean project!', new SolvableError(
-					`An unexpected error occurred while removing the build directory '${build_dir}'.`,
+					`An unexpected error occurred while removing the build directory '${buildDir}'.`,
 					'Do you have this directory open somewhere?',
 					err
 				));
@@ -680,7 +687,7 @@ export class ConstructorPlugin {
 		}
 
 		Electron_Dialog.showMessageBox({
-			message: `The build directory '${build_dir}' has been cleared.`,
+			message: `The build directory '${buildDir}' has been cleared.`,
 			buttons: ['Ok']
 		});
 

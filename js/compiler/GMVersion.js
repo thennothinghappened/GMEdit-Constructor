@@ -143,6 +143,91 @@ export class GMRuntimeVersion extends GMVersion {
 
 	}
 
+	/**
+	 * Find an available runtime compatible with the given project version.
+	 * 
+	 * @param {GMS2.RuntimeProvider} runtimeProvider Method of listing available runtimes.
+	 * @param {GMVersion} projectVersion Version of the project we are tasked with matching against.
+	 * @param {GM.ReleaseChannel | undefined} [channel] The channel to query. If unspecified, all channels will be queried in order of specificity.
+	 * @returns {Result<GMS2.FindCompatibleRuntimeData, GMS2.FindCompatibleRuntimeError>}
+	 */
+	static findCompatibleRuntime(runtimeProvider, projectVersion, channel) {
+		if (channel !== undefined) {
+			
+			const runtimes = runtimeProvider.getRuntimes(channel);
+
+			if (runtimes === undefined) {
+				return Err({ type: 'channel-empty', channel });
+			}
+
+			const runtime = this.findCompatibleRuntimeInChannel(projectVersion, runtimes);
+
+			if (runtime === undefined) {
+				return Err({ type: 'none-compatible', channel });
+			}
+
+			return Ok({ runtime, channel });
+
+		}
+
+		// Beta runtimes use major versions of months, multiplied by 100. Thus, encountering this, we
+		// know the project is on a beta build.
+		if (projectVersion.month >= 100) {
+			return this.findCompatibleRuntime(runtimeProvider, projectVersion, 'Beta');
+		}
+
+		/**
+		 * The order to check in. Our order is based on the release frequency of the channels, as this
+		 * also matches with their stability. We want to ideally pick the most-stable option, if there
+		 * are multiple possible matches.
+		 * 
+		 * @type {GM.ReleaseChannel[]}
+		 */
+		const CHANNEL_QUERY_ORDER = ['LTS', 'Stable', 'Beta'];
+
+		for (const channel of CHANNEL_QUERY_ORDER) {
+
+			const result = this.findCompatibleRuntime(runtimeProvider, projectVersion, channel);
+
+			if (result.ok) {
+				return result;
+			}
+
+		}
+
+		return Err({ type: 'none-compatible' });
+	}
+
+	/**
+	 * Find an available runtime compatible with the given project version in the given channel.
+	 * 
+	 * @private
+	 * @param {GMVersion} projectVersion Version of the project we are tasked with matching against.
+	 * @param {NonEmptyArray<GMS2.RuntimeInfo>} runtimes List of runtimes in the channel.
+	 * @returns {GMS2.RuntimeInfo|undefined}
+	 */
+	static findCompatibleRuntimeInChannel(projectVersion, runtimes) {
+		for (const runtime of [...runtimes].sort((a, b) => b.version.compare(a.version))) {
+			
+			if (runtime.version.year !== projectVersion.year) {
+				continue;
+			}
+
+			if (runtime.version.month !== projectVersion.month) {
+				continue;
+			}
+
+			if (runtime.version.revision !== projectVersion.revision) {
+				continue;
+			}
+
+			return runtime;
+
+		}
+
+		return undefined;
+	}
+
 	toString() {
 		return `runtime-${super.toString()}`;
 	}

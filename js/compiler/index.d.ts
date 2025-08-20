@@ -110,6 +110,38 @@ export declare global {
 
 		};
 
+		/**
+		 * Controller object for running compilation jobs!
+		 */
+		interface CompileController extends AsyncDestroyable {
+			/**
+			 * Run a new job.
+			 * 
+			 * @param runtime Runtime being compiled with.
+			 * @param user User whose license we'll use.
+			 * @param settings Specific parameters about the job type.
+			 * @param id Specific ID to use for this job, for stealing from an existing one.
+			 * @returns Promise resolving with the result of starting the job.
+			 */
+			async start(
+				runtime: GMS2.RuntimeInfo,
+				user: GM.User,
+				settings: GMS2.IgorSettings,
+				id?: number
+			): Promise<Result<Job>>;
+
+			/**
+			 * Stop all currently running jobs.
+			 * 
+			 * @returns Promise that resolves when all jobs have stopped.
+			 */
+			async stopAll(): Promise<void>;
+		};
+
+		namespace CompileController {
+
+		};
+
 		namespace YY {
 
 			type File = {

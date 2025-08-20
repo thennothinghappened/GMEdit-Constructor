@@ -8,6 +8,7 @@ import { job_parse_stdout } from './output-parsing/parse-stdout.js';
 
 /**
  * Wrapper for an Igor job.
+ * @implements {GM.Job}
  */
 export class IgorJob {
 
@@ -28,25 +29,19 @@ export class IgorJob {
 	/** @type {GMEdit.Project} */
 	project;
 
-	/**
-	 * When the job was started.
-	 * @type {Date}
-	 */
-	startTime;
-
 	stdout = '';
 
-	/** @type {JobState} */
+	/** @type {GM.Job.State} */
 	state = { status: 'running' };
 
 	/**
 	 * @private
-	 * @type {EventEmitterImpl<JobEventMap>}
+	 * @type {EventEmitterImpl<GM.Job.EventMap>}
 	 */
 	eventEmitter = new EventEmitterImpl(['stdout', 'output', 'stopping', 'stop']);
 
 	/**
-	 * @returns {EventEmitter<JobEventMap>}
+	 * @returns {EventEmitter<GM.Job.EventMap>}
 	 */
 	get events() {
 		return this.eventEmitter;
@@ -56,7 +51,7 @@ export class IgorJob {
 	 * A promise that resolves upon completion of this job.
 	 * 
 	 * @readonly
-	 * @type {Promise<JobEventMap['stop']>}
+	 * @type {Promise<GM.Job.EventMap['stop']>}
 	 */
 	complete = new Promise(resolve => this.events.once('stop', resolve));
 	
@@ -135,10 +130,30 @@ export class IgorJob {
 		
 	}
 
+	getState() {
+		return this.state;
+	}
+
+	get buildPath() {
+		return this.settings.buildPath;
+	}
+
+	get platform() {
+		return this.settings.platform;
+	}
+
+	get runtimeType() {
+		return this.settings.runtimeType;
+	}
+
+	get task() {
+		return this.settings.task;
+	}
+
 	/**
 	 * Stop the job. Returns a promise that resolves when the job has stopped.
 	 * 
-	 * @returns {Promise<Result<JobEventMap['stop'], BaseError>>}
+	 * @returns {Promise<Result<GM.Job.EventMap['stop'], BaseError>>}
 	 */
 	stop = async () => {
 
@@ -175,7 +190,7 @@ export class IgorJob {
 
 	/**
 	 * @private
-	 * @returns {Promise<Result<JobEventMap['stop'], BaseError>>}
+	 * @returns {Promise<Result<GM.Job.EventMap['stop'], BaseError>>}
 	 */
 	async forceStop() {
 		const forceKillResult = await this.killProcesses(true);

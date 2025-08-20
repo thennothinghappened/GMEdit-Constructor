@@ -13,7 +13,7 @@ import { GMS2RuntimeError } from '../errors/GMS2RuntimeError.js';
  * There's no doubt a way better way of doing this whole setup but
  * hey, it works, and I'm a bit busy to do a better solution now.
  * 
- * @type {JobErrorDescriptor[]}
+ * @type {GM.Job.ErrorDescriptor[]}
  */
 const errorDescriptors = [
 	GMS2RuntimeError,
@@ -26,11 +26,11 @@ const errorDescriptors = [
  * Parse the stdout of an Igor job for errors.
  * 
  * @param {String} stdout 
- * @returns {JobError[]}
+ * @returns {GM.Job.Error[]}
  */
 export function job_parse_stdout(stdout) {
 
-	/** @type {JobError[]} */
+	/** @type {GM.Job.Error[]} */
 	const errors = [];
 
 	let string = stdout;
@@ -61,8 +61,8 @@ export function job_parse_stdout(stdout) {
  * Parse the next {@link JobError} of the given descriptor type, if any more exist.
  * 
  * @param {string} string The string - probably `stdout` or `stderr` - to search in.
- * @param {JobErrorDescriptor} errorDescriptor The descriptor for the error type to search for.
- * @returns {JobError|undefined}
+ * @param {GM.Job.ErrorDescriptor} errorDescriptor The descriptor for the error type to search for.
+ * @returns {GM.Job.Error|undefined}
  */
 function parseJobError(string, errorDescriptor) {
 	

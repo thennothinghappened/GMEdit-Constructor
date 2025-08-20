@@ -23,6 +23,20 @@ export declare global {
 	};
 
 	/**
+	 * Some object which requires special logic *that may take some time* to be properly destroyed
+	 * when it is no longer required.
+	 */
+	interface AsyncDestroyable {
+		/**
+		 * Destroy this object.
+		 * 
+		 * This method is safe to call more than once.
+		 * @returns Promise that resolves when the object has been destroyed successfully.
+		 */
+		async destroyAsync(): Promise<void>;
+	};
+
+	/**
 	 * A method of reporting errors to users.
 	 * 
 	 * The methods here are to be used in cases where the user needs to be informed of some error,
@@ -74,6 +88,7 @@ export declare global {
 			projectPropertiesMenu: ProjectPropertiesMenu;
 		};
 		configTreeUi: ConfigTreeUi;
+		compileController: GM.CompileController;
 		sidebarLogDisplay?: SidebarLogDisplay;
 	};
 
