@@ -30,5 +30,20 @@ test.suite('GMVersion', () => {
 		const result = GMVersion.parse('2024.11.0.0-');
 		assertErr(result);
 	});
+
+	test('comparing beta and stable versions of the same month', () => {
+		const beta = new GMVersion(2024, 400, 3, 2);
+		const stable = new GMVersion(2024, 4, 1, 0);
+
+		assert(stable.compare(beta) > 0);
+	});
+
+	test('comparing two stable versions with different years', () => {
+		assert(new GMVersion(2024, 2, 0, 0).compare(new GMVersion(2023, 2, 0, 0)) > 0);
+	});
+
+	test('comparing two stable versions with different months', () => {
+		assert(new GMVersion(2024, 2, 0, 0).compare(new GMVersion(2024, 4, 0, 0)) < 0);
+	});
 });
 
