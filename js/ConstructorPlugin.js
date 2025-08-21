@@ -21,6 +21,7 @@ import { JobOutputLog } from './ui/job-output/OutputLog.js';
 import { BottomPaneLogDisplay } from './ui/job-output/BottomPaneLogDisplay.js';
 import { SidebarLogDisplay } from './ui/job-output/SidebarLogDisplay.js';
 import { GMRuntimeVersion } from './compiler/GMVersion.js';
+import { GMEditDiskIO } from './utils/io/GMEditDiskIO.js';
 
 /**
  * Name of the plugin 
@@ -94,12 +95,12 @@ export class ConstructorPlugin {
 		nodeModulesProvider.inject(nodeModules);
 
 		const controlPanel = new ControlPanelImpl();
-		igorPaths.__setup__();
 
+		const diskIO = new GMEditDiskIO();
 		const preferences = new Preferences(
 			controlPanel,
-			new GMS2RuntimeIndexerImpl(),
-			new UserIndexerImpl()
+			new GMS2RuntimeIndexerImpl(diskIO),
+			new UserIndexerImpl(diskIO)
 		);
 
 		const preferencesDataPath = nodeModulesProvider.path.join(Electron_App.getPath('userData'), 'GMEdit', 'config', `${PLUGIN_NAME}.json`);

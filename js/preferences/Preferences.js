@@ -3,7 +3,7 @@
  * and runtime list.
  */
 
-import { def_global_build_path, def_runtime_paths, def_user_paths, igor_path_segment } from '../compiler/igor-paths.js';
+import { def_global_build_path, def_runtime_paths, def_user_paths } from '../compiler/igor-paths.js';
 import { readFile } from '../utils/node/file.js';
 import { BaseError, SolvableError } from '../utils/Err.js';
 import { deep_assign } from '../utils/object.js';
