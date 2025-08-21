@@ -68,10 +68,27 @@ export class GMVersion {
 			return Math.sign(year_diff);
 		}
 
-		const month_diff = this.month - other.month;
+		const ourMonth = (this.month >= 100)
+			? this.month / 100
+			: this.month;
+
+		const theirMonth = (other.month >= 100)
+			? other.month / 100
+			: other.month;
+
+		const month_diff = ourMonth - theirMonth;
 
 		if (month_diff !== 0) {
 			return Math.sign(month_diff);
+		}
+		
+		if ((ourMonth !== this.month) !== (theirMonth !== other.month)) {
+			// Tie-breaker: betas of the same month as a stable are less new than the stable version.
+			if (this.month >= 100) {
+				return -1;
+			} else {
+				return 1;
+			}
 		}
 
 		const major_diff = this.revision - other.revision;
