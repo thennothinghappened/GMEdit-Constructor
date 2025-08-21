@@ -1,5 +1,4 @@
 import assert from 'node:assert';
-import { describe } from 'node:test';
 import { inspect } from 'node:util';
 
 /**
