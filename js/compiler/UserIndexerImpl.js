@@ -1,5 +1,4 @@
 import { BaseError } from '../utils/Err.js';
-import { readdir, readFile } from '../utils/node/file.js';
 import { flattenOptionArray, isSome, None, Some } from '../utils/Option.js';
 import { Err, Ok } from '../utils/Result.js';
 
@@ -30,7 +29,7 @@ export class UserIndexerImpl {
 			DEVICES_JSON_FILENAME
 		];
 
-		const dirNameList = await readdir(path);
+		const dirNameList = await this.diskIO.readDir(path);
 		
 		if (!dirNameList.ok) {
 			return Err({ code: 'pathReadError', inner: dirNameList.err });
@@ -78,7 +77,7 @@ export class UserIndexerImpl {
 					forPlatform: {}
 				};
 
-				const devicesFile = await readFile(devices.path);
+				const devicesFile = await this.diskIO.readFile(devices.path);
 
 				if (devicesFile.ok) {
 					try {

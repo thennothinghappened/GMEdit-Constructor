@@ -21,7 +21,7 @@ import { JobOutputLog } from './ui/job-output/OutputLog.js';
 import { BottomPaneLogDisplay } from './ui/job-output/BottomPaneLogDisplay.js';
 import { SidebarLogDisplay } from './ui/job-output/SidebarLogDisplay.js';
 import { GMRuntimeVersion } from './compiler/GMVersion.js';
-import { GMEditDiskIO } from './utils/io/GMEditDiskIO.js';
+import { NodeJSDiskIO } from './utils/io/NodeJSDiskIO.js';
 
 /**
  * Name of the plugin 
@@ -96,11 +96,12 @@ export class ConstructorPlugin {
 
 		const controlPanel = new ControlPanelImpl();
 
-		const diskIO = new GMEditDiskIO(nodeModulesProvider.path.join);
+		const diskIO = new NodeJSDiskIO(nodeModulesProvider.path.join, Electron_FS);
 		const preferences = new Preferences(
 			controlPanel,
 			new GMS2RuntimeIndexerImpl(diskIO),
-			new UserIndexerImpl(diskIO)
+			new UserIndexerImpl(diskIO),
+			diskIO
 		);
 
 		const preferencesDataPath = nodeModulesProvider.path.join(Electron_App.getPath('userData'), 'GMEdit', 'config', `${PLUGIN_NAME}.json`);
@@ -115,7 +116,7 @@ export class ConstructorPlugin {
 
 		controlPanel.setPreferencesMenu(new PreferencesMenu(preferences));
 
-		return Ok(new ConstructorPlugin(preferences, controlPanel, pluginPath));
+		return Ok(new ConstructorPlugin(preferences, controlPanel, diskIO, pluginPath));
 	}
 
 	/**
@@ -125,11 +126,15 @@ export class ConstructorPlugin {
 	 * @private
 	 * @param {Preferences} preferences 
 	 * @param {ControlPanel} controlPanel
+	 * @param {DiskIO} diskIO 
 	 * @param {string} pluginPath Directory that this plugin loaded from.
 	 */
-	constructor(preferences, controlPanel, pluginPath) {
+	constructor(preferences, controlPanel, diskIO, pluginPath) {
 		this.preferences = preferences;
 		this.controlPanel = controlPanel;
+
+		/** @private */
+		this.diskIO = diskIO;
 
 		this.hamburgerOptions = new HamburgerOptions({
 			showControlPanel: this.showControlPanel,
@@ -301,7 +306,7 @@ export class ConstructorPlugin {
 			this.preferences
 		));
 
-		const compileController = new CompileControllerImpl(project);
+		const compileController = new CompileControllerImpl(project, this.diskIO);
 
 		this.currentProjectComponents = {
 			project,

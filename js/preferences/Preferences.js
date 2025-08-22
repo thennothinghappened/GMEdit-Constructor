@@ -4,7 +4,6 @@
  */
 
 import { def_global_build_path, def_runtime_paths, def_user_paths } from '../compiler/igor-paths.js';
-import { readFile } from '../utils/node/file.js';
 import { BaseError, SolvableError } from '../utils/Err.js';
 import { deep_assign } from '../utils/object.js';
 import { GMRuntimeVersion } from '../compiler/GMVersion.js';
@@ -151,11 +150,15 @@ export class Preferences {
 	 * @param {ProblemLogger} problemLogger
 	 * @param {GMS2.RuntimeIndexer} gms2RuntimeIndexer
 	 * @param {GM.UserIndexer} userIndexer
+	 * @param {DiskIO} diskIO 
 	 */
-	constructor(problemLogger, gms2RuntimeIndexer, userIndexer) {
+	constructor(problemLogger, gms2RuntimeIndexer, userIndexer, diskIO) {
 		this.problemLogger = problemLogger;
 		this.gms2RuntimeIndexer = gms2RuntimeIndexer;
 		this.userIndexer = userIndexer;
+
+		/** @private */
+		this.diskIO = diskIO;
 	}
 
 	/**
@@ -171,7 +174,13 @@ export class Preferences {
 	 */
 	save() {
 		if (this.dataPath !== undefined) {
-			Electron_FS.writeFileSync(this.dataPath, JSON.stringify(this.prefs));
+			const result = this.diskIO.writeFileSync(this.dataPath, JSON.stringify(this.prefs));
+
+			if (result.ok) {
+				return;
+			}
+
+			this.problemLogger.error('Failed to write preferences to disk', result.err);
 		}
 	}
 
@@ -199,17 +208,19 @@ export class Preferences {
 			`)));
 		}
 		
-		const prefsFile = await readFile(dataPath);
+		const prefsFile = await this.diskIO.readFile(dataPath);
 
 		if (!prefsFile.ok) {
-			try {
-				Electron_FS.writeFileSync(dataPath, JSON.stringify(this.prefs));
-				return this.load(dataPath);
-			} catch (err) {
-				return Err(new BaseError(docString(`
-					An unexpected error occurred in writing the default preferences file to disk.
-				`), err));
+			const ioResult = this.diskIO.writeFileSync(dataPath, JSON.stringify(this.prefs));
+
+			if (!ioResult.ok) {
+				return Err(new BaseError(
+					'An unexpected error occurred in writing the default preferences file to disk.',
+					ioResult.err
+				));
 			}
+
+			return this.load(dataPath);
 		}
 
 		/** @type {Partial<TPreferences.Data>} */

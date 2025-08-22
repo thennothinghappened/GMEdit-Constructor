@@ -2,10 +2,11 @@
 export type MockDiskNode = MockDiskFile | MockDiskDirectory;
 
 export type MockDiskFile = {
-	type: 'file'
+	type: 'file';
+	data: string;
 };
 
 export type MockDiskDirectory = {
-	type: 'directory',
+	type: 'directory';
 	entries: Partial<Record<string, MockDiskNode>>;
 }

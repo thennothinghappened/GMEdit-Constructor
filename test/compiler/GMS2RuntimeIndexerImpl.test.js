@@ -1,5 +1,5 @@
 import test from 'node:test';
-import { MockDiskIO } from '../utils/MockDiskIO.js';
+import { MockDiskIO } from '../utils/io/MockDiskIO.js';
 import { GMS2RuntimeIndexerImpl } from '../../js/compiler/GMS2RuntimeIndexerImpl.js';
 import { assertOk } from '../index.js';
 import assert from 'node:assert';
