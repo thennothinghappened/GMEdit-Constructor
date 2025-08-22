@@ -20,5 +20,9 @@ export function assertErr(result) {
 		return;
 	}
 
-	return assert.fail(`The result was not Err, got Ok(${inspect(result.data)})`);
+	if ('data' in result) {
+		return assert.fail(`The result was not Err, got Ok(${inspect(result.data)})`);
+	} else {
+		return assert.fail(`The result was not Err, got Ok(void)`);
+	}
 }
