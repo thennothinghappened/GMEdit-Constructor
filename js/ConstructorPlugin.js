@@ -96,7 +96,7 @@ export class ConstructorPlugin {
 
 		const controlPanel = new ControlPanelImpl();
 
-		const diskIO = new NodeJSDiskIO(nodeModulesProvider.path.join, Electron_FS);
+		const diskIO = new NodeJSDiskIO(nodeModules.path.join, Electron_FS);
 		const preferences = new Preferences(
 			controlPanel,
 			new GMS2RuntimeIndexerImpl(diskIO),
@@ -104,7 +104,7 @@ export class ConstructorPlugin {
 			diskIO
 		);
 
-		const preferencesDataPath = nodeModulesProvider.path.join(Electron_App.getPath('userData'), 'GMEdit', 'config', `${PLUGIN_NAME}.json`);
+		const preferencesDataPath = diskIO.joinPath(Electron_App.getPath('userData'), 'GMEdit', 'config', `${PLUGIN_NAME}.json`);
 		const preferencesLoadResult = await preferences.load(preferencesDataPath);
 
 		if (!preferencesLoadResult.ok) {
@@ -618,10 +618,10 @@ export class ConstructorPlugin {
 	getBuildDir(project) {
 		
 		if (this.preferences.useGlobalBuildPath) {
-			return nodeModulesProvider.path.join(this.preferences.globalBuildPath, project.displayName);
+			return this.diskIO.joinPath(this.preferences.globalBuildPath, project.displayName);
 		}
 
-		return nodeModulesProvider.path.join(project.dir, 'build');
+		return this.diskIO.joinPath(project.dir, 'build');
 
 	}
 
