@@ -96,7 +96,7 @@ export class ConstructorPlugin {
 
 		const controlPanel = new ControlPanelImpl();
 
-		const diskIO = new GMEditDiskIO();
+		const diskIO = new GMEditDiskIO(nodeModulesProvider.path.join);
 		const preferences = new Preferences(
 			controlPanel,
 			new GMS2RuntimeIndexerImpl(diskIO),

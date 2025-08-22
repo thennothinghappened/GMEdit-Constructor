@@ -1,4 +1,3 @@
-import path from 'node:path';
 import { BaseError } from '../Err.js';
 import { Err, Ok } from '../Result.js';
 
@@ -8,6 +7,14 @@ import { Err, Ok } from '../Result.js';
  * @implements {DiskIO}
  */
 export class GMEditDiskIO {
+	/**
+	 * @param {import('node:path').join} nodeJoinPath 
+	 */
+	constructor(nodeJoinPath) {
+		/** @private */
+		this.nodeJoinPath = nodeJoinPath;
+	}
+
 	/**
 	 * @type {DiskIO['isDirectorySync']}
 	 */
@@ -46,6 +53,6 @@ export class GMEditDiskIO {
 	 * @type {DiskIO['joinPath']}
 	 */
 	joinPath(...paths) {
-		return path.join(...paths);
+		return this.nodeJoinPath(...paths);
 	}
 }
