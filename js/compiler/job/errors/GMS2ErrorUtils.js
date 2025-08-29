@@ -30,6 +30,26 @@ export class GMS2ErrorUtils {
 
 			case 'Script':
 				if (!rest.includes('@')) {
+					// Try looking up the identifier as a script's top-level function via GMEdit's
+					// linter.
+					const apiEntry = GmlAPI.gmlLookup[rest];
+
+					if (apiEntry !== undefined) {
+						// TODO: is there a nice way in GMEdit to get the script *name*, not path??
+						const scriptName = apiEntry.path
+							.slice(apiEntry.path.lastIndexOf('/') + 1)
+							.replace('.gml', '');
+
+						return Ok({
+							type: 'Script',
+							name: rest,
+							definedIn: /** @type {GMS2.ErrorUtils.ScriptInfo.ScriptAsset} */ ({
+								type: 'GlobalScript',
+								name: scriptName
+							})
+						});
+					}
+
 					return Err(new BaseError('TODO: best-effort parsing of LTS-style script identifiers'));
 				}
 

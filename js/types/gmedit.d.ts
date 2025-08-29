@@ -578,6 +578,13 @@ export declare global {
 			gmlFile: GmlFile;
 		}
 
+		type GmlLookup = {
+			path: string;
+			sub: HaxeNull<string>;
+			row: number;
+			col: HaxeNull<number>;
+		};
+
 		const aceTools: AceTools;
 		const sidebar: typeof Sidebar;
 	
@@ -586,6 +593,15 @@ export declare global {
 		const off: <K extends keyof PluginEventMap>(type: K, listener: (e: PluginEventMap[K]) => void) => void;
 
 	};
+
+	/**
+	 * Stores current API state and project-specific data.
+	 * @author YellowAfterlife
+	 */
+	class GmlAPI {
+		/** Used for F12/middle-click */
+		static readonly gmlLookup: Record<string, GMEdit.GmlLookup|undefined>;
+	}
 	
 	const $gmedit: {
 		'ui.Preferences': typeof GMEdit.Preferences;
