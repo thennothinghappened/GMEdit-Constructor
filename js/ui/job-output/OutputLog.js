@@ -204,20 +204,27 @@ export class JobOutputLog {
 		}
 
 		const state = this.job.getState();
+		
+		/** @type {string|undefined} */
+		let status = undefined;
 
 		switch (state.status) {
 			case 'running': break;
-			case 'stopping': title +=  ': Stopping'; break;
-			case 'stopped': title += `: ${state.stopType}`; break;
+			case 'stopping': status =  'Stopping'; break;
+			case 'stopped': status = state.stopType; break;
 		}
 
 		// TODO: Format time nicely here :)
 		const duration = ((Date.now() - this.job.startTime.getTime()) / 1000).toString();
 
 		if (this.display.supportsTitle()) {
-			this.display.setTitle(title);
+			this.display.setTitle(title, status);
 			this.jobNameHeading.textContent = `${duration} seconds`;
 		} else {
+			if (status !== undefined) {
+				title += `: ${status}`;
+			}
+
 			this.jobNameHeading.textContent = `${title} (${duration} seconds)`;
 		}
 	}

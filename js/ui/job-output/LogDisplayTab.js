@@ -120,8 +120,8 @@ export class OutputLogTab extends ConstructorTab {
 	/**
 	 * @type {UI.OutputLogDisplay['setTitle']}
 	 */
-	setTitle(title) {
-		GmlFileUtils.rename(this.file, title);
+	setTitle(title, status) {
+		GmlFileUtils.rename(this.file, (status === undefined) ? title : `${title}: ${status}`);
 	}
 
 	/**

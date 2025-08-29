@@ -89,7 +89,7 @@ export class SidebarLogDisplay {
 	/**
 	 * @type {UI.OutputLogDisplay['setTitle']}
 	 */
-	setTitle(_title) {}
+	setTitle(_title, _status) {}
 
 	/**
 	 * @type {UI.OutputLogDisplay['addError']}

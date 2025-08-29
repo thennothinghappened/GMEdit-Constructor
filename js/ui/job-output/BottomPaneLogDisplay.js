@@ -29,6 +29,11 @@ export class BottomPaneLogDisplay {
 	bottomPane;
 
 	/**
+	 * @private
+	 */
+	title = '';
+
+	/**
 	 * @param {BottomPane} bottomPane
 	 */
 	constructor(bottomPane) {
@@ -104,12 +109,14 @@ export class BottomPaneLogDisplay {
 	/**
 	 * @type {UI.OutputLogDisplay['setTitle']}
 	 */
-	setTitle(title) {
-		this.bottomPane.renameTab(this.logTab, title);
+	setTitle(title, status) {
+		this.bottomPane.renameTab(this.logTab, (status === undefined) ? title : `${title}: ${status}`);
 
 		if (this.errorsTab !== undefined) {
 			this.bottomPane.renameTab(this.errorsTab, `${title} - Errors`);
 		}
+
+		this.title = title;
 	}
 
 	/**
@@ -117,7 +124,7 @@ export class BottomPaneLogDisplay {
 	 */
 	addError(error) {
 		if (this.errorsTab === undefined) {
-			this.errorsTab = this.bottomPane.openTab(`${this.logTab.name} - Errors`, document.createElement('div'));
+			this.errorsTab = this.bottomPane.openTab(`${this.title}: Errors`, document.createElement('div'));
 			this.errorsTab.content.classList.add('gm-constructor-tab', 'gm-constructor-viewer-bottom-pane', 'gm-constructor-viewer-errors', 'popout-window');
 
 			this.errorsTab.events.on('close', () => {

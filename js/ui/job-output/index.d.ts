@@ -30,14 +30,14 @@ export declare global {
 			bringToForeground();
 
 			/**
-			 * Get whether this display can show a custom title.
+			 * Get whether this display can show a custom title
 			 */
 			supportsTitle(): boolean;
 
 			/**
-			 * Set the title of the display.
+			 * Set the title of the display, and a word describing the current status, if any.
 			 */
-			setTitle(title: string);
+			setTitle(title: string, status?: string);
 
 			/**
 			 * Add an error to the error display.
