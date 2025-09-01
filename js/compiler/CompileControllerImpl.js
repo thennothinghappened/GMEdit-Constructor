@@ -6,11 +6,9 @@
 import { IgorJob } from './job/IgorJob.js';
 import { HOST_PLATFORM, output_blob_exts } from './igor-paths.js';
 import { InvalidStateErr, SolvableError } from '../utils/Err.js';
-import { child_process, path } from '../utils/node/node-import.js';
+import { child_process } from '../utils/node/node-import.js';
 import { Err, Ok } from '../utils/Result.js';
-import { mkdir, readdir } from '../utils/node/file.js';
 import { docString } from '../utils/StringUtils.js';
-import { GMVersion } from './GMVersion.js';
 
 /**
  * Real implementation of the compile controller, spawning Igor tasks.
@@ -26,16 +24,15 @@ export class CompileControllerImpl {
 	jobs = [];
 
 	/**
-	 * @type {GMEdit.Project}
-	 * @private
-	 */
-	project;
-
-	/**
 	 * @param {GMEdit.Project} project
+	 * @param {DiskIO} diskIO 
 	 */
-	constructor(project) {
+	constructor(project, diskIO) {
+		/** @private */
 		this.project = project;
+
+		/** @private */
+		this.diskIO = diskIO;
 	}
 
 	async destroyAsync() {
@@ -68,11 +65,11 @@ export class CompileControllerImpl {
 		}
 
 		const idString = id.toString();
-		settings.buildPath = path.join(settings.buildPath, settings.platform, idString);
+		settings.buildPath = this.diskIO.joinPath(settings.buildPath, settings.platform, idString);
 
-		if (!(await readdir(settings.buildPath)).ok) {
+		if (!(await this.diskIO.readDir(settings.buildPath)).ok) {
 			
-			const res = await mkdir(settings.buildPath, true);
+			const res = await this.diskIO.createDir(settings.buildPath, true);
 			
 			if (!res.ok) {
 				return Err(new SolvableError(
@@ -150,8 +147,8 @@ export class CompileControllerImpl {
 			'/config=' + settings.configName,
 			'/rp=' + runtime_path,
 			'/runtime=' + settings.runtimeType,
-			'/cache=' + path.join(settings.buildPath, 'cache'),
-			'/of=' + path.join(settings.buildPath, 'output', `${projectName}.${blob_extension}`),
+			'/cache=' + this.diskIO.joinPath(settings.buildPath, 'cache'),
+			'/of=' + this.diskIO.joinPath(settings.buildPath, 'output', `${projectName}.${blob_extension}`),
 			`/uf=${user.fullPath}`,
 			'/v'
 		];

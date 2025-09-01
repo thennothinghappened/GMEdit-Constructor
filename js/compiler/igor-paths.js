@@ -1,6 +1,4 @@
 
-import * as node from '../utils/node/node-import.js';
-
 const windowsAppData = process.env?.AppData ?? 'C:\\Users\\PLEASE_SPECIFY_USERNAME\\AppData\\Roaming';
 const windowsLocalAppData = process.env?.LocalAppData ?? 'C:\\Users\\PLEASE_SPECIFY_USERNAME\\AppData\\Local';
 const linuxConfigPath = process.env.XDG_CONFIG_HOME ?? process.env.HOME + '/.config';
@@ -84,42 +82,27 @@ export const output_blob_exts = {
 	OperaGX: 'unx'
 };
 
+const IGOR_PLATFORM = igor_platform_map[process.platform];
+
 /**
  * Default paths to the runtimes for the host OS.
  */
-export const def_runtime_paths = igor_platform_map[process.platform].default_runtime_paths;
+export const def_runtime_paths = IGOR_PLATFORM.default_runtime_paths;
 
 /**
  * Default paths to the userdata folders for the host OS.
  */
-export const def_user_paths = igor_platform_map[process.platform].default_user_paths;
+export const def_user_paths = IGOR_PLATFORM.default_user_paths;
 
 /**
  * Default path to the global build directory.
  */
-export const def_global_build_path = igor_platform_map[process.platform].default_global_build_path;
+export const def_global_build_path = IGOR_PLATFORM.default_global_build_path;
 
 
 /**
  * {@link IgorPlatform} to native build for the host OS. 
  */
-export const HOST_PLATFORM = igor_platform_map[process.platform].user_platform;
-
-/**
- * The local-to-runtime Igor path for the current platform & architecture.
- * @type {string}
- */
-export let igor_path_segment;
-
-/**
- * Called when the plugin is loading.
- */
-export function __setup__() {
-	igor_path_segment = node.path.join(
-		'bin',
-		'igor',
-		igor_platform_map[process.platform].platform_path_name,
-		process.arch,
-		`Igor${igor_platform_map[process.platform].platform_executable_extension}`
-	);
-}
+export const HOST_PLATFORM = IGOR_PLATFORM.user_platform;
+export const HOST_PLATFORM_EXECUTABLE_EXTENSION = IGOR_PLATFORM.platform_executable_extension;
+export const HOST_PLATFORM_PLATFORM_PATH_NAME = IGOR_PLATFORM.platform_path_name;

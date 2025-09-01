@@ -21,6 +21,7 @@ import { JobOutputLog } from './ui/job-output/OutputLog.js';
 import { BottomPaneLogDisplay } from './ui/job-output/BottomPaneLogDisplay.js';
 import { SidebarLogDisplay } from './ui/job-output/SidebarLogDisplay.js';
 import { GMRuntimeVersion } from './compiler/GMVersion.js';
+import { NodeJSDiskIO } from './utils/io/NodeJSDiskIO.js';
 
 /**
  * Name of the plugin 
@@ -94,15 +95,16 @@ export class ConstructorPlugin {
 		nodeModulesProvider.inject(nodeModules);
 
 		const controlPanel = new ControlPanelImpl();
-		igorPaths.__setup__();
 
+		const diskIO = new NodeJSDiskIO(nodeModules.path.join, Electron_FS);
 		const preferences = new Preferences(
 			controlPanel,
-			new GMS2RuntimeIndexerImpl(),
-			new UserIndexerImpl()
+			new GMS2RuntimeIndexerImpl(diskIO),
+			new UserIndexerImpl(diskIO),
+			diskIO
 		);
 
-		const preferencesDataPath = nodeModulesProvider.path.join(Electron_App.getPath('userData'), 'GMEdit', 'config', `${PLUGIN_NAME}.json`);
+		const preferencesDataPath = diskIO.joinPath(Electron_App.getPath('userData'), 'GMEdit', 'config', `${PLUGIN_NAME}.json`);
 		const preferencesLoadResult = await preferences.load(preferencesDataPath);
 
 		if (!preferencesLoadResult.ok) {
@@ -114,7 +116,7 @@ export class ConstructorPlugin {
 
 		controlPanel.setPreferencesMenu(new PreferencesMenu(preferences));
 
-		return Ok(new ConstructorPlugin(preferences, controlPanel, pluginPath));
+		return Ok(new ConstructorPlugin(preferences, controlPanel, diskIO, pluginPath));
 	}
 
 	/**
@@ -124,11 +126,15 @@ export class ConstructorPlugin {
 	 * @private
 	 * @param {Preferences} preferences 
 	 * @param {ControlPanel} controlPanel
+	 * @param {DiskIO} diskIO 
 	 * @param {string} pluginPath Directory that this plugin loaded from.
 	 */
-	constructor(preferences, controlPanel, pluginPath) {
+	constructor(preferences, controlPanel, diskIO, pluginPath) {
 		this.preferences = preferences;
 		this.controlPanel = controlPanel;
+
+		/** @private */
+		this.diskIO = diskIO;
 
 		this.hamburgerOptions = new HamburgerOptions({
 			showControlPanel: this.showControlPanel,
@@ -300,7 +306,7 @@ export class ConstructorPlugin {
 			this.preferences
 		));
 
-		const compileController = new CompileControllerImpl(project);
+		const compileController = new CompileControllerImpl(project, this.diskIO);
 
 		this.currentProjectComponents = {
 			project,
@@ -612,10 +618,10 @@ export class ConstructorPlugin {
 	getBuildDir(project) {
 		
 		if (this.preferences.useGlobalBuildPath) {
-			return nodeModulesProvider.path.join(this.preferences.globalBuildPath, project.displayName);
+			return this.diskIO.joinPath(this.preferences.globalBuildPath, project.displayName);
 		}
 
-		return nodeModulesProvider.path.join(project.dir, 'build');
+		return this.diskIO.joinPath(project.dir, 'build');
 
 	}
 

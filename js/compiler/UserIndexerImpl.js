@@ -1,6 +1,4 @@
 import { BaseError } from '../utils/Err.js';
-import { readdir, readFile } from '../utils/node/file.js';
-import * as node from '../utils/node/node-import.js';
 import { flattenOptionArray, isSome, None, Some } from '../utils/Option.js';
 import { Err, Ok } from '../utils/Result.js';
 
@@ -8,6 +6,14 @@ import { Err, Ok } from '../utils/Result.js';
  * @implements {GM.UserIndexer}
  */
 export class UserIndexerImpl {
+
+	/**
+	 * @param {DiskIO} diskIO
+	 */
+	constructor(diskIO) {
+		/** @private */
+		this.diskIO = diskIO;
+	}
 
 	/**
 	 * @type {GM.UserIndexer['getUsers']}
@@ -23,7 +29,7 @@ export class UserIndexerImpl {
 			DEVICES_JSON_FILENAME
 		];
 
-		const dirNameList = await readdir(path);
+		const dirNameList = await this.diskIO.readDir(path);
 		
 		if (!dirNameList.ok) {
 			return Err({ code: 'pathReadError', inner: dirNameList.err });
@@ -35,11 +41,11 @@ export class UserIndexerImpl {
 		/** @type {GM.User[]} */
 		const users = (await Promise.all(dirNameList.data.map(async directoryName => {
 
-				const fullPath = node.path.join(path, directoryName);
+				const fullPath = this.diskIO.joinPath(path, directoryName);
 				let discardEntry = true;
 
 				for (const fileName of MAYBE_USER_DIR_CONTENTS) {
-					if (Electron_FS.existsSync(node.path.join(fullPath, fileName))) {
+					if (this.diskIO.existsSync(this.diskIO.joinPath(fullPath, fileName))) {
 						discardEntry = false;
 						break;
 					}
@@ -67,11 +73,11 @@ export class UserIndexerImpl {
 
 				/** @type {GM.DevicesData} */
 				const devices = {
-					path: node.path.join(fullPath, DEVICES_JSON_FILENAME),
+					path: this.diskIO.joinPath(fullPath, DEVICES_JSON_FILENAME),
 					forPlatform: {}
 				};
 
-				const devicesFile = await readFile(devices.path);
+				const devicesFile = await this.diskIO.readFile(devices.path);
 
 				if (devicesFile.ok) {
 					try {

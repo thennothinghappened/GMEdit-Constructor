@@ -1,20 +1,38 @@
-import { readdir } from '../utils/node/file.js';
-import * as nodeModulesProvider from '../utils/node/node-import.js';
 import { Err, Ok } from '../utils/Result.js';
 import { GMRuntimeVersion } from './GMVersion.js';
-import { igor_path_segment } from './igor-paths.js';
-
+import { HOST_PLATFORM_EXECUTABLE_EXTENSION, HOST_PLATFORM_PLATFORM_PATH_NAME } from './igor-paths.js';
 /**
  * @implements {GMS2.RuntimeIndexer}
  */
 export class GMS2RuntimeIndexerImpl {
 
 	/**
+	 * @param {DiskIO} diskIO
+	 */
+	constructor(diskIO) {
+		/** @private */
+		this.diskIO = diskIO;
+
+		/**
+		 * @private
+		 * @readonly
+		 */
+		this.igorPathSegment = this.diskIO.joinPath(
+			'bin',
+			'igor',
+			HOST_PLATFORM_PLATFORM_PATH_NAME,
+			process.arch,
+			`Igor${HOST_PLATFORM_EXECUTABLE_EXTENSION}`
+		);
+	}
+
+	/**
 	 * @type {GMS2.RuntimeIndexer['getRuntimes']}
 	 */
 	async getRuntimes(path) {
 
-		const dirContents = await readdir(path);
+		const dirContents = await this.diskIO.readDir(path);
+		console.log(dirContents)
 		
 		if (!dirContents.ok) {
 			return Err({ code: 'pathReadError', inner: dirContents.err });
@@ -24,11 +42,11 @@ export class GMS2RuntimeIndexerImpl {
 		const invalidRuntimes = [];
 
 		const runtimes = dirContents.data
-			.map(dirname => ({ dirname, path: nodeModulesProvider.path.join(path, dirname) }))
-			.filter(({ path }) => Electron_FS.lstatSync(path).isDirectory())
+			.map(dirname => ({ dirname, path: this.diskIO.joinPath(path, dirname) }))
+			.filter(({ path }) => this.diskIO.isDirectorySync(path))
 			.map(({ dirname, path }) => {
 
-				const igorPath = nodeModulesProvider.path.join(path, igor_path_segment);
+				const igorPath = this.diskIO.joinPath(path, this.igorPathSegment);
 				const version = GMRuntimeVersion.parse(dirname);
 
 				if (!version.ok) {
@@ -49,7 +67,7 @@ export class GMS2RuntimeIndexerImpl {
 
 			})
 			.filter(runtime => runtime !== undefined)
-			.filter(runtime => Electron_FS.existsSync(runtime.igorPath))
+			.filter(runtime => this.diskIO.existsSync(runtime.igorPath))
 			.sort((a, b) => b.version.compare(a.version));
 
 		return Ok({
