@@ -6,7 +6,7 @@ stable option to the older [builder](<https://github.com/YAL-GMEdit/builder>), a
 compilation toolchain instead of invoking the asset compiler directly. If you are working on a
 codebase that must remain on a legacy (<2.3) version of GameMaker, use builder instead.
 
-Constructor can compile for the current build target (your OS), web targets (HTML5 and WASM),
+Constructor can compile for the current build target (your OS), web targets (HTML5 and WASM), Android,
 and can switch between build configs.
 
 ## Features
