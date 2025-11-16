@@ -303,7 +303,8 @@ export class ConstructorPlugin {
 
 		this.controlPanel.setProjectPropertiesMenu(new ProjectPropertiesMenu(
 			projectProperties,
-			this.preferences
+			this.preferences,
+			this.controlPanel
 		));
 
 		const compileController = new CompileControllerImpl(project, this.diskIO);
@@ -395,7 +396,8 @@ export class ConstructorPlugin {
 
 		const projectPropertiesMenu = new ProjectPropertiesMenu(
 			this.currentProjectComponents.projectProperties,
-			this.preferences
+			this.preferences,
+			this.controlPanel
 		);
 
 		const group = UIPreferences.addGroup(target, PLUGIN_NAME);

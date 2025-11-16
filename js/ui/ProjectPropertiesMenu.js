@@ -7,6 +7,7 @@ import { GMRuntimeVersion } from '../compiler/GMVersion.js';
 import * as ui from './ui-wrappers.js';
 import { docString } from '../utils/StringUtils.js';
 import { HOST_PLATFORM } from '../compiler/igor-paths.js';
+import { SolvableError } from '../utils/Err.js';
 
 /**
  * @type {UI.Dropdown.NormalizedEntry<undefined>}
@@ -86,11 +87,15 @@ export class ProjectPropertiesMenu {
 	/**
 	 * @param {ProjectProperties} properties
 	 * @param {Preferences} preferences 
+	 * @param {ProblemLogger} logger
 	 */
-	constructor(properties, preferences) {
+	constructor(properties, preferences, logger) {
 
 		this.properties = properties;
 		this.preferences = preferences;
+
+		/** @private */
+		this.logger = logger;
 
 		this.element.appendChild(ui.em(
 			`Configure behaviour for ${properties.project.displayName}.`
@@ -311,12 +316,9 @@ export class ProjectPropertiesMenu {
 
 		}
 
-		const entries = this.preferences.getRuntimes(channel)?.map(runtime => ({
-			label: runtime.version.toString(),
-			value: runtime.version
-		}));
+		const installedRuntimes = this.preferences.getRuntimes(channel);
 
-		if (entries === undefined) {
+		if (installedRuntimes === undefined) {
 
 			this.runtimeVersionDropdown.setOptions([{
 				label: 'None installed',
@@ -327,6 +329,27 @@ export class ProjectPropertiesMenu {
 			return;
 
 		}
+
+		const entries = installedRuntimes.map(runtime => ({
+			label: runtime.version.toString(),
+			value: runtime.version
+		}));
+
+		let current = this.properties.runtimeVersion;
+
+		if (current && installedRuntimes.every(runtime => runtime.version !== current)) {
+			this.logger.error('Chosen runtime unavailable', new SolvableError(
+				docString(`
+				The runtime you've chosen to compile with (${current}) is not available. You will
+				not be able to compile the project.
+				`),
+				docString(`
+				Install it, or select a different runtime from the option list.
+				`)
+			));
+
+			current = undefined;
+		}
 		
 		this.runtimeVersionDropdown.setOptions(
 			[
@@ -336,7 +359,7 @@ export class ProjectPropertiesMenu {
 				},
 				...entries
 			],
-			this.properties.runtimeVersion
+			current
 		);
 
 		this.runtimeVersionDropdown.enable(true);
