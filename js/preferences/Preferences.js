@@ -3,7 +3,7 @@
  * and runtime list.
  */
 
-import { def_global_build_path, def_runtime_paths, def_user_paths } from '../compiler/igor-paths.js';
+import { def_global_build_path, def_runtime_paths, def_user_paths, IGOR_PLATFORM_INFO } from '../compiler/igor-paths.js';
 import { BaseError, SolvableError } from '../utils/Err.js';
 import { deep_assign } from '../utils/object.js';
 import { GMRuntimeVersion } from '../compiler/GMVersion.js';
@@ -28,15 +28,18 @@ const PREFS_DEFAULT = {
 		type_opts: {
 			Stable: {
 				search_path: def_runtime_paths.Stable,
-				users_path: def_user_paths.Stable
+				users_path: def_user_paths.Stable,
+				prefabsPath: IGOR_PLATFORM_INFO.defaultPrefabsPaths.Stable,
 			},
 			Beta: {
 				search_path: def_runtime_paths.Beta,
-				users_path: def_user_paths.Beta
+				users_path: def_user_paths.Beta,
+				prefabsPath: IGOR_PLATFORM_INFO.defaultPrefabsPaths.Beta,
 			},
 			LTS: {
 				search_path: def_runtime_paths.LTS,
-				users_path: def_user_paths.LTS
+				users_path: def_user_paths.LTS,
+				prefabsPath: IGOR_PLATFORM_INFO.defaultPrefabsPaths.LTS,
 			}
 		}
 	},
@@ -73,7 +76,8 @@ export class Preferences {
 		'setUseGlobalBuildPath',
 		'setGlobalBuildPath',
 		'setShowTooltipHints',
-		'setOutputPosition'
+		'setOutputPosition',
+		'setPrefabsPath',
 	]);
 
 	/**
@@ -533,6 +537,29 @@ export class Preferences {
 	 */
 	getUserSearchPath(channel) {
 		return this.prefs.runtime_opts.type_opts[channel].users_path;
+	}
+
+	/**
+	 * Get the prefab installation path.
+	 * 
+	 * @param {GM.ReleaseChannel} channel
+	 * @returns {string}
+	 */
+	getPrefabsPath(channel) {
+		return this.prefs.runtime_opts.type_opts[channel].prefabsPath;
+	}
+
+	/**
+	 * Set the prefab installation path.
+	 * 
+	 * @param {GM.ReleaseChannel} channel
+	 * @param {string} prefabsPath
+	 */
+	setPrefabsPath(channel, prefabsPath) {
+		this.prefs.runtime_opts.type_opts[channel].prefabsPath = prefabsPath;
+		this.save();
+
+		this.eventEmitter.emit('setPrefabsPath', { channel, prefabsPath });
 	}
 
 	/**

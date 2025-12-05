@@ -87,6 +87,22 @@ export declare global {
 			platform: GM.SupportedPlatform;
 
 			/**
+			 * The user whose license we'll provide.
+			 */
+			user: GM.User;
+
+			/**
+			 * The runtime to use to compile the project.
+			 */
+			runtime: GMS2.RuntimeInfo;
+
+			/**
+			 * An additional location to search for prefabs, besides the `/prefabs` folder in the
+			 * project itself.
+			 */
+			prefabsPath?: string;
+
+			/**
 			 * A remote device to build on.
 			 */
 			device?: RemoteDevice;
@@ -159,6 +175,11 @@ export declare global {
 			default_user_paths: {
 				[key in GM.ReleaseChannel]: string
 			};
+
+			/**
+			 * Default directories for the prefab libraries to pass to the compiler.
+			 */
+			defaultPrefabsPaths: Record<GM.ReleaseChannel, string>;
 
 			/** Default path to the global build directory. */
 			default_global_build_path: string;

@@ -420,23 +420,23 @@ export class ConstructorPlugin {
 	async executeTask(task, components) {
 		const { project, projectProperties, compileController } = components;
 
-		/** @type {GMS2.RuntimeInfo|undefined} */
-		let runtime = undefined;
+		/** @type {GMS2.RuntimeInfo} */
+		let runtime;
 
 		/** @type {GM.ReleaseChannel} */
 		let channel;
 
-		if (projectProperties.runtimeVersion !== undefined) {
+		const chosenVersion = projectProperties.getRuntimeVersion();
 
+		if (chosenVersion !== undefined) {
 			channel = /** @type {GM.ReleaseChannel} */ (projectProperties.runtimeReleaseChannel);
-			const result = this.preferences.getRuntimeInfo(channel, projectProperties.runtimeVersion);
+			const result = this.preferences.getRuntimeInfo(channel, chosenVersion);
 	
 			if (!result.ok) {
 				this.controlPanel.error('Project\'s selected Runtime is not installed.', new SolvableError(
 					docString(`
-						This project specifies the runtime version
-						'${projectProperties.runtimeVersion}', but this version doesn't appear to be
-						installed!
+						This project specifies the runtime version '${chosenVersion}', but this
+						version doesn't appear to be installed!
 					`),
 					docString(`
 						Install the specified runtime in the IDE and reload GMEdit if this is the
@@ -450,11 +450,7 @@ export class ConstructorPlugin {
 			}
 
 			runtime = result.data;
-
-		}
-
-		if (runtime === undefined) {
-
+		} else {
 			const result = GMRuntimeVersion.findCompatibleRuntime(
 				this.preferences,
 				projectProperties.projectVersion,
@@ -528,40 +524,23 @@ export class ConstructorPlugin {
 
 			runtime = result.data.runtime;
 			channel = result.data.channel;
-			
 		}
 
-		// @ts-expect-error Channel is not used before assignment. Both cases set it.
 		const user = this.preferences.getDefaultUser(channel);
 
 		if (user === undefined) {
 			this.controlPanel.error('No user found to compile with.', new SolvableError(
 				docString(`
-					Constructor couldn't find any users at the data path specified for the ${
-						// @ts-expect-error Channel is not used before assignment. Both cases set it.
-						channel
-					} installation.
+					Constructor couldn't find any users at the data path specified for the
+					${channel} installation.
 				`),
 				docString(`
 					Try specifying a different runtime channel type below, or check that the
-					installation data path for ${
-						// @ts-expect-error Channel is not used before assignment. Both cases set it.
-						channel
-					} is correct.
+					installation data path for ${channel} is correct.
 				`)
 			));
 			return;
 		}
-
-		/** @type {GMS2.IgorSettings} */
-		const settings = {
-			task: task,
-			buildPath: this.getBuildDir(project),
-			platform: projectProperties.platform ?? igorPaths.HOST_PLATFORM,
-			device: projectProperties.device,
-			runtimeType: projectProperties.runtimeBuildType,
-			configName: projectProperties.buildConfigName
-		};
 
 		/** @type {UI.OutputLogDisplay|undefined} */
 		let display = undefined;
@@ -582,7 +561,17 @@ export class ConstructorPlugin {
 			open_files_save();
 		}
 
-		const job = await compileController.start(runtime, user, settings, jobIdToReuse);
+		const job = await compileController.start({
+			task: task,
+			user,
+			runtime,
+			prefabsPath: this.preferences.getPrefabsPath(channel),
+			buildPath: this.getBuildDir(project),
+			platform: projectProperties.platform ?? igorPaths.HOST_PLATFORM,
+			device: projectProperties.device,
+			runtimeType: projectProperties.runtimeBuildType,
+			configName: projectProperties.buildConfigName
+		}, jobIdToReuse);
 
 		if (!job.ok) {
 			this.controlPanel.error('Failed to run Igor job!', job.err);

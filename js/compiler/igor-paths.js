@@ -9,7 +9,7 @@ const linuxDataPath = process.env.XDG_DATA_HOME ?? process.env.HOME + '/.local/s
  * @type {{[key in NodeJS.Platform]: GMS2.IgorPlatformInfo}}
  */
 // @ts-expect-error We don't care that unsupported platforms are missing, GMEdit doesn't even run there.
-const igor_platform_map = {
+const IGOR_PLATFORM_INFO_MAP = {
 	'win32': {
 		platform_executable_extension: '.exe',
 		platform_path_name: 'windows',
@@ -18,6 +18,11 @@ const igor_platform_map = {
 			Stable:	'C:\\ProgramData\\GameMakerStudio2\\Cache\\runtimes',
 			Beta:	'C:\\ProgramData\\GameMakerStudio2-Beta\\Cache\\runtimes',
 			LTS:	'C:\\ProgramData\\GameMakerStudio2-LTS\\Cache\\runtimes'
+		},
+		defaultPrefabsPaths: {
+			Stable:	'C:\\ProgramData\\GameMakerStudio2\\Prefabs',
+			Beta:	'C:\\ProgramData\\GameMakerStudio2-Beta\\Prefabs',
+			LTS:	'C:\\ProgramData\\GameMakerStudio2-LTS\\Prefabs'
 		},
 		default_user_paths: {
 			Stable:	windowsAppData + '\\GameMakerStudio2',
@@ -35,6 +40,11 @@ const igor_platform_map = {
 			Beta:	'/Users/Shared/GameMakerStudio2-Beta/Cache/runtimes',
 			LTS:	'/Users/Shared/GameMakerStudio2-LTS/Cache/runtimes'
 		},
+		defaultPrefabsPaths: {
+			Stable:	'/Users/Shared/GameMakerStudio2/Prefabs',
+			Beta:	'/Users/Shared/GameMakerStudio2-Beta/Prefabs',
+			LTS:	'/Users/Shared/GameMakerStudio2-LTS/Prefabs'
+		},
 		default_user_paths: {
 			Stable:	process.env.HOME + '/.config/GameMakerStudio2',
 			Beta:	process.env.HOME + '/.config/GameMakerStudio2-Beta',
@@ -50,6 +60,11 @@ const igor_platform_map = {
 			Stable:	linuxDataPath + '/GameMakerStudio2/Cache/runtimes',
 			Beta:	linuxDataPath + '/GameMakerStudio2-Beta/Cache/runtimes',
 			LTS:	linuxDataPath + '/GameMakerStudio2-LTS/Cache/runtimes'
+		},
+		defaultPrefabsPaths: {
+			Stable:	linuxDataPath + '/GameMakerStudio2/Prefabs',
+			Beta:	linuxDataPath + '/GameMakerStudio2-Beta/Prefabs',
+			LTS:	linuxDataPath + '/GameMakerStudio2-LTS/Prefabs'
 		},
 		default_user_paths: {
 			Stable:	linuxConfigPath + '/GameMakerStudio2',
@@ -82,27 +97,27 @@ export const output_blob_exts = {
 	OperaGX: 'unx'
 };
 
-const IGOR_PLATFORM = igor_platform_map[process.platform];
+export const IGOR_PLATFORM_INFO = IGOR_PLATFORM_INFO_MAP[process.platform];
 
 /**
  * Default paths to the runtimes for the host OS.
  */
-export const def_runtime_paths = IGOR_PLATFORM.default_runtime_paths;
+export const def_runtime_paths = IGOR_PLATFORM_INFO.default_runtime_paths;
 
 /**
  * Default paths to the userdata folders for the host OS.
  */
-export const def_user_paths = IGOR_PLATFORM.default_user_paths;
+export const def_user_paths = IGOR_PLATFORM_INFO.default_user_paths;
 
 /**
  * Default path to the global build directory.
  */
-export const def_global_build_path = IGOR_PLATFORM.default_global_build_path;
+export const def_global_build_path = IGOR_PLATFORM_INFO.default_global_build_path;
 
 
 /**
  * {@link IgorPlatform} to native build for the host OS. 
  */
-export const HOST_PLATFORM = IGOR_PLATFORM.user_platform;
-export const HOST_PLATFORM_EXECUTABLE_EXTENSION = IGOR_PLATFORM.platform_executable_extension;
-export const HOST_PLATFORM_PLATFORM_PATH_NAME = IGOR_PLATFORM.platform_path_name;
+export const HOST_PLATFORM = IGOR_PLATFORM_INFO.user_platform;
+export const HOST_PLATFORM_EXECUTABLE_EXTENSION = IGOR_PLATFORM_INFO.platform_executable_extension;
+export const HOST_PLATFORM_PLATFORM_PATH_NAME = IGOR_PLATFORM_INFO.platform_path_name;

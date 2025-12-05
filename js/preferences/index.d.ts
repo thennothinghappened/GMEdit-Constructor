@@ -31,7 +31,19 @@ export declare global {
 			/** Globally selected runtime options that may be overriden by projects. */
 			runtime_opts: {
 				type_opts: {
-					[key in GM.ReleaseChannel]: RuntimePerChannelPrefs;
+					[key in GM.ReleaseChannel]: {
+						/** Where we should search for the list of runtimes. */
+						search_path: string;
+				
+						/** Where we should search for the list of users. */
+						users_path: string;
+				
+						/** Chosen user to use. */
+						user?: string;
+
+						/** Path to the prefab library to pass to the compiler. */
+						prefabsPath: string;
+					};
 				};
 			};
 
@@ -128,17 +140,6 @@ export declare global {
 
 		}
 
-		type RuntimePerChannelPrefs = {
-			/** Where we should search for the list of runtimes. */
-			search_path: string;
-	
-			/** Where we should search for the list of users. */
-			users_path: string;
-	
-			/** Chosen user to use. */
-			user?: string;
-		};
-
 		/**
 		 * Where Constructor should display job output to.
 		 */
@@ -210,6 +211,14 @@ export declare global {
 
 				};
 
+			};
+
+			/**
+			 * Fires when the search path for prefabs is changed for a given release channel.
+			 */
+			setPrefabsPath: {
+				channel: GM.ReleaseChannel;
+				prefabsPath: string;
 			};
 
 		}

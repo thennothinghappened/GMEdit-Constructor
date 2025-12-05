@@ -3,7 +3,7 @@
  * A text input in the UI.
  * @implements {UI.Widget}
  */
-export class Input {
+export class TextField {
 
 	/**
 	 * @readonly

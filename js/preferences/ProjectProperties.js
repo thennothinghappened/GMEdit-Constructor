@@ -74,7 +74,7 @@ export class ProjectProperties {
 		'setRuntimeVersion',
 		'setPlatform',
 		'setDevice',
-		'setReuseOutputTab'
+		'setReuseOutputTab',
 	]);
 
 	/**
@@ -284,8 +284,7 @@ export class ProjectProperties {
 	 * 
 	 * @returns {GMRuntimeVersion|undefined}
 	 */
-	get runtimeVersion() {
-
+	getRuntimeVersion() {
 		const channel = this.runtimeReleaseChannel;
 
 		// If no channel is specified, this value is meaningless.
@@ -306,20 +305,17 @@ export class ProjectProperties {
 		}
 
 		return version.data;
-
 	}
 
 	/**
 	 * Set the desired runtime version.
 	 * @param {GMRuntimeVersion|undefined} version 
 	 */
-	set runtimeVersion(version) {
-
+	setRuntimeVersion(version) {
 		this.portable.runtimeVersion = version?.toString();
 
 		this.savePortableProps();
 		this.eventEmitter.emit('setRuntimeVersion', { version });
-
 	}
 
 	/**
@@ -358,7 +354,7 @@ export class ProjectProperties {
 	 * @private
 	 */
 	onChangeRuntimeChannel = () => {
-		this.runtimeVersion = undefined;
+		this.setRuntimeVersion(undefined);
 	};
 
 }
