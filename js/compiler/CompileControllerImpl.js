@@ -43,13 +43,11 @@ export class CompileControllerImpl {
 	/**
 	 * Run a new job on a given project.
 	 * 
-	 * @param {GMS2.RuntimeInfo} runtime
-	 * @param {GM.User} user
 	 * @param {GMS2.IgorSettings} settings
 	 * @param {number|undefined} [id] Specific ID to use for this job, for stealing from an existing one.
 	 * @returns {Promise<Result<IgorJob>>}
 	 */
-	async start(runtime, user, settings, id = this.getNewJobId()) {
+	async start(settings, id = this.getNewJobId()) {
 		if (settings.device === undefined && this.requiresRemoteDevice(settings.task, settings.platform)) {
 			// TODO: use a union error type for passing this upwards to show the user a better message.
 			// Error descriptiveness isn't as good at this level.
@@ -84,7 +82,7 @@ export class CompileControllerImpl {
 
 		}
 		
-		const flags = this.getFlagsForJobSettings(runtime.path, user, settings);
+		const flags = this.getFlagsForJobSettings(settings);
 
 		const existingJob = this.jobs[id];
 		await existingJob?.stop();
@@ -101,7 +99,7 @@ export class CompileControllerImpl {
 		let startTime;
 
 		try {
-			proc = child_process.spawn(runtime.igorPath, flags, spawn_opts);
+			proc = child_process.spawn(settings.runtime.igorPath, flags, spawn_opts);
 			
 			startTime = await new Promise((resolve, reject) => {
 				proc.once('spawn', () => resolve(new Date()));
@@ -132,12 +130,10 @@ export class CompileControllerImpl {
 	 * Select the flags for Igor to run the job.
 	 * 
 	 * @private
-	 * @param {string} runtime_path
-	 * @param {GM.User} user
 	 * @param {GMS2.IgorSettings} settings
 	 * @returns {string[]}
 	 */
-	getFlagsForJobSettings(runtime_path, user, settings) {
+	getFlagsForJobSettings(settings) {
 
 		const projectName = this.project.displayName;
 		const blob_extension = output_blob_exts[settings.platform];
@@ -145,13 +141,19 @@ export class CompileControllerImpl {
 		const flags = [
 			'/project=' + this.project.path,
 			'/config=' + settings.configName,
-			'/rp=' + runtime_path,
+			'/rp=' + settings.runtime.path,
 			'/runtime=' + settings.runtimeType,
 			'/cache=' + this.diskIO.joinPath(settings.buildPath, 'cache'),
 			'/of=' + this.diskIO.joinPath(settings.buildPath, 'output', `${projectName}.${blob_extension}`),
-			`/uf=${user.fullPath}`,
+			`/uf=${settings.user.fullPath}`,
 			'/v'
 		];
+
+		if (settings.runtime.version.supportsPrefabsPath()) {
+			if (settings.prefabsPath !== undefined) {
+				flags.push(`/prefabs=${settings.prefabsPath}`);
+			}
+		}
 
 		// ignore cache, this fixes changes not applying in yyc
 		if (settings.runtimeType === 'YYC') {

@@ -246,8 +246,15 @@ export class GMRuntimeVersion extends GMVersion {
 		return undefined;
 	}
 
+	/**
+	 * Whether this runtime's compiler can be passed a prefab library path.
+	 * @returns {boolean}
+	 */
+	supportsPrefabsPath() {
+		return this.compare(new GMRuntimeVersion(2024, 1400, 2, 925)) >= 0;
+	}
+
 	toString() {
 		return `runtime-${super.toString()}`;
 	}
-
 }

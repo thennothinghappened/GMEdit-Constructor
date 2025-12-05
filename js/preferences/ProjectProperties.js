@@ -74,7 +74,8 @@ export class ProjectProperties {
 		'setRuntimeVersion',
 		'setPlatform',
 		'setDevice',
-		'setReuseOutputTab'
+		'setReuseOutputTab',
+		'setPrefabsPathOverride',
 	]);
 
 	/**
@@ -284,8 +285,7 @@ export class ProjectProperties {
 	 * 
 	 * @returns {GMRuntimeVersion|undefined}
 	 */
-	get runtimeVersion() {
-
+	getRuntimeVersion() {
 		const channel = this.runtimeReleaseChannel;
 
 		// If no channel is specified, this value is meaningless.
@@ -306,20 +306,34 @@ export class ProjectProperties {
 		}
 
 		return version.data;
-
 	}
 
 	/**
 	 * Set the desired runtime version.
 	 * @param {GMRuntimeVersion|undefined} version 
 	 */
-	set runtimeVersion(version) {
-
+	setRuntimeVersion(version) {
 		this.portable.runtimeVersion = version?.toString();
 
 		this.savePortableProps();
 		this.eventEmitter.emit('setRuntimeVersion', { version });
+	}
 
+	/**
+	 * @returns {string|undefined}
+	 */
+	getPrefabsPathOverride() {
+		return this.local.prefabsPathOverride;
+	}
+
+	/**
+	 * @param {string|undefined} value
+	 */
+	setPrefabsPathOverride(value) {
+		this.local.prefabsPathOverride = value;
+		this.saveLocalProps();
+
+		this.eventEmitter.emit('setPrefabsPathOverride', value);
 	}
 
 	/**
@@ -358,7 +372,7 @@ export class ProjectProperties {
 	 * @private
 	 */
 	onChangeRuntimeChannel = () => {
-		this.runtimeVersion = undefined;
+		this.setRuntimeVersion(undefined);
 	};
 
 }
