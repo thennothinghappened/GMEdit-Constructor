@@ -7,7 +7,7 @@ import { GM_RELEASE_CHANNELS, Preferences, GMS2_RUNTIME_TYPES } from '../prefere
 import { use } from '../utils/scope-extensions/use.js';
 import { Dropdown } from './components/Dropdown.js';
 import { mapToOption, Some } from '../utils/Option.js';
-import { Input as TextField } from './components/TextField.js';
+import { TextField } from './components/TextField.js';
 import { docString } from '../utils/StringUtils.js';
 import { Checkbox } from './components/Checkbox.js';
 
@@ -29,7 +29,14 @@ export class PreferencesMenu {
 
 	/**
 	 * @private
-	 * @type {{ [key in GM.ReleaseChannel]: { userDropdown: UI.Dropdown<GM.User>, runtimesDirInput: TextField, installDataDirInput: TextField } }}
+	 * @type {{
+	 * 		[key in GM.ReleaseChannel]: {
+	 * 			userDropdown: UI.Dropdown<GM.User>,
+	 * 			runtimesDirInput: TextField,
+	 * 			installDataDirInput: TextField,
+	 * 			prefabsDirInput: TextField,
+	 * 		}
+	 * }}
 	 */
 	channelWidgets = {
 		// @ts-expect-error Filled in during the constructor.
@@ -167,6 +174,16 @@ export class PreferencesMenu {
 					.visible(users !== undefined)
 					.appendTo(group);
 
+				widgets.prefabsDirInput = new TextField('Prefab Library Path',
+						this.preferences.getPrefabsPath(channel),
+						(path) => this.preferences.setPrefabsPath(channel, path.trim())
+					)
+					.tooltip(docString(`
+						Directory where your prefabs are located. This is usually the path you've
+						set in the GameMaker IDE's Package Manager preferences.
+					`))
+					.appendTo(group);
+
 				// Presumably not-installed groups can start collapsed, since the user probably
 				// doesn't care about them unless they specifically want to set them up.
 				const runtimes = this.preferences.getRuntimes(channel);
@@ -193,6 +210,7 @@ export class PreferencesMenu {
 			setOutputPosition: this.onSetOutputPosition,
 			setUseGlobalBuildPath: this.onSetUseGlobalBuildPath,
 			setGlobalBuildPath: this.onSetGlobalBuildPath,
+			setPrefabsPath: this.onSetPrefabsPath,
 			userListChanged: this.onUserListChanged,
 			runtimeListChanged: this.onRuntimeListChanged
 		});
@@ -261,6 +279,14 @@ export class PreferencesMenu {
 	 */
 	onSetGlobalBuildPath = ({ globalBuildPath }) => {
 		this.globalBuildsPathInput.value = globalBuildPath;
+	}
+	
+	/**
+	 * @private
+	 * @param {TPreferences.PreferencesEventMap['setPrefabsPath']} event
+	 */
+	onSetPrefabsPath = ({ channel, prefabsPath }) => {
+		this.channelWidgets[channel].prefabsDirInput.value = prefabsPath;
 	}
 
 	/**

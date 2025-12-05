@@ -8,6 +8,7 @@ import * as ui from './ui-wrappers.js';
 import { docString } from '../utils/StringUtils.js';
 import { HOST_PLATFORM } from '../compiler/igor-paths.js';
 import { SolvableError } from '../utils/Err.js';
+import { TextField } from './components/TextField.js';
 
 /**
  * @type {UI.Dropdown.NormalizedEntry<undefined>}
@@ -165,7 +166,7 @@ export class ProjectPropertiesMenu {
 
 		this.runtimeVersionDropdown = new Dropdown('Runtime Version',
 				None,
-				(value) => { this.properties.runtimeVersion = value; },
+				(version) => this.properties.setRuntimeVersion(version),
 				/** @type {ReadonlyArray<UI.Dropdown.Entry<GMRuntimeVersion|undefined>>} */ ([]),
 				(a, b) => a.equals(b)
 			)
@@ -184,6 +185,27 @@ export class ProjectPropertiesMenu {
 				runtime by selecting a runtime channel and runtime version using these options.
 
 			`))
+			.appendTo(this.element);
+
+		this.prefabsPathOverrideInput = new TextField('Prefab Library Path Override',
+				this.properties.getPrefabsPathOverride() ?? '',
+				(path) => {
+					const trimmed = path.trim();
+
+					if (trimmed === '') {
+						this.properties.setPrefabsPathOverride(undefined);
+						return;
+					}
+
+					this.properties.setPrefabsPathOverride(trimmed);
+				}
+			)
+			.tooltip(docString(`
+				A different location where your prefabs are installed to for this specific project.
+
+				Leave blank to use your global preference.
+			`))
+			.singleline()
 			.appendTo(this.element);
 
 		this.updateRuntimeVersionList(this.properties.runtimeReleaseChannel);
@@ -335,7 +357,7 @@ export class ProjectPropertiesMenu {
 			value: runtime.version
 		}));
 
-		let current = this.properties.runtimeVersion;
+		let current = this.properties.getRuntimeVersion();
 
 		// @ts-expect-error I don't know what TS's issue is with GMVersion vs GMRuntimeVersion, the
 		// `.equals()` method takes the parent class as the argument.
