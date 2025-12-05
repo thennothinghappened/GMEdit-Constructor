@@ -50,7 +50,7 @@ export class GMVersion {
 	constructor(year, month, major, build) {
 		this.year = year;
 		this.month = month;
-		this.revision = major;
+		this.major = major;
 		this.build = build;
 	}
 
@@ -76,25 +76,26 @@ export class GMVersion {
 			? other.month / 100
 			: other.month;
 
-		const month_diff = ourMonth - theirMonth;
+		const monthDifference = ourMonth - theirMonth;
 
-		if (month_diff !== 0) {
-			return Math.sign(month_diff);
+		if (monthDifference !== 0) {
+			return Math.sign(monthDifference);
+		}
+
+		const majorDiff = this.major - other.major;
+
+		if (majorDiff !== 0) {
+			return Math.sign(majorDiff);
 		}
 		
+		// Are we comparing a beta and a monthly? (ONE of lhs or rhs is * 100.)
 		if ((ourMonth !== this.month) !== (theirMonth !== other.month)) {
-			// Tie-breaker: betas of the same month as a stable are less new than the stable version.
+			// Tie-breaker: Betas for a given month are older than that month's stable.
 			if (this.month >= 100) {
 				return -1;
 			} else {
 				return 1;
 			}
-		}
-
-		const major_diff = this.revision - other.revision;
-
-		if (major_diff !== 0) {
-			return Math.sign(major_diff);
 		}
 
 		const build_diff = this.build - other.build;
@@ -118,7 +119,7 @@ export class GMVersion {
 	}
 
 	toString() {
-		return `${this.year}.${this.month}.${this.revision}.${this.build}`;
+		return `${this.year}.${this.month}.${this.major}.${this.build}`;
 	}
 
 }
@@ -154,7 +155,7 @@ export class GMRuntimeVersion extends GMVersion {
 		return Ok(new GMRuntimeVersion(
 			versionRes.data.year,
 			versionRes.data.month,
-			versionRes.data.revision,
+			versionRes.data.major,
 			versionRes.data.build
 		));
 
@@ -234,7 +235,7 @@ export class GMRuntimeVersion extends GMVersion {
 				continue;
 			}
 
-			if (runtime.version.revision !== projectVersion.revision) {
+			if (runtime.version.major !== projectVersion.major) {
 				continue;
 			}
 

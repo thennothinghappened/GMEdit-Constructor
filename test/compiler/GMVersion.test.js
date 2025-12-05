@@ -11,7 +11,7 @@ test.suite('GMVersion', () => {
 		const version = result.data;
 		assert.equal(version.year, 2023);
 		assert.equal(version.month, 11);
-		assert.equal(version.revision, 1);
+		assert.equal(version.major, 1);
 		assert.equal(version.build, 160);
 	});
 
@@ -22,7 +22,7 @@ test.suite('GMVersion', () => {
 		const version = result.data;
 		assert.equal(version.year, 2024);
 		assert.equal(version.month, 1400);
-		assert.equal(version.revision, 0);
+		assert.equal(version.major, 0);
 		assert.equal(version.build, 866);
 	});
 
@@ -32,7 +32,7 @@ test.suite('GMVersion', () => {
 	});
 
 	test('comparing beta and stable versions of the same month', () => {
-		const beta = new GMVersion(2024, 400, 3, 2);
+		const beta = new GMVersion(2024, 400, 1, 2);
 		const stable = new GMVersion(2024, 4, 1, 0);
 
 		assert(stable.compare(beta) > 0);
