@@ -75,6 +75,14 @@ export class Input {
 	}
 
 	/**
+	 * @returns {this}
+	 */
+	singleline() {
+		this.element.classList.add('singleline');
+		return this;
+	}
+
+	/**
 	 * @param {boolean} hasError
 	 */
 	hasError(hasError) {

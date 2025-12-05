@@ -144,7 +144,7 @@ fieldset.gm-constructor-debug {
 	margin: 0;
 }
 
-.gm-constructor-control-panel .select.singleline {
+.gm-constructor-control-panel .singleline {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
@@ -153,12 +153,13 @@ fieldset.gm-constructor-debug {
 	vertical-align: middle;
 }
 
-.gm-constructor-control-panel .select.singleline > span {
+.gm-constructor-control-panel .singleline > span {
 	flex-grow: 1;
 	flex-basis: 30%;
 }
 
-.gm-constructor-control-panel .select.singleline > select {
+.gm-constructor-control-panel .select.singleline > select,
+.gm-constructor-control-panel .input.singleline > input {
 	flex-grow: 1;
 	flex-basis: 70%;
 	width: auto;
