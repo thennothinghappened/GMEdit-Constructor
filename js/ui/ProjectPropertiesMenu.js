@@ -337,7 +337,9 @@ export class ProjectPropertiesMenu {
 
 		let current = this.properties.runtimeVersion;
 
-		if (current && installedRuntimes.every(runtime => runtime.version !== current)) {
+		// @ts-expect-error I don't know what TS's issue is with GMVersion vs GMRuntimeVersion, the
+		// `.equals()` method takes the parent class as the argument.
+		if (current && installedRuntimes.every(runtime => !runtime.version.equals(current))) {
 			this.logger.error('Chosen runtime unavailable', new SolvableError(
 				docString(`
 				The runtime you've chosen to compile with (${current}) is not available. You will
