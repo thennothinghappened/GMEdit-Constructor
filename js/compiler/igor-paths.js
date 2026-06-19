@@ -51,10 +51,10 @@ const IGOR_PLATFORM_INFO_MAP = {
 			'LTS 2026':	'/Users/Shared/GameMakerStudio2-LTS2026/Prefabs',
 		},
 		default_user_paths: {
-			'Monthly':	process.env.HOME + '/.config/GameMakerStudio2',
-			'Beta':		process.env.HOME + '/.config/GameMakerStudio2-Beta',
-			'LTS 2022':	process.env.HOME + '/.config/GameMakerStudio2-LTS',
-			'LTS 2026':	process.env.HOME + '/.config/GameMakerStudio2-LTS2026',
+			'Monthly':	process.env.HOME + '/Library/Application Support/GameMakerStudio2',
+			'Beta':		process.env.HOME + '/Library/Application Support/GameMakerStudio2-Beta',
+			'LTS 2022':	process.env.HOME + '/Library/Application Support/GameMakerStudio2-LTS',
+			'LTS 2026':	process.env.HOME + '/Library/Application Support/GameMakerStudio2-LTS2026',
 		},
 		default_global_build_path: process.env.HOME + '/GMEdit-Constructor/builds'
 	},
